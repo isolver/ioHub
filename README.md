@@ -20,13 +20,13 @@ a large portion of the I/O bound tasks an application may have into a
 common asynchronous non-blocking architecture that runs in a seperate
 independent process than the application itself (not a child process).
 
-The *main features / goals* of the ioHub are:
+The **main features / goals** of the ioHub are:
 
-1. *Integrate data collection from multiple devices*, including keyboard, 
+1. **Integrate data collection from multiple devices**, including keyboard, 
    mouse, parallel port, eye trackers ( using the Common Eye Tracker 
    Interface project ), etc.
    
-2. Time Base Syncronization.
+2. **Time Base Syncronization.**
 2a.For devices that provide data streams and / or events that are time
    stamped, the ioHub will convert the various "Device Time"s to a common
    "Application Time" base. The exact mechanism for determining the 'offset' 
@@ -39,8 +39,8 @@ The *main features / goals* of the ioHub are:
    following a non-blocking asyncronous methodology whenever possible. 
    This has the effect of it being able to check for polled device updates 
    quickly ( currently several times a msec ). This also means time stampes
-   for this type of devices whould be sub millisecond **realative to when 
-   the event was received by the hub**. 
+   for this type of devices whould be sub millisecond *realative to when 
+   the event was received by the hub*. 
 2c.The accuracy and precision of time stamping is
    important to the ioHub, so it does what it can, when it can:*  
      i)  The offset between time bases is corrected for, when an existing 
@@ -52,7 +52,7 @@ The *main features / goals* of the ioHub are:
          can be actively monitored and also corrected for in the Application
          time stamping. This is necessary when the Application Time base and
          the Device Time are derived from difference clocks / crystals.
-    * It is important to note that the ability for the ioHub to correct 
+     *It is important to note that the ability for the ioHub to correct 
       for the above factors is 100% device and OS dependent. If a device
       has not been designed with proper time base interfacing in mind, and
       there are therefore limited, coarse, or no ways to determine one or more
@@ -61,14 +61,14 @@ The *main features / goals* of the ioHub are:
       each device, what the level of expected accuracy and precision should be, 
       and what (if any) tests have been done to date to validate the 
       time base corrections.
-3.*Common Data Stream / Event Access and Data Types*, regardless of device. 
+3.**Common Data Stream / Event Access and Data Types**, regardless of device. 
    The ioHub, while normalizing the time stamps of all input events to a 
    common experiment / application level timebase, also provides the 
    convenience of a single interface to device data, and common device
    sample and event definition standards. Furthermore devices within
    the same device category will have their sample data and events mapped
    to a single set of vendor independent structures as much as possible.
-4. *Low Overhead Design.* The ioHub runs as a seperate process from your
+4. **Low Overhead Design.** The ioHub runs as a seperate process from your
    application, while at the same time doing work that your application
    once needed spend CPU time on and perhaps dead I/O blocking time on
    (depending on your application design of course). The ioHub allows 
@@ -84,7 +84,7 @@ The *main features / goals* of the ioHub are:
    round trip times through the core ioHub infrastructure taking under 
    100 usec ( 0.1 msec, 0.001 sec ) with packet loads of about 1400 bytes. 
    In all tests preformed to date, no dropped packets have occurred.
-5. *Data Storage.* Given all the data stgream / event based processing that
+5. **Data Storage.** Given all the data stgream / event based processing that
    the ioHub is doing, it seems to only make sense to offer the option for
    it to also save all this data from the ioHub process, further reducing
    the overhead and processing required by your application if it is not 
