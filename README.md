@@ -27,12 +27,14 @@ The **main features / goals** of the ioHub are:
    Interface project ), etc.
    
 2. **Time Base Syncronization.**
+
 2a.For devices that provide data streams and / or events that are time
    stamped, the ioHub will convert the various "Device Time"s to a common
    "Application Time" base. The exact mechanism for determining the 'offset' 
    between the two time bases is device dependent, please see the full 
    documentation for details. The base offset that is determined is applied
    to convert the Device Time to Application Time prior to further corrections.
+
 2b.For devices that do not provide time stamped data streams or events, the ioHub
    will time stampe them in Application Time when the ioHub receives the event.
    An important goal of the ioHub is to keep its core IOLoop as fast as possible, 
@@ -41,17 +43,22 @@ The **main features / goals** of the ioHub are:
    quickly ( currently several times a msec ). This also means time stampes
    for this type of devices whould be sub millisecond *realative to when 
    the event was received by the hub*. 
+
 2c.The accuracy and precision of time stamping is
    important to the ioHub, so it does what it can, when it can:*  
+
      i)  The offset between time bases is corrected for, when an existing 
          time stamp is present.
+
      ii) Delay that is measurable, or a known average, can be applied to
          each device data stream and event type to correct for the delay
          in the time stamp.
+
      iii)Drift between the Application Time base and each Device's timebase
          can be actively monitored and also corrected for in the Application
          time stamping. This is necessary when the Application Time base and
          the Device Time are derived from difference clocks / crystals.
+
      *It is important to note that the ability for the ioHub to correct 
       for the above factors is 100% device and OS dependent. If a device
       has not been designed with proper time base interfacing in mind, and
@@ -61,6 +68,7 @@ The **main features / goals** of the ioHub are:
       each device, what the level of expected accuracy and precision should be, 
       and what (if any) tests have been done to date to validate the 
       time base corrections.
+
 3.**Common Data Stream / Event Access and Data Types**, regardless of device. 
    The ioHub, while normalizing the time stamps of all input events to a 
    common experiment / application level timebase, also provides the 
@@ -68,6 +76,7 @@ The **main features / goals** of the ioHub are:
    sample and event definition standards. Furthermore devices within
    the same device category will have their sample data and events mapped
    to a single set of vendor independent structures as much as possible.
+
 4. **Low Overhead Design.** The ioHub runs as a seperate process from your
    application, while at the same time doing work that your application
    once needed spend CPU time on and perhaps dead I/O blocking time on
@@ -84,6 +93,7 @@ The **main features / goals** of the ioHub are:
    round trip times through the core ioHub infrastructure taking under 
    100 usec ( 0.1 msec, 0.001 sec ) with packet loads of about 1400 bytes. 
    In all tests preformed to date, no dropped packets have occurred.
+
 5. **Data Storage.** Given all the data stgream / event based processing that
    the ioHub is doing, it seems to only make sense to offer the option for
    it to also save all this data from the ioHub process, further reducing
