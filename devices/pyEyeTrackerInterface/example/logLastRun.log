@@ -1,0 +1,182 @@
+7076.7178	EXP	conditionFile: C:\Users\Sol\Desktop\Google Drive\DEV\pyeyetracker\pyeyetracker\example\condition_files\DEFAULT_TRIAL_DATA.xlsx
+7116.2019	INFO	configured pyglet screen 0
+7263.3912	INFO	Using gamma table of operating system
+7493.4096	WARNING	t of last frame was 16912.27ms (=1/0)
+7509.7813	WARNING	t of last frame was 16371.75ms (=1/0)
+7526.7284	WARNING	t of last frame was 16947.11ms (=1/0)
+7543.0873	WARNING	t of last frame was 16358.84ms (=1/0)
+7559.7668	WARNING	Multiple dropped frames have occurred - I'll stop bothering you about them!
+9127.6847	WARNING	Couldn't measure a consistent frame rate.
+  - Is your graphics card set to sync to vertical blank?
+  - Are you running other processes on your computer?
+
+9127.8663	INFO	Monitor dimentions in degrees: 47.741812	26.854769
+9127.8807	INFO	PPD w : h: 40.216 : 40.216
+9845.6596	INFO	RUN_INFO openGLRenderingEngine: GeForce GTX 580/PCIe/SSE2
+9845.6683	INFO	RUN_INFO psychopyVersion: 1.73.06
+9845.6737	INFO	RUN_INFO windowRecordFrameIntervals: True
+9845.6776	INFO	RUN_INFO systemRebooted: 
+9845.6818	INFO	RUN_INFO windowWinType: pyglet
+9845.8416	INFO	RUN_INFO windowRgb: [ 25.  25.  25.]
+9845.8479	INFO	RUN_INFO pythonExecutable: C:\Program Files (x86)\PsychoPy2\pythonw.exe
+9845.8521	INFO	RUN_INFO systemUserID: 1000
+9845.8560	INFO	RUN_INFO windowAllowGUI: False
+9845.8599	INFO	RUN_INFO windowScreen: 0
+9845.8635	INFO	RUN_INFO windowWaitBlanking: True
+9845.8746	INFO	RUN_INFO systemUserProcFlagged: [['VMware', '3272'], ['VMware', '4076'], ['Explorer', '2800'], ['iTunes', '6728']]
+9845.9187	INFO	RUN_INFO windowSize_pix: [1920 1080]
+9845.9235	INFO	RUN_INFO systemUser: Sol
+9845.9278	INFO	RUN_INFO openGLext.GL_ARB_texture_float: True
+9845.9317	INFO	RUN_INFO windowMonitor.name: std1920x1080_50w_60d
+9845.9353	INFO	RUN_INFO pythonPygletVersion: $Id: __init__.py 2530 2009-10-18 01:39:18Z benjamin.coder.smith $
+9845.9389	INFO	RUN_INFO openGLext.GL_ARB_texture_non_power_of_two: True
+9845.9431	INFO	RUN_INFO windowMonitor.getDistance_cm: 60
+9845.9470	INFO	RUN_INFO psychopyHaveExtRush: True
+9845.9524	INFO	RUN_INFO systemUserProcFlaggedPID: ['3272', '4076', '2800', '6728']
+9845.9566	INFO	RUN_INFO systemUserProcCount: 144
+9845.9602	INFO	RUN_INFO windowMonitor.currentCalibName: 2012_05_08 17:23
+9845.9638	INFO	RUN_INFO openGLext.GL_ARB_fragment_program: True
+9845.9677	INFO	RUN_INFO openGLext.GL_ARB_multitexture: True
+9845.9716	INFO	RUN_INFO windowUnits: pix
+9845.9752	INFO	RUN_INFO windowUseNativeGamma: True
+9845.9788	INFO	RUN_INFO pythonMatplotlibVersion: 1.0.1
+9845.9827	INFO	RUN_INFO experimentAuthVersion: None
+9845.9863	INFO	RUN_INFO openGLext.GL_EXT_framebuffer_object: True
+9845.9902	INFO	RUN_INFO openGLVendor: NVIDIA Corporation
+9845.9938	INFO	RUN_INFO systemPlatform: windowsversion=(6, 1, 7601, 2, 'Service Pack 1')
+9845.9974	INFO	RUN_INFO experimentRunTime: Wed Jun 13 18:13:17 2012 Eastern Daylight Time
+9846.0010	INFO	RUN_INFO pythonPygameVersion: 1.9.1release-svn2575
+9846.0046	INFO	RUN_INFO openGLVersion: 4.2.0
+9846.0082	INFO	RUN_INFO experimentScript.directory: C:\Users\Sol\Desktop\Google Drive\DEV\pyeyetracker\pyeyetracker\example
+9846.0121	INFO	RUN_INFO windowMonitor.gammaInterpolator2: None
+9846.0157	INFO	RUN_INFO experimentAuthor: None
+9846.0193	INFO	RUN_INFO windowMonitor.getWidth_cm: 50
+9846.0232	INFO	RUN_INFO pythonFullVersion: 2.6.6 (r266:84297, Aug 24 2010, 18:46:32) [MSC v.1500 32 bit (Intel)]
+9846.0268	INFO	RUN_INFO openGLext.GL_ARB_shader_objects: True
+9846.0341	INFO	RUN_INFO experimentRunTime.epoch: 1339625597.19
+9846.0383	INFO	RUN_INFO experimentScript: psychoTrackerMain.py
+9846.1758	INFO	RUN_INFO systemUserProcCmdPid: [['System', '4'], ['smss.exe', '652'], ['csrss.exe', '900'], ['wininit.exe', '996'], ['csrss.exe', '1004'], ['services.exe', '516'], ['lsass.exe', '532'], ['lsm.exe', '540'], ['svchost.exe', '200'], ['winlogon.exe', '904'], ['nvvsvc.exe', '1036'], ['nvSCPAPISvr.exe', '1060'], ['svchost.exe', '1104'], ['MsMpEng.exe', '1184'], ['svchost.exe', '1268'], ['svchost.exe', '1308'], ['svchost.exe', '1332'], ['svchost.exe', '1536'], ['svchost.exe', '1652'], ['NvXDSync.exe', '1804'], ['nvvsvc.exe', '1816'], ['spoolsv.exe', '2056'], ['svchost.exe', '2092'], ['schedul2.exe', '2212'], ['armsvc.exe', '2240'], ['afcdpsrv.exe', '2276'], ['svchost.exe', '2460'], ['AppleMobileDeviceService.', '2480'], ['mDNSResponder.exe', '2560'], ['btwdins.exe', '2592'], ['des2svr.exe', '2652'], ['hasplms.exe', '2708'], ['KinectManagementService.e', '2760'], ['LSSrvc.exe', '2792'], ['MSCamS64.exe', '2824'], ['MsDepSvc.exe', '2844'], ['sqlservr.exe', '2920'], ['PenCommService.exe', '3064'], ['RichVideo.exe', '2284'], ['TimeMgmtDaemon.exe', '3084'], ['sqlwriter.exe', '3104'], ['svchost.exe', '3124'], ['svchost.exe', '3152'], ['syncagentsrv.exe', '3180'], ['vmware-usbarbitrator64.ex', '3272'], ['vmnat.exe', '3308'], ['svchost.exe', '3360'], ['winvnc4.exe', '3532'], ['winvnc4.exe', '3564'], ['PocketCloudService.exe', '3604'], ['PrintIsolationHost.exe', '3772'], ['hdhomerun_service.exe', '2184'], ['vmware-authd.exe', '4076'], ['vmnetdhcp.exe', '1632'], ['svchost.exe', '4556'], ['svchost.exe', '4576'], ['IAStorDataMgrSvc.exe', '2580'], ['daemonu.exe', '4684'], ['SearchIndexer.exe', '2804'], ['taskhost.exe', '3904'], ['dwm.exe', '3196'], ['explorer.exe', '2800'], ['RPMDaemon.exe', '4036'], ['SDBMSG.exe', '4636'], ['KhalScroll.exe', '2640'], ['XBoxStat.exe', '3168'], ['SetPoint.exe', '1464'], ['schedhlp.exe', '4900'], ['WyseBrowser.exe', '1100'], ['KHALMNPR.exe', '4864'], ['TortoiseHgOverlayServer.e', '2724'], ['igfxpers.exe', '4452'], ['msseces.exe', '5124'], ['TSVNCache.exe', '5528'], ['Steam.exe', '5656'], ['chrome.exe', '5676'], ['netsession_win.exe', '5684'], ['netsession_win.exe', '5728'], ['Rim.DesktopHelper.exe', '5940'], ['vdrive.exe', '6004'], ['ubd.exe', '6036'], ['Skype.exe', '6132'], ['googledrivesync.exe', '5172'], ['BTTray.exe', '5412'], ['IAStorIcon.exe', '5200'], ['Dropbox.exe', '5648'], ['issch.exe', '5672'], ['distnoted.exe', '4812'], ['conhost.exe', '5604'], ['CLMLSvc.exe', '6164'], ['PDVD10Serv.exe', '6192'], ['brs.exe', '6200'], ['EvernoteClipper.exe', '6392'], ['H800.exe', '6400'], ['TrueImageMonitor.exe', '6460'], ['BTStackServer.exe', '6468'], ['HipChat.exe', '6504'], ['Rainmeter.exe', '6516'], ['RIMBBLaunchAgent.exe', '6540'], ['jusched.exe', '6592'], ['iTunesHelper.exe', '6728'], ['CtHelper.exe', '6792'], ['nvtray.exe', '6832'], ['googledrivesync.exe', '5032'], ['BluetoothHeadsetProxy.exe', '7220'], ['iPodService.exe', '7264'], ['SteamService.exe', '5560'], ['AlarmClock.exe', '8468'], ['svchost.exe', '7416'], ['ccstudio.exe', '6176'], ['FNPLicensingService.exe', '8972'], ['chrome.exe', '7608'], ['chrome.exe', '6580'], ['chrome.exe', '3348'], ['chrome.exe', '4416'], ['chrome.exe', '9012'], ['chrome.exe', '7076'], ['chrome.exe', '7188'], ['chrome.exe', '1708'], ['chrome.exe', '4424'], ['chrome.exe', '7968'], ['AcroRd32.exe', '1484'], ['chrome.exe', '8400'], ['AcroRd32.exe', '2044'], ['chrome.exe', '8604'], ['chrome.exe', '9064'], ['TGitCache.exe', '3280'], ['Geany.exe', '4296'], ['chrome.exe', '160'], ['chrome.exe', '5812'], ['chrome.exe', '4668'], ['rundll32.exe', '9164'], ['chrome.exe', '4412'], ['chrome.exe', '9068'], ['taskeng.exe', '8948'], ['SearchProtocolHost.exe', '8976'], ['SearchFilterHost.exe', '1704'], ['audiodg.exe', '7824'], ['pythonw.exe', '8856'], ['pythonw.exe', '8864'], ['dllhost.exe', '5544'], ['tasklist.exe', '8920'], ['conhost.exe', '7892'], ['WmiPrvSE.exe', '7596']]
+9846.1806	INFO	RUN_INFO experimentScript.digestSHA1: d694517a9b573faa11e1178522be00cea310627a
+9846.1842	INFO	RUN_INFO openGLext.GL_ARB_vertex_shader: True
+9846.1878	INFO	RUN_INFO systemUsersCount: 2
+9846.2019	INFO	RUN_INFO windowPos_pix: [0, 0]
+9846.2070	INFO	RUN_INFO pythonVersion: 2.6.6
+9846.2136	INFO	RUN_INFO windowRefreshThreshold_sec: 0.02
+9846.2193	INFO	RUN_INFO experimentRandomSeed.string: 1339625597.19
+9846.2229	INFO	RUN_INFO psychopyGitHead: master 
+9846.2268	INFO	RUN_INFO pythonScipyVersion: 0.9.0
+9846.2301	INFO	RUN_INFO pythonNumpyVersion: 1.6.2
+9846.2337	INFO	RUN_INFO windowHaveShaders: True
+9846.2373	INFO	RUN_INFO pythonWxVersion: 2.8.12.0 (msw-unicode)
+9846.2413	INFO	RUN_INFO experimentRandomSeed.isSet: True
+9846.2446	INFO	RUN_INFO systemRavailable: False
+9846.2482	INFO	RUN_INFO windowIsFullScr: True
+9846.2518	INFO	RUN_INFO systemHostName: Sol-PC
+9846.2554	INFO	RUN_INFO windowMonitor.gammaInterpolator: None
+9889.4156	EXP	Set  size=[ 1.  1.]
+9889.4156	EXP	Set MESSAGE_TEXT color=[ 1.  1.  1.] colorSpace=rgb
+9889.4156	EXP	Set FP1_OUTER size=[ 1.  1.]
+9889.4156	EXP	Set FP1_INNER size=[ 1.  1.]
+9889.4156	EXP	Set FP2_OUTER size=[ 1.  1.]
+9889.4156	EXP	Set FP2_INNER size=[ 1.  1.]
+9889.4811	DATA	pyEyeTracker object created.
+9889.5261	EXP	EXP START: 
+9911.3625	EXP	CLEAR_SCREEN EXP_START_CLEAR_SCREEN
+9912.4240	EXP	Created sequence: random, trialTypes=49, nReps=1, seed=9911409
+9993.8720	EXP	displayTextScreenWaitForKeypress:
+13665.4021	DATA	Mouse: Left button down, pos=(662,594)
+13787.8369	DATA	Mouse: Left button up, pos=(662,594)
+14628.1480	DATA	Keypress: return
+14628.1945	DATA	Key pressed: return
+14628.2057	EXP	START BLOCK B1 of 1
+14643.1159	EXP	CLEAR_SCREEN READY_BLOCK_CLEAR_SCREEN
+14643.2724	EXP	New trial (rep=0, index=0): {u'FP2_INNER_COLOR2': [0, 0, 255, 255], u'FP1_OUTER_RADIUS': 0.5, u'FP2_INNER_RADIUS': 0.125, u'SCREEN_BACKGROUND_TYPE': u'STATIC', u'MAX_RESPONSE_WAIT': 3000, u'FP2_Y_TL00': 405, u'FP2_X': 0, u'FP2_ISI_1': 1500, u'FP2_CHANGE_INTERVAL': 350, u'FP2_OUTER_COLOR': [255, 255, 255, 255], u'FP2_INNER_COLOR': [0, 0, 0, 255], u'FP2_OUTER_RADIUS': 0.5, u'FP1_INNER_RADIUS': 0.125, u'TRIAL_ID': 24, u'POSSIBLE_RESPONSES': ('r', 'b'), u'CORRECT_RESPONSE': u'b', u'FP1_Y': u'FP2_Y.PREV', u'FP1_X': u'FP2_X.PREV', u'FP1_OUTER_COLOR': [255, 255, 255, 255], u'SCREEN_COLOR_PARAMS': u'50,50,50,255', u'FP2_X_TL00': 960, u'FP1_INNER_COLOR': [0, 0, 0, 255], u'BLOCK_LABEL': u'B1', None: None, u'FP2_Y': -135}
+14643.3228	EXP	START TRIAL 23 of BLOCK B1
+14660.9717	EXP	Set FP1_OUTER pos=[   0. -135.]
+14660.9717	EXP	Set FP1_INNER pos=[   0. -135.]
+14660.9717	EXP	FP1
+16230.9639	DATA	Keypress: return
+16231.0669	DATA	KEY 16.231 return
+16231.0834	EXP	KEY_TRIGGER 16.231 return
+16243.2986	EXP	Set FP2_OUTER pos=[   0. -135.]
+16243.2986	EXP	Set FP2_INNER pos=[   0. -135.]
+16243.2986	EXP	FP2_INITIAL_DISPLAY
+16243.4578	EXP	AWAIT_START 16243.448
+17668.8618	EXP	AWAIT_END 17668.836 1500 1425.388
+17676.7795	EXP	FP2_COLOR_CHANGE_START
+17676.9224	EXP	AWAIT_START 17676.911
+18009.8828	EXP	AWAIT_END 18009.856 350 332.945
+18026.7377	EXP	FP2_COLOR_CHANGE_END
+18026.8215	EXP	AWAIT_START 18026.810
+20876.9989	EXP	AWAIT_END 20876.971 2999 2850.162
+20877.0368	EXP	END TRIAL 23 of BLOCK B1
+20877.8473	EXP	New trial (rep=0, index=1): {u'FP2_INNER_COLOR2': [255, 0, 0, 255], u'FP1_OUTER_RADIUS': 0.5, u'FP2_INNER_RADIUS': 0.125, u'SCREEN_BACKGROUND_TYPE': u'STATIC', u'MAX_RESPONSE_WAIT': 3000, u'FP2_Y_TL00': 405, u'FP2_X': -720, u'FP2_ISI_1': 1500, u'FP2_CHANGE_INTERVAL': 350, u'FP2_OUTER_COLOR': [255, 255, 255, 255], u'FP2_INNER_COLOR': [0, 0, 0, 255], u'FP2_OUTER_RADIUS': 0.5, u'FP1_INNER_RADIUS': 0.125, u'TRIAL_ID': 3, u'POSSIBLE_RESPONSES': ('r', 'b'), u'CORRECT_RESPONSE': u'r', u'FP1_Y': u'FP2_Y.PREV', u'FP1_X': u'FP2_X.PREV', u'FP1_OUTER_COLOR': [255, 255, 255, 255], u'SCREEN_COLOR_PARAMS': u'50,50,50,255', u'FP2_X_TL00': 240, u'FP1_INNER_COLOR': [0, 0, 0, 255], u'BLOCK_LABEL': u'B1', None: None, u'FP2_Y': -135}
+20877.9866	EXP	START TRIAL 2 of BLOCK B1
+20894.5055	EXP	Set FP1_OUTER pos=[   0. -135.]
+20894.5055	EXP	Set FP1_INNER pos=[   0. -135.]
+20894.5055	EXP	FP1
+20909.9524	EXP	Set FP2_OUTER pos=[-720. -135.]
+20909.9524	EXP	Set FP2_INNER pos=[-720. -135.]
+20909.9524	EXP	FP2_INITIAL_DISPLAY
+20910.0271	EXP	AWAIT_START 20910.023
+22335.0933	EXP	AWAIT_END 22335.067 1500 1425.044
+22343.5245	EXP	FP2_COLOR_CHANGE_START
+22343.6675	EXP	AWAIT_START 22343.656
+22677.0789	EXP	AWAIT_END 22677.053 350 333.396
+22679.7908	DATA	Keypress: b
+22693.5392	EXP	FP2_COLOR_CHANGE_END
+22693.6179	EXP	AWAIT_START 22693.606
+25544.2154	EXP	AWAIT_END 25544.189 2999 2850.582
+25544.2509	EXP	END TRIAL 2 of BLOCK B1
+25545.0367	EXP	New trial (rep=0, index=2): {u'FP2_INNER_COLOR2': [255, 0, 0, 255], u'FP1_OUTER_RADIUS': 0.5, u'FP2_INNER_RADIUS': 0.125, u'SCREEN_BACKGROUND_TYPE': u'STATIC', u'MAX_RESPONSE_WAIT': 3000, u'FP2_Y_TL00': 405, u'FP2_X': -480, u'FP2_ISI_1': 1500, u'FP2_CHANGE_INTERVAL': 350, u'FP2_OUTER_COLOR': [255, 255, 255, 255], u'FP2_INNER_COLOR': [0, 0, 0, 255], u'FP2_OUTER_RADIUS': 0.5, u'FP1_INNER_RADIUS': 0.125, u'TRIAL_ID': 10, u'POSSIBLE_RESPONSES': ('r', 'b'), u'CORRECT_RESPONSE': u'r', u'FP1_Y': u'FP2_Y.PREV', u'FP1_X': u'FP2_X.PREV', u'FP1_OUTER_COLOR': [255, 255, 255, 255], u'SCREEN_COLOR_PARAMS': u'50,50,50,255', u'FP2_X_TL00': 480, u'FP1_INNER_COLOR': [0, 0, 0, 255], u'BLOCK_LABEL': u'B1', None: None, u'FP2_Y': -135}
+25545.2223	DATA	Keypress: b
+25545.4229	DATA	Keypress: b
+25545.6001	DATA	Keypress: b
+25545.7721	DATA	Keypress: b
+25545.9421	DATA	Keypress: b
+25546.1193	DATA	Keypress: lctrl
+25546.2046	DATA	Keypress: c
+25546.3439	DATA	KEY 22.680 b
+25546.3601	DATA	KEY 25.545 b
+25546.3727	DATA	KEY 25.545 b
+25546.3853	DATA	KEY 25.546 b
+25546.3982	DATA	KEY 25.546 b
+25546.4100	DATA	KEY 25.546 b
+25546.4217	DATA	KEY 25.546 lctrl
+25546.4364	DATA	KEY 25.546 c
+25546.5091	EXP	START TRIAL 9 of BLOCK B1
+25563.8817	EXP	Set FP1_OUTER pos=[-720. -135.]
+25563.8817	EXP	Set FP1_INNER pos=[-720. -135.]
+25563.8817	EXP	FP1
+25580.4786	EXP	Set FP2_OUTER pos=[-480. -135.]
+25580.4786	EXP	Set FP2_INNER pos=[-480. -135.]
+25580.4786	EXP	FP2_INITIAL_DISPLAY
+25580.6039	EXP	AWAIT_START 25580.596
+27006.3292	EXP	AWAIT_END 27006.302 1500 1425.707
+27009.1009	DATA	Keypress: escape
+27009.2912	DATA	Keypress: escape
+27027.4872	EXP	FP2_COLOR_CHANGE_START
+27027.5575	DATA	KEY 27.009 escape
+27027.5692	DATA	KEY 27.009 escape
+27027.6119	EXP	AWAIT_START 27027.606
+27360.3014	EXP	AWAIT_END 27360.276 350 332.669
+27363.1646	DATA	Keypress: escape
+27363.3697	DATA	Keypress: escape
+27376.7008	EXP	FP2_COLOR_CHANGE_END
+27376.7686	EXP	AWAIT_START 27376.758
+30227.4572	EXP	AWAIT_END 30227.430 2999 2850.671
+30227.4941	EXP	END TRIAL 9 of BLOCK B1
+30227.5058	EXP	EXPERIMENT TERMINATED BY USER
+31009.1588	EXP	END BLOCK B1 of 1
+31009.8855	DATA	Keypress: q
+31009.9765	DATA	Keypress: escape
+31010.0528	DATA	Keypress: w
+31010.1020	DATA	Keypress: escape
+31010.1984	DATA	Keypress: w
+31010.2468	DATA	Keypress: escape
+31010.3450	DATA	Keypress: escape
+31010.3897	DATA	Keypress: w
+31010.5011	DATA	Keypress: w
+31010.5528	DATA	Keypress: escape
+31026.5275	EXP	CLEAR_SCREEN EXPERIMENT_COMPLETED dur=0.398 minutes
+31026.5518	EXP	EXPERIMENT TERMINATED BY USER

@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="index.html" />
+    <link rel="up" title="Documentation" href="pyet_documentation.html" />
+    <link rel="next" title="Supported EyeTracker List" href="pyet_eyetracker_models.html" />
+    <link rel="prev" title="Overview" href="pyet_overview.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyet_eyetracker_models.html" title="Supported EyeTracker List"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pyet_overview.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+        <li><a href="contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="pyet_documentation.html" accesskey="U">Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#installing-psychopy">Installing PsychoPy</a></li>
+<li><a class="reference internal" href="#installing-pyeyetracker">Installing PyEyeTracker</a><ul>
+<li><a class="reference internal" href="#windows-installation">Windows Installation</a></li>
+<li><a class="reference internal" href="#add-external-files-if-required">Add external files (if required)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pyet_overview.html"
+                        title="previous chapter">Overview</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyet_eyetracker_models.html"
+                        title="next chapter">Supported EyeTracker List</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pyet_installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>To use pyEyeTracker you generally need to install whe package you will be using to run your
+experiments with, and then install pyEyeTracker as well. The following installation instructions
+assume you are using <a class="reference external" href="http://www.psychopy.org/">PsychoPy</a> for the experiment runtime, as it is
+supported by pyEyeTracker out of the box so to speak.</p>
+<div class="section" id="installing-psychopy">
+<span id="id2"></span><h2>Installing PsychoPy<a class="headerlink" href="#installing-psychopy" title="Permalink to this headline">¶</a></h2>
+<p>Please follow the latest installation instructions on installing PsychoPy for your platform
+from the PsychoPy &#8216;installation web page &lt;<a class="reference external" href="http://www.psychopy.org/installation.html">http://www.psychopy.org/installation.html</a>&gt;&#8217;_ .</p>
+<p>** Please note that as of the inital release only Windows is supported. This will be corrected, for
+the eye tracker interfaces that are able to support other platforms, shortly. **</p>
+<p>Then &#8216;download &lt;<a class="reference external" href="http://code.google.com/p/psychopy/">http://code.google.com/p/psychopy/</a>&gt;&#8217;_ the latest PsychoPy package fo your OS. Note that
+there is a very nice self installer available for Windows which includes everything needed to run PsychoPy,
+including the Python runtime environment. As of writting, it is the file named <strong>StandalonePsychoPy-1.73.02-win32.exe</strong>.</p>
+<p>Once you have installed PsychoPy, you should be able to launch the apppication ( for example in Windows from
+Start-&gt;PsychoPy2-&gt;PsychoPy2 ), which will start the PsychoPy IDE, as seen below. If the GUI you see looks different than below,
+you are likely in the <em>builder</em> IDE mode of PsychoPy. Switch to the <em>coder</em> mode by selecting the PsychoPy menu
+<strong>View-&gt;Go to Coder View</strong>.</p>
+<img alt="_images/psychopy2_coder_ide.png" src="_images/psychopy2_coder_ide.png" />
+<p>To test that everything is working well in PsychoPy, select the PsychoPy menu</p>
+<p><strong>Demos-&gt;Timing-&gt;pylabPlotFrames.py</strong></p>
+<p>and the pylabPlotFrames.py script should load into the code editor panel of the IDE, as seen below.</p>
+<img alt="_images/pylabPlotFrameTimes.png" src="_images/pylabPlotFrameTimes.png" />
+<p>To run the script, press on the Green circle icon at the top of the PsychoPy IDE window that has a picture of a runner in it.
+This should launch the python script, run the retrace timing test, and then plot the retrace points obtained from
+the test, as seen below.</p>
+<img alt="_images/retrace_data.png" src="_images/retrace_data.png" />
+<p>Assuming this all worked as it should, you are good to move on with installing the pyEyeTracker package.</p>
+</div>
+<div class="section" id="installing-pyeyetracker">
+<span id="id3"></span><h2>Installing PyEyeTracker<a class="headerlink" href="#installing-pyeyetracker" title="Permalink to this headline">¶</a></h2>
+<p>After you have installed PsychoPy and tested that it is running, please ensure that PsychoPy is closed down.</p>
+<p>Downloaded the latest version of PyEyeTracker for your platform. Only eye tracker extensions that are supported on the OS
+you are downloading for will be included in that package.</p>
+<p>** Please note that at this time, pyEyeTracker only supports Windows Windows XP SP2 or Windows 7. Support for OS X and Linus will be added soon,
+for those eye tracker interfaces that can run on platforms other than Windows. **</p>
+<div class="section" id="windows-installation">
+<h3>Windows Installation<a class="headerlink" href="#windows-installation" title="Permalink to this headline">¶</a></h3>
+<p>The pyEyeTracker is currently simply distributed as a pyeyetracker directory compressed in either a rar or zip file.
+Please download the compressed file of your choice and uncpress the pyEyeTracker directory to the following location:</p>
+<ol class="arabic">
+<li><p class="first">If you installed the standalone PsychoPy distribution, copy the pyEyeTracker directory to</p>
+<blockquote>
+<div><p>[INSTALL_DIR]PsychoPy2LibSite-Packages.</p>
+</div></blockquote>
+</li>
+</ol>
+<p>where [INSTALL_DIR] is the path of your &#8220;Program Files&#8221; directory that you installed PsychoPy2 to. On a Windows 32 bit PC, this will normally be:</p>
+<blockquote>
+<div>C:Program FilesPsychoPy2LibSite-Packages.</div></blockquote>
+<p>On a Windows 64 bit PC, it will normally be:</p>
+<blockquote>
+<div>C:Program Files(x86)PsychoPy2LibSite-Packages.</div></blockquote>
+<ol class="arabic">
+<li><p class="first">If you installed PsychoPy into an existing Python distribution, copy the pyEyeTracker directory to your existing Python distributions site-packages directory.</p>
+<blockquote>
+<div><p>[PYTHON_INSTALL]LibSite-Packages.</p>
+</div></blockquote>
+</li>
+</ol>
+<p>where [INSTALL_DIR] is the path of your Python installation base directory that you installed PsychoPy2 to.
+For example if running Python 2.7, it would usually be C:Python27 , so the full to copy pyEyeTracker to would be</p>
+<blockquote>
+<div>C:Python27LibSite-Packages.</div></blockquote>
+<p>You can now test that pyEyeTracker is being picked up by the python interpreter that PsychoPy is also using by relaunching the PsychoPy IDE and in the IDE
+interactive python interpreter window type:</p>
+<blockquote>
+<div>import pyeyetracker
+print pyeyetracker.supportedTrackers()</div></blockquote>
+<p>You should not receive any errors and a list of supported eye trackers should be printed to the screen.</p>
+</div>
+<div class="section" id="add-external-files-if-required">
+<h3>Add external files (if required)<a class="headerlink" href="#add-external-files-if-required" title="Permalink to this headline">¶</a></h3>
+<p>Some eye tracker implemetations of the pyEyeTracker interface require that you get some necessary files from the manufacturer
+and copy them into the appropriate manufacturers pyEyeTracker interface subdirectory before the interface for that eye tracker will work.
+Other eye trackers either use an interface that does not require extra files, or have allowed us to distribute those files with the
+pyEyeTracker module so that it is easier for you to use. To determine if you do need to get and install any extra files before the specific
+implementation of the pyEyeTracker interface you plan on using will work, please see the <a class="reference internal" href="pyet_eyetracker_models.html#supported-eyetracker-list"><em>Supported EyeTracker List</em></a> page, which also includes
+links to a dedicated page for each supported tracker and any instructions you need to follow should you have to get extra files.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyet_eyetracker_models.html" title="Supported EyeTracker List"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pyet_overview.html" title="Overview"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+        <li><a href="contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="pyet_documentation.html" >Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

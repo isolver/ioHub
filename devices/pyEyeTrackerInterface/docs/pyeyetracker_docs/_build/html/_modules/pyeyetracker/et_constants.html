@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyeyetracker.et_constants &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyeyetracker.et_constants</h1><div class="highlight"><pre>
+<span class="c"># Part of the pyEyeTracker library </span>
+<span class="c"># Copyright (C) 2012 Sol Simpson </span>
+<span class="c"># Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). </span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span><span class="p">,</span><span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">et_base_types</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">Point2D</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;Point2D&#39;</span><span class="p">,</span> <span class="s">&#39;x y&#39;</span><span class="p">)</span>
+<span class="n">Point3D</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;Point3D&#39;</span><span class="p">,</span> <span class="s">&#39;x y z&#39;</span><span class="p">)</span>
+<span class="n">ColorRGBA</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;ColorRGBA&#39;</span><span class="p">,</span> <span class="s">&#39;r g b a&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EYE_IMAGE_GRAPHICS_COLORS"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.EYE_IMAGE_GRAPHICS_COLORS">[docs]</a><span class="k">class</span> <span class="nc">EYE_IMAGE_GRAPHICS_COLORS</span><span class="p">:</span>
+    <span class="n">PUPIL_HAIR_COLOR</span> <span class="o">=</span> <span class="n">ColorRGBA</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">CR_HAIR_COLOR</span> <span class="o">=</span> <span class="n">ColorRGBA</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">PUPIL_BOX_COLOR</span> <span class="o">=</span> <span class="n">ColorRGBA</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">SEARCH_LIMIT_BOX_COLOR</span> <span class="o">=</span> <span class="n">ColorRGBA</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">MOUSE_CURSOR_COLOR</span> <span class="o">=</span> <span class="n">ColorRGBA</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="etReturnCodes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etReturnCodes">[docs]</a><span class="k">class</span> <span class="nc">etReturnCodes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<span class="n">ET_RTN_CODES</span><span class="o">=</span><span class="n">etReturnCodes</span><span class="p">([</span><span class="s">&quot;ET_OK&quot;</span><span class="p">,</span> <span class="s">&quot;ET_WARNING&quot;</span><span class="p">,</span> <span class="s">&quot;ET_ERROR&quot;</span><span class="p">,</span> <span class="s">&quot;ET_NOT_IMPLEMENTED&quot;</span><span class="p">])</span>
+        
+<div class="viewcode-block" id="etEyes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etEyes">[docs]</a><span class="k">class</span> <span class="nc">etEyes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<span class="n">ET_EYE_CODES</span><span class="o">=</span><span class="n">etEyes</span><span class="p">([</span><span class="s">&#39;NO_EYE&#39;</span><span class="p">,</span><span class="s">&#39;LEFT&#39;</span><span class="p">,</span><span class="s">&#39;RIGHT&#39;</span><span class="p">,</span><span class="s">&#39;BINOCULAR&#39;</span><span class="p">,</span><span class="s">&#39;LEFT_RIGHT_AVERAGED&#39;</span><span class="p">])</span>        
+
+<div class="viewcode-block" id="etPupilSizeTypes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etPupilSizeTypes">[docs]</a><span class="k">class</span> <span class="nc">etPupilSizeTypes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<span class="n">ET_PUPIL_SIZE_MEASURES</span><span class="o">=</span><span class="n">etPupilSizeTypes</span><span class="p">([</span><span class="s">&#39;AREA&#39;</span><span class="p">,</span><span class="s">&#39;DIAMETER&#39;</span><span class="p">,</span><span class="s">&#39;WIDTH&#39;</span><span class="p">,</span><span class="s">&#39;HEIGHT&#39;</span><span class="p">,</span><span class="s">&#39;MAJOR_AXIS_LENGTH&#39;</span><span class="p">,</span><span class="s">&#39;MINOR_AXIS_LENGTH&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="etDataTypes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etDataTypes">[docs]</a><span class="k">class</span> <span class="nc">etDataTypes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span>    </div>
+<span class="n">ET_DATA_TYPES</span><span class="o">=</span><span class="n">etDataTypes</span><span class="p">([</span><span class="s">&#39;SAMPLE&#39;</span><span class="p">,</span><span class="s">&#39;FIXATION&#39;</span><span class="p">,</span><span class="s">&#39;FIXATION_START&#39;</span><span class="p">,</span><span class="s">&#39;FIXATION_UPDATE&#39;</span><span class="p">,</span><span class="s">&#39;FIXATION_END&#39;</span><span class="p">,</span><span class="s">&#39;SACCADE&#39;</span><span class="p">,</span><span class="s">&#39;SACCADE_START&#39;</span><span class="p">,</span><span class="s">&#39;SACCADE_END&#39;</span><span class="p">,</span><span class="s">&#39;BLINK&#39;</span><span class="p">,</span><span class="s">&#39;BLINK_START&#39;</span><span class="p">,</span><span class="s">&#39;BLINK_END&#39;</span><span class="p">,</span><span class="s">&#39;MESSAGE&#39;</span><span class="p">,</span><span class="s">&#39;BUTTON&#39;</span><span class="p">,</span><span class="s">&#39;INPUT&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="etSoftwareModes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etSoftwareModes">[docs]</a><span class="k">class</span> <span class="nc">etSoftwareModes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span>  </div>
+<span class="n">ET_MODES</span> <span class="o">=</span> <span class="n">etSoftwareModes</span><span class="p">([</span><span class="s">&quot;OFFLINE&quot;</span><span class="p">,</span><span class="s">&quot;NO_TRACKER&quot;</span><span class="p">])</span>
+    
+<div class="viewcode-block" id="etCalibrationTypes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etCalibrationTypes">[docs]</a><span class="k">class</span> <span class="nc">etCalibrationTypes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span>  </div>
+<span class="n">ET_CALIBRATION_TYPES</span> <span class="o">=</span> <span class="n">etCalibrationTypes</span><span class="p">([</span><span class="s">&quot;H3&quot;</span><span class="p">,</span><span class="s">&quot;HV3&quot;</span><span class="p">,</span><span class="s">&quot;HV5&quot;</span><span class="p">,</span><span class="s">&quot;HV9&quot;</span><span class="p">,</span><span class="s">&quot;HV13&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="etCalibrationModes"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_constants.etCalibrationModes">[docs]</a><span class="k">class</span> <span class="nc">etCalibrationModes</span><span class="p">(</span><span class="n">etEnum</span><span class="p">):</span>
+        <span class="k">pass</span>  </div>
+<span class="n">ET_CALIBRATION_MODES</span> <span class="o">=</span> <span class="n">etCalibrationModes</span><span class="p">([</span><span class="s">&quot;AUTO&quot;</span><span class="p">,</span><span class="s">&quot;MANUAL&quot;</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

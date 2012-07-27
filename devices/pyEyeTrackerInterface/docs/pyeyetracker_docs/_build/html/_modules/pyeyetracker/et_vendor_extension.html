@@ -1,0 +1,134 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyeyetracker.et_vendor_extension &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyeyetracker.et_vendor_extension</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">et_vendor extension</span>
+
+<span class="sd">Part of the pyEyeTracker library </span>
+<span class="sd">Copyright (C) 2012 Sol Simpson </span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). </span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EyeTrackerVendorExtension"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_vendor_extension.EyeTrackerVendorExtension">[docs]</a><span class="k">class</span> <span class="nc">EyeTrackerVendorExtension</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    EyeTrackerVendorExtension is the base class used to add custom functionality to the pyEyeTracker</span>
+<span class="sd">    module when the standard pyEyeTracker functionality set can not be used to meet the requirements</span>
+<span class="sd">    of the specific eye trackers needs. This should be used AS A LAST RESORT to add the necessary </span>
+<span class="sd">    functionality for any eye tracker. If you believe that certain functionality can not be met with </span>
+<span class="sd">    the current pyEyeTracker core API, please first contact the pyEyeTracker development team and discuss</span>
+<span class="sd">    your requirements and needs. It may a) be possible to achieve what you need already, or b) be the</span>
+<span class="sd">    case that your requirement is agreed to be a use case that should be added to the core pyEyeTracker </span>
+<span class="sd">    fucntionality instead of being added via an EyeTrackerVendorExtension. If either of these two situations</span>
+<span class="sd">    are the case, the development team will put your requirements on the roadmap for the pyEyeTracker development</span>
+<span class="sd">    and you or someone else are welcome to submit a patch for review containing the added functionality to the</span>
+<span class="sd">    base pyEyeTracker code.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+   </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

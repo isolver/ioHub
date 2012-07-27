@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="index.html" />
+    <link rel="up" title="Documentation" href="pyet_documentation.html" />
+    <link rel="next" title="Installation" href="pyet_installation.html" />
+    <link rel="prev" title="Documentation" href="pyet_documentation.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyet_installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pyet_documentation.html" title="Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+        <li><a href="contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="pyet_documentation.html" accesskey="U">Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview</a><ul>
+<li><a class="reference internal" href="#design-goals">Design Goals</a></li>
+<li><a class="reference internal" href="#areas-of-functionality-supported">Areas of Functionality Supported</a></li>
+<li><a class="reference internal" href="#project-status">Project Status</a><ul>
+<li><a class="reference internal" href="#may-11th-2012">May 11th, 2012</a></li>
+<li><a class="reference internal" href="#general-thoughts-moving-forward">General Thoughts Moving Forward</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pyet_documentation.html"
+                        title="previous chapter">Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyet_installation.html"
+                        title="next chapter">Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pyet_overview.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="design-goals">
+<span id="id1"></span><h2>Design Goals<a class="headerlink" href="#design-goals" title="Permalink to this headline">¶</a></h2>
+<p>pyEyeTracker is a new, in progress, python module that provides an
+eye tracking interface and specification with the following high level goals:</p>
+<ul class="simple">
+<li>Simple python interface that addresses common eye tracker functionality used in many research and HCI applications.</li>
+<li>Designed for use with multiple eye tracking models; several eye tracking manufacturers have already provided the information and / or resources necessary to implement the interface for some of their eye tracker models,and more are on the way.</li>
+<li>Single set of funtion / method calls used for the core interface, regardless of eye tracker model.</li>
+<li>Built-in support for use with the mature and popular <a class="reference external" href="http://http://www.psychopy.org/">PsychoPy Psychology software</a> ; coder support is provided to start, with the plan to add designer support in the future.</li>
+<li>pyEyeTracker inncludes built in pussport for PsychoPy, although support for any python environrmnt that can generate your stimuli and non eye tracker events should be possible; but why would you when there is Psychopy?</li>
+<li>Cross platform support for Windows &amp;, Mac OS X, and Linux (assuming support exists for each OS by the particular eye tracker implementation)</li>
+<li>Recognition that not all eye tracking system will be able to support the core set of pyEyeTracker features, so inclusion of a common method for providing &#8216;function not supported&#8217; feadback to the user of the interface is provided.</li>
+<li>Common Extension mechanism allowing functionaily that is not part of the pyEyeTracker core functionality set, but is critical to a particular eye tracker model, to be accessed.</li>
+<li>Community and industry based support and input on the improvement and evolution of the pyEyeTracker project</li>
+<li>Planned to be an Open Source based project with GPL version 3 license ASAP.</li>
+<li>Lead by the COGAIN committee on eye tracker data quality standardization, and administered by Sol Simpson / iSolver Software Solutions.</li>
+</ul>
+<p>In general, the pyEyeTracker module design should be as flexible and powerful
+as possible, while also being non-overwhelmming and as simple as possible,
+reflecting the common standard functionaily found in many of the eye tracking
+systems used for computer based experimental and usability testing, or HCI applications.
+These requirements are competing, so the pyEyeTracker design needs to balance the
+two appropriately.</p>
+</div>
+<div class="section" id="areas-of-functionality-supported">
+<span id="areas-of-functionality"></span><h2>Areas of Functionality Supported<a class="headerlink" href="#areas-of-functionality-supported" title="Permalink to this headline">¶</a></h2>
+<p>The pyEyeTracker interface is intended to provide a common interface to the following high levels of eye tracker functionality:</p>
+<ol class="arabic simple">
+<li>Connection and Initalization</li>
+<li>Setting Eye Tracker Settings and Variable States</li>
+<li>Presenting Eye Tracker Driven Graphics for Calibration, Validation, or Drift Correction Type Processes</li>
+<li>Creating and Closing of Eye Tracker Data Files</li>
+<li>Starting and Stopping of Eye Data Recording</li>
+<li>Sending Syncronization Messages to the Eye Tracker</li>
+<li>Receiving Data from the Eye Tracker ( Eye Samples and Eye Events, Perhaps Other ) During the Recording Session</li>
+<li>Providing an Accurate Experiment PC Time Stamp for any Data Received From the Eye Tracker ( defined as accurate to within 1 msec )</li>
+<li>Providing a Single Event Queue for Experiment PC Events and Eye Tracker Based Events of Interest, Streamed Chronologically.</li>
+<li>Transfering an Eye Tracker File from a Remote Eye Tracker to the Experiment PC.</li>
+<li>Closing and Uninitializing the Eye Tracker.</li>
+<li>Providing a Common Extension Base Class for use when Functionality Not supported in pyEyeTracker Needs to be Added.</li>
+<li>Providing Documented, Common Default Behaviour for Any Base pyEyeTracker Functionality that a Specific Implementation can NOT Support.</li>
+</ol>
+</div>
+<div class="section" id="project-status">
+<span id="id2"></span><h2>Project Status<a class="headerlink" href="#project-status" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="may-11th-2012">
+<h3>May 11th, 2012<a class="headerlink" href="#may-11th-2012" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The initial design specification is basically complete for pyEyeTracker.</li>
+<li>The design spec will be sent out for review and input to relevent parties.</li>
+<li>A meeting will (hopefully) be held sometime the week of May 13 to review the specification.</li>
+<li>Once there is general agreement on the phase 1 specification, implementation of the interface to some eye trackers wil begin.</li>
+<li>Intial eye trackers to integrate will likely be: SMI high Speed 1250, LC Technologies (model not known by Sol at time of writting), SR Research EyeLink 1000, ASL series 6000, and others.</li>
+<li>Inital experiment requirements are being refined in parrallel to pyEyeTracker design speficiation</li>
+<li>Sol has been learning PychoPy API while working on pyEyeTracker spec, by no means a master of it yet. ;)</li>
+<li>We are meeting in Lund on May 19th to work on the eye tracker integration and experiment program.</li>
+<li>Denis Engemann has been brought into the discussion by Michael MacAskill (see below). Denis is a very talented software developer and seems possibly interested in looking at the project. Hopefully we find mutual goals and he ends up being onboad with helping out on implementation moving forward.</li>
+<li>My (Sol&#8217;s) hope is that the pyEyeTracker spec is stable enough, that we have enough example eye tracker interfaces done, and some sample experiments, etc. by end of June so that we can release the pyEyeTracker publicly and start the process of treating it as an open source community driven project from that point on.</li>
+<li>Obviously, momentum will need to build up before there is any significant input and help from others in the eye tracking comunity, but the sooner we start, the sooner this will hopefully happen.</li>
+</ul>
+<p>In terms of eye tracker integration status:</p>
+<ul class="simple">
+<li>Many eye tracking companies have been very helpful and supportive of this effort. This is really nice to see.</li>
+<li>No eye trackers have actually been implemented in the interface yet, until this is done, it means the pyEyeTracker spec is just that, a spec as far as I am conserned. ;)</li>
+<li>We have the information needed to integrate SMI system quite easly (hopefully) thanks to an existing python implementation done by Michael R. MacAskill and Dr Daniel Myall, both of the New Zealand Brain Research Institute. It uses the SMI UDP ascii protocol so is cross platform from the get go. This is a major win. We owe them a big big beer.</li>
+<li>SR Research integration is not an issue given pyLink already exists, the question is what priority does this have. Although pyLink relies on the SR Research core libraries, they are available for Windows, OS X and Linux, and therefore so is pyLink.</li>
+<li>LC Technologies we have provided the documentation and you have their developers kit. I have not looked at it in detail yet but from discussion it sounds like we will be able to do do what we need to, however it will be via calls to external libraries / DLLs, like with SR Research. I am not sure what OSs are supported.</li>
+<li>ASL iontergation is not so clear right now; from emails with Josh, we should be able to start / stop recording, send sync messages, and receive data at runtime. However we will not be able to do integrated calibtartion, so an extrenal program will we run for the calibration prior to running the experiment. I is not clear what the interface is, but my sense is that it is a  C library, perhaps windows only.</li>
+<li>Cambridge Research Systems (CRS) has shown great interest in integrating their new system with the pyEyeTracker interface. I have had lengthy discusions with them about their new system and it should not be a problem. It uses a USB HID interface.</li>
+<li>Others, like Tobii, are unclear to me at this point.</li>
+</ul>
+</div>
+<div class="section" id="general-thoughts-moving-forward">
+<h3>General Thoughts Moving Forward<a class="headerlink" href="#general-thoughts-moving-forward" title="Permalink to this headline">¶</a></h3>
+<p>There are a large number of eye trackers available
+today, each with their own strengths and unique aspects of functionality.
+Therefore it should be expected that during the initial phase of develoment,
+particualrly prior to version 1.0 being released. The module&#8217;s API will likely
+change as input is received and modifications are made to improve overall design as more detailed
+insight is learned about each eye tracking systems programming interface.
+Is is very likely that some of these changes will not be backwards compatible with the
+current API spec, so before upgrading to a newer version of the module, be sure to check the
+pyEyeTracker change log to review any incompatible changes that have been made and how your
+experiment may need to be modified to reflect the changes.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyet_installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pyet_documentation.html" title="Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+        <li><a href="contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="pyet_documentation.html" >Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

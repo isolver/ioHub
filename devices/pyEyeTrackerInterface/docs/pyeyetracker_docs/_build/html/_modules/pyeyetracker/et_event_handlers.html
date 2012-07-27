@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyeyetracker.et_event_handlers &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyeyetracker.et_event_handlers</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">et_event_handlers</span>
+
+<span class="sd">Part of the pyEyeTracker library </span>
+<span class="sd">Copyright (C) 2012 Sol Simpson </span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). </span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">et_constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="UserEventHandler"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.UserEventHandler">[docs]</a><span class="k">class</span> <span class="nc">UserEventHandler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">localTimeFunction</span><span class="p">,</span> <span class="n">eventTypes</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">callbackData</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">=</span><span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eventTypes</span><span class="o">=</span><span class="n">eventTypes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callbackData</span><span class="o">=</span><span class="n">callbackData</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localTimeFunction</span><span class="o">=</span><span class="n">localTimeFunction</span>
+        
+<div class="viewcode-block" id="UserEventHandler.poll"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.UserEventHandler.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">updatedData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">callbackData</span> <span class="o">=</span> <span class="n">updatedData</span>
+        
+        <span class="n">newUserEvents</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        
+        <span class="n">newUserEvents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">localTimeFunction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">callbackData</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">newUserEvents</span>
+        </div></div>
+<div class="viewcode-block" id="EyeTrackerEventHandler"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler">[docs]</a><span class="k">class</span> <span class="nc">EyeTrackerEventHandler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">localTimeFunction</span><span class="p">,</span> <span class="n">eyetrackerTimeFunction</span><span class="p">,</span>  <span class="n">userEventHandler</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        
+        <span class="c"># event queue point back to pyEyeTracker dataQueue </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processedDataBuffer</span><span class="o">=</span><span class="n">RingBuffer</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eventCounts</span><span class="o">=</span><span class="n">Counter</span><span class="p">(</span><span class="n">ET_DATA_TYPES</span><span class="o">.</span><span class="n">ENUM_LIST</span><span class="p">)</span>
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">userEventHandler</span><span class="o">=</span><span class="n">userEventHandler</span>
+         
+        <span class="bp">self</span><span class="o">.</span><span class="n">localTimeFunction</span><span class="o">=</span><span class="n">localTimeFunction</span>  <span class="c"># function pointer to timer to use for converting eye tracker </span>
+                                <span class="c"># time stamps to local / experiment time. should provide time </span>
+                                <span class="c"># as msec.usec floats </span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">eyetrackerTimeFunction</span><span class="o">=</span><span class="n">eyetrackerTimeFunction</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">timebaseOffset</span><span class="o">=</span><span class="mi">0</span>  <span class="c"># offset / different between API and EYE_TRACKER time</span>
+                                <span class="c"># this should be calulated when pyEyeTracker instance is created</span>
+                                <span class="c"># and use best mention available to underlying interface to get an accurate, </span>
+                                <span class="c"># precise offset. Notethat the offset could be updated every second to adjust</span>
+                                <span class="c"># for slow drift between the the two clocks.</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateTimeBaseOffset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeBaseUpdate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">localTimeFunction</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPollTime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lastTimeBaseUpdate</span>
+    
+<div class="viewcode-block" id="EyeTrackerEventHandler.setUserEventHandler"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.setUserEventHandler">[docs]</a>    <span class="k">def</span> <span class="nf">setUserEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userEventHandler</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">userEventHandler</span><span class="o">=</span><span class="n">userEventHandler</span>     
+    </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.poll"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        poll should be called on a regular basis so that processing and housekeeping can occur </span>
+<span class="sd">        by the _eyetrackerEventProcessor class.</span>
+<span class="sd">        &#39;&#39;&#39;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPollTime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">localTimeFunction</span><span class="p">()</span>
+        
+        <span class="c">#update timebase delta every 1000 msec</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastPollTime</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeBaseUpdate</span> <span class="o">&gt;=</span> <span class="mf">1000.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateTimebaseOffset</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeBaseUpdate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lastPollTime</span>
+       
+        <span class="n">newEyeTrackerEvents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getConvertedNativeEvents</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">processedDataBuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newEyeTrackerEvents</span><span class="p">)</span>
+        
+        <span class="n">newUserEvents</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">userEventHandler</span><span class="p">:</span>
+            <span class="n">newUserEvents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">userEventHandler</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processedDataBuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newUserEvents</span><span class="p">)</span>
+        
+             </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getLocalTime"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getLocalTime">[docs]</a>    <span class="k">def</span> <span class="nf">getLocalTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">localTimeBaseFunction</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getEyeTrackerTime"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getEyeTrackerTime">[docs]</a>    <span class="k">def</span> <span class="nf">getEyeTrackerTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eyeTrackerTimeFunction</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getLatestSample"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getLatestSample">[docs]</a>    <span class="k">def</span> <span class="nf">getLatestSample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">peak</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getLatestEvent"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getLatestEvent">[docs]</a>    <span class="k">def</span> <span class="nf">getLatestEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">peak</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getBufferedData"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getBufferedData">[docs]</a>    <span class="k">def</span> <span class="nf">getBufferedData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">processedDataBuffer</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+    </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.clearDataBuffer"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.clearDataBuffer">[docs]</a>    <span class="k">def</span> <span class="nf">clearDataBuffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processedDataBuffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.updateTimeBaseOffset"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.updateTimeBaseOffset">[docs]</a>    <span class="k">def</span> <span class="nf">updateTimeBaseOffset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+        </div>
+<div class="viewcode-block" id="EyeTrackerEventHandler.getConvertedNativeEvents"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_event_handlers.EyeTrackerEventHandler.getConvertedNativeEvents">[docs]</a>    <span class="k">def</span> <span class="nf">getConvertedNativeEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># get events from eye tracker, create appropriate evnt type for each</span>
+        <span class="c"># and set the correct localTime based on the current offset.</span>
+        <span class="n">nevents</span><span class="o">=</span><span class="nb">list</span><span class="p">((</span><span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span><span class="p">,))</span>        
+        <span class="k">return</span> <span class="n">nevents</span>
+
+     </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

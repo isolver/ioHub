@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyeyetracker.et_graphics &mdash; pyEyeTracker 0.1alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyEyeTracker 0.1alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo.png" border="0" alt="pyEyeTracker"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyeyetracker.et_graphics</h1><div class="highlight"><pre>
+<span class="c"># Part of the pyEyeTracker library </span>
+<span class="c"># Copyright (C) 2012 Sol Simpson </span>
+<span class="c"># Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). </span>
+<span class="kn">from</span> <span class="nn">et_constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay">[docs]</a><span class="k">class</span> <span class="nc">pyEyeTrackerCalibrationDisplay</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">eyetracker</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eyetracker</span><span class="o">=</span><span class="n">eyetracker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibrationWidth</span><span class="o">=</span><span class="n">w</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibrationHeight</span><span class="o">=</span><span class="n">h</span>
+
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.setupCalDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.setupCalDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">setupCalDisplay</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.exitCalDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.exitCalDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">exitCalDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.recordAbortHide"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.recordAbortHide">[docs]</a>    <span class="k">def</span> <span class="nf">recordAbortHide</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.clearCalDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.clearCalDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">clearCalDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.eraseCalTarget"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.eraseCalTarget">[docs]</a>    <span class="k">def</span> <span class="nf">eraseCalTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.drawCalTarget"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.drawCalTarget">[docs]</a>    <span class="k">def</span> <span class="nf">drawCalTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+        <span class="c">#    </span>
+        <span class="c">#    def playBeep(self,beepid):</span>
+        <span class="c">#        return ET_RTN_CODES.ET_NOT_IMPLEMENTED</span>
+        <span class="c">#</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.translateKeyMessage"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.translateKeyMessage">[docs]</a>    <span class="k">def</span> <span class="nf">translateKeyMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+            <span class="c">#key = event.key;</span>
+            <span class="c">#if key == ET_JUNK_KEY:</span>
+            <span class="c">#	return 0</span>
+            <span class="c">#return key	</span>
+            <span class="c">#return 0</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.getInputKey"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.getInputKey">[docs]</a>    <span class="k">def</span> <span class="nf">getInputKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ky</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[]:</span><span class="c"># key event handler that is being used pygame.event.get([KEYDOWN]):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translateKeyMessage</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">ky</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tkey</span><span class="p">,</span><span class="n">key</span><span class="o">.</span><span class="n">mod</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">err</span>
+
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+        <span class="c">#return ky</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.getMouseState"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.getMouseState">[docs]</a>    <span class="k">def</span> <span class="nf">getMouseState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#pos = pygame.mouse.get_pos()</span>
+        <span class="c">#   state = pygame.mouse.get_pressed()</span>
+        <span class="c">#return (pos,state[0])	</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.exitImageDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.exitImageDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">exitImageDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+        </div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.alertPrintf"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.alertPrintf">[docs]</a>    <span class="k">def</span> <span class="nf">alertPrintf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>	
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.setupImageDisplay"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.setupImageDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">setupImageDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imgSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>		
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.imageTitle"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.imageTitle">[docs]</a>    <span class="k">def</span> <span class="nf">imageTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>		
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.drawImageLine"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.drawImageLine">[docs]</a>    <span class="k">def</span> <span class="nf">drawImageLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">totlines</span><span class="p">,</span><span class="n">buff</span><span class="p">):</span>		
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.drawLozenge"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.drawLozenge">[docs]</a>    <span class="k">def</span> <span class="nf">drawLozenge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">,</span><span class="n">colorindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">colorindex</span>   <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">CR_HAIR_COLOR</span><span class="p">:</span>   <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">PUPIL_HAIR_COLOR</span><span class="p">:</span>       <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">PUPIL_BOX_COLOR</span><span class="p">:</span>        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">SEARCH_LIMIT_BOX_COLOR</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">MOUSE_CURSOR_COLOR</span><span class="p">:</span>     <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.drawLine"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.drawLine">[docs]</a>    <span class="k">def</span> <span class="nf">drawLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">colorindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x1</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">x1</span> <span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">x2</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">x2</span> <span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">y1</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">y1</span> <span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">y2</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">y2</span> <span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">colorindex</span>   <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">CR_HAIR_COLOR</span><span class="p">:</span>   <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">PUPIL_HAIR_COLOR</span><span class="p">:</span>       <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">PUPIL_BOX_COLOR</span><span class="p">:</span>        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">SEARCH_LIMIT_BOX_COLOR</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">colorindex</span> <span class="o">==</span>  <span class="n">ET_EYE_IMAGE_COLOR</span><span class="o">.</span><span class="n">MOUSE_CURSOR_COLOR</span><span class="p">:</span>     <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ET_RTN_CODES</span><span class="o">.</span><span class="n">ET_NOT_IMPLEMENTED</span>
+</div>
+<div class="viewcode-block" id="pyEyeTrackerCalibrationDisplay.setImagePalette"><a class="viewcode-back" href="../../pyeyetracker.html#pyeyetracker.et_graphics.pyEyeTrackerCalibrationDisplay.setImagePalette">[docs]</a>    <span class="k">def</span> <span class="nf">setImagePalette</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imagebuffer</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clearCalDisplay</span><span class="p">()</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pal</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sz</span><span class="p">:</span>
+            <span class="n">rf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">gf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">bf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pal</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">rf</span><span class="o">&lt;&lt;</span><span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">gf</span><span class="o">&lt;&lt;</span><span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">bf</span><span class="p">))</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">home</a>|&nbsp;</li>
+        <li><a href="../../search.html">search</a>|&nbsp;</li>
+        <li><a href="../../contents.html">documentation</a>|&nbsp;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, iSolver Software Solutions, GPL version 3 licensed..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
