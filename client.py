@@ -16,44 +16,50 @@ class SocketConnection(object):
         self.initSocket()
         self.coder=None
         self.feed=None
-        if coder:
-            if coder == 'ujson':
-                import ujson
-                self.coder=ujson
-                self.pack=ujson.encode
-                self.unpack=ujson.decode
-            elif coder =='msgpack':
-                import msgpack
-                self.coder=msgpack
-                self.packer=msgpack.Packer()
-                self.unpacker=msgpack.Unpacker()
-                self.pack=self.packer.pack
-                self.feed=self.unpacker.feed
-            else:
-                raise Exception ("Unknown coder type: %s. Must be either 'ujson' or 'msgpack'"%(str(coder),))
+        self.configCoder(coder)
         
     def initSocket(self,broadcast=False,blocking=0, timeout=0):
-        print 'Default SocketConnection being used'
+        #print 'Default SocketConnection being used'
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         if broadcast is True:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) 
             self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, struct.pack('@i', 1))
-        
-        
+           
         if blocking is not 0:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)        
 
         self.sock.settimeout(timeout)
         self.sock.setblocking(blocking)
  
+    def configCoder(self,coder):
+        #print "** In configCoder...", coder
+        if coder:
+            if coder == 'ujson':
+                import ujson
+                self.coder=ujson
+                self.pack=ujson.encode
+                self.unpack=ujson.decode
+                #print 'ujson:', self.pack
+            elif coder =='msgpack':
+                import msgpack
+                self.coder=msgpack
+                self.packer=msgpack.Packer()
+                self.unpacker=msgpack.Unpacker(use_list=True)
+                self.pack=self.packer.pack
+                self.feed=self.unpacker.feed
+                self.unpack=self.unpacker.unpack
+                #print 'msgpack:', self.pack
+            else:
+                raise Exception ("Unknown coder type: %s. Must be either 'ujson' or 'msgpack'"%(str(coder),))
+        
     def sendTo(self,data,address=None): 
         #print 'DATA [%s] %s %s'%(data,self._remote_host, str(self._remote_port))
         if address is None:
             address=self._remote_host, self._remote_port
         d=self.pack(data)
         byte_count=len(d)+2
-        print 'Sending byte count of ',len(d)+2,type(d)
+        #print 'Sending byte count of ',len(d)+2,type(d)
         self.sock.sendto(d+'\r\n',address) 
         return byte_count
  
@@ -73,7 +79,7 @@ class UDPClientConnection(SocketConnection):
     def __init__(self,remote_host='127.0.0.1',remote_port=9000,rcvBufferLength=1492,broadcast=False,blocking=1, timeout=1, coder=None):
         SocketConnection.__init__(self,remote_host=remote_host,remote_port=remote_port,rcvBufferLength=rcvBufferLength,broadcast=broadcast,blocking=blocking, timeout=timeout,coder=coder)
     def initSocket(self,**kwargs):
-        print 'UDPClientConnection being used'
+        #print 'UDPClientConnection being used'
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64*1024) 
          
@@ -81,24 +87,13 @@ class ioHubClient(object):
     #outgoingEventBuffer=deque(maxlen=256)
     #incomingEventBuffer=deque(maxlen=1024)
     def __init__(self,config=None):
-        if config == None:
-            self.coder='ujson'
-        else:
-            self.coder=config['ioHub']['IPCcoder']
-        
-        if self.coder == 'ujson':
-            import ujson
-            self.coder=ujson
-        elif self.coder =='msgpack':
-            import msgpack
-            self.coder=msgpack
-        else:
-            raise Exception ("Unknown coder type: %s. Must be either 'ujson' or 'msgpack'"%(str( self.coder),))
-    
+        coder='ujson'
+        if config:
+            coder=config['ioHub']['IPCcoder']
+           
         # udp port setup
-        self.udp_client = UDPClientConnection(self.coder)
+        self.udp_client = UDPClientConnection(coder=coder)
  
-    
     # UDP communication with ioHost    
     def sendToHub(self,argsList,timeTxRx=False):
         '''
@@ -226,7 +221,10 @@ class ioHubClient(object):
             return etime-stime,r
         return r
     # client utility methods.
-    
+
+    def testConnection(self):
+        return self.sendToHub(('RPC','getProcessInfoString'))
+        
     def close(self): 
         self.udp_client.close()
 

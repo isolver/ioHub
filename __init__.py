@@ -7,14 +7,6 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 """
 from __future__ import division
-
-try:
-    import ujson
-except:
-    import json
-    print 'Warning: Using Python json lib. Performance will be IMPACTED. Please install ujson.' 
-
-PEFORMANCE_MEASURES_ENABLED=False
     
 class ioDeviceError(Exception):
     def __init__(self, device,msg):

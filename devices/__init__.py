@@ -11,7 +11,6 @@ import numpy as N
 import platform
 import timeit
 from collections import deque
-import psutil
 
 class Computer(object):
     _instance=None
@@ -20,14 +19,21 @@ class Computer(object):
             raise "Error creating Computer object; instance already exists. \
                    Use Computer.getInstance() to existing instance, or Computer. \
                    deleteInstance() to delete the existing instance before creating a new one."
-        self.system=system
-        self.node=node
-        self.release=release
-        self.version=version
-        self.machine=machine
-        self.processor=processor
-        self.cpuCount=psutil.NUM_CPUS
-
+        else:
+            import psutil, os
+            
+            self.system=system
+            self.node=node
+            self.release=release
+            self.version=version
+            self.machine=machine
+            self.processor=processor
+            self.cpuCount=psutil.NUM_CPUS
+            
+            
+            self.currentProcessID=os.getpid()
+            self.currentProcess=psutil.Process(self.currentProcessID)
+ 
     # return time in sec.msec format
     @classmethod
     def getInstance(cls):
@@ -59,6 +65,7 @@ class Computer(object):
     # timeit.timeit(stmt, setup='pass', timer=default_timer, number=1000000)
     # Create a Timer instance with the given statement, setup code and timer
     # function and run its timeit() method with number executions.
+    @staticmethod
     def profileCode(stmt, setup='pass', timer=timeit.default_timer, number=1000000):
         return timeit.timeit(stmt, setup, timer, number)
 
@@ -67,23 +74,37 @@ class Computer(object):
     # Create a Timer instance with the given statement, setup code and
     # timer function and run its repeat() method with the given repeat count
     # and number executions.
+    @staticmethod
     def repeatedProfile(stmt, setup='pass', timer=timeit.default_timer, repeat=3, number=1000000):
         return timeit.repeat(stmt, setup, timer, repeat, number)
 
-    @staticmethod
-    def printProcessInfo():
-        import psutil, os
-        p = psutil.Process(os.getpid())
-        tcount= p.get_num_threads()
-        pthreads=p.get_threads()
+    def printProcessInfo(self):
+        tcount= self.currentProcess.get_num_threads()
+        pthreads=self.currentProcess.get_threads()
         
         print '--------------------------------------'
-        print 'Process ( %d ): '%(os.getpid(),)
+        print 'Process ( %d ): '%(self.currentProcessID,)
         print p
         print 'Thread Count:', tcount
         print 'Thread Info:'
         for t in pthreads:
             print t
+
+    def getProcessInfoString(self):
+        tcount= self.currentProcess.get_num_threads()
+        pthreads=self.currentProcess.get_threads()
+        
+        r='--------------------------------------\n'
+        r+='Process ( %d ):\n'%(self.currentProcessID,)
+        r+=str(self.currentProcess)
+        r+='Thread Count: %d\n'%(tcount,)
+        r+='Thread Info:\n'
+        for t in pthreads:
+            r+=str(t)+'\n'
+            
+    def __del__(self):
+        self._instance=None
+        del self._instance
             
 Computer._instance=Computer(*platform.uname())
 computer=Computer.getInstance()

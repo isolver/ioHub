@@ -1,7 +1,7 @@
 ﻿import gevent
 from gevent.server import DatagramServer
 from gevent import Greenlet
-import os,sys, ujson
+import os,sys,gc
 import time, bisect
 import pythoncom
 from collections import deque
@@ -9,25 +9,29 @@ import ioHub
 from ioHub.devices import Computer,computer
 currentMsec= Computer.currentMsec
 import ioDataStore
-from ioDataStore import EMRTfile
+from ioDataStore import EMRTpyTablesFile
              
 class udpServer(DatagramServer):
-    def __init__(self,ioHubServer,address,coder='ujson'):
+    def __init__(self,ioHubServer,address,coder='msgpack'):
         self.iohub=ioHubServer
         self.feed=None
+        self._inHighPriorityMode=False
         
         if coder=='ujson':
+            print " ioHub Server configuring ujson..."
             import ujson
             self.coder=ujson
             self.pack=ujson.encode
             self.unpack=ujson.decode
         elif coder == 'msgpack':
+            print " ioHub Server configuring msgpack..."
             import msgpack
             self.coder=msgpack
             self.packer=msgpack.Packer()
-            self.unpacker=msgpack.Unpacker()
+            self.unpacker=msgpack.Unpacker(use_list=True)
             self.pack=self.packer.pack
             self.feed=self.unpacker.feed
+            self.unpack=self.unpacker.unpack
 
         
         DatagramServer.__init__(self,address)
@@ -35,7 +39,7 @@ class udpServer(DatagramServer):
         
     def handle(self, request, replyTo):
         if self.feed: # using msgpack
-            self.feed(data[:-2])
+            self.feed(request[:-2])
             request = self.unpack() 
         else: #using ujson
             request=self.unpack(request[:-2])
@@ -130,6 +134,24 @@ class udpServer(DatagramServer):
         self.iohub.eventBuffer.clear()
         return l
     
+    def closeDataStoreFile(self):
+        if self.iohub.emrt_file:
+            self.iohub.emrt_file.flush()
+            self.iohub.emrt_file.close()
+        self.iohub.emrt_file=None
+
+    def createDataStoreFile(self,fileName,folderPath,fmode,ftype):        
+        try:
+            if ftype == 'pytables':
+                self.closeDataStoreFile()
+                self.iohub.emrt_file=EMRTpyTablesFile(fileName,folderPath,fmode)
+                return True
+            else:
+                return ('RPC_ERROR','createDataStoreFile','Only DataStore File Type "pytables" is currently Supported, not %s'%str(ftype)) 
+        except Exception, err:
+            print "Error ruuning createDataStoreFile:", err
+            return ('RPC_ERROR','createDataStoreFile',str(err))
+    
     def registerDevice(self,deviceInstanceInfoDict):
         deviceInfo=deviceInstanceInfoDict
         if 'category' in deviceInfo:
@@ -147,24 +169,25 @@ class udpServer(DatagramServer):
     def currentMsec(self):
         return currentMsec()
     
-    def getHubProcessStats(self):
-        return Computer.getProcessInfoString()
-    
-    @staticmethod
-    def getProcessInfoString():
+    def enableHighPriority(self,disable_gc=True):
         import psutil, os
-        p = psutil.Process(os.getpid())
-        tcount= p.get_num_threads()
-        pthreads=p.get_threads()
-        
-        r='--------------------------------------\n'
-        r+='Process ( %d ):\n'%(os.getpid(),)
-        r+=str(p)
-        r+='Thread Count: %d\n'%(tcount,)
-        r+='Thread Info:\n'
-        for t in pthreads:
-            r+=str(t)+'\n'
-        return r
+        if self._inHighPriorityMode is False:
+            if disable_gc:
+                gc.disable()
+            p = psutil.Process(os.getpid())
+            p.nice=psutil.HIGH_PRIORITY_CLASS
+            self._inHighPriorityMode=True
+
+    def disableHighPriority(self):
+        import psutil, os
+        if self._inHighPriorityMode is True:
+            gc.enable()
+            p = psutil.Process(os.getpid())
+            p.nice=psutil.NORMAL_PRIORITY_CLASS
+            self._inHighPriorityMode=False
+    
+    def getProcessInfoString(self):
+        return computer.getProcessInfoString()
 
 class DeviceMonitor(Greenlet):
     def __init__(self, device,sleep_interval):
@@ -184,22 +207,19 @@ class ioServer(object):
     eventBuffer=None 
     eventDictionary=None
     flushCounter=128
-    def __init__(self,dataFile=None,configFile=None):
+    def __init__(self,configFile=None):
         if configFile==None:
             self.config=None
         else:
-            self.config=None
+            self.config=configFile
     
-        ioServer.eventBuffer=deque(maxlen=4096) 
-        ioServer.eventDictionary=dict()
-        
-        self.emrt_file=EMRTfile(dataFile)
+        ioServer.eventBuffer=deque(maxlen=4096)
+        self.emrt_file=None
         self.devices=[]
         self.deviceMonitors=[]
         
         self.udpService=udpServer(self,':9000')
 
-        
         defaults=ioHub.devices.Keyboard.getDefaultAtrributeValueDict()
         kb=ioHub.devices.Keyboard(**defaults)
         
@@ -240,9 +260,13 @@ class ioServer(object):
     def processDeviceEvents(self,sleep_interval):
         numEventsForFlush=ioServer.flushCounter
         nevents=0
-        addEventToFile=self.emrt_file.addEventToFile
+        
+        addEventToFile=None
+        flush=None
+        if self.emrt_file:
+            addEventToFile=self.emrt_file.addEventToFile
+            flush=self.emrt_file.flush
         appendEvent=self.eventBuffer.append
-        flush=self.emrt_file.flush
         while 1:
             for device in self.devices:
                 events=device.getEventBuffer()
@@ -251,7 +275,7 @@ class ioServer(object):
                     e=device.getIOHubEventObject(evt,device.instance_code)
                     if device.events_ipc is True:
                         appendEvent(e)
-                    if device.data_presistance is True:
+                    if addEventToFile and device.data_presistance is True:
                         addEventToFile(e)
                         nevents+=1
                         if nevents==numEventsForFlush:
@@ -280,20 +304,16 @@ class ioServer(object):
 
 
 
-def run(dataFile='test.rt',configFile=None):
-    s = ioServer('test.rt',configFile)
+def run(configFile=None):
+    s = ioServer(configFile)
     s.start()    
     
 if __name__ == '__main__':
     prog=sys.argv[0]
-    if len(sys.argv)>1:
-        dataFileName=sys.argv[1]
-    else:
-        dataFileName='test.rt'
     
-    if len(sys.argv)>2:
-        configFileName=sys.argv[2]
+    if len(sys.argv)>1:
+        configFileName=sys.argv[1]
     else:
         configFileName=None
-
-        run(dataFile=dataFileName,configFile=configFileName)
+        
+    run(configFile=configFileName)
