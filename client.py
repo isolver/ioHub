@@ -1,8 +1,20 @@
-﻿from gevent import socket
+﻿"""
+ioHub Python Module
+
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
+
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+"""
+
+from gevent import socket
 import sys
 import ioHub
 from ioHub.devices import Computer
+from ioHub.devices.experiment import MessageEvent,CommandEvent
+
 currentMsec= Computer.currentMsec
+
 
 class SocketConnection(object):
     def __init__(self,local_host=None,local_port=None,remote_host=None,remote_port=None,rcvBufferLength=1492, broadcast=False, blocking=0, timeout=0,coder=None):
@@ -82,20 +94,72 @@ class UDPClientConnection(SocketConnection):
         #print 'UDPClientConnection being used'
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64*1024) 
-         
+
+#
+# The ioHubClientDevice is the ioHub client side representation of an ioHub device.
+# It has a dynamically created list of methods that can be called
+# (matching the list of methods for the device in the ioHub.devices module),
+# however here, each results in an RPC call to the ioHub for the device, which returns
+# the result.
+#
+class DeviceRPC(object):
+    def __init__(self,sendToHub,device_class,method_name):
+        self.device_class=device_class
+        self.method_name=method_name
+        self.sendToHub=sendToHub
+        
+    def __call__(self, *args,**kwargs):
+        r = self.sendToHub(('EXP_DEVICE','DEV_RPC',self.device_class,self.method_name,args,kwargs))  
+        r=r[0][1:]
+        if len(r)==1:
+            return r[0]
+        return r
+        
+class ioHubClientDevice(object):
+    def __init__(self,hubClient,name,code,dclass):
+        self.hubClient=hubClient
+        self.user_label=name
+        self.instance_code=code
+        self.device_class=dclass
+        
+        r=self.hubClient.sendToHub(('EXP_DEVICE','GET_DEV_INTERFACE',dclass))
+        self._methods=r[0][1]
+        
+    def __getattr__(self,name):
+        if name in self._methods:
+            #print 'GET:',name,"is valid for",self.device_class
+            return DeviceRPC(self.hubClient.sendToHub,self.device_class,name)
+            
+        
+#
+# ioHubDevices is a class that contains an attribute (dynamically created) 
+# for each device that is created in the ioHub. These devices are each of type
+# ioHubClientDevice. The attribute name for the device is the user_label / name
+# given to the device by the user, so it must be a valid python attribute name.
+# The ioHubClientDevice itself  has a list of methods that can be called
+# (matching the list of methods for the device in the ioHub.devices module),
+# however here, each results in an RPC call to the ioHub for the device, which returns
+# the result.
+#        
+class ioHubDevices(object):
+    def __init__(self,hubClient):
+        self.hubClient=hubClient
+    
 class ioHubClient(object):
-    #outgoingEventBuffer=deque(maxlen=256)
-    #incomingEventBuffer=deque(maxlen=1024)
-    def __init__(self,config=None):
-        coder='ujson'
-        if config:
-            coder=config['ioHub']['IPCcoder']
-           
+    def __init__(self,ipcCoder='msgpack'):
         # udp port setup
-        self.udp_client = UDPClientConnection(coder=coder)
- 
+        self.udp_client = UDPClientConnection(coder=ipcCoder)
+        self.devices=ioHubDevices(self)
+        
+    def getDevices(self):
+        return self.devices
+    
+    def createDeviceList(self,deviceList):
+        for user_label,instance_code,device_class in deviceList:
+            self.devices.__dict__[user_label]=ioHubClientDevice(self,user_label,instance_code,device_class)
+            
     # UDP communication with ioHost    
-    def sendToHub(self,argsList,timeTxRx=False):
+    def sendToHub(self,argsList):
         '''
         General purpose UDP packet sending routine. For the most part, 
         ioHub expect data to be sent json encoded using the ujson library
@@ -169,10 +233,6 @@ class ioHubClient(object):
         -> Response: ('SEND_EVENTS_RESULT',number_of_events_received)
         -> Error Return: Not defined.     
         '''
-        startMsec=0
-        endMsec=0
-        if timeTxRx is True:
-            startMsec=currentMsec()
         # send request to host, return is # bytes sent.
         bytes_sent=self.udp_client.sendTo(argsList)
         
@@ -180,133 +240,31 @@ class ioHubClient(object):
         result,address=self.udp_client.receive()
         
         r = (result,bytes_sent,address)
-        if not timeTxRx:
-            return r
-            
-        endMsec=currentMsec()
-        return (endMsec-startMsec),r
-
-    def getEvents(self,timeTxRx=False):
-        return self.sendToHub(('GET_EVENTS',),timeTxRx)
- 
-    def sendEvents(self,events,timeTxRx=False):
-        stime=0
-        etime=0
-        if timeTxRx is True:
-            stime=currentMsec()
-            
-        eventList=[]
-        for e in events:
-            eventList.append(e.asTuple())
-        r = self.sendToHub(('EXP_DEVICE','EVENT_TX',eventList))
- 
-        if timeTxRx is True:
-            etime=currentMsec()
-            return etime-stime,r
         return r
         
-    def sendCommands(self,commands,timeTxRx=False):
-        stime=0
-        etime=0
-        if timeTxRx is True:
-            stime=currentMsec()
-            
-        commandList=[]
-        for e in commands:
-            commandList.append(e.asTuple())
-        r = self.sendToHub(('EXP_DEVICE','CMD_TX',commandList))
+    def getEvents(self):
+        return self.sendToHub(('GET_EVENTS',))
  
-        if timeTxRx is True:
-            etime=currentMsec()
-            return etime-stime,r
-        return r
-    # client utility methods.
+    def sendEvents(self,events):
+        eventList=[]
+        for e in events:
+            eventList.append(e._asTuple())
+        return self.sendToHub(('EXP_DEVICE','EVENT_TX',eventList))
 
+    def sendMessageEvent(self,text,prefix='',offset=0.0):
+        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.create(text=text,msg_offset=offset,msg_prefix=prefix)._asTuple()]))
+    
+    def sendCommandEvent(self,command,text,priority=255,prefix='',offset=0.0):
+        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.create(text=text,command=command,priority=priority,msg_offset=offset,msg_prefix=prefix)._asTuple()]))
+
+        
+    # client utility methods.
+    def getDeviceList(self):
+        return self.sendToHub(('EXP_DEVICE','GET_DEV_LIST'))
+    
     def testConnection(self):
         return self.sendToHub(('RPC','getProcessInfoString'))
         
-    def close(self): 
+    def shutDownServer(self): 
+        self.udp_client.sendTo(('RPC','shutDown'))
         self.udp_client.close()
-
-    
-'''      
-if __name__ == '__main__':  
-    SELECTED_TEST='GEVENT'
-    AVAILABLE_TESTS={'GEVENT':{'ITERATIONS':1000},'SEVENTS':{'ITERATIONS':1000,'EVENT_COUNT':16},'ESTREAM':{'DURATION':10}}
-    
-    c = ioClient()
-    results=[] 
-    sum=0.0
-    i=0
-    r=c.clearEventBuffer()
-    print 'clearBufferedEvents: ', r
-    if SELECTED_TEST in AVAILABLE_TESTS:
-        TEST_CONDITIONS=AVAILABLE_TESTS[SELECTED_TEST]
-        
-        if SELECTED_TEST == 'GEVENT':
-            loops=TEST_CONDITIONS['ITERATIONS']
-            bt=currentMsec()
-            while i < loops:
-                st= currentMsec()
-                r=c.getEvents()
-                #print 'return:',r
-                rpcType,rpcFunction,events=r
-                if events and len(events)>0:
-                   results.append(events)
-                   #print events
-                   i+=1
-                   et= currentMsec()
-                   sum+=(et-st)
-        elif SELECTED_TEST == 'ESTREAM':
-            duration=TEST_CONDITIONS['DURATION']*60*1000
-            bt=currentMsec()
-            while currentMsec() < bt+duration:
-                st= currentMsec()
-                rpcType,rpcFunction,events=c.getEvents()
-                if events and len(events)>0:
-                   #results.append(events)
-                   print events
-                   i+=1
-                   et= currentMsec()
-                   sum+=(et-st)
-        elif  SELECTED_TEST == 'SEVENTS':
-            loops=TEST_CONDITIONS['ITERATIONS']
-            ecount=TEST_CONDITIONS['EVENT_COUNT']
-                   
-            bt=currentMsec()
-            while i < loops:
-                elist=[]
-                for x in xrange(ecount):
-                    e=(100,currentMsec(),currentMsec()+1000.0,"This is the event message.","Obj_ref1","Obj_ref2",123,456)
-                    elist.append(e)
-               
-                st= currentMsec()
-                response=c.sendEvents(elist)
-                results.append(response)
-                i+=1
-                et= currentMsec()
-                sum+=(et-st)
-            nowt=currentMsec()
-            sumBytes=0
-            sumEvents=0
-            for r in results:
-               sumBytes+=r[0]
-               sumEvents+=r[1][2]
-               
-            print "Sent %d bytes ( %d experiment events, %.2f bytes // event avg.) in %.3f msec wall time. = %.3f bytes // sec"%(sumBytes,sumEvents,sumBytes/float(sumEvents),nowt-bt, (sumBytes/1000.0))
-                    
-    print SELECTED_TEST,"Average Delay: ", sum /i, i
-
-    t1=currentMsec()
-    rpc,func_name,ht=c.currentIOHubMsec()
-    t2=currentMsec()
-    
-    print "Currrent Host / Local times",ht,(t2-t1),ht-t1,t2-ht
-
-    print 'CLIENT STATS:'
-    Computer.printProcessInfo()
-    print '\n'
-    print 'HUB STATS:'    
-    r=c.getProcessInfoString()
-    print r[2]
-'''

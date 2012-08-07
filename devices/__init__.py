@@ -1,7 +1,6 @@
 """
-ioHub.devices module __init__
+ioHub Python Module
 
-Part of the Eye Movement Research Toolkit
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
@@ -112,12 +111,11 @@ computer=Computer.getInstance()
 class ioObject(object):
     dataType=[]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict={}
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=['I_tuple','I_np_array','I_public_dict','I_tables_row']+attributeNames
+    __slots__=['I_tuple','I_np_array','I_tables_row']+attributeNames
     def __init__(self,*args,**kwargs):
-        self.I_public_dict=dict()
+        #self.I_public_dict=dict()
         self.I_np_array=None
         self.I_tables_row=None
         
@@ -127,7 +125,7 @@ class ioObject(object):
             setattr(self,key,value)
             if key[:2] is not 'I_':
                 ovalues.append(value)
-                self.I_public_dict[key]=value
+                #self.I_public_dict[key]=value
         #print "ovalues:",len(ovalues)," <> ",ovalues
         #print "self.ndType:",self.ndType.__len__()," <> ",self.ndType
         self.I_tuple=tuple(ovalues) 
@@ -136,45 +134,60 @@ class ioObject(object):
     def getAttributesList(cls):
         return [e[0] for e in cls.dataType]
     
-    def asTuple(self):
+    def _asTuple(self):
         return self.I_tuple
         
-    def asDict(self):
-        return self.I_public_dict
+    #def _asDict(self):
+    #    return self.I_public_dict
 
-    def asNumpyArray(self):
+    def _asNumpyArray(self):
         if self.I_np_array is None:
+            print '=================='
+            print len(self.I_tuple)
+            print self.I_tuple
+            print '-------------'
+            print self.ndType
             self.I_np_array=N.array([self.I_tuple,],self.ndType) 
         return self.I_np_array
     
-    def getTablesRow(self):
+    def _getTablesRow(self):
         return self.I_tables_row
         
 ########### Base Abstract Device that all other Devices inherit from ##########
 class Device(ioObject):
-    dataType=ioObject.dataType+[('instance_code','a24'),('category_id','u1'),('type_id','u1'),('user_label','a24'),('os_device_code','a64'),('max_event_buffer_length','u2'),('events_ipc','b'),('data_presistance','b')]
+    dataType=ioObject.dataType+[('instance_code','a48'),('category_id','u1'),('type_id','u1'),('device_class','a24'),('user_label','a24'),('os_device_code','a64'),('max_event_buffer_length','u2')]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(ioObject.defaultValueDict,**{'instance_code':'INSTANCE_CODE_NOT_SET','category_id':0,'type_id':0,'user_label':'USER_LABEL_NOT_SET','os_device_code':'OS_DEV_CODE_NOT_SET','max_event_buffer_length':512,'events_ipc':True,'data_presistance':True})
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames+['I_eventBuffer',]
-    
+    DEVICE_TIMEBASE_TO_USEC=1.0
+    __slots__=attributeNames+['I_eventBuffer','I_eventListeners']
     def __init__(self,*args,**kwargs):
         ioObject.__init__(self,**kwargs)
         self.I_eventBuffer=deque(maxlen=self.max_event_buffer_length)
-
-    def getEventBuffer(self):
+        self.I_eventListeners=list()
+        
+    def _getEventBuffer(self):
         return self.I_eventBuffer
+    
+    def _addEventListener(self,l):
+        if l not in self.I_eventListeners:
+            self.I_eventListeners.append(l)
+    
+    def _removeEventListener(self,l):
+       if l in self.I_eventListeners:
+            self.I_eventListeners.remove(l)
             
-    @classmethod
-    def getDefaultAtrributeValueDict(cls):
-        return dict(cls.defaultValueDict)
+    def _getEventListeners(self):
+        return self.I_eventListeners
+        
+    def _getRPCInterface(self):
+        return ()
         
 ########### Base Device Event that all other Device Events inherit from ##########
 
 class DeviceEvent(ioObject):
     dataType=ioObject.dataType+[('experiment_id','u8'),('session_id','u4'),('event_id','u8'),('event_type','u1'),
-                                ('device_instance_code','a24'),('device_time','u8'), ('logged_time', 'u8'), ('hub_time','u8'),
+                                ('device_instance_code','a48'),('device_time','u8'), ('logged_time', 'u8'), ('hub_time','u8'),
                                 ('confidence_interval', 'f4'),('delay', 'f4')]
     attributeNames=[e[0] for e in dataType]
     defaultValueDict=None
@@ -213,5 +226,12 @@ from parallelPort import ParallelPortEvent
 
 import experiment
 from experiment import ExperimentRuntimeDevice
-from experiment import Message, Command
-#import commonETI as eyeTrackerInterface
+from experiment import MessageEvent, CommandEvent
+
+import eyeTrackerInterface
+from eyeTrackerInterface.HW import *
+from eyeTrackerInterface.eye_events import *
+
+
+import display
+from display import Display

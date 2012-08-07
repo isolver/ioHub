@@ -1,5 +1,5 @@
 """
-ioHub module __init__
+ioHub Python Module
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -18,7 +18,7 @@ class ioDeviceError(Exception):
 DEVICE_CATERGORY_ID_LABEL={
         1:'KEYBOARD',
         2:'MOUSE',
-#        4:'MONITOR',
+        4:'VISUAL_STIMULUS_PRESENTER',
         8:'VIRTUAL',
         16:'DIGITAL_IO',
 #        32:'DA_CONVERTER',
@@ -46,7 +46,7 @@ if 'KEYBOARD' not in DEVICE_CATERGORY_ID_LABEL:
 DEVICE_TYPE_LABEL={
         1:'KEYBOARD_DEVICE',
         2:'MOUSE_DEVICE',
-#        3:'MONITOR_DEVICE',
+        3:'DISPLAY_DEVICE',
         4:'PARALLEL_PORT_DEVICE',
         5:'EXPERIMENT_DEVICE',
 #        6:'ANALOG_INPUT_DEVICE',
@@ -78,12 +78,11 @@ DEVICE_ID_TO_CATERGORYS=dict()
 EVENT_TYPES=dict(UNDEFINED_EVENT=0, EXPERIMENT_EVENT =1,  MESSAGE =2,  COMMAND =3, 
                  KEYBOARD_EVENT =50, KEYBOARD_PRESS =51, KEYBOARD_RELEASE =52,BUTTON_BOX_PRESS =60, BUTTON_BOX_RELEASE =61,
                  MOUSE_EVENT =54, MOUSE_PRESS =55, MOUSE_RELEASE =56, MOUSE_WHEEL =57, MOUSE_MOVE =58, MOUSE_DOUBLE_CLICK=59,
-                 PARALLEL_PORT_INPUT =73, TTL_INPUT =70,
-                 EYE_SAMPLE =100,BINOC_EYE_SAMPLE =101, 
-                 FIXATION =105, FIXATION_START =106, FIXATION_UPDATE =107, FIXATION_END =108,
-                 SACCADE =110, SACCADE_START =111, SACCADE_END =112,
-                 BLINK =115, BLINK_START =116, BLINK_END =117, 
-                 SMOOTH_PURSUIT =118, SMOOTH_PURSUIT_START =119, SMOOTH_PURSUIT_END =120,
+                 PARALLEL_PORT_INPUT =73, TTL_INPUT =70,EYE_SAMPLE=100,BINOC_EYE_SAMPLE =101, 
+                 FIXATION_START =106, FIXATION_UPDATE =107, FIXATION_END =108,
+                 SACCADE_START =111, SACCADE_END =112,
+                 BLINK_START =116, BLINK_END =117, 
+                 SMOOTH_PURSUIT_START =119, SMOOTH_PURSUIT_END =120,
                 )
 if 50 not in EVENT_TYPES:
     temp={}
@@ -106,52 +105,4 @@ if 50 not in EVENT_TYPES:
                  AUDIO_OUT_START =40, AUDIO_OUT_END =41, VOICE_KEY =42, AUDIO_IN_START =43, AUDIO_IN_END =44,
 '''
  
-import devices  
-from devices import Keyboard
-from devices import Mouse
-from devices import ParallelPort
-from devices import ExperimentRuntimeDevice
-#from devices import pyEyeTrackerInterface
-#from pyEyeTrackerInterface import EyeTracker
-#from devices import Monitor
-
-'''
-DEVICE_ID_CLASS= {
-        1:Keyboard,
-        2:Mouse,
-#        3:Monitor,
-        4:ParallelPort,
-#        5:EyeTracker,
-#        6:ButtonBox,
-        7:None,
-        8:None,
-        9:None,
-        10:None,
-        11:None,
-        12:None,
-        13:None,
-        14:None,
-        15:None,
-        16:None,
-        17:None
-}
-
-if 'KEYBOARD_DEVICE' not in DEVICE_ID_CLASS:
-    temp={}
-    for key,value in DEVICE_ID_CLASS.iteritems():
-        temp[value]=key
-    DEVICE_ID_CLASS.update(temp)
-    
-    DEVICE_CLASSES=DEVICE_ID_CLASS
-    
-    if None in DEVICE_CLASSES:
-        del DEVICE_CLASSES[None]
-    
-    tempdict={}
-    for did, dcls in DEVICE_ID_CLASS.iteritems():
-        if dcls is not None and did in DEVICE_TYPE_LABEL:
-            tempdict[DEVICE_TYPE_LABEL[did]]=dcls
-    DEVICE_ID_CLASS.update(tempdict)
-
-    del tempdict
-'''    
+import devices

@@ -1,7 +1,6 @@
 """
-ioHub Windows 32 bit Keyboard Class and Event Generator
+ioHub Python Module
 
-Part of the ioHub Module
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License
 (GPL version 3 or any later version).
@@ -25,8 +24,7 @@ class KeyboardWindows32(object):
     WIN32_KEYBOARD_RELEASE=257
     WIN32_KEYBOARD_PRESS_EVENT_TYPES=(WIN32_KEYBOARD_PRESS,WIN32_KEYBOARD_SYSKEY_PRESS)
     def __init__(self,*args,**kwargs):      
-        self.I_modifierValue=0;   
-        print 'Created KeyboardWindows32.'
+        self.I_modifierValue=0;
         
     def eventCallback(self,event):
         notifiedTime=int(currentMsec())

@@ -1,7 +1,6 @@
 """
-ExperimentToolkit.toolkit-libs.devices.Keyboard: Xplatform Keyboard Class and Event Generator
+ioHub Python Module
 
-Part of the ExperimentToolkit Framework
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
@@ -53,21 +52,23 @@ if computer.system == 'Windows':
     class Keyboard(Device,KeyboardWindows32):
         dataType = Device.dataType+[]
         attributeNames=[e[0] for e in dataType]
-        defaultValueDict=dict(Device.defaultValueDict,**{'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL['KEYBOARD'],'type_id':ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE'],'max_event_buffer_length':1024})
         ndType=N.dtype(dataType)
         fieldCount=ndType.__len__()
         __slots__=attributeNames
+        categoryTypeString='KEYBOARD'
+        deviceTypeString='KEYBOARD_DEVICE'
         def __init__(self,*args,**kwargs):
-            dargs=dict(Keyboard.defaultValueDict)
-       
-            for k,v in kwargs.iteritems():
-                if k in dargs:
-                    dargs[k]=v
-             
-            Device.__init__(self,**dargs)
-            KeyboardWindows32.__init__(self,**dargs)            
-
-            print "Keyboard class set as ",self.__class__.__name__
+            deviceConfig=kwargs['dconfig']
+            deviceSettings={'instance_code':deviceConfig['instance_code'],
+                'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[Keyboard.categoryTypeString],
+                'type_id':ioHub.DEVICE_TYPE_LABEL[Keyboard.deviceTypeString],
+                'device_class':deviceConfig['device_class'],
+                'user_label':deviceConfig['name'],
+                'os_device_code':'OS_DEV_CODE_NOT_SET',
+                'max_event_buffer_length':deviceConfig['event_buffer_size']
+                }          
+            Device.__init__(self,**deviceSettings)
+            KeyboardWindows32.__init__(self,**deviceSettings)            
 elif computer.system == 'Linux':
     import __linux__
     print 'Keyboard not implemented on Linux yet.'

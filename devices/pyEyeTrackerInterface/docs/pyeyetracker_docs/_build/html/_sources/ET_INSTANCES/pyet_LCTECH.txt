@@ -1,7 +1,0 @@
-.. _pyEyeTracker-LC-Tech:
-
-*************************************
-pyEyeTracker LC Tech. Interface Notes
-*************************************
-
-Content TBC

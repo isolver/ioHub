@@ -1,7 +1,6 @@
 """
-XioHub Windows 32 bit Mouse Class and Event Generator
+ioHub Python Module
 
-Part of the XioHub Module
 Copyright (C) 2012 Sol Simpson 
 Distributed under the terms of the GNU General Public License 
 (GPL version 3 or any later version). 
@@ -39,7 +38,7 @@ class MouseWindows32(object):
     BUTTON_ID_RIGHT=2
     BUTTON_ID_MIDDLE=3
     def __init__(self, *args,**kwargs):
-        print 'Created MouseWindows32 device.....'
+        pass
 
     def eventCallback(self,event):
         notifiedTime=int(currentMsec())

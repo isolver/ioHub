@@ -1,6 +1,0 @@
-Issues:
-    
-   1) Randomization of condition file does not seem to be working.
-   2) targets are distorted; the defualt center color is not shown and the fill has splines through it. 
-       This just started happenning Mat 21st, so I did something to an OpenGL setting or such. 
-   3) Data saving is not how I trhink it should be. Input would be good. Maybe it is fine. 

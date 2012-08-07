@@ -1,8 +1,6 @@
-from ....experimentPlatform import *
 """
-XioHub Linux Keyboard Class and Event Generator
+ioHub Python Module
 
-Part of the XioHub Module
 Copyright (C) 2012 Sol Simpson 
 Distributed under the terms of the GNU General Public License 
 (GPL version 3 or any later version). 

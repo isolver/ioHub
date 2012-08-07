@@ -1,4 +1,13 @@
-﻿from .. import Device,Computer,DeviceEvent
+﻿"""
+ioHub Python Module
+
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
+
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+"""
+
+from .. import Device,Computer,DeviceEvent
 import ioHub
 currentMsec=Computer.currentMsec
 import numpy as N
@@ -6,14 +15,23 @@ import numpy as N
 class ExperimentRuntimeDevice(Device):
     dataType = list(Device.dataType)
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(Device.defaultValueDict,**{'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL['VIRTUAL'],'type_id':ioHub.DEVICE_TYPE_LABEL['EXPERIMENT_DEVICE'],'max_event_buffer_length':1024})
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
+    categoryTypeString='VIRTUAL'
+    deviceTypeString='EXPERIMENT_DEVICE'
     def __init__(self,*args,**kwargs):
-        dargs=dict(ExperimentRuntimeDevice.defaultValueDict,**kwargs)
-        Device.__init__(self,**dargs)
-
+        deviceConfig=kwargs['dconfig']
+        deviceSettings={'instance_code':deviceConfig['instance_code'],
+            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[ExperimentRuntimeDevice.categoryTypeString],
+            'type_id':ioHub.DEVICE_TYPE_LABEL[ExperimentRuntimeDevice.deviceTypeString],
+            'device_class':deviceConfig['device_class'],
+            'user_label':deviceConfig['name'],
+            'os_device_code':'OS_DEV_CODE_NOT_SET',
+            'max_event_buffer_length':deviceConfig['event_buffer_size']
+            }          
+        Device.__init__(self,**deviceSettings)
+ 
         print "ExperimentRuntimeDevice class set as ",self.__class__.__name__
 
     def eventCallback(self,event):
@@ -26,11 +44,12 @@ class ExperimentRuntimeDevice(Device):
  
     @staticmethod
     def getIOHubEventObject(event,device_instance_code):
-        event_type = event[3]
+        print "Exp event:",event
+        event_type = event[1][3]
         if event_type==ioHub.EVENT_TYPES['MESSAGE']:
-            return Message.createFromOrderedList(event)
+            return MessageEvent.createFromOrderedList(event)
         if event_type==ioHub.EVENT_TYPES['COMMAND']:
-            return Command.createFromOrderedList(event)
+            return CommandEvent.createFromOrderedList(event)
             
 ######### Experiment Events ###########
 
@@ -46,37 +65,37 @@ class ExperimentEvent(DeviceEvent):
     def __init__(self,**kwargs):
         DeviceEvent.__init__(self,**kwargs)
 
-class Message(ExperimentEvent):
-    dataType=ExperimentEvent.dataType+[('msg_offset','i2'),('msg_prefix','a3'),('text','a128')]
+class MessageEvent(ExperimentEvent):
+    dataType=ExperimentEvent.dataType+[('msg_offset','i2'),('prefix','a3'),('text','a128')]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(ExperimentEvent.defaultValueDict,**{'msg_offset':0,'msg_prefix':'','text':'','event_type':ioHub.EVENT_TYPES['MESSAGE']})
+    defaultValueDict=dict(ExperimentEvent.defaultValueDict,**{'msg_offset':0,'prefix':'','text':'','event_type':ioHub.EVENT_TYPES['MESSAGE']})
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
     def __init__(self,**kwargs):
-        dargs=dict(Message.defaultValueDict,**kwargs)
+        dargs=dict(MessageEvent.defaultValueDict,**kwargs)
         ExperimentEvent.__init__(self,**dargs)
 
     @staticmethod
-    def create(text='',msg_offset=0.0,msg_prefix=''):
+    def create(text='',msg_offset=0.0,prefix=''):
         device_time=currentMsec()
-        return Message(device_time=device_time,text=text,msg_offset=msg_offset,msg_prefix=msg_prefix) 
+        return MessageEvent(device_time=device_time,text=text,msg_offset=msg_offset,prefix=prefix) 
     
-class Command(Message):
-    dataType=Message.dataType+[('priority','u1'),('command','a32')]
+class CommandEvent(MessageEvent):
+    dataType=MessageEvent.dataType+[('priority','u1'),('command','a32')]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(Message.defaultValueDict,**{'priority':255,'command':'','event_type':ioHub.EVENT_TYPES['COMMAND']})
+    defaultValueDict=dict(MessageEvent.defaultValueDict,**{'priority':255,'command':'','event_type':ioHub.EVENT_TYPES['COMMAND']})
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
     def __init__(self,**kwargs):
-        dargs=dict(Command.defaultValueDict,**kwargs)
-        Message.__init__(self,**dargs)
+        dargs=dict(CommandEvent.defaultValueDict,**kwargs)
+        MessageEvent.__init__(self,**dargs)
         
     @staticmethod
     def create(text='',priority=0,command='',msg_offset=0.0,msg_prefix=''):
         device_time=currentMsec()
-        return Command(device_time=device_time,priority=priority,command=command,text=text,msg_offset=msg_offset,msg_prefix=msg_prefix)
+        return CommandEvent(device_time=device_time,priority=priority,command=command,text=text,msg_offset=msg_offset,prefix=prefix)
         
 
 '''
