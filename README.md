@@ -7,6 +7,10 @@ at a point where it is very likely that downloading the code and trying
 to run it will fail, or that not all features are fully functional at this
 time. Please bear with us as we get the ioHub to a stable 'alpha' state.
 
+If you are looking to view the state of the source for the pyEyeTrackerInterface,
+it is in the ioHub.devices.eyeTrackerInterface folder of the module. The above 
+comments apply to it as well at this time. 
+
 #Overview
 
 The ioHub module is intended to be a standalone Python service that runs
@@ -104,10 +108,10 @@ The **main features / goals** of the ioHub are:
    sending Experiment Events to the ioHub to be integrated with the rest 
    of the device data and saved for future analysis. pyTables will be used
    as the API / storage mechanism for the ioHub. This functionality is being packaged
-   as a seperate madule called the ioDataStore. The use of this functionality
-   is completely optional, may not be of use in all situations, and requires further 
-   requirements refinement refinement to move implementation beyond a very alpha stage of 
-   functionality.      
+   as a seperate module called the ioDataStore (https://github.com/isolver/ioDataStore).
+   The use of this functionality is completely optional, may not be of use in all situations,
+   and requires further requirements refinement refinement to move implementation beyond an alpha
+   stage of functionality.      
 
 # Installing
 
