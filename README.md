@@ -47,27 +47,27 @@ The **main features / goals** of the ioHub are:
 2c. The accuracy and precision of time stamping is
    important to the ioHub, so it does what it can, when it can:*  
 
-     i)  The offset between time bases is corrected for, when an existing 
-         time stamp is present.
+   i)  The offset between time bases is corrected for, when an existing 
+   time stamp is present.
 
-     ii) Delay that is measurable, or a known average, can be applied to
-         each device data stream and event type to correct for the delay
-         in the time stamp.
+   ii) Delay that is measurable, or a known average, can be applied to
+   each device data stream and event type to correct for the delay
+   in the time stamp.
 
-     iii)Drift between the Application Time base and each Device's timebase
-         can be actively monitored and also corrected for in the Application
-         time stamping. This is necessary when the Application Time base and
-         the Device Time are derived from difference clocks / crystals.
+   iii)Drift between the Application Time base and each Device's timebase
+   can be actively monitored and also corrected for in the Application
+   time stamping. This is necessary when the Application Time base and
+   the Device Time are derived from difference clocks / crystals.
 
-     *It is important to note that the ability for the ioHub to correct 
-      for the above factors is 100% device and OS dependent. If a device
-      has not been designed with proper time base interfacing in mind, and
-      there are therefore limited, coarse, or no ways to determine one or more
-      of these factors, then the ioHub can only do so much in this area.
-      The documentation will have a section outlining what is in place for
-      each device, what the level of expected accuracy and precision should be, 
-      and what (if any) tests have been done to date to validate the 
-      time base corrections.
+   *It is important to note that the ability for the ioHub to correct 
+   for the above factors is 100% device and OS dependent. If a device
+   has not been designed with proper time base interfacing in mind, and
+   there are therefore limited, coarse, or no ways to determine one or more
+   of these factors, then the ioHub can only do so much in this area.
+   The documentation will have a section outlining what is in place for
+   each device, what the level of expected accuracy and precision should be, 
+   and what (if any) tests have been done to date to validate the 
+   time base corrections.
 
 3. **Common Data Stream / Event Access and Data Types**, regardless of device. 
    The ioHub, while normalizing the time stamps of all input events to a 
@@ -122,11 +122,11 @@ The **main features / goals** of the ioHub are:
   installer installs 2.6 at this time, so it can not be used. You must install psychopy as a 
   package and all the psychopy dependencies seperately.
   
-    psychopy 1.74.01 for Python 2.7 - http://code.google.com/p/psychopy/downloads/
+   psychopy 1.74.01 for Python 2.7 - http://code.google.com/p/psychopy/downloads/
 
   And all dependencies for it, which are listed at:
 
-    http://www.psychopy.org/installation.html#dependencies
+   http://www.psychopy.org/installation.html#dependencies
 
   You will want to get with python 2.7 win32 version of each dependency.
  
@@ -135,23 +135,23 @@ The **main features / goals** of the ioHub are:
   OK, once you have all that installed, you will want to get the following extra 
   dependencies for ioHub and ioDataStore:
   
-    psutil: http://code.google.com/p/psutil/downloads/detail?name=psutil-0.5.1.win32-py2.7.exe
+   psutil: http://code.google.com/p/psutil/downloads/detail?name=psutil-0.5.1.win32-py2.7.exe
  
-    ujson: http://pypi.python.org/packages/2.7/u/ujson/ujson-1.19.win32-py2.7.exe#md5=a5eda15e99f6091e9e550887b35e7fd4
+   ujson: http://pypi.python.org/packages/2.7/u/ujson/ujson-1.19.win32-py2.7.exe#md5=a5eda15e99f6091e9e550887b35e7fd4
 
-    msgpack: http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644
+   msgpack: http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644
 
-    gevent: http://code.google.com/p/gevent/downloads/detail?name=gevent-1.0b3.win32-py2.7.exe&can=2&q=
+   gevent: http://code.google.com/p/gevent/downloads/detail?name=gevent-1.0b3.win32-py2.7.exe&can=2&q=
    
-    greenlet: http://pypi.python.org/packages/2.7/g/greenlet/greenlet-0.4.0.win32-py2.7.exe#md5=910896116b1e4fd527b8afaadc7132f3
+   greenlet: http://pypi.python.org/packages/2.7/g/greenlet/greenlet-0.4.0.win32-py2.7.exe#md5=910896116b1e4fd527b8afaadc7132f3
 
-    pytables: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables 
+   pytables: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables 
     
-    numexpr: http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.7.exe&can=2&q=
+   numexpr: http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.7.exe&can=2&q=
 
-    pywin32: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download
+   pywin32: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download
     
-    pyHook: http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download
+   pyHook: http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download
 
 # Known Issues / Black Holes
 
@@ -159,7 +159,7 @@ See the Bug Tracker.
 
 # Getting Help
 
-email: sds-git _AT_ isolver-software.coT (change the T to an m)
+email: sds-git _AT_ isolver-software.coT (change _AT_ to an @ and the T to an m)
 
 # License
 
