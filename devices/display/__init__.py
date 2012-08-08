@@ -32,7 +32,7 @@ class Display(Device):
             }          
         Device.__init__(self,**deviceSettings)
     
-    def poll(self):
+    def _poll(self):
         pass
  
             

@@ -239,7 +239,7 @@ class DeviceMonitor(Greenlet):
         self.running = True
         
         while self.running is True:
-            self.device.poll()
+            self.device._poll()
             gevent.sleep(self.sleep_interval)
         
         self.device=None
@@ -316,7 +316,7 @@ class ioServer(object):
                         
                     iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
         
-                def poll(self):
+                def _poll(self):
                     quit=pythoncom.PumpWaitingMessages()
                     if quit == 1:
                         raise KeyboardInterrupt()               
@@ -333,7 +333,7 @@ class ioServer(object):
                     evt=events.popleft()                    
                     e=device.getIOHubEventObject(evt,device.instance_code)
                     for l in device._getEventListeners():
-                        l.handleEvent(e) 
+                        l._handleEvent(e) 
             gevent.sleep(sleep_interval)    
 
     def closeDataStoreFile(self):
@@ -382,7 +382,7 @@ class ioServer(object):
         
         #print "ioServer Process Completed!"
    
-    def handleEvent(self,event):
+    def _handleEvent(self,event):
         self.eventBuffer.append(event)
         
         

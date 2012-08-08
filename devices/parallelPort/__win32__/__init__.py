@@ -39,7 +39,7 @@ class ParallelPortWin32(object):
     def write(self, word):
         PortOut(self.base_address,word)
         
-    def poll(self):
+    def _poll(self):
         currentTime=int(currentMsec())
         currentValue=self.read()
         

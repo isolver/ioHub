@@ -39,7 +39,7 @@ class ExperimentRuntimeDevice(Device):
         self.I_eventBuffer.append((notifiedTime,event))
         return True
     
-    def poll(self):
+    def _poll(self):
         pass
  
     @staticmethod

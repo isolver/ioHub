@@ -19,10 +19,26 @@ from .... import RTN_CODES,EYE_CODES,PUPIL_SIZE_MEASURES,DATA_TYPES,\
               DATA_FILTER,USER_SETUP_STATES
 
 class EyeTracker(Device):
-    """EyeTracker class is the main class for the pyEyeTrackerInterface module, 
+    '''EyeTracker class is the main class for the pyEyeTrackerInterface module, 
     containing the majority of the eye tracker functionality commonly needed
     for a range of experiments.
-       
+    
+    With the integration of the pyEyeTrackerInterface into the ioHub module, the EyeTracker
+    device is a device along with the other currently supported ioHub devices; Keyboard, Mouse,
+    and Parallel Port.
+    
+    For implementers of pyEyeTracker interfaces, this means that the interface itself is running
+    in the ioHub process, and communication between the computer and the eyetracker is done via
+    the ioHub.
+
+    For users of the pyEyeTrackerInterface for an eye tracker and psychopy, there is a second,
+    experiment side ( psychopy side ) interface that has a parallel public API that 'talks'
+    to the ioHub server. The good news for users is that this is transparent and you should not
+    even realize this is happening in use. The good news for interface developers is that the 
+    client side interface is dynamically generated at the start-up of the experiment based on the
+    server side interface, so you do not need to maintain 2 seperate interfaces or worry about
+    keeping them in sync.    
+           
     Not every eye tracker implemenation of the pyEyeTrackerInterface specification will
     support all of the specifications functionality. This is to be expected and
     pyEyeTrackerInterface has been designed to handle this case. When a specific
@@ -51,7 +67,7 @@ class EyeTracker(Device):
     #. Accessing Eye Tracker Data During Recording
     #. Syncronizing the Local Experiment timebase with the Eye Tracker Timebase, so Eye Tracker events can be provided with local time stamps when that is appropriate.
     #. Experiment Flow Generics 
-    """    
+    '''   
     
     #: Used by pyEyeTrackerInterface implentations to store relationships between an eye 
     #: trackers command names supported for pyEyeTrackerInterface sendCommand method and  
@@ -93,7 +109,8 @@ class EyeTracker(Device):
     lastPollTime=0.0
     # <<<
     def __init__(self,*args,**kwargs):
-        """EyeTracker class. This class is to be extended by each eye tracker specific implemetation
+        '''
+        EyeTracker class. This class is to be extended by each eye tracker specific implemetation
         of the pyEyeTrackerInterface.
         
         Please review the documentation page for the specific eye tracker model that you are using the 
@@ -108,7 +125,7 @@ class EyeTracker(Device):
         **kwargs are an optional set of named parameters.
         
         **If an instance of EyeTracker has already been created, trying to create a second will raise an exception. Either destroy the first instance and then create the new instance, or use the class method EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
-        """
+        '''
         if EyeTracker._INSTANCE is not None:
             raise "EyeTracker object has already been created; only one instance can exist.\n \
             Delete existing instance before recreating EyeTracker object."
@@ -201,6 +218,24 @@ class EyeTracker(Device):
         # <<<<
 
     def _getRPCInterface(self):
+        '''
+        This method is what builds the list of ioHub 'client side' methods that are visible
+        for this device. This list == the list of callable methods a user can make to the device
+        from the experiment process via something like:
+        
+           iohubClient.devices.eyetracker.experimentStartDefaultLogic()
+            
+        or to make it look shorter:
+        
+           eyetracker = iohubClient.devices.eyetracker
+           
+        then all calls to eyetracker methods are just:
+
+           r=eyetracker.isRecordingEnabled()
+           if r is False:
+               eyetracker.setRecordingState(True)
+           etc...           
+        '''
         rpcList=[]
         dlist = dir(self)
         for d in dlist:
@@ -210,10 +245,10 @@ class EyeTracker(Device):
         return rpcList
         
     def experimentStartDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the start of an experiment.  
-        """
+        '''
         recording_filename=None
         if 'filename' in kwargs:
             recording_filename=kwargs['filename']
@@ -265,10 +300,10 @@ class EyeTracker(Device):
         return RTN_CODES.ET_OK
  
     def blockStartDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the start of an experiment block.  
-        """
+        '''
         # TODO: need to determine how  to handle this given ioHub handling of
         #       keyboard and mouse events. Need to factor in echo of keys
         #       between Host and Display systems.
@@ -279,10 +314,10 @@ class EyeTracker(Device):
         return RTN_CODES.ET_OK
 
     def trialStartDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the start of an experiment trial.  
-        """
+        '''
         
         pylink.flushGetkeyQueue(); 
         gc.disable();
@@ -290,28 +325,28 @@ class EyeTracker(Device):
         return RTN_CODES.ET_OK
          
     def trialEndDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the end of an experiment trial.  
-        """
+        '''
         
         pylink.endRealTimeMode();
         gc.enable();
         return RTN_CODES.ET_OK
          
     def blockEndDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the end of an experiment block.  
-        """
+        '''
         # Currently does nothing; which is current 'implemented' state.
         return RTN_CODES.ET_OK
 
     def experimentEndDefaultLogic(self,*args,**kwargs):
-        """
+        '''
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the end of an experiment session.  
-        """       
+        '''       
         if self._eyelink != None:
             # File transfer and cleanup!
             
@@ -329,13 +364,13 @@ class EyeTracker(Device):
         return ('EYETRACKER_ERROR','EyeLink EyeTracker is not initialized.')
         
     def trackerTime(self):
-        """
+        '''
         Current eye tracker time ( in USEC since device interface was initialized)
-        """
+        '''
         return (self._eyelink.trackerTime()-self.DEVICE_START_TIME)*self.DEVICE_TIMEBASE_TO_USEC
    
     def setConnectionState(self,*args,**kwargs):
-        """
+        '''
         setConnectionState is used to connect ( setConnectionState(True) ) or disable ( setConnectionState(False) )
         the connection of the pyEyeTrackerInterface to the eyetracker.
         
@@ -343,7 +378,7 @@ class EyeTracker(Device):
         
             enabled (bool): True = enable the connection, False = disable the connection.
             kwargs (dict): any eye tracker specific parameters that should be passed.
-        """
+        '''
         enabled=args[0]
         if enabled is True or enabled is False:
             if enabled is True:
@@ -360,13 +395,13 @@ class EyeTracker(Device):
             return ['EYETRACKER_ERROR','Invalid arguement type','setConnectionState','enabled',enabled,kwargs]
             
     def isConnected(self):
-        """
+        '''
         isConnected returns whether the pyEyeTrackerInterface is connected to the eye tracker (returns True) or not (returns False)
-        """
+        '''
         return self._eyelink.isConnected()
             
     def sendCommand(self, *args, **kwargs):
-        """
+        '''
         sendCommand sends a text command and text command value to the eye tracker. Depending on the command and on the eye trackers
         implementation, when a command is send, the eye tracker may or n=may not response indicating the status of the command. If the
         command is not going to return a response from the eye tracker, the method will return RTN_CODES.ET_RESULT_UNKNOWN.
@@ -381,7 +416,7 @@ class EyeTracker(Device):
            wait (bool or callable) *NOT CURRENTLY SUPPORTED; FUNCTIONS AS ALWAYS == TRUE*: if bool, True = do not return from function until result of command if known (if it can be known); False = return immediately after sending the command, ignoring any possible return value. If wait is a callable, then wait fould be a reference to the callback function you want called when the return value is available. If no return value is possible for the command, wait is ignorded and RTN_CODES.ET_RESULT_UNKNOWN is returned immediately..           
         
         Return: the result of the command call, or one of the ReturnCodes Constants ( ReturnCodes.ET_OK, ReturnCodes.ET_RESULT_UNKNOWN, ReturnCodes.ET_NOT_IMPLEMENTED ) 
-        """
+        '''
         if len(args)>=2:
             command=args[0]
             value=args[1]
@@ -405,7 +440,7 @@ class EyeTracker(Device):
         return r
         
     def sendMessage(self,*args,**kwargs):
-        """
+        '''
         sendMessage sends a text message to the eye tracker. Depending on the eye trackers implementation, when a message is send,
         the eye tracker may or may not response indicating the message was received. If the
         message is not going to receive a response from the eye tracker, the method will return RTN_CODES.ET_RESULT_UNKNOWN.
@@ -420,7 +455,7 @@ class EyeTracker(Device):
         
         kwargs:
            time_offset (int): number of int msec that the time stamp of the message should be offset by. This can be used so that a message can be sent for a display change **BEFORE** or **AFTER** the aftual flip occurred (usually before), by sending the message, say 4 msec prior to when you know the next trace will occur, entering -4 into the offset field of the message, and then send it and calling flip() 4 msec before the retrace to ensure that the message time stampe and flip are both sent and schuled in advance. (4 msec is quite large buffer even on windows these days with morern hardware BTW)
-        """
+        '''
         message=args[0]
         
         time_offset=0
@@ -436,7 +471,7 @@ class EyeTracker(Device):
         return r
                 
     def createRecordingFile(self, *args,**kwargs):
-        """
+        '''
         createRecordingFile instructs the eye tracker to open a new file on the eye tracker computer to save data collected to
         during the recording. If recording is started and stopped multiple times while a single recording file is open, each 
         start/stop recording pair will be represented within the single file. A recording file is closed by calling
@@ -446,7 +481,7 @@ class EyeTracker(Device):
         kwargs:
            fileName (str): Name of the recording file to save on the eye tracker. This does *not* include the path to the file. Some eye trackers have limitations to the length of their file name, so please refer to the specific implemtations documenation for any caviates.
            path (str): This optional parameter can be used to specify the path to the recording file that should be saved. The path must already exist. If this paramemter is not specified, then the defualt file location is used. 
-        """
+        '''
         fileName=None
         if fileName in kwargs:
             fileName= kwargs['fileName']
@@ -477,7 +512,7 @@ class EyeTracker(Device):
         return ET_RTN_CODES.ET_OK
         
     def closeRecordingFile(self,*args,**kwargs):
-        """
+        '''
         closeRecordingFile is used to close the currently open file that is being used to save data from the eye track to the eye tracker computer. 
         Once a file has been closed, getFile(localFileName,fileToTransfer) can be used to transfer the file from the eye tracker computer to the 
         experiment computer at the end of the experiment session.
@@ -485,19 +520,19 @@ class EyeTracker(Device):
         kwargs:
            fileName (str): Name of the recording file to save on the eye tracker. This does *not* include the path to the file. Some eye trackers have limitations to the length of their file name, so please refer to the specific implemtations documenation for any caviates.
            path (str): This optional parameter can be used to specify the path to the recording file that should be saved. The path must already exist. If this paramemter is not specified, then the defualt file location is used. 
-        """
+        '''
         self._eyelink.closeDataFile()
         return ET_RTN_CODES.ET_OK
 
     
     def getFile(self,*args,**kwargs):
-        """
+        '''
         getFile is used to transfer the file from the eye tracker computer to the experiment computer at the end of the experiment session.
 
         kwargs:
            localFileName (str): Name of the recording file to experiment computer.
            fileToTransfer (str): Name of the recording file to transfer from the eye tracker.
-        """
+        '''
         
         fileToTransfer=None
         if fileToTransfer in kwargs:
@@ -519,14 +554,14 @@ class EyeTracker(Device):
 
     
     def runSetupProcedure(self, *args ,**kwargs):
-        """
+        '''
         runSetupProcedure passes the graphics environment over to the eye tracker interface so that it can perform such things
         as camera setup, calibration, etc. This is a blocking call that will not return until the setup procedure is done; at which time
         the graphics environment can be taken back over by psychopy.  See the EyeTrackerSetupGraphics class for more information.
         
         The graphicsContext arguement should likely be the psychopy full screen window instance that has been created 
         for the experiment.
-        """
+        '''
         graphicsContext=None
         if len(args)>0:
             graphicsContext=args[0]
@@ -538,24 +573,24 @@ class EyeTracker(Device):
         return self._setupGraphics.run()
 
     def stopSetupProcedure(self):
-        """
+        '''
         stopSetupProcedure allows a user to cancel the ongoing eye tracker setup procedure. Given runSetupProcedure is a blocking
         call, the only way this will happen is if the user has another thread that makes the call, perhaps a watch dog type thread.
         So in practice, calling this method is not very likely I do not think.
-        """
+        '''
         result=None
         if self._setupGraphics is not None:
             result = self._setupGraphics.stop()
         return result
                 
     def setRecordingState(self,*args,**kwargs):
-        """
+        '''
         setRecordingState is used to start or stop the recording of data from the eye tracking device. Use sendCommand() set the necessary information 
         for your eye tracker to enable what data you would like saved, send over to the experiment computer during recording, etc.
         
         args:
            recording (bool): if True, the eye tracker should start recordng data.; false = stop recording data.
-        """
+        '''
         if len(args)==0:
             return ('EYETRACKER_ERROR','EyeTracker.setRecordingState','recording(bool) must be provided as a args[0]')
         enable=args[0]
@@ -578,15 +613,15 @@ class EyeTracker(Device):
             return RTN_CODES.ET_OK;
 
     def isRecordingEnabled(self,*args,**kwargs):
-       """
+       '''
        isRecordingEnabled returns the recording state from the eye tracking device.
        True == the device is recording data
        False == Recording is not occurring
-       """
+       '''
        return self._eyelink.isRecording()  
      
     def getDataFilteringLevel(self,data_stream=DATA_STREAMS.ALL,**kwargs):
-        """
+        '''
         getDataFilteringLevel returns the numerical code the current device side filter level 
         set for the specific data_stream. 
         
@@ -604,20 +639,20 @@ class EyeTracker(Device):
         
         If a stream type that is not supported by the device for individual filtering is specified, 
         an error should be generated.
-        """
+        '''
         return RTN_CODES.ET_NOT_IMPLEMENTED
 
-    def setDataFilteringLevel(self,level,data_stream=DATA_STREAMS.ALL,**kwargs):
-        """
-        setDataFilteringLevel sets the numerical code for current ET device side filter level 
+    def setDataFilterLevel(self,*args,**kwargs):
+        '''
+        setDataFilteringLevel sets the code for current ET device side filter level 
         for the specific data_stream. 
         
-        Currently, filter levels 0 (meaning no filter) through 
-        5 (highest filter level) can be specified via the pyEyeTrackerInterface.
-        They are defined in ET_FILTERS.
+        Currently, filter levels LEVEL_0 (meaning no filter) through 
+        LEVEL_5 (highest filter level) can be specified via the pyEyeTrackerInterface.
+        They are defined in DATA_FILTER Enum.
         
         data_streams specifies what output the filter is being applied to by the device. The
-        currently defined output streams are defined in ET_DATA_STREAMS, and are
+        currently defined output streams are defined in DATA_STREAMS, and are
         ALL,FILE,NET,SERIAL,ANALOG. ALL indicates that the filter level should be applied to all 
         available output streams,
         
@@ -626,17 +661,53 @@ class EyeTracker(Device):
         
         If a stream type that is not supported by the device for individual filtering is specified, 
         an error should be generated.
-        """
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        
+        For the SR Research EyeLink implementation, please note the following constraints and 
+        'oddities' that will be improved on in future versions:
+        
+        1) Filter Levels LEVEL_0 to LEVEL_2 are supported. LEVEL_0 maps to Filter OFF. 
+           LEVEL_1 maps to FILTER_NORMAL, and LEVEL_2 maps top FILTER_HIGH in the EyeLink system.
+           
+        2) Filter streams FILE, NET, and ANALOG are supported. 
+        
+        3) ** If you set the filter level for NET it also sets the level for ANALOG, and visa versa.
+        
+        4) ** If you set the filter level for FILE, it sets the level for NET & ANALOG to LEVEL_0
+        
+        5) ** Given 4), it is suggested you either set the filter level for ALL, or you 'first' set the
+              filter level for FILE, and then set the filter level for NET or ANALOG.
+        '''
+        if len(args)==0:
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "level = args[0], but no args provided")
+        level=args[0]
+        supportedLevels=(DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)
+        if level not in supportedLevels:
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid level value provided; must be one of (DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)")
+        
+        data_stream=DATA_FILTER.ALL
+        if data_stream in kwargs:
+            data_stream=kwargs['data_stream']
+        supportedFilterStreams=(DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)
+        if data_stream not in supportedFilterStreams:
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid data_stream value provided; must be one of (DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)")
+        
+        lindex = supportedLevels.index(level)
+        
+        if data_stream == DATA_STREAMS.ALL:
+            return self._eyelink.setHeuristicLinkAndFileFilter(lindex,lindex)
+        elif data_stream == DATA_STREAMS.NET or data_stream == ET_DATA_STREAMS.ANALOG:
+            return self._eyelink.setHeuristicLinkAndFileFilter(lindex)
+        elif data_stream == DATA_STREAMS.FILE:
+            return self._eyelink.setHeuristicLinkAndFileFilter(0,lindex)
 
     def getLatestSample(self, *args, **kwargs):
-        """
+        '''
         Returns the latest sample retieved from the eye tracker device.
-        """
+        '''
         return self._latestSample
     
-    def drawToGazeOverlayScreen(self, drawingcommand='UNIMPLEMENTED', position=None,  value=None, **kwargs):
-        """
+    def drawToGazeOverlayScreen(self,*args,**kwargs):
+        '''
         drawToGazeOverlayScreen provides a generic interface for ET devices that support
         having graphics drawn to the Host / Control computer gaze overlay area, or other similar
         graphics area functionality.
@@ -646,36 +717,86 @@ class EyeTracker(Device):
         
         There is no set list of values for any of the arguements for this command, so please refer to the
         ET imlpementation notes for your device for details. Hypothetical examples may be:
+        '''
+        drawingcommand=None
+        if len(args)==0:
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','args must have length > 0: drawingcommand = args[0]')
+        else:
+            drawingcommand=args[0]
+            
+        if drawingcommand is None:
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','drawingcommand can not be None.')
+        elif drawingcommand=='TEXT':
+            if 'value' in kwargs and 'position' in kwargs:
+                text=kwargs['value']
+                position=kwargs['position']
+                return self._eyelink.drawText(str(text),position) # value = text to display. position = (-1,-1), or position in gaze orders to draw text.
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: TEXT','kwargs "value" and "position" are required for this command.')
+        elif drawingcommand=='CLEAR':
+            if 'value' in kwargs:
+                pcolor=int(kwargs['value'])
+                if pcolor >=0 and pcolor <= 15:
+                    return self._eyelink.clearScreen(pcolor) # value must be between 0 - 15 and is the color from the EyeLink Host PC pallette to use.
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: CLEAR','kwargs "value" is required for this command')
+        elif drawingcommand=='LINE': # value must be between 0 - 15 and is the color from the EyeLink Host PC pallette to use. position must be [(x1,y1),(x2,y2)]
+            if 'value' in kwargs and 'position' in kwargs:
+                pcolor=int(kwargs['value'])
+                position = kwargs['position']
+                if pcolor >=0 and pcolor <= 15 and len(position)==2:
+                    return self._eyelink.drawLine(position[0], position[1],pcolor)
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: LINE','kwargs "value" and "position" are required for this command')
+        elif drawingcommand=='BOX':# value must be between 0 - 15 and is the color from the EyeLink Host PC pallette to use.  position must be (x,y,width,height) 
+            if 'value' in kwargs and 'position' in kwargs:
+                pcolor=int(kwargs['value'])
+                position = kwargs['position']
+                if pcolor >=0 and pcolor <= 15 and len(position)==4:
+                    return self._eyelink.drawBox(position[0], position[1],position[2], position[3], pcolor)
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: BOX','kwargs "value" and "position" are required for this command')
+        elif drawingcommand=='CROSS': # Draws a small "+" to mark a target point.  # value must be between 0 - 15 and is the color from the EyeLink Host PC pallette to use.  position must be (x,y)
+            if 'value' in kwargs and 'position' in kwargs:
+                pcolor=int(kwargs['value'])
+                position = kwargs['position']
+                if pcolor >=0 and pcolor <= 15 and len(position)==2:
+                    return self._eyelink.drawBox(position[0], position[1],pcolor)
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: CROSS','kwargs "value" and "position" are required for this command')
+        elif drawingcommand=='FILLEDBOX':
+            if 'value' in kwargs and 'position' in kwargs:
+                pcolor=int(kwargs['value'])
+                position = kwargs['position']
+                if pcolor >=0 and pcolor <= 15 and len(position)==4:
+                    return self._eyelink.drawBox(position[0], position[1],position[2], position[3], pcolor)
+            return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: FILLEDBOX','kwargs "value" and "position" are required for this command')
         
-        # clear the overlay area to black
-        eyetracker.drawToGazeOverlayScreen(drawingcommand='CLEAR',  value="BLACK")
+        return ('EYETRACKER_ERROR','drawToGazeOverlayScreen','command: %s'%drawingcommand,'Unknown drawing command.')
 
-        # draw some white text centered on the overlay area
-        eyetracker.drawToGazeOverlayScreen(drawingcommand='TEXT', position=('CENTER',512,387),  value="This is my Text To Show", color='WHITE')
-
-        # draw an image on the overlay area
-        eyetracker.drawToGazeOverlayScreen(drawingcommand='IMAGE',  value="picture.png", position=('CENTER',512,387))
-        """
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def getDigitalPortState(self, port, **kwargs):
-        """
+    def getDigitalPortState(self, *args, **kwargs):
+        '''
         getDigitalPortState returns the current value of the specified digital port on the ET computer. 
         This can be used to read the parallel port or idigial lines on the ET host PC if the ET has such functionality.
-
-        port = the address to read from on the host PC. Consult your ET device documentation for appropriate values.
-        """
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        
+        args:
+            port = the address to read from on the host PC. Consult your ET device documentation for appropriate values.
+        '''
+        if len(args)==0:
+            return ('EYETRACKER_ERROR','getDigitalPortState','port=args[0] is required.')
+        port = int(args[0])    
+        return self._eyelink.readIOPort(port)
          
-    def setDigitalPortState(self, port, value, **kwargs):
-        """
+    def setDigitalPortState(self, *args, **kwargs):
+        '''
         setDigitalPortState sets the value of the specified digital port on the ET computer. 
         This can be used to write to the parallel port or idigial lines on the ET Host / Operator PC if the ET
         has such functionality.
-
-        port = the address to write to on the host PC. Consult your ET device documentation for appropriate values.
-        """
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        
+        args:
+            port = the address to write to on the host PC. Consult your ET device documentation for appropriate values.
+            value = value to assign to port
+        '''
+        if len(args)<2:
+            return ('EYETRACKER_ERROR','setDigitalPortState','port=args[0] and value=args[1] are required.')        
+        port = int(args[0])    
+        value = int(args[1])
+        return self._eyelink.writeIOPort(port, value)
     
     """
     class MonocularEyeSample(DeviceEvent):
@@ -701,7 +822,7 @@ class EyeTracker(Device):
     def __init__(self,*args,**kwargs):
         DeviceEvent.__init__(self,*args,**kwargs)
     """
-    def poll(self):
+    def _poll(self):
         '''
         For the EyeLink systems, a polling model is used to check for new events and samples.
         If your eye tracker supports a more efficient event based call-back approach, this should be 
@@ -782,12 +903,85 @@ class EyeTracker(Device):
                     self.I_eventBuffer.append(monoSample)
 
         EyeTracker.lastPollTime=currentTime
-
+    
+    def _handleEvent(self,*args,**kwargs):
+        '''
+        _handleEvent is used by devices that signal new events by using an event driven
+        callback approach. 
+        One args is required, the device event to be handled, "event"
+        '''
+        if len(args) > 0:
+            event=args[0]
+            
+        currentTime=int(Computer.currentUsec())
+        confidenceInterval=currentTime-self.lastCallbackTime
+        
+        # do any manipulation to the native event object here before putting it in the devices
+        # circular buffer. Remember to keep work done in the callback to a minimum. For example,
+        # the conversion to a native ioHub event is done in the getIOHubEventObject(event,device_instance_code)
+        # method, so does not need to be done here.
+        #
+        # ......
+        #
+        
+        EyeTracker.lastCallbackTime=currentTime
+        
+        # append the native event to the deque as a tuple of (current_time, event)
+        # This can be unpacked in the getIOHubEventObject and the current_time 
+        # used as the logged_time field of the ioHub DeviceEvent object.
+        #
+        self.I_eventBuffer.append((currentTime,event))
+        pass
+    
     @staticmethod    
-    def getIOHubEventObject(event,device_instance_code):
+    def getIOHubEventObject(*args,**kwargs):
+        '''
+        getIOHubEventObject is used to convert a devices events from their 'native' format
+        to the ioHub DeviceEvent obejct for the relevent event type. 
+        
+        If a polling model is used to retrieve events, this conversion is actually done in
+        the polling method itself.
+        
+        If an event driven callback method is used, then this method should be employed to do
+        the conversion between object types, so a minimum of work is done in the callback itself.
+        
+        The method expects two args:
+            (logged_time,event)=args[0] (when the callback is used to register device events)
+            event = args[0] (when polling is used to get device events)
+            device_instance_code=args[1]
+        '''
+        
+        # CASE 1: Polling is being used to get events:
+        #
+        if len(args)==2:
+            event=args[0]
+            device_instance_code=args[1]
+            
         return event # already an EyeTracker Event    
+        
+        #
+        # CASE 2: Callback is used to register events
+        # if len(args)==2:
+        #    logged_time,event=args[0]
+        #    device_instance_code=args[1]
+        #
+        # Convert the native event type to the appropriate DeviceEvenet type for an EyeTracker.
+        # See iohub.devices.eyeTrackerInterface.eye_events.py for the list of intended eye tracker 
+        # event types (includes Samples).
+        #
+        # ......
+        #
+        #
+        # return event # Return the ioHub EyeTracker event class instance.    
+        
+        
 
     def _eyeTrackerToDisplayCoords(self,*args,**kwargs):
+        '''
+        For eye tracker that have a static or fixed type internal mapping, 
+        this method is used to convert from eye tracker units to display units.
+        Default implementation is to just pass the data through untouched.
+        '''
         if len(args<2):
             return ['EYETRACKER_ERROR','_eyeTrackerToDisplayCoords requires two args gaze_x=args[0], gaze_y=args[1]']
         gaze_x=args[0]
@@ -803,6 +997,11 @@ class EyeTracker(Device):
         
     
     def _displayToEyeTrackerCoords(self,*args,**kwargs):
+        '''
+        For eye tracker that have a static or fixed type internal mapping, 
+        this method is used to convert from display units to eye tracker units.
+        Default implementation is to just pass the data through untouched.
+        '''
         if len(args<2):
             return ['EYETRACKER_ERROR','_displayToEyeTrackerCoords requires two args display_x=args[0], display_y=args[1]']
         display_x=args[0]
