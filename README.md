@@ -28,14 +28,14 @@ The **main features / goals** of the ioHub are:
    
 2. **Time Base Syncronization.**
 
-2a.For devices that provide data streams and / or events that are time
+2a. For devices that provide data streams and / or events that are time
    stamped, the ioHub will convert the various "Device Time"s to a common
    "Application Time" base. The exact mechanism for determining the 'offset' 
    between the two time bases is device dependent, please see the full 
    documentation for details. The base offset that is determined is applied
    to convert the Device Time to Application Time prior to further corrections.
 
-2b.For devices that do not provide time stamped data streams or events, the ioHub
+2b. For devices that do not provide time stamped data streams or events, the ioHub
    will time stampe them in Application Time when the ioHub receives the event.
    An important goal of the ioHub is to keep its core IOLoop as fast as possible, 
    following a non-blocking asyncronous methodology whenever possible. 
@@ -44,7 +44,7 @@ The **main features / goals** of the ioHub are:
    for this type of devices whould be sub millisecond *realative to when 
    the event was received by the hub*. 
 
-2c.The accuracy and precision of time stamping is
+2c. The accuracy and precision of time stamping is
    important to the ioHub, so it does what it can, when it can:*  
 
      i)  The offset between time bases is corrected for, when an existing 
@@ -69,7 +69,7 @@ The **main features / goals** of the ioHub are:
       and what (if any) tests have been done to date to validate the 
       time base corrections.
 
-3.**Common Data Stream / Event Access and Data Types**, regardless of device. 
+3. **Common Data Stream / Event Access and Data Types**, regardless of device. 
    The ioHub, while normalizing the time stamps of all input events to a 
    common experiment / application level timebase, also provides the 
    convenience of a single interface to device data, and common device
@@ -130,7 +130,7 @@ The **main features / goals** of the ioHub are:
 
   You will want to get with python 2.7 win32 version of each dependency.
  
-  ** For numpy, please get 1.6.2 or higher. **
+  **For numpy, please get 1.6.2 or higher.**
 
   OK, once you have all that installed, you will want to get the following extra 
   dependencies for ioHub and ioDataStore:
@@ -159,7 +159,7 @@ See the Bug Tracker.
 
 # Getting Help
 
-email: sds-git _AT_ isolver-solftware.coP (change the P to an m)
+email: sds-git _AT_ isolver-software.coT (change the T to an m)
 
 # License
 
