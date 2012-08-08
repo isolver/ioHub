@@ -51,14 +51,14 @@ The **main features / goals** of the ioHub are:
 2c. The accuracy and precision of time stamping is
    important to the ioHub, so it does what it can, when it can:*  
 
-   i)  The offset between time bases is corrected for, when an existing 
+   The offset between time bases is corrected for, when an existing 
    time stamp is present.
 
-   ii) Delay that is measurable, or a known average, can be applied to
+   Delay that is measurable, or a known average, can be applied to
    each device data stream and event type to correct for the delay
    in the time stamp.
 
-   iii)Drift between the Application Time base and each Device's timebase
+   Drift between the Application Time base and each Device's timebase
    can be actively monitored and also corrected for in the Application
    time stamping. This is necessary when the Application Time base and
    the Device Time are derived from difference clocks / crystals.
