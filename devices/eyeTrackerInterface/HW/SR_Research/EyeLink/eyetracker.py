@@ -289,8 +289,8 @@ class EyeTracker(Device):
         
         self.sendCommand("button_function"," 5 'accept_target_fixation'");
         
-        self.setDataFilteringLevel(DATA_FILTER.OFF,DATA_STREAMS.FILE)
-        self.setDataFilteringLevel(DATA_FILTER.OFF,DATA_STREAMS.NET)
+        self.setDataFilterLevel(DATA_FILTER.OFF,DATA_STREAMS.FILE)
+        self.setDataFilterLevel(DATA_FILTER.OFF,DATA_STREAMS.NET)
         
         if recording_filename:
             self.createRecordingFile(recording_filename)
@@ -620,9 +620,9 @@ class EyeTracker(Device):
        '''
        return self._eyelink.isRecording()  
      
-    def getDataFilteringLevel(self,data_stream=DATA_STREAMS.ALL,**kwargs):
+    def getDataFilterLevel(self,*args,**kwargs):
         '''
-        getDataFilteringLevel returns the numerical code the current device side filter level 
+        getDataFilterLevel returns the numerical code the current device side filter level 
         set for the specific data_stream. 
         
         Currently, filter levels 0 (meaning no filter) through 
@@ -640,6 +640,12 @@ class EyeTracker(Device):
         If a stream type that is not supported by the device for individual filtering is specified, 
         an error should be generated.
         '''
+        data_stream=DATA_STREAMS.ALL
+        if 'data_stream' in kwargs:
+            data_stream=kwargs['data_stream']
+        elif len(args)>0:
+            data_stream=args[0]
+        
         return RTN_CODES.ET_NOT_IMPLEMENTED
 
     def setDataFilterLevel(self,*args,**kwargs):
@@ -647,7 +653,7 @@ class EyeTracker(Device):
         setDataFilteringLevel sets the code for current ET device side filter level 
         for the specific data_stream. 
         
-        Currently, filter levels LEVEL_0 (meaning no filter) through 
+        Currently, filter levels OFF (meaning no filter) through 
         LEVEL_5 (highest filter level) can be specified via the pyEyeTrackerInterface.
         They are defined in DATA_FILTER Enum.
         
@@ -665,40 +671,41 @@ class EyeTracker(Device):
         For the SR Research EyeLink implementation, please note the following constraints and 
         'oddities' that will be improved on in future versions:
         
-        1) Filter Levels LEVEL_0 to LEVEL_2 are supported. LEVEL_0 maps to Filter OFF. 
+        1) Filter Levels OFF to LEVEL_2 are supported. OFF maps to Filter OFF. 
            LEVEL_1 maps to FILTER_NORMAL, and LEVEL_2 maps top FILTER_HIGH in the EyeLink system.
            
         2) Filter streams FILE, NET, and ANALOG are supported. 
         
         3) ** If you set the filter level for NET it also sets the level for ANALOG, and visa versa.
         
-        4) ** If you set the filter level for FILE, it sets the level for NET & ANALOG to LEVEL_0
+        4) ** If you set the filter level for FILE, it sets the level for NET & ANALOG to OFF
         
         5) ** Given 4), it is suggested you either set the filter level for ALL, or you 'first' set the
               filter level for FILE, and then set the filter level for NET or ANALOG.
         '''
         if len(args)==0:
-            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "level = args[0], but no args provided")
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "level = args[0], but no args provided"]
         level=args[0]
-        supportedLevels=(DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)
+        supportedLevels=(DATA_FILTER.OFF,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)
         if level not in supportedLevels:
-            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid level value provided; must be one of (DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)")
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid level value provided; must be one of (DATA_FILTER.OFF,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)"]
         
-        data_stream=DATA_FILTER.ALL
+        data_stream=DATA_STREAMS.ALL
         if data_stream in kwargs:
             data_stream=kwargs['data_stream']
-        supportedFilterStreams=(DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)
+        supportedFilterStreams=(DATA_STREAMS.ALL,DATA_STREAMS.NET,DATA_STREAMS.ANALOG)
         if data_stream not in supportedFilterStreams:
-            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid data_stream value provided; must be one of (DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)")
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid data_stream value provided; must be one of (DATA_STREAMS.ALL,DATA_STREAMS.NET,DATA_STREAMS.ANALOG)"]
         
         lindex = supportedLevels.index(level)
         
         if data_stream == DATA_STREAMS.ALL:
-            return self._eyelink.setHeuristicLinkAndFileFilter(lindex,lindex)
-        elif data_stream == DATA_STREAMS.NET or data_stream == ET_DATA_STREAMS.ANALOG:
-            return self._eyelink.setHeuristicLinkAndFileFilter(lindex)
+            self._eyelink.setHeuristicLinkAndFileFilter(lindex,lindex)
+        elif data_stream == DATA_STREAMS.NET or data_stream == DATA_STREAMS.ANALOG:
+            self._eyelink.setHeuristicLinkAndFileFilter(lindex)
         elif data_stream == DATA_STREAMS.FILE:
-            return self._eyelink.setHeuristicLinkAndFileFilter(0,lindex)
+            self._eyelink.setHeuristicLinkAndFileFilter(0,lindex)
+        return RTN_CODES.ET_OK
 
     def getLatestSample(self, *args, **kwargs):
         '''

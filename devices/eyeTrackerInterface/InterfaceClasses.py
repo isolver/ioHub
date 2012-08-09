@@ -479,9 +479,9 @@ class EyeTracker(Device):
        '''
        return RTN_CODES.ET_NOT_IMPLEMENTED 
      
-    def getDataFilteringLevel(self,data_stream=DATA_STREAMS.ALL,**kwargs):
+    def getDataFilterLevel(self,*args,**kwargs):
         '''
-        getDataFilteringLevel returns the numerical code the current device side filter level 
+        getDataFilterLevel returns the numerical code the current device side filter level 
         set for the specific data_stream. 
         
         Currently, filter levels 0 (meaning no filter) through 
@@ -499,6 +499,12 @@ class EyeTracker(Device):
         If a stream type that is not supported by the device for individual filtering is specified, 
         an error should be generated.
         '''
+        data_stream=DATA_STREAMS.ALL
+        if 'data_stream' in kwargs:
+            data_stream=kwargs['data_stream']
+        elif len(args)>0:
+            data_stream=args[0]
+        
         return RTN_CODES.ET_NOT_IMPLEMENTED
 
     def setDataFilterLevel(self,*args,**kwargs):
@@ -506,7 +512,7 @@ class EyeTracker(Device):
         setDataFilteringLevel sets the code for current ET device side filter level 
         for the specific data_stream. 
         
-        Currently, filter levels LEVEL_0 (meaning no filter) through 
+        Currently, filter levels OFF (meaning no filter) through 
         LEVEL_5 (highest filter level) can be specified via the pyEyeTrackerInterface.
         They are defined in DATA_FILTER Enum.
         
@@ -526,16 +532,16 @@ class EyeTracker(Device):
         level=args[0]
         
         # example code below......
-        supportedLevels=(DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)
+        supportedLevels=(DATA_FILTER.OFF,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)
         if level not in supportedLevels:
-            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid level value provided; must be one of (DATA_FILTER.LEVEL_0,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)")
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid level value provided; must be one of (DATA_FILTER.OFF,DATA_FILTER.LEVEL_1,DATA_FILTER.LEVEL_2)")
         
         data_stream=DATA_FILTER.ALL
         if data_stream in kwargs:
             data_stream=kwargs['data_stream']
-        supportedFilterStreams=(DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)
+        supportedFilterStreams=(DATA_STREAMS.ALL,DATA_STREAMS.NET,DATA_STREAMS.ANALOG)
         if data_stream not in supportedFilterStreams:
-            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid data_stream value provided; must be one of (DATA_STREAMS.ALL,DATA_STREAMS.NET,ET_DATA_STREAMS.ANALOG)")
+            return ['EYETRACKER_ERROR',"EyeTracker.setDataFilterLevel", "Invalid data_stream value provided; must be one of (DATA_STREAMS.ALL,DATA_STREAMS.NET,DATA_STREAMS.ANALOG)")
         
         lindex = supportedLevels.index(level)
         

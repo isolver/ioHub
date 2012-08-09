@@ -353,7 +353,7 @@ class EyeTracker(Device):
         They are defined in ET_FILTERS.
         
         data_streams specifies what output the filter is being applied to by the device. The
-        currently defined output streams are defined in ET_DATA_STREAMS, and are
+        currently defined output streams are defined in DATA_STREAMS, and are
         ALL,FILE,NET,SERIAL,ANALOG. ALL indicates that the filter level should be applied to all 
         available output streams,
         

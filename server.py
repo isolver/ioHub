@@ -350,7 +350,7 @@ class ioServer(object):
             print ">> %d\t\t%d\t%s"%(currentUsec(),level,text)
 
     def createDataStoreFile(self,fileName,folderPath,fmode,ftype):        
-        import ioDataStore
+        from ioHub import ioDataStore
         try:
             if ftype == 'pytables':
                 from ioDataStore import EMRTpyTablesFile
