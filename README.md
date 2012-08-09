@@ -107,11 +107,11 @@ The **main features / goals** of the ioHub are:
    The experiment itself can in effect act as an input device in this case,
    sending Experiment Events to the ioHub to be integrated with the rest 
    of the device data and saved for future analysis. pyTables will be used
-   as the API / storage mechanism for the ioHub. This functionality is being packaged
-   as a seperate module called the ioDataStore (https://github.com/isolver/ioDataStore).
-   The use of this functionality is completely optional, may not be of use in all situations,
-   and requires further requirements refinement refinement to move implementation beyond an alpha
-   stage of functionality.      
+   as the API / storage mechanism for the ioHub. This functionality is packaged
+   the ioHub.ioDataStore directory. The use of this functionality is completely optional,
+   may not be of use in all situations, and requires further requirements refinement refinement
+   to move implementation beyond an alpha stage of functionality. With that said, it also has a huge 
+   amount of potential.
 
 # Installing
 
@@ -156,6 +156,9 @@ The **main features / goals** of the ioHub are:
    pywin32: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download
     
    pyHook: http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download
+   
+   'Finally', the ioHub source to your site-packages folder, putting the ioHub directory in the site-packages directory 
+   of your Python 2.7 installation. 
 
 # Known Issues / Black Holes
 
