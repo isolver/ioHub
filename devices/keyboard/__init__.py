@@ -95,16 +95,20 @@ class KeyboardEvent(DeviceEvent):
 
 class KeyboardPressEvent(KeyboardEvent):
     dataType = KeyboardEvent.dataType
-    ndType=KeyboardEvent.ndType
-    fieldCount=KeyboardEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,**kwargs):
         KeyboardEvent.__init__(self,**kwargs)
 
 
 class KeyboardReleaseEvent(KeyboardEvent):
     dataType = KeyboardEvent.dataType
-    ndType=KeyboardEvent.ndType
-    fieldCount=KeyboardEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,**kwargs):
         KeyboardEvent.__init__(self,**kwargs)
 

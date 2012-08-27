@@ -293,9 +293,16 @@ class EyeTracker(Device):
         
     def trackerTime(self):
         '''
-        Current eye tracker time ( in USEC since device interface was initialized)
+        Current eye tracker time (timebase is eye tracker dependent)
         '''
         return RTN_CODES.ET_NOT_IMPLEMENTED
+   
+    def trackerUsecTimeSinceDeviceInit(self):
+        '''
+        Current eye tracker time, normalized. (in usec for since ioHub initialized Device)
+        '''
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+        
    
     def setConnectionState(self,*args,**kwargs):
         '''

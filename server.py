@@ -56,8 +56,10 @@ class udpServer(DatagramServer):
             request=self.unpack(request[:-2])
         
         request_type= request.pop(0)
+        
         if request_type == 'GET_EVENTS':
-            return self.handleGetEvents(replyTo)
+            r= self.handleGetEvents(replyTo)
+            return r
         elif request_type == 'EXP_DEVICE':
             return self.handleExperimentDeviceRequest(request,replyTo)
         elif request_type == 'RPC':
@@ -112,9 +114,11 @@ class udpServer(DatagramServer):
 
         while len(eventBuffer)>0:
              e=eventBuffer.popleft()
+             print '--'
+             print e._asTuple()
              bisect.insort(currentEvents, e)       
         events=[e.I_tuple for e in currentEvents]
-        
+
         if len(events)>0:
             self.sendResponse(('GET_EVENTS_RESULT',events),replyTo)
         else:
@@ -169,8 +173,15 @@ class udpServer(DatagramServer):
             edata=('IOHUB_ERROR','EXP_DEVICE',request_type,"The request type provided for EXP_DEVICE is not recognized.")
             self.sendResponse(edata,replyTo)
             
-    def sendResponse(self,data,address):
+    def sendResponse(self,data,address,printResponseInfo=False):
         packet_data=self.pack(data)+'\r\n'
+        if printResponseInfo:
+            print "==================="
+            print "ioHub Response Element Count:", len(data)
+            #print data
+            #print '------'
+            print "ResponseLength: ",len(packet_data)
+            print "===================\n"
         self.socket.sendto(packet_data,address)         
            
     def clearEventBuffer(self):
@@ -248,7 +259,6 @@ class ioServer(object):
     eventBuffer=None 
     def __init__(self,config=None):
         self._running=True
-        
         self.config=config
         ioServer.eventBuffer=deque(maxlen=config['global_event_buffer'])
         self.emrt_file=None
@@ -266,37 +276,38 @@ class ioServer(object):
         # device configuration
         if len(config['monitor_devices']) > 0:
             import ioHub.devices as devices
-            
-        #built device list and config from yaml config settings
-        for key,deviceConfig in config['monitor_devices'].iteritems():
-            # build devices to monitor
-            self.log("Creating Device: %s"%deviceConfig['device_class'])
-            dclass=deviceConfig['device_class']
-            parentModule=devices
-            modulePathTokens=dclass.split('.')
-            for mt in modulePathTokens:
-                DeviceClass=getattr(parentModule,mt)
-                parentModule=DeviceClass  
-            deviceInstance=DeviceClass(dconfig=deviceConfig)
-            self.devices.append(deviceInstance)
-            self.deviceDict[deviceConfig['device_class']]=deviceInstance
-            
-            if 'device_timer' in deviceConfig:
-                interval = deviceConfig['device_timer']['interval']
-                self.log("%s has requested a timer with period %.5f"%(deviceConfig['device_class'], interval))
-                dPoller=DeviceMonitor(deviceInstance,interval)
-                self.deviceMonitors.append(dPoller)
-                
-            # add event listeners for streaming events
-            if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
-                self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
-                deviceInstance._addEventListener(self)
 
-            # add event listeners for saving events
-            if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
-                self.log("Event saving is being enabled for: %s"%deviceConfig['device_class'])
-                deviceInstance._addEventListener(self.emrt_file)
-            self.log("==============================")
+        #built device list and config from yaml config settings
+        for iodevice in config['monitor_devices']:
+            for _key,deviceConfig in iodevice.iteritems():
+                # build devices to monitor
+                self.log("Creating Device: %s"%deviceConfig['device_class'])
+                dclass=deviceConfig['device_class']
+                parentModule=devices
+                modulePathTokens=dclass.split('.')
+                for mt in modulePathTokens:
+                    DeviceClass=getattr(parentModule,mt)
+                    parentModule=DeviceClass  
+                deviceInstance=DeviceClass(dconfig=deviceConfig)
+                self.devices.append(deviceInstance)
+                self.deviceDict[deviceConfig['device_class']]=deviceInstance
+                
+                if 'device_timer' in deviceConfig:
+                    interval = deviceConfig['device_timer']['interval']
+                    self.log("%s has requested a timer with period %.5f"%(deviceConfig['device_class'], interval))
+                    dPoller=DeviceMonitor(deviceInstance,interval)
+                    self.deviceMonitors.append(dPoller)
+                    
+                # add event listeners for streaming events
+                if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
+                    self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
+                    deviceInstance._addEventListener(self)
+
+                # add event listeners for saving events
+                if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
+                    self.log("Event saving is being enabled for: %s"%deviceConfig['device_class'])
+                    deviceInstance._addEventListener(self.emrt_file)
+                self.log("==============================")
         deviceDict=self.deviceDict
         iohub=self
         if (('Mouse' in deviceDict) or ('Keyboard' in deviceDict)) and computer.system == 'Windows':
@@ -313,7 +324,7 @@ class ioServer(object):
                         self._hookManager.HookMouse()    
                     if 'Keyboard' in deviceDict:
                         self._hookManager.HookKeyboard()
-                        
+                       
                     iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
         
                 def _poll(self):

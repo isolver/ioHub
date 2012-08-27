@@ -13,6 +13,7 @@ from collections import deque
 
 class Computer(object):
     _instance=None
+    _nextEventID=1
     def __init__(self,system, node, release, version, machine, processor):
         if Computer._instance!=None:
             raise "Error creating Computer object; instance already exists. \
@@ -60,6 +61,12 @@ class Computer(object):
     def currentUsec():
         return int(timeit.default_timer()*1000000.0)
 
+    @staticmethod
+    def getNextEventID():
+        n = Computer._nextEventID
+        Computer._nextEventID+=1
+        return n
+        
     # From Python 2.6 Doc
     # timeit.timeit(stmt, setup='pass', timer=default_timer, number=1000000)
     # Create a Timer instance with the given statement, setup code and timer
@@ -113,11 +120,10 @@ class ioObject(object):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=['I_tuple','I_np_array','I_tables_row']+attributeNames
+    __slots__=['I_tuple','I_np_array']+attributeNames
     def __init__(self,*args,**kwargs):
-        #self.I_public_dict=dict()
         self.I_np_array=None
-        self.I_tables_row=None
+        self.I_tuple=None
         
         ovalues=[]
         for key in self.attributeNames:
@@ -125,33 +131,24 @@ class ioObject(object):
             setattr(self,key,value)
             if key[:2] is not 'I_':
                 ovalues.append(value)
-                #self.I_public_dict[key]=value
-        #print "ovalues:",len(ovalues)," <> ",ovalues
-        #print "self.ndType:",self.ndType.__len__()," <> ",self.ndType
         self.I_tuple=tuple(ovalues) 
 
     @classmethod
     def getAttributesList(cls):
-        return [e[0] for e in cls.dataType]
+        return cls.attributeNames
     
     def _asTuple(self):
         return self.I_tuple
-        
-    #def _asDict(self):
-    #    return self.I_public_dict
 
     def _asNumpyArray(self):
         if self.I_np_array is None:
-            print '=================='
-            print len(self.I_tuple)
-            print self.I_tuple
-            print '-------------'
-            print self.ndType
+            #print '=================='
+            #print len(self.I_tuple)
+            #print self.I_tuple
+            #print '-------------'
+            #print self.ndType
             self.I_np_array=N.array([self.I_tuple,],self.ndType) 
         return self.I_np_array
-    
-    def _getTablesRow(self):
-        return self.I_tables_row
         
 ########### Base Abstract Device that all other Devices inherit from ##########
 class Device(ioObject):
@@ -201,10 +198,7 @@ class DeviceEvent(ioObject):
         return self.hub_time-other.hub_time
         
     def hubTime(self):
-        if self.hub_time is None:
-            self.hub_time=self.log_time
-            print 'Warning: Using Log Time as Hub Time', self.label
-        return self.hub_time#(currentMsec()-self.device.offset)*self.device.drift-self.delay
+        return self.hub_time
 
     @classmethod
     def createFromOrderedList(cls,list):

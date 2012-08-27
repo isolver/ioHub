@@ -181,6 +181,10 @@ class EMRTpyTablesFile():
         self.TABLES['MESSAGE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'Message', D.MessageEvent.ndType, title='Experiment Message Event Logging.')    
 
         self.TABLES['EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'MonocularEyeSample', D.MonocularEyeSample.ndType, title='Monocular Eye Samples')     
+        self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BinocularEyeSample', D.BinocularEyeSample.ndType, title='Binocular Eye Samples')     
+        self.TABLES['FIXATION_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationStartEvent', D.FixationStartEvent.ndType, title='Fixation Start Events')     
+        self.TABLES['FIXATION_UPDATE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixatonUpdateEvent', D.FixatonUpdateEvent.ndType, title='Fixation Update Events')     
+        self.TABLES['FIXATION_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationEndEvent', D.FixationEndEvent.ndType, title='Fixation End Events')     
         
         #self.TABLES['EXPERIMENT_EVENT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'ExperimentEvent', exev.ExperimentEvent.ndType, title='Generic Experiment Event Logging.')     
         #self.TABLES['DRAW_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.monitor,'DisplayDrawStart', exev.DisplayDrawStart.ndType, title='Display Draw Start Event Logging.')    
@@ -233,7 +237,9 @@ class EMRTpyTablesFile():
         pass
     
     def _handleEvent(self, event):
-        etable=self.TABLES[ ioHub.EVENT_TYPES[event.event_type]]
+        #print 'ioDataStore event:',ioHub.EVENT_TYPES[event.event_type],event.event_type
+        etable=self.TABLES[ioHub.EVENT_TYPES[event.event_type]]
+        #print etable
         etable.append(event._asNumpyArray())
         
         # if flushCounter threshold is >=0 then do some checks. If it is < 0, then 

@@ -20,103 +20,98 @@ and four eye event types; note that not all eye trackers support all these event
 * SmoothPursuit: StartPursuitEvent, EndPursuitEvent
 
 """
-'''
-('raw_pupil_only', [('x', '<f4'), ('y', '<f4')]),('raw_pupil_size',[('v1','f2'),('v2','f2')]),
-        ('raw_cr1_only', [('x', '<f4'), ('y', '<f4')]), ('raw_cr1_size',[('v1','f2'),('v2','f2')]),
-        ('raw_cr2_only', [('x', '<f4'), ('y', '<f4')]), ('raw_cr2_size',[('v1','f2'),('v2','f2')]),
-'''
 ##################### Eye Tracker Sample Stream Types ################################
 # 
 class MonocularEyeSample(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('eye', 'u1'), ('gaze', [('x','f4'), ('y','f4'),('z','f4')]), 
-        ('angle', [('x','f4'), ('y','f4')]),('raw', [('x','f4'), ('y','f4')]),
-        ('pupil_measure',[('v1','f2'),('v2','f2')]),('pixels_degree', [('x', '<f2'), ('y', '<f2')]),
-        ('status', 'u1')]
+    dataType = DeviceEvent.dataType+[('eye', 'u1'), ('gaze_x','f4'),('gaze_y','f4'),('gaze_z','f4'), 
+        ('angle_x','f4'),('angle_y','f4'),('raw_x','f4'),('raw_y','f4'),
+        ('pupil_measure1','f4'),('pupil_measure2','f4'),('ppd_x','f4'),('ppd_y','f4'),
+        ('velocity_x','f4'),('velocity_y','f4'),('velocity_xy','f4'),('status', 'u1')]
+    attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]    
+    __slots__=attributeNames    
     def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,**kwargs)
+        DeviceEvent.__init__(self,*args,**kwargs)
         
 class BinocularEyeSample(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('gaze', [('x','f4',2), ('y','f4',2),('z','f4',2)]), 
-        ('angle', [('x','f4',2), ('y','f4',2),('z','f4',2)]), 
-        ('raw', [('x','f4',2), ('y','f4',2),('z','f4',2)]),('pupil_measure',[('v1','f2',2),('v2','f2',2)]),  
-        ('raw_pupil_only', [('x', '<f4',2), ('y', '<f4',2)]),('raw_pupil_size',[('d1','f2',2),('d2','f2',2)]),
-        ('raw_cr1_only', [('x', '<f4',2), ('y', '<f4',2)]), ('raw_cr1_size',[('v1','f2',2),('v2','f2',2)]),
-        ('raw_cr2_only', [('x', '<f4',2), ('y', '<f4',2)]), ('raw_cr2_size',[('v1','f2',2),('v2','f2',2)]),
-        ('pixels_degree', [('x', '<f2',2), ('y', '<f2',2)]),('status', 'u1',2)]
+    dataType = DeviceEvent.dataType+[('left_gaze_x','f4'),('left_gaze_y','f4'),('left_gaze_z','f4'), 
+        ('left_angle_x','f4'),('left_angle_y','f4'),('left_raw_x','f4'),('left_raw_y','f4'),
+        ('left_pupil_measure1','f4'),('left_pupil_measure2','f4'),('left_ppd_x','f4'),('left_ppd_y','f4'),
+        ('left_velocity_x','f4'),('left_velocity_y','f4'),('left_velocity_xy','f4'),
+        ('right_gaze_x','f4'),('right_gaze_y','f4'),('right_gaze_z','f4'), 
+        ('right_angle_x','f4'),('right_angle_y','f4'),('right_raw_x','f4'),('right_raw_y','f4'),
+        ('right_pupil_measure1','f4'),('right_pupil_measure2','f4'),('right_ppd_x','f4'),('right_ppd_y','f4'),
+        ('right_velocity_x','f4'),('right_velocity_y','f4'),('right_velocity_xy','f4'),('status', 'u1')]
+    attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]   
-    
+    __slots__=attributeNames    
     def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,**kwargs)
+        DeviceEvent.__init__(self,*args,**kwargs)
         
 ######## Eye Tracker basedTTL Input Event Type ############
 # 
-class EyeTTLInput(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('port', 'u8'),('value', 'u2')]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]   
-    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-        
+#class EyeTTLInput(DeviceEvent):
+#    dataType = DeviceEvent.dataType+[('port', 'u8'),('value', 'u2')]
+#    attributeNames=[e[0] for e in dataType]
+#    ndType=N.dtype(dataType)
+#    fieldCount=ndType.__len__()
+#    __slots__=attributeNames    
+#    def __init__(self,*args,**kwargs):
+#        DeviceEvent.__init__(self,*args,**kwargs)
+         
 ######## Eye Tracker based Button Box / Response Pad Event Type ############
 # 
-class EyeButtonPress(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('button', 'u1')] 
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]    
-    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-
-class EyeButtonRelease(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('button', 'u1')] 
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]  
-    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-
-################### Fixation Event Types ##########################
-# 
-class FixationStartEvent(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('eye', 'u1'),('gaze', [('x','f4'), ('y','f4'),('z','f4')]), 
-                ('pupil_measure',[('v1','f2'),('v2','f2')]),('pixels_degree', [('x', 'f4'), ('y', 'f4')]),
-                ('velocity', [('x', 'f4'), ('y', 'f4'),('xy', 'f4')])]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]    
-    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-
-#class FixatonUpdateEvent(DeviceEvent):
-##    dataType = DeviceEvent.dataType+[('eye', 'u1'),('duration','u16'),('average_gaze', [('x', 'f4'), ('y', 'f4')]),\
-#               ('average_pupil_measure',[('v1','f4'),('v2','f4')]),('average_pixels_degree', [('x', '<f4'), ('y', 'f4')]),\
-#                ('average_velocity', [('x', 'f4'), ('y', 'f4'),('xy', 'f4')]),('peak_velocity', [('x', 'f4'), ('y', 'f4'),('xy', 'f4')])]
-#    print 'FixatonUpdateEvent:',dataType
+#class EyeButtonPress(DeviceEvent):
+#    dataType = DeviceEvent.dataType+[('button', 'u1')] 
 #    ndType=N.dtype(dataType)
 #    fieldCount=ndType.__len__()
 #    __slots__=[e[0] for e in dataType]    
 #    
-##    def __init__(self,*args,**kwargs):
-#        DeviceEvent.__init__(self,*args,**kwargs)    
-       
-class FixationEndEvent(FixationStartEvent):
-    dataType = FixationStartEvent.dataType+[('start_event_id', 'u8')]
+#    def __init__(self,*args,**kwargs):
+#        DeviceEvent.__init__(self,*args,**kwargs)
+#
+#class EyeButtonRelease(DeviceEvent):
+#    dataType = DeviceEvent.dataType+[('button', 'u1')] 
+#    ndType=N.dtype(dataType)
+#    fieldCount=ndType.__len__()
+#    __slots__=[e[0] for e in dataType]  
+#    
+#    def __init__(self,*args,**kwargs):
+#        DeviceEvent.__init__(self,*args,**kwargs)
+#
+################### Fixation Event Types ##########################
+# 
+class FixationStartEvent(DeviceEvent):
+    dataType = DeviceEvent.dataType+[('eye', 'u1'), ('gaze_x','f4'),('gaze_y','f4'),('gaze_z','f4'),
+        ('pupil_measure1','f2'),('pupil_measure2','f2'),('ppd_x','<f2'),('ppd_y','<f2'),
+        ('velocity_x','f4'),('velocity_y','f4'),('velocity_xy','f4')]
+    attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]    
-    
+    __slots__=attributeNames    
     def __init__(self,*args,**kwargs):
-        FixationStartEvent.__init__(self,*args,**kwargs) 
+        DeviceEvent.__init__(self,*args,**kwargs)
+
+class FixatonUpdateEvent(FixationStartEvent):
+    dataType = FixationStartEvent.dataType+[('peak_velocity_x','f4'),('peak_velocity_y','f4'),('peak_velocity_xy','f4')]
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames    
+    def __init__(self,*args,**kwargs):
+        FixationStartEvent.__init__(self,*args,**kwargs)
+       
+class FixationEndEvent(FixatonUpdateEvent):
+    dataType = FixatonUpdateEvent.dataType+[('start_event_id', 'u8')]
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames    
+    def __init__(self,*args,**kwargs):
+        FixatonUpdateEvent.__init__(self,*args,**kwargs)
+ 
 
 ################### Saccade Event Types ##########################
 #         

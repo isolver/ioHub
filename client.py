@@ -76,19 +76,24 @@ class SocketConnection(object):
         return byte_count
  
     def receive(self):
-        data, address = self.sock.recvfrom(self._rcvBufferLength)
-        self.lastAddress=address
-        if self.feed: # using msgpack
-            self.feed(data[:-2])
-            return self.unpack(),address          
-        return self.unpack(data[:-2]),address
-
+        try:
+            data, address = self.sock.recvfrom(self._rcvBufferLength)
+            self.lastAddress=address
+            if self.feed: # using msgpack
+                self.feed(data[:-2])
+                return self.unpack(),address          
+            
+            return self.unpack(data[:-2]),address
+        except Exception as e:
+            print "ioHubClient socket.receive ERROR:",e
+        return ("IO_HUB_ERROR", "ioHubClient socket.receive ERROR",str(e)),None
+            
     def close(self):    
         self.sock.close()
 
 
 class UDPClientConnection(SocketConnection):
-    def __init__(self,remote_host='127.0.0.1',remote_port=9000,rcvBufferLength=1492,broadcast=False,blocking=1, timeout=1, coder=None):
+    def __init__(self,remote_host='127.0.0.1',remote_port=9000,rcvBufferLength=64*1024,broadcast=False,blocking=1, timeout=1, coder=None):
         SocketConnection.__init__(self,remote_host=remote_host,remote_port=remote_port,rcvBufferLength=rcvBufferLength,broadcast=broadcast,blocking=blocking, timeout=timeout,coder=coder)
     def initSocket(self,**kwargs):
         #print 'UDPClientConnection being used'

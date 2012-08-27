@@ -320,8 +320,6 @@ class EyeTracker(Device):
         '''
         
         pylink.flushGetkeyQueue(); 
-        gc.disable();
-        pylink.beginRealTimeMode(100)
         return RTN_CODES.ET_OK
          
     def trialEndDefaultLogic(self,*args,**kwargs):
@@ -329,9 +327,7 @@ class EyeTracker(Device):
         Experiment Centered Generic method that can be used to perform a set of
         eye tracker default code associated with the end of an experiment trial.  
         '''
-        
-        pylink.endRealTimeMode();
-        gc.enable();
+        # Currently does nothing; which is current 'implemented' state.
         return RTN_CODES.ET_OK
          
     def blockEndDefaultLogic(self,*args,**kwargs):
@@ -351,7 +347,7 @@ class EyeTracker(Device):
             # File transfer and cleanup!
             
             self._eyelink.setOfflineMode();                          
-            pylink.msecDelay(200);                 
+            #pylink.msecDelay(200);                 
 
             #Close the file and transfer it to Display PC
             if self._OPEN_EDF is not None:
@@ -365,9 +361,15 @@ class EyeTracker(Device):
         
     def trackerTime(self):
         '''
-        Current eye tracker time ( in USEC since device interface was initialized)
+        Current eye tracker time (in msec for eyelink since host app was last started)
         '''
-        return (self._eyelink.trackerTime()-self.DEVICE_START_TIME)*self.DEVICE_TIMEBASE_TO_USEC
+        return self._eyelink.trackerTime()
+   
+    def trackerUsecTimeSinceDeviceInit(self):
+        '''
+        Current eye tracker time (in usec for since ioHub initialized Device)
+        '''
+        return (self._eyelink.trackerTime()-EyeTracker.DEVICE_START_TIME)*self.DEVICE_TIMEBASE_TO_USEC
    
     def setConnectionState(self,*args,**kwargs):
         '''
@@ -383,12 +385,12 @@ class EyeTracker(Device):
         if enabled is True or enabled is False:
             if enabled is True:
                 self._eyelink.connect();
-                pylink.msecDelay(100);
+                #pylink.msecDelay(100);
                 # With the pyLink module, when the EyeLink() class is create, a connection is made.
                 return True; 
             else:
                 self._eyelink.setOfflineMode();                          
-                pylink.msecDelay(250);
+                #pylink.msecDelay(250);
                 self._eyelink.reset()
                 return False
         else:
@@ -835,17 +837,20 @@ class EyeTracker(Device):
         If your eye tracker supports a more efficient event based call-back approach, this should be 
         used instead of registering a timer with the device.
         '''
-        currentTime=int(Computer.currentUsec())
-        currentHostTime = self.trackerTime()
-        ioHub_time_offset= currentTime-currentHostTime
-        
+         
         eyelink=self._eyelink        
         
         #get native events queued up
         while 1:    
+            currentTime=int(Computer.currentUsec())
+            currentHostTime = self.trackerTime()
+            ioHub_msec_offset= Computer.currentMsec()-currentHostTime
+            
             ne = eyelink.getNextData()
+            
             if ne == 0 or ne is None:
                 break # no more events / samples to process
+            
             ne= eyelink.getFloatData()
 
             #possible native pylink class types
@@ -863,17 +868,26 @@ class EyeTracker(Device):
             if isinstance(ne,pylink.Sample):
                 # now convert from native format to pyEyeTracker  common format
                 # TODO : not yet done, 
-                confidenceInterval=currentTime-EyeTracker.lastPollTime
-                sample_timestamp=ne.getTime()*1000.0
+                confidenceInterval=0.0 # TODO should be half the sampling rate to rep. avg. external world event to frame capture time (assuming consistant frame rate) 
+                sample_timestamp=int(ne.getTime())
                 sample_delay=currentHostTime-sample_timestamp
                 ppd=ne.getPPD()
+
+                # hubtime calculation needs to be finished / improved.
+                # - offset should be an integration of 1% to handle noise / spikes in 
+                #   calulation
+                # - need to handle drift between clocks
                 
+                hub_timestamp=int((sample_timestamp-self.DEVICE_START_TIME+ioHub_msec_offset)*1000.0)
+               
                 if ne.isBinocular():
                     # binocular sample
                     event_type=ioHub.EVENT_TYPES['BINOC_EYE_SAMPLE']
-                    eye=EYE_CODES.BINOCULAR
+                    myeye=EYE_CODES.BINOCULAR
                     leftData=ne.getLeftEye()
                     rightData=ne.getRightEye()
+                    
+                    
                 else:
                     # monocular sample
                     etype=ioHub.EVENT_TYPES['EYE_SAMPLE']
@@ -881,30 +895,30 @@ class EyeTracker(Device):
                     eyeData=None
                     if leftEye == 1:
                         eyeData=ne.getLeftEye()
-                        eye=EYE_CODES.LEFT
+                        myeye=EYE_CODES.LEFT
                     else:
                         eyeData=ne.getRightEye()
-                        eye=EYE_CODES.RIGHT
+                        myeye=EYE_CODES.RIGHT
                     
                     pupilSize=eyeData.getPupilSize()
                     rawPupil=eyeData.getRawPupil()
                     href=eyeData.getHREF() 
                     gaze=eyeData.getGaze()
+                   
+                    # TO DO: EyeLink pyLink does not expose sample velocity fields. Patch and fix.
+                    vel_x=-1.0
+                    vel_y=-1.0
+                    vel_xy=-1.0
                     
-                    # hubtime calculation needs to be finished / improved.
-                    # - offset should be an integration of 1% to handle noise / spikes in 
-                    #   calulation
-                    # - need to handle drift between clocks
-                    
-                    hub_timestamp=sample_timestamp-ioHub_time_offset
 
-                    monoSample=MonocularEyeSample(experiment_id=0,session_id=0,event_id=0,
+                    monoSample=MonocularEyeSample(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
                                 event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                              device_time=sample_timestamp, logged_time=currentTime, 
-                              hub_time=hub_timestamp,confidence_interval=confidenceInterval,
-                              delay=sample_delay,eye=eye,gaze=(gaze[0],gaze[1],-1.0),
-                              angle=(href[0],href[1]),raw=(rawPupil[0],rawPupil[1]),
-                              pupil_measure=(pupilSize,-1.0),pixels_degree=ppd,status=0)
+                                device_time=sample_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                                confidence_interval=confidenceInterval, delay=sample_delay,
+                                eye=myeye,gaze_x=gaze[0],gaze_y=gaze[1],gaze_z=-1.0,
+                                angle_x=href[0],angle_y=href[1],raw_x=rawPupil[0],raw_y=rawPupil[1],
+                                pupil_measure1=pupilSize,pupil_measure2=-1, ppd_x=ppd[0], ppd_y=ppd[1], 
+                                velocity_x=vel_x,velocity_y=vel_y,velocity_xy=vel_xy,status=0)
                     
                     EyeTracker._latestSample=monoSample      
                     self.I_eventBuffer.append(monoSample)

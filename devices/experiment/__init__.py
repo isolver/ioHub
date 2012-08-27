@@ -32,8 +32,6 @@ class ExperimentRuntimeDevice(Device):
             }          
         Device.__init__(self,**deviceSettings)
  
-        print "ExperimentRuntimeDevice class set as ",self.__class__.__name__
-
     def eventCallback(self,event):
         notifiedTime=int(currentMsec())
         self.I_eventBuffer.append((notifiedTime,event))

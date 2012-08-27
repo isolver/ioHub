@@ -56,7 +56,7 @@ class MouseEvent(DeviceEvent):
     # TODO: Determine real maximum key name string and modifiers string
     # lengths and set appropriately.
     dataType = DeviceEvent.dataType+[('button_state',N.uint8),('button_id',N.uint8),('x_position',N.uint16),
-                                    ('y_position',N.uint16), ('wheel', N.uint8),('windowID',N.uint64)]
+                                    ('y_position',N.uint16), ('wheel', N.int8),('windowID',N.uint64)]
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
@@ -66,35 +66,45 @@ class MouseEvent(DeviceEvent):
 
 class MouseMoveEvent(MouseEvent):
     dataType = MouseEvent.dataType
-    ndType=MouseEvent.ndType
-    fieldCount=MouseEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseWheelEvent(MouseEvent):
     dataType = MouseEvent.dataType
-    ndType=MouseEvent.ndType
-    fieldCount=MouseEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseButtonDownEvent(MouseEvent):
     dataType = MouseEvent.dataType
-    ndType=MouseEvent.ndType
-    fieldCount=MouseEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseButtonUpEvent(MouseEvent):
     dataType = MouseEvent.dataType
-    ndType=MouseEvent.ndType
-    fieldCount=MouseEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseDoubleClickEvent(MouseEvent):
     dataType = MouseEvent.dataType
-    ndType=MouseEvent.ndType
-    fieldCount=MouseEvent.fieldCount
+    attributeNames=[e[0] for e in dataType]
+    ndType=N.dtype(dataType)
+    fieldCount=ndType.__len__()
+    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
