@@ -183,9 +183,13 @@ class EMRTpyTablesFile():
         self.TABLES['EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'MonocularEyeSample', D.MonocularEyeSample.ndType, title='Monocular Eye Samples')     
         self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BinocularEyeSample', D.BinocularEyeSample.ndType, title='Binocular Eye Samples')     
         self.TABLES['FIXATION_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationStartEvent', D.FixationStartEvent.ndType, title='Fixation Start Events')     
-        self.TABLES['FIXATION_UPDATE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixatonUpdateEvent', D.FixatonUpdateEvent.ndType, title='Fixation Update Events')     
+        #self.TABLES['FIXATION_UPDATE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixatonUpdateEvent', D.FixatonUpdateEvent.ndType, title='Fixation Update Events')     
         self.TABLES['FIXATION_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationEndEvent', D.FixationEndEvent.ndType, title='Fixation End Events')     
-        
+        self.TABLES['SACCADE_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeStartEvent', D.SaccadeStartEvent.ndType, title='Saccade Start Events')     
+        self.TABLES['SACCADE_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeEndEvent', D.SaccadeEndEvent.ndType, title='Saccade End Events')     
+        self.TABLES['BLINK_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkStartEvent', D.BlinkStartEvent.ndType, title='Blink Start Events')     
+        self.TABLES['BLINK_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkEndEvent', D.BlinkEndEvent.ndType, title='Blink End Events')     
+         
         #self.TABLES['EXPERIMENT_EVENT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'ExperimentEvent', exev.ExperimentEvent.ndType, title='Generic Experiment Event Logging.')     
         #self.TABLES['DRAW_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.monitor,'DisplayDrawStart', exev.DisplayDrawStart.ndType, title='Display Draw Start Event Logging.')    
         #self.TABLES['DRAW_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.monitor,'DisplayDrawEnd', exev.DisplayDrawEnd.ndType, title='Display Draw End Event Logging.')    

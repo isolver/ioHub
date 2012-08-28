@@ -28,20 +28,20 @@ class ExperimentRuntimeDevice(Device):
             'device_class':deviceConfig['device_class'],
             'user_label':deviceConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':deviceConfig['event_buffer_size']
+            'max_event_buffer_length':deviceConfig['event_buffer_length']
             }          
         Device.__init__(self,**deviceSettings)
  
-    def eventCallback(self,event):
+    def _nativeEventCallback(self,event):
         notifiedTime=int(currentMsec())
-        self.I_eventBuffer.append((notifiedTime,event))
+        self.I_nativeEventBuffer.append((notifiedTime,event))
         return True
     
     def _poll(self):
         pass
  
     @staticmethod
-    def getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event,device_instance_code):
         print "Exp event:",event
         event_type = event[1][3]
         if event_type==ioHub.EVENT_TYPES['MESSAGE']:

@@ -131,11 +131,7 @@ class ioObject(object):
             setattr(self,key,value)
             if key[:2] is not 'I_':
                 ovalues.append(value)
-        self.I_tuple=tuple(ovalues) 
-
-    @classmethod
-    def getAttributesList(cls):
-        return cls.attributeNames
+        self.I_tuple=tuple(ovalues)
     
     def _asTuple(self):
         return self.I_tuple
@@ -157,14 +153,27 @@ class Device(ioObject):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     DEVICE_TIMEBASE_TO_USEC=1.0
-    __slots__=attributeNames+['I_eventBuffer','I_eventListeners']
+    __slots__=attributeNames+['I_nativeEventBuffer','I_eventListeners','I_ioHubEventBuffer']
     def __init__(self,*args,**kwargs):
         ioObject.__init__(self,**kwargs)
-        self.I_eventBuffer=deque(maxlen=self.max_event_buffer_length)
+        self.I_ioHubEventBuffer=deque(maxlen=self.max_event_buffer_length)
+        self.I_nativeEventBuffer=deque(maxlen=self.max_event_buffer_length)
         self.I_eventListeners=list()
+
+    def getEvents(self):
+        eventList=[]
+        while len(self.I_ioHubEventBuffer) > 0:
+            eventList.append(self.I_ioHubEventBuffer.popleft().I_tuple)
+        return eventList
+    
+    def clearEvents(self):
+        self.I_ioHubEventBuffer.clear()
         
-    def _getEventBuffer(self):
-        return self.I_eventBuffer
+    def _handleEvent(self,e):
+        self.I_ioHubEventBuffer.append(e)
+        
+    def _getNativeEventBuffer(self):
+        return self.I_nativeEventBuffer
     
     def _addEventListener(self,l):
         if l not in self.I_eventListeners:
@@ -178,7 +187,13 @@ class Device(ioObject):
         return self.I_eventListeners
         
     def _getRPCInterface(self):
-        return ()
+        rpcList=[]
+        dlist = dir(self)
+        for d in dlist:
+            if d[0] is not '_' and not d.startswith('I_'):
+                if callable(getattr(self,d)):
+                    rpcList.append(d)
+        return rpcList
         
 ########### Base Device Event that all other Device Events inherit from ##########
 
@@ -229,3 +244,36 @@ from eyeTrackerInterface.eye_events import *
 
 import display
 from display import Display
+
+typeCodeToClass=dict()
+
+def buildTypeCodeToClassDict():
+    global typeCodeToClass
+    
+    import ioHub
+    from ioHub import EVENT_TYPES
+    
+    typeCodeToClass[EVENT_TYPES['KEYBOARD_PRESS']]=KeyboardPressEvent
+    typeCodeToClass[EVENT_TYPES['KEYBOARD_RELEASE']]=KeyboardReleaseEvent
+    typeCodeToClass[EVENT_TYPES['MOUSE_MOVE']]=MouseMoveEvent
+    typeCodeToClass[EVENT_TYPES['MOUSE_WHEEL']]=MouseWheelEvent
+    typeCodeToClass[EVENT_TYPES['MOUSE_PRESS']]=MouseButtonDownEvent
+    typeCodeToClass[EVENT_TYPES['MOUSE_RELEASE']]=MouseButtonUpEvent
+    typeCodeToClass[EVENT_TYPES['MOUSE_DOUBLE_CLICK']]=MouseDoubleClickEvent
+    typeCodeToClass[EVENT_TYPES['PARALLEL_PORT_INPUT']]=ParallelPortEvent
+    typeCodeToClass[EVENT_TYPES['MESSAGE']]=MessageEvent
+    typeCodeToClass[EVENT_TYPES['COMMAND']]=CommandEvent
+    typeCodeToClass[EVENT_TYPES['EYE_SAMPLE']]=MonocularEyeSample
+    typeCodeToClass[EVENT_TYPES['BINOC_EYE_SAMPLE']]=BinocularEyeSample
+    typeCodeToClass[EVENT_TYPES['FIXATION_START']]=FixationStartEvent
+    typeCodeToClass[EVENT_TYPES['FIXATION_END']]=FixationEndEvent
+    typeCodeToClass[EVENT_TYPES['SACCADE_START']]=SaccadeStartEvent
+    typeCodeToClass[EVENT_TYPES['SACCADE_END']]=SaccadeEndEvent
+    typeCodeToClass[EVENT_TYPES['BLINK_START']]=BlinkStartEvent
+    typeCodeToClass[EVENT_TYPES['BLINK_END']]=BlinkEndEvent
+    #typeCodeToClass['']=
+    #typeCodeToClass['']=
+    #typeCodeToClass['']=
+    #typeCodeToClass['']=
+    #typeCodeToClass['']=
+    #typeCodeToClass['']=

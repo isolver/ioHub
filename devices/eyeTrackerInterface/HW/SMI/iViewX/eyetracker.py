@@ -134,7 +134,7 @@ class EyeTracker(Device):
             'device_class':self.eyeTrackerConfig['device_class'],
             'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_size']
+            'max_event_buffer_length':deviceConfig['event_buffer_length'],
             }
         Device.__init__(self,**deviceSettings)
         
@@ -151,7 +151,7 @@ class EyeTracker(Device):
         #specific commands       
         EyeTracker._COMMAND_TO_FUNCTION={'Calibrate':EyeTracker._iViewXAPI.iV_Calibrate, 'Validate':EyeTracker._iViewXAPI.iV_Validate}
         
-    
+    '''
     def _getRPCInterface(self):
         rpcList=[]
         dlist = dir(self)
@@ -160,6 +160,7 @@ class EyeTracker(Device):
                 if callable(getattr(self,d)):
                     rpcList.append(d)
         return rpcList
+    '''
     
     def _EyeTrackerToDisplayCoords(self,*args,**kwargs):
         

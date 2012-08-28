@@ -1,0 +1,28 @@
+title: Psycho Test
+authors:
+- name: Sol Simpson
+  email: N/A
+description: Example psychopy experiment running with ioHub (including pyEyeTrackerInterface) and ioDataStore.
+runtime: 
+    script: psychotest.py       # name of main script file for experiment (should contain the if __name__ is "__main__" : )
+    name: psychopy              # name of experiment runtime environment used a.k.a psychopy
+    api_version: 1.7.03         # minumum version of psychopy supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
+    python_version: 2.7         # minimum python version supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
+    python_exe: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\python.bat #(TO DO:  CURRENLY NOT USED)
+eventBufferLength: 2048         #length of 'client side' event buffer. 
+ioHub:
+    enable: True                # True = enable ioHub functionality
+    config: ioHub_config.yaml   # specifies the config file to use for the ioHub, if enabled. File must be in experiment dir.
+    ioHub_path: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\emrt_lib
+#
+# Defines what Experiment Events can be sent from the experiment and stored to the ioHub file.
+# See Experiment Event documentation for config param meanings. ( TO DO: NO DOCS YET )
+# Currently Only 'Command' and "Message' are supported.  ** EXPERIMENT EVENTS ARE CURRENTLY BROKEN. **
+#
+events:
+- event_class: MessageEvent
+  prefix: 0
+  msg_offset: 0
+- event_class: CommandEvent
+  priority: 0
+  

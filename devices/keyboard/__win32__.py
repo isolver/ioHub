@@ -26,7 +26,7 @@ class KeyboardWindows32(object):
     def __init__(self,*args,**kwargs):      
         self.I_modifierValue=0;
         
-    def eventCallback(self,event):
+    def _nativeEventCallback(self,event):
         notifiedTime=int(currentMsec())
         #
         # Start Tracking Modifiers that are pressed
@@ -45,14 +45,14 @@ class KeyboardWindows32(object):
         # End Tracking Modifiers that are pressed
         #
         event.Modifiers=self.I_modifierValue
-        self.I_eventBuffer.append((notifiedTime,event))
+        self.I_nativeEventBuffer.append((notifiedTime,event))
         return True
 
     def _poll(self):
         pass
             
     @staticmethod
-    def getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event,device_instance_code):
         from . import KeyboardPressEvent,KeyboardReleaseEvent
         notifiedTime, event=event
         etype = ioHub.EVENT_TYPES['KEYBOARD_RELEASE']
@@ -65,7 +65,7 @@ class KeyboardWindows32(object):
         
         chrv=chr(event.Ascii)
 
-        return eclass(experiment_id=0,session_id=1,event_id=2,event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE'],
+        return eclass(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE'],
                                 device_instance_code=device_instance_code,device_time=int(event.Time),logged_time=notifiedTime,hub_time=0,
                                 confidence_interval=0.0,delay=0.0,is_pressed=pressed,flags=event.flags,
                                 alt=event.IsAlt(),extended=event.IsExtended(),transition=event.IsTransition(),

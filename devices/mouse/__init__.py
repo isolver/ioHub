@@ -37,7 +37,7 @@ if computer.system == 'Windows':
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
-                'max_event_buffer_length':deviceConfig['event_buffer_size']
+                'max_event_buffer_length':deviceConfig['event_buffer_length']
                 }          
             Device.__init__(self,**deviceSettings)
             MouseWindows32.__init__(self,**deviceSettings)        

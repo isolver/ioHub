@@ -145,7 +145,7 @@ class EyeTracker(Device):
             'device_class':self.eyeTrackerConfig['device_class'],
             'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_size']
+            'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_length']
             }
         Device.__init__(self,**deviceSettings)
         
@@ -217,6 +217,7 @@ class EyeTracker(Device):
         #print ''        
         # <<<<
 
+    """
     def _getRPCInterface(self):
         '''
         This method is what builds the list of ioHub 'client side' methods that are visible
@@ -243,7 +244,8 @@ class EyeTracker(Device):
                 if callable(getattr(self,d)):
                     rpcList.append(d)
         return rpcList
-        
+    """
+    
     def experimentStartDefaultLogic(self,*args,**kwargs):
         '''
         Experiment Centered Generic method that can be used to perform a set of
@@ -281,6 +283,7 @@ class EyeTracker(Device):
 
         # set link data 
         self.sendCommand("link_event_filter"," = LEFT, RIGHT, FIXATION, FIXUPDATE, SACCADE , BLINK, BUTTON, MESSAGE, INPUT")
+        self.sendCommand("link_event_data"," = GAZE, GAZERES, HREF , PUPIL , AREA , STATUS, VELOCITY, FIXAVG")
         
         if tracker_software_ver>=4:
             self.sendCommand("link_sample_data","  = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT , HTARGET")
@@ -807,30 +810,6 @@ class EyeTracker(Device):
         value = int(args[1])
         return self._eyelink.writeIOPort(port, value)
     
-    """
-    class MonocularEyeSample(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('eye', 'u1'), ('gaze', [('x','f4'), ('y','f4'),('z','f4')]), 
-        ('angle', [('x','f4'), ('y','f4'),('z','f4')]), 
-        ('raw', [('x','f4'), ('y','f4'),('z','f4')]),('pupil_measure',[('v1','f2'),('v2','f2')]),  
-        ('pixels_degree', [('x', '<f2'), ('y', '<f2')]),('status', 'u1')]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-        
-    class BinocularEyeSample(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('gaze', [('x','f4',2), ('y','f4',2),('z','f4',2)]), 
-        ('angle', [('x','f4',2), ('y','f4',2),('z','f4',2)]), 
-        ('raw', [('x','f4',2), ('y','f4',2),('z','f4',2)]),('pupil_measure',[('v1','f2',2),('v2','f2',2)]),  
-        ('pixels_degree', [('x', '<f2',2), ('y', '<f2',2)]),('status', 'u1',2)]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in dataType]   
-    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
-    """
     def _poll(self):
         '''
         For the EyeLink systems, a polling model is used to check for new events and samples.
@@ -843,8 +822,6 @@ class EyeTracker(Device):
         #get native events queued up
         while 1:    
             currentTime=int(Computer.currentUsec())
-            currentHostTime = self.trackerTime()
-            ioHub_msec_offset= Computer.currentMsec()-currentHostTime
             
             ne = eyelink.getNextData()
             
@@ -853,8 +830,18 @@ class EyeTracker(Device):
             
             ne= eyelink.getFloatData()
 
+            if ne is None:
+                break
+                
+            confidenceInterval=0.0 # TODO should be half the sampling rate to rep. avg. external world event to frame capture time (assuming consistant frame rate) 
+            event_timestamp=int(ne.getTime())
+            currentHostTime = self.trackerTime()
+            event_delay=currentHostTime-event_timestamp
+            
+            hub_timestamp=currentTime-(event_delay*1000)
+
             #possible native pylink class types
-            # Sample 
+            # Sample (MonocularSample or BinocularSample)
             # StartBlinkEvent 
             # EndBlinkEvent      
             # StartSacadeEvent 
@@ -868,9 +855,7 @@ class EyeTracker(Device):
             if isinstance(ne,pylink.Sample):
                 # now convert from native format to pyEyeTracker  common format
                 # TODO : not yet done, 
-                confidenceInterval=0.0 # TODO should be half the sampling rate to rep. avg. external world event to frame capture time (assuming consistant frame rate) 
-                sample_timestamp=int(ne.getTime())
-                sample_delay=currentHostTime-sample_timestamp
+
                 ppd=ne.getPPD()
 
                 # hubtime calculation needs to be finished / improved.
@@ -878,8 +863,7 @@ class EyeTracker(Device):
                 #   calulation
                 # - need to handle drift between clocks
                 
-                hub_timestamp=int((sample_timestamp-self.DEVICE_START_TIME+ioHub_msec_offset)*1000.0)
-               
+                
                 if ne.isBinocular():
                     # binocular sample
                     event_type=ioHub.EVENT_TYPES['BINOC_EYE_SAMPLE']
@@ -887,6 +871,37 @@ class EyeTracker(Device):
                     leftData=ne.getLeftEye()
                     rightData=ne.getRightEye()
                     
+                    leftPupilSize=leftData.getPupilSize()
+                    leftRawPupil=leftData.getRawPupil()
+                    leftHref=leftData.getHREF() 
+                    leftGaze=leftData.getGaze()
+                    
+                    rightPupilSize=rightData.getPupilSize()
+                    rightRawPupil=rightData.getRawPupil()
+                    rightHref=rightData.getHREF() 
+                    rightGaze=rightData.getGaze()
+                   
+                    # TO DO: EyeLink pyLink does not expose sample velocity fields. Patch and fix.
+                    vel_x=-1.0
+                    vel_y=-1.0
+                    vel_xy=-1.0
+                    
+
+                    binocSample=BinocularEyeSample(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                                confidence_interval=confidenceInterval, delay=event_delay,
+                                eye=myeye,left_gaze_x=leftGaze[0],left_gaze_y=leftGaze[1],left_gaze_z=-1.0,
+                                left_angle_x=leftHref[0],left_angle_y=leftHref[1],left_raw_x=leftRawPupil[0],left_raw_y=leftRawPupil[1],
+                                left_pupil_measure1=leftPupilSize,left_pupil_measure2=-1, left_ppd_x=ppd[0], left_ppd_y=ppd[1], 
+                                left_velocity_x=vel_x,left_velocity_y=vel_y,left_velocity_xy=vel_xy,
+                                right_gaze_x=rightGaze[0],right_gaze_y=rightGaze[1],right_gaze_z=-1.0,
+                                right_angle_x=rightHref[0],right_angle_y=rightHref[1],right_raw_x=rightRawPupil[0],right_raw_y=rightRawPupil[1],
+                                right_pupil_measure1=rightPupilSize,right_pupil_measure2=-1, right_ppd_x=ppd[0], right_ppd_y=ppd[1], 
+                                right_velocity_x=vel_x,right_velocity_y=vel_y,right_velocity_xy=vel_xy,status=0)
+  
+                    EyeTracker._latestSample=binocSample      
+                    self.I_nativeEventBuffer.append(binocSample)
                     
                 else:
                     # monocular sample
@@ -913,51 +928,226 @@ class EyeTracker(Device):
 
                     monoSample=MonocularEyeSample(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
                                 event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                                device_time=sample_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                                confidence_interval=confidenceInterval, delay=sample_delay,
+                                device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                                confidence_interval=confidenceInterval, delay=event_delay,
                                 eye=myeye,gaze_x=gaze[0],gaze_y=gaze[1],gaze_z=-1.0,
                                 angle_x=href[0],angle_y=href[1],raw_x=rawPupil[0],raw_y=rawPupil[1],
                                 pupil_measure1=pupilSize,pupil_measure2=-1, ppd_x=ppd[0], ppd_y=ppd[1], 
                                 velocity_x=vel_x,velocity_y=vel_y,velocity_xy=vel_xy,status=0)
                     
                     EyeTracker._latestSample=monoSample      
-                    self.I_eventBuffer.append(monoSample)
-
+                    self.I_nativeEventBuffer.append(monoSample)
+                    
+            #elif isinstance(ne,pylink.FixationUpdateEvent):
+            #    etype=ioHub.EVENT_TYPES['FIXATION_UPDATE']
+            #     
+            #    which_eye=ne.getEye()
+            #    if which_eye:
+            #        which_eye=EYE_CODES.RIGHT
+            #    else:
+            #        which_eye=EYE_CODES.LEFT
+                '''    
+                pupil_size=ne.getStartPupilSize()
+                gaze=ne.getStartGaze()
+                href=ne.getStartHREF()
+                velocity=ne.getStartVelocity()
+                ppd=ne.getStartPPD()
+                estatus=ne.getStatus()
+                
+                fue=FixatonUpdateEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                                    gaze_x=gaze[0], gaze_y=gaze[1],gaze_z=-1, pupil_measure1=pupil_size, pupil_measure2=-1.0,
+                                    ppd_x=ppd[0],ppd_y=ppd[1],velocity_x=-1.0,velocity_y=-1.0,velocity_xy=velocity,status=estatus)
+                
+                self.I_nativeEventBuffer.append(fue)
+                '''
+            elif isinstance(ne,pylink.EndFixationEvent):
+                etype=ioHub.EVENT_TYPES['FIXATION_END']
+                
+                estatus = ne.getStatus()
+                
+                which_eye=ne.getEye()
+                if which_eye:
+                    which_eye=EYE_CODES.RIGHT
+                else:
+                    which_eye=EYE_CODES.LEFT
+                
+                start_event_time= ne.getStartTime()
+                end_event_time = ne.getEndTime()
+                event_duration = end_event_time-start_event_time
+                
+                s_gaze=ne.getStartGaze()
+                s_href=ne.getStartHREF()
+                s_vel=ne.getStartVelocity()
+                s_pupilsize=ne.getStartPupilSize()
+                s_ppd=ne.getStartPPD()
+                
+                e_gaze=ne.getEndGaze()
+                e_href=ne.getEndHREF()
+                e_pupilsize=ne.getEndPupilSize()
+                e_vel=ne.getEndVelocity()
+                e_ppd=ne.getEndPPD()
+                
+                a_gaze=ne.getAverageGaze()
+                a_href=ne.getAverageHREF()
+                a_pupilsize=ne.getAveragePupilSize()
+                a_vel=ne.getAverageVelocity()
+                
+                peak_vel=ne.getPeakVelocity()
+                
+                fee=FixationEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                                    duration=event_duration,start_gaze_x=s_gaze[0],start_gaze_y=s_gaze[1],start_gaze_z=-1.0,
+                                    start_angle_x=s_href[0], start_angle_y=s_href[1], start_raw_x=-1.0, start_raw_y=-1.0,
+                                    start_pupil_measure1=s_pupilsize, start_pupil_measure2=-1.0, start_ppd_x=s_ppd[0], start_ppd_y=s_ppd[1],
+                                    start_velocity_x = -1, start_velocity_y = -1, start_velocity_xy = s_vel,
+                                    end_gaze_x = e_gaze[0], end_gaze_y = e_gaze[1], end_gaze_z = -1.0,
+                                    end_angle_x= e_href[0], end_angle_y = e_href[1], end_raw_x = -1, end_raw_y = -1,
+                                    end_pupil_measure1 = e_pupilsize, end_pupil_measure2 = -1, end_ppd_x = e_ppd[0], end_ppd_y= e_ppd[1],
+                                    end_velocity_x = -1, end_velocity_y= -1, end_velocity_xy = e_vel,
+                                    average_gaze_x=a_gaze[0],average_gaze_y=a_gaze[1],average_gaze_z=-1.0,
+                                    average_angle_x=a_href[0],average_angle_y=a_href[1],average_raw_x=-1.0,average_raw_y=-1.0,
+                                    average_pupil_measure1=a_pupilsize,average_pupil_measure2=-1.0,average_ppd_x=-1.0,average_ppd_y=-1.0,
+                                    average_velocity_x=-1.0,average_velocity_y=-1.0,average_velocity_xy=a_vel,
+                                    peak_velocity_x=-1.0, peak_velocity_y=-1.0, peak_velocity_xy=peak_vel,status=estatus) 
+                self.I_nativeEventBuffer.append(fee)
+                
+            elif isinstance(ne,pylink.EndSaccadeEvent):
+                etype=ioHub.EVENT_TYPES['SACCADE_END']
+                
+                estatus = ne.getStatus()
+                
+                which_eye=ne.getEye()
+                if which_eye:
+                    which_eye=EYE_CODES.RIGHT
+                else:
+                    which_eye=EYE_CODES.LEFT
+                
+                start_event_time= ne.getStartTime()
+                end_event_time = ne.getEndTime()
+                event_duration = end_event_time-start_event_time
+                
+                e_amp = ne.getAmplitude()
+                e_angle = ne.getAngle()
+                
+                s_gaze=ne.getStartGaze()
+                s_href=ne.getStartHREF()
+                s_vel=ne.getStartVelocity()
+                s_pupilsize=-1.0
+                s_ppd=ne.getStartPPD()
+                
+                e_gaze=ne.getEndGaze()
+                e_href=ne.getEndHREF()
+                e_pupilsize=-1.0
+                e_vel=ne.getEndVelocity()
+                e_ppd=ne.getEndPPD()
+                
+                a_vel=ne.getAverageVelocity()
+                peak_vel=ne.getPeakVelocity()
+                
+                see=SaccadeEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                                    duration=event_duration, amplitude_x=e_amp[0], amplitude_y=e_amp[1], angle=e_angle, 
+                                    start_gaze_x=s_gaze[0],start_gaze_y=s_gaze[1],start_gaze_z=-1.0,
+                                    start_angle_x=s_href[0], start_angle_y=s_href[1], start_raw_x=-1.0, start_raw_y=-1.0,
+                                    start_pupil_measure1=s_pupilsize, start_pupil_measure2=-1.0, start_ppd_x=s_ppd[0], start_ppd_y=s_ppd[1],
+                                    start_velocity_x = -1, start_velocity_y = -1, start_velocity_xy = s_vel,
+                                    end_gaze_x = e_gaze[0], end_gaze_y = e_gaze[1], end_gaze_z = -1.0,
+                                    end_angle_x= e_href[0], end_angle_y = e_href[1], end_raw_x = -1, end_raw_y = -1,
+                                    end_pupil_measure1 = e_pupilsize, end_pupil_measure2 = -1, end_ppd_x = e_ppd[0], end_ppd_y= e_ppd[1],
+                                    end_velocity_x = -1, end_velocity_y= -1, end_velocity_xy = e_vel,
+                                    average_velocity_x=-1.0,average_velocity_y=-1.0,average_velocity_xy=a_vel,
+                                    peak_velocity_x=-1.0, peak_velocity_y=-1.0, peak_velocity_xy=peak_vel,status=estatus) 
+                self.I_nativeEventBuffer.append(see)               
+            elif isinstance(ne,pylink.EndBlinkEvent):
+                etype=ioHub.EVENT_TYPES['BLINK_END']
+                
+                estatus = ne.getStatus()
+                
+                which_eye=ne.getEye()
+                if which_eye:
+                    which_eye=EYE_CODES.RIGHT
+                else:
+                    which_eye=EYE_CODES.LEFT
+                
+                start_event_time= ne.getStartTime()
+                end_event_time = ne.getEndTime()
+                event_duration = end_event_time-start_event_time
+                               
+                bee=BlinkEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                                    duration=event_duration, status=estatus)
+                self.I_nativeEventBuffer.append(bee)
+                
+            elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):                
+                etype=ioHub.EVENT_TYPES['FIXATION_START']
+                ioEventClass=FixationStartEvent
+                
+                if isinstance(ne,pylink.StartSaccadeEvent):
+                    etype=ioHub.EVENT_TYPES['SACCADE_START']
+                    ioEventClass=SaccadeStartEvent
+                which_eye=ne.getEye()
+                if which_eye:
+                    which_eye=EYE_CODES.RIGHT
+                else:
+                    which_eye=EYE_CODES.LEFT
+                
+                pupil_size=-1
+                if etype == ioHub.EVENT_TYPES['FIXATION_START']:
+                    pupil_size=ne.getStartPupilSize()
+                gaze=ne.getStartGaze()
+                href=ne.getStartHREF()
+                velocity=ne.getStartVelocity()
+                ppd=ne.getStartPPD()
+                estatus=ne.getStatus()
+                
+                se=ioEventClass(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                                    gaze_x=gaze[0], gaze_y=gaze[1],gaze_z=-1, 
+                                    angle_x=href[0],angle_y=href[1],raw_x=-1.0,raw_y=-1.0,
+                                    pupil_measure1=pupil_size, pupil_measure2=-1.0,
+                                    ppd_x=ppd[0],ppd_y=ppd[1],velocity_x=-1.0,velocity_y=-1.0,velocity_xy=velocity,status=estatus)
+                self.I_nativeEventBuffer.append(se)
+                
+            elif isinstance(ne,pylink.StartBlinkEvent):
+                etype=ioHub.EVENT_TYPES['BLINK_START']
+                
+                estatus = ne.getStatus()
+                
+                which_eye=ne.getEye()
+                if which_eye:
+                    which_eye=EYE_CODES.RIGHT
+                else:
+                    which_eye=EYE_CODES.LEFT
+                
+                start_event_time= ne.getStartTime()
+                               
+                bse=BlinkStartEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
+                                    device_time=start_event_time, logged_time=currentTime, hub_time=hub_timestamp,
+                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,status=estatus)
+                                    
+                self.I_nativeEventBuffer.append(bse)
+                
         EyeTracker.lastPollTime=currentTime
     
-    def _handleEvent(self,*args,**kwargs):
-        '''
-        _handleEvent is used by devices that signal new events by using an event driven
-        callback approach. 
-        One args is required, the device event to be handled, "event"
-        '''
-        if len(args) > 0:
-            event=args[0]
-            
-        currentTime=int(Computer.currentUsec())
-        confidenceInterval=currentTime-self.lastCallbackTime
-        
-        # do any manipulation to the native event object here before putting it in the devices
-        # circular buffer. Remember to keep work done in the callback to a minimum. For example,
-        # the conversion to a native ioHub event is done in the getIOHubEventObject(event,device_instance_code)
-        # method, so does not need to be done here.
-        #
-        # ......
-        #
-        
-        EyeTracker.lastCallbackTime=currentTime
-        
-        # append the native event to the deque as a tuple of (current_time, event)
-        # This can be unpacked in the getIOHubEventObject and the current_time 
-        # used as the logged_time field of the ioHub DeviceEvent object.
-        #
-        self.I_eventBuffer.append((currentTime,event))
+    def _handleNativeEvent(self,*args,**kwargs):
         pass
     
     @staticmethod    
-    def getIOHubEventObject(*args,**kwargs):
+    def _getIOHubEventObject(*args,**kwargs):
         '''
-        getIOHubEventObject is used to convert a devices events from their 'native' format
+        _getIOHubEventObject is used to convert a devices events from their 'native' format
         to the ioHub DeviceEvent obejct for the relevent event type. 
         
         If a polling model is used to retrieve events, this conversion is actually done in

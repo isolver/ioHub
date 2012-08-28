@@ -147,7 +147,7 @@ class EyeTracker(Device):
             'device_class':self.eyeTrackerConfig['device_class'],
             'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_size']
+            'max_event_buffer_length':deviceConfig['event_buffer_length']
             }
         Device.__init__(self,**deviceSettings)
         
@@ -215,7 +215,8 @@ class EyeTracker(Device):
         #print self.displaySettings
         #print ''        
         # <<<<
-
+    
+    """
     def _getRPCInterface(self):
         '''
         This method is what builds the list of ioHub 'client side' methods that are visible
@@ -242,7 +243,8 @@ class EyeTracker(Device):
                 if callable(getattr(self,d)):
                     rpcList.append(d)
         return rpcList
-        
+    """
+    
     def experimentStartDefaultLogic(self,*args,**kwargs):
         '''
         Experiment Centered Generic method that can be used to perform a set of
@@ -631,11 +633,11 @@ class EyeTracker(Device):
             # ......
             
             # put the ioHub eye tracker Device event in devices buffer for pickup by the ioHub.
-            self.I_eventBuffer.append(ioHubEvent)
+            self.I_nativeEventBuffer.append(ioHubEvent)
 
         EyeTracker.lastPollTime=currentTime
     
-    def _handleEvent(self,*args,**kwargs):
+    def _handleNativeEvent(self,*args,**kwargs):
         '''
         _handleEvent is used by devices that signal new events by using an event driven
         callback approach. 
@@ -645,11 +647,11 @@ class EyeTracker(Device):
             event=args[0]
             
         currentTime=int(Computer.currentUsec())
-        confidenceInterval=currentTime-self.lastCallbackTime
+        confidenceInterval=currentTime-EyeTracker.lastCallbackTime
         
         # do any manipulation to the native event object here before putting it in the devices
         # circular buffer. Remember to keep work done in the callback to a minimum. For example,
-        # the conversion to a native ioHub event is done in the getIOHubEventObject(event,device_instance_code)
+        # the conversion to a native ioHub event is done in the _getIOHubEventObject(event,device_instance_code)
         # method, so does not need to be done here.
         #
         # ......
@@ -658,16 +660,15 @@ class EyeTracker(Device):
         EyeTracker.lastCallbackTime=currentTime
         
         # append the native event to the deque as a tuple of (current_time, event)
-        # This can be unpacked in the getIOHubEventObject and the current_time 
+        # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
         #
-        self.I_eventBuffer.append((currentTime,event))
-        pass
+        self.I_nativeEventBuffer.append((currentTime,event))
     
     @staticmethod    
-    def getIOHubEventObject(*args,**kwargs):
+    def _getIOHubEventObject(*args,**kwargs):
         '''
-        getIOHubEventObject is used to convert a devices events from their 'native' format
+        _getIOHubEventObject is used to convert a devices events from their 'native' format
         to the ioHub DeviceEvent obejct for the relevent event type. 
         
         If a polling model is used to retrieve events, this conversion is actually done in

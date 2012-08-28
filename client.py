@@ -155,13 +155,16 @@ class ioHubClient(object):
         # udp port setup
         self.udp_client = UDPClientConnection(coder=ipcCoder)
         self.devices=ioHubDevices(self)
+        self.deviceByLabel=dict()
         
     def getDevices(self):
         return self.devices
     
     def createDeviceList(self,deviceList):
         for user_label,instance_code,device_class in deviceList:
-            self.devices.__dict__[user_label]=ioHubClientDevice(self,user_label,instance_code,device_class)
+            d=ioHubClientDevice(self,user_label,instance_code,device_class)
+            self.devices.__dict__[user_label]=d
+            self.deviceByLabel[user_label]=d
             
     # UDP communication with ioHost    
     def sendToHub(self,argsList):

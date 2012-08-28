@@ -41,7 +41,7 @@ class MouseWindows32(object):
     def __init__(self, *args,**kwargs):
         self._lastCallbackTime=None
 
-    def eventCallback(self,event):
+    def _nativeEventCallback(self,event):
         ctime=currentMsec()
 
         ci=0.0
@@ -52,14 +52,14 @@ class MouseWindows32(object):
         
         notifiedTime=int(ctime)
 
-        self.I_eventBuffer.append((notifiedTime,event))
+        self.I_nativeEventBuffer.append((notifiedTime,event))
         return True
     
     def _poll(self):
         pass
  
     @staticmethod
-    def getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event,device_instance_code):
         from . import MouseMoveEvent,MouseWheelEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
         notifiedTime, event=event
         p = event.Position
@@ -93,7 +93,7 @@ class MouseWindows32(object):
         elif event.Message in (MouseWindows32.WM_MBUTTONDOWN,MouseWindows32.WM_MBUTTONUP,MouseWindows32.WM_MBUTTONDBLCLK):
                 bnum=MouseWindows32.BUTTON_ID_MIDDLE
         
-        r= eclass(experiment_id=0,session_id=1,event_id=2,event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['MOUSE_DEVICE'],
+        r= eclass(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['MOUSE_DEVICE'],
                                 device_instance_code=device_instance_code,device_time=int(event.Time),logged_time=notifiedTime,hub_time=notifiedTime,
                                 confidence_interval=0.0 ,delay=0.0,button_state=bstate,button_id=bnum,
                                 x_position=px,y_position=py,wheel=event.Wheel,windowID=event.Window)

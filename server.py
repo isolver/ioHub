@@ -113,14 +113,15 @@ class udpServer(DatagramServer):
         eventBuffer=self.iohub.eventBuffer
 
         while len(eventBuffer)>0:
-             e=eventBuffer.popleft()
-             print '--'
-             print e._asTuple()
-             bisect.insort(currentEvents, e)       
-        events=[e.I_tuple for e in currentEvents]
+            e=eventBuffer.popleft()
+            currentEvents.append(e.I_tuple)
+        #     print '--'
+        #     print e._asTuple()
+        #     bisect.insort(currentEvents, e)       
+        #events=[e.I_tuple for e in currentEvents]
 
-        if len(events)>0:
-            self.sendResponse(('GET_EVENTS_RESULT',events),replyTo)
+        if len(currentEvents)>0:
+            self.sendResponse(('GET_EVENTS_RESULT',currentEvents),replyTo)
         else:
             self.sendResponse(('GET_EVENTS_RESULT', None),replyTo)
  
@@ -129,7 +130,7 @@ class udpServer(DatagramServer):
         if request_type == 'EVENT_TX':
             exp_events=request.pop(0)
             for eventAsTuple in exp_events:
-                self.iohub.experimentRuntimeDevice.eventCallback(eventAsTuple)
+                self.iohub.experimentRuntimeDevice._nativeEventCallback(eventAsTuple)
             self.sendResponse(('EVENT_TX_RESULT',len(exp_events)),replyTo)
         elif request_type == 'DEV_RPC':
             dclass=request.pop(0)
@@ -276,6 +277,7 @@ class ioServer(object):
         # device configuration
         if len(config['monitor_devices']) > 0:
             import ioHub.devices as devices
+            devices.buildTypeCodeToClassDict()
 
         #built device list and config from yaml config settings
         for iodevice in config['monitor_devices']:
@@ -301,7 +303,10 @@ class ioServer(object):
                 # add event listeners for streaming events
                 if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
                     self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
+                    # add listener for global event queue
                     deviceInstance._addEventListener(self)
+                    # add listener for device event queue
+                    deviceInstance._addEventListener(deviceInstance)
 
                 # add event listeners for saving events
                 if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
@@ -317,9 +322,9 @@ class ioServer(object):
                     self._hookManager=pyHook.HookManager()
                     
                     if 'Mouse' in deviceDict:
-                        self._hookManager.MouseAll = deviceDict['Mouse'].eventCallback
+                        self._hookManager.MouseAll = deviceDict['Mouse']._nativeEventCallback
                     if 'Keyboard' in deviceDict:
-                        self._hookManager.KeyAll = deviceDict['Keyboard'].eventCallback
+                        self._hookManager.KeyAll = deviceDict['Keyboard']._nativeEventCallback
                     if 'Mouse' in deviceDict:
                         self._hookManager.HookMouse()    
                     if 'Keyboard' in deviceDict:
@@ -339,10 +344,10 @@ class ioServer(object):
     def processDeviceEvents(self,sleep_interval):
         while self._running:
             for device in self.devices:
-                events=device._getEventBuffer()
+                events=device._getNativeEventBuffer()
                 while len(events)>0:
                     evt=events.popleft()                    
-                    e=device.getIOHubEventObject(evt,device.instance_code)
+                    e=device._getIOHubEventObject(evt,device.instance_code)
                     for l in device._getEventListeners():
                         l._handleEvent(e) 
             gevent.sleep(sleep_interval)    

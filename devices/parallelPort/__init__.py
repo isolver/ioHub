@@ -38,7 +38,7 @@ if computer.system == 'Windows':
                 'base_address':deviceConfig['base_address'],
                 'address_offset':0,
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
-                'max_event_buffer_length':deviceConfig['event_buffer_size']
+                'max_event_buffer_length':deviceConfig['event_buffer_length']
                 }          
             Device.__init__(self,**deviceSettings)
             ParallelPortWin32.__init__(self,**deviceSettings)

@@ -56,18 +56,18 @@ class ParallelPortWin32(object):
             else:
                 lrv=0
                 
-            ppe= ParallelPortEvent(experiment_id=0,session_id=1,event_id=2,event_type=ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],
+            ppe= ParallelPortEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],
                                     device_type=ioHub.DEVICE_TYPE_LABEL['PARALLEL_PORT_DEVICE'],
                                     device_instance_code=self.instance_code,device_time=currentTime,
                                     logged_time=currentTime,hub_time=currentTime,confidence_interval=ci,
                                     delay=0.025,base_address=self.base_address,address_offset=self.address_offset,current_value=currentValue,
                                     last_value=lrv)
 
-            self.I_eventBuffer.append(ppe)
+            self.I_nativeEventBuffer.append(ppe)
 
         self.lastReadTime=currentTime
         self.lastReadValue=currentValue
 
     @staticmethod    
-    def getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event,device_instance_code):
         return event # already a ParallelPort Event
