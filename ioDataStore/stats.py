@@ -34,4 +34,4 @@ def calculateStatsOnColumn(hfile,table,columnName):
     stats.median=N.median(a)
     stats.std=N.std(a)
     stats.var=N.var(a)
-    return stats  
+    return stats
