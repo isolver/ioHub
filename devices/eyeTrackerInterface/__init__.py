@@ -76,7 +76,7 @@ class InitialUserSetupState(Enum):
 USER_SETUP_STATES = InitialUserSetupState()
     
 class CalibrationTypes(Enum):
-    __slots__=["DC","HV3","HV5","HV9","HV13"]
+    __slots__=["DC","H3","HV3","HV5","HV9","HV13"]
     def __init__(self):
         Enum.__init__(self)
 CALIBRATION_TYPES = CalibrationTypes()
