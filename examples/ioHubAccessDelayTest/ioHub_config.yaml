@@ -111,7 +111,7 @@ monitor_devices:
         device_timer:
             interval: 0.0001
     - device:
-        device_class: ExperimentRuntimeDevice
+        device_class: ExperimentDevice
         name: PsychoPy
         instance_code: computer_serial_number+psychopy
         saveEvents: True

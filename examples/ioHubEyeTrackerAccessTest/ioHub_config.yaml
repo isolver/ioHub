@@ -102,7 +102,7 @@ monitor_devices:
         device_timer:
             interval: 0.0001
     - device:
-        device_class: ExperimentRuntimeDevice
+        device_class: ExperimentDevice
         name: PsychoPy
         instance_code: computer_serial_number+psychopy
         saveEvents: True
@@ -190,7 +190,7 @@ monitor_devices:
             # 
             # Sampling rate to track at in Hz. Must be supported by eye tracker being used. ;)
             #
-            sampling_rate: 60.0
+            sampling_rate: 1000
             #
             # EyeTrackerConfig['track_eyes']=('BINOC' | 'MONO', [ 'MEAN' | 'SIM' ])
             #

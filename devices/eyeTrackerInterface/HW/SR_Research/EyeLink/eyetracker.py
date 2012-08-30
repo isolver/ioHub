@@ -106,7 +106,10 @@ class EyeTracker(Device):
     # >>> implementation specific private class attributes
     _eyelink=None
     _OPEN_EDF=None
+    _VALID_SAMPLING_RATES=[250,500,1000,2000]
+    _VALID_CALIBRATION_TYPES=dict(H3="H3",HV3="HV3",HV5="HV5",HV9="HV9",HV13="HV13")
     lastPollTime=0.0
+    currentSampleRate=None
     # <<<
     def __init__(self,*args,**kwargs):
         '''
@@ -154,29 +157,14 @@ class EyeTracker(Device):
         
         # >>>> implementation specific private attributes
         EyeTracker._eyelink=pylink.EyeLink()
+        EyeTracker.currentSampleRate=EyeTracker._eyelink.getSampleRate()
+        
         EyeTracker.DEVICE_START_TIME=int(self._eyelink.trackerTime())
         # <<<< 
         
         # >>>> eye tracker setting to config (if possible)
-        #
-        # Current settings, example from possible values.
-        #
-        # 'sampling_rate': 60.0, 
-        # 'vog_settings': {
-        #                  'pupil_illumination': 'dark', 
-        #                  'pupil_center_algorithm': 'centroid', 
-        #                  'tracking_mode': 'pupil-cr'
-        #                 } 
-        # 'default_calibration': '9P'
-        # 'track_eyes': 'BINOC'
-        # 'runtime_filtering': {
-        #                       'ANY': 0
-        #                      }
         runtimeSettings=self.eyeTrackerConfig['runtime_settings']
-        #print ''
-        #print " #### EyeTracker Runtime Settings #### "
-        #print runtimeSettings
-        #print ''
+        self._setRuntimeSettings(runtimeSettings)
         # <<<<
         
         # >>>> Display / Calibration related information to use for config if possible
@@ -217,6 +205,54 @@ class EyeTracker(Device):
         #print ''        
         # <<<<
 
+    def _setRuntimeSettings(self,runtimeSettings):
+        #print " #### EyeTracker Runtime Settings #### "
+        #print runtimeSettings
+        #print ''
+        eyelink=self._eyelink
+        
+        for pkey,v in runtimeSettings.iteritems():
+            if pkey == 'auto_calibration':
+                if v is True or v == 1 or v == 'ON':
+                    eyelink.enableAutoCalibration()
+                elif v is False or v == 0 or v == 'OFF':
+                    eyelink.disableAutoCalibration()
+            
+            elif pkey == 'default_calibration':
+                if v in EyeTracker._VALID_CALIBRATION_TYPES:
+                    eyelink.setCalibrationType(EyeTracker._VALID_CALIBRATION_TYPES[v])
+            
+            elif pkey == 'runtime_filtering':
+                linkValue=0
+                fileValue=0
+                for ftype,fvalue in v.iteritems():
+                    if ftype == 'ANY':
+                        linkValue=fvalue
+                        fileValue=fvalue
+                    elif ftype == 'NET':
+                        linkValue=fvalue
+                    elif ftype == 'ANALOG':
+                        linkValue=fvalue
+                    elif ftype == 'FILE':
+                        fileValue=fvalue
+                eyelink.setHeuristicLinkAndFileFilter(linkValue,fileValue)
+            
+            elif pkey == 'sampling_rate':
+                if v in EyeTracker._VALID_SAMPLING_RATES:
+                    eyelink.sendCommand('sample_rate = %d'%(v))
+            
+            else:
+                print "WARNING: UNHANDLED EYETRACKER CONFIG SETTING:",pkey,v
+                print ""
+        # <<<<
+        
+        '''
+        'track_eyes': 'BINOC', 
+        'default_native_data_file_name': 'default',  
+        'vog_settings': {'pupil_illumination': 'dark', 'pupil_center_algorithm': 'centroid', 'tracking_mode': 'pupil-cr'}, 
+        'save_native_data_file_to': 'C:\\Users\\isolver\\Desktop\\Dropbox\\EMDQ and EMRA\\EMRA\\EMRT\\DEV\\EMRTDISTRO\\emrt_lib\\emrt\\examples\\experiment\\',
+        '''
+    
     """
     def _getRPCInterface(self):
         '''
@@ -611,6 +647,7 @@ class EyeTracker(Device):
                 print "ERROR: No link samples received!";
                 return ('EYETRACKER_ERROR','EyeTracker.setRecordingState','Error in waitForBlockStart')
             else:
+                EyeTracker.currentSampleRate=self._eyelink.getSampleRate()
                 return RTN_CODES.ET_OK;
         
         elif enable is False:
@@ -816,8 +853,12 @@ class EyeTracker(Device):
         If your eye tracker supports a more efficient event based call-back approach, this should be 
         used instead of registering a timer with the device.
         '''
-         
-        eyelink=self._eyelink        
+        pollStartLocalTime=int(Computer.currentUsec())
+        eyelink=self._eyelink
+        pollStartHostTime = eyelink.trackerTimeUsec()        
+               
+                  
+        confidenceInterval=1000.0/EyeTracker.currentSampleRate/2.0*1000.0
         
         #get native events queued up
         while 1:    
@@ -828,17 +869,15 @@ class EyeTracker(Device):
             if ne == 0 or ne is None:
                 break # no more events / samples to process
             
-            ne= eyelink.getFloatData()
+            ne=eyelink.getFloatData()
 
             if ne is None:
                 break
-                
-            confidenceInterval=0.0 # TODO should be half the sampling rate to rep. avg. external world event to frame capture time (assuming consistant frame rate) 
+
             event_timestamp=int(ne.getTime())
-            currentHostTime = self.trackerTime()
-            event_delay=currentHostTime-event_timestamp
+            event_delay=pollStartHostTime-(event_timestamp*1000.0)
             
-            hub_timestamp=currentTime-(event_delay*1000)
+            hub_timestamp=currentTime-event_delay
 
             #possible native pylink class types
             # Sample (MonocularSample or BinocularSample)
@@ -892,10 +931,12 @@ class EyeTracker(Device):
                                 device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
                                 confidence_interval=confidenceInterval, delay=event_delay,
                                 eye=myeye,left_gaze_x=leftGaze[0],left_gaze_y=leftGaze[1],left_gaze_z=-1.0,
+                                left_eye_cam_x=-1,left_eye_cam_y=-1,left_eye_cam_z=-1.0,
                                 left_angle_x=leftHref[0],left_angle_y=leftHref[1],left_raw_x=leftRawPupil[0],left_raw_y=leftRawPupil[1],
                                 left_pupil_measure1=leftPupilSize,left_pupil_measure2=-1, left_ppd_x=ppd[0], left_ppd_y=ppd[1], 
                                 left_velocity_x=vel_x,left_velocity_y=vel_y,left_velocity_xy=vel_xy,
                                 right_gaze_x=rightGaze[0],right_gaze_y=rightGaze[1],right_gaze_z=-1.0,
+                                right_eye_cam_x=-1,right_eye_cam_y=-1,right_eye_cam_z=-1.0,
                                 right_angle_x=rightHref[0],right_angle_y=rightHref[1],right_raw_x=rightRawPupil[0],right_raw_y=rightRawPupil[1],
                                 right_pupil_measure1=rightPupilSize,right_pupil_measure2=-1, right_ppd_x=ppd[0], right_ppd_y=ppd[1], 
                                 right_velocity_x=vel_x,right_velocity_y=vel_y,right_velocity_xy=vel_xy,status=0)
@@ -931,6 +972,7 @@ class EyeTracker(Device):
                                 device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
                                 confidence_interval=confidenceInterval, delay=event_delay,
                                 eye=myeye,gaze_x=gaze[0],gaze_y=gaze[1],gaze_z=-1.0,
+                                eye_cam_x=-1,eye_cam_y=-1,eye_cam_z=-1.0,
                                 angle_x=href[0],angle_y=href[1],raw_x=rawPupil[0],raw_y=rawPupil[1],
                                 pupil_measure1=pupilSize,pupil_measure2=-1, ppd_x=ppd[0], ppd_y=ppd[1], 
                                 velocity_x=vel_x,velocity_y=vel_y,velocity_xy=vel_xy,status=0)

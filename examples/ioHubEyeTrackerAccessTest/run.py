@@ -1,23 +1,12 @@
-from __future__ import division
-import psychopy
-from psychopy import logging, core, visual
-import os,gc,psutil
-from yaml import load, dump
+import ioHub.psychopyIOHubRuntime
+from ioHub.psychopyIOHubRuntime import *
 from eyeTrackerConstants import *
-import simpleIOHubRuntime
 
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    print "*** Using Python based YAML Parsing"
-    from yaml import Loader, Dumper
-    
-HERE_DIR=os.path.dirname(os.path.abspath(__file__))
+EXPERIMENT_DIR=os.path.dirname(os.path.abspath(__file__))
 
-class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
+class ExperimentRuntime(SimpleIOHubRuntime):
     def __init__(self, configFile):
-        print 'configFile',configFile
-        simpleIOHubRuntime.SimpleIOHubRuntime.__init__(self,configFile)
+        SimpleIOHubRuntime.__init__(self,EXPERIMENT_DIR,configFile)
                
     def run(self,*args,**kwargs):
         TEST_BLOCK_COUNT=2
@@ -102,6 +91,15 @@ class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
                 print DIVIDER
                 
                 stime=self.currentMsec()
+                events=self.getEvents(asType='dict')
+                etime=self.currentMsec()
+                #for e in events:
+                #    print '%s %s'%(ioHub.EVENT_TYPES[e['event_type']],str(e['hub_time']))
+                print 'Get All Events (msec):',etime-stime
+                print 'Event Count:',len(events)
+                print DIVIDER
+
+                stime=self.currentMsec()
                 e=self.getEvents('ExperimentPCkeyboard')
                 etime=self.currentMsec()
                 print 'Get Keyboard Events (msec):',etime-stime
@@ -172,6 +170,13 @@ if __name__ == "__main__":
         # terminate the ioServer
         runtime.hub.shutDownServer()
         
+        # save ioHubFile to xlsx format
+        print "Saving Sample Excel File ...."
+        import ioHub.ioDataStore.util as dsUtil
+        tstart=runtime.currentMsec()
+        nrows=dsUtil.hubTableToExcel(EXPERIMENT_DIR,runtime.ioHubConfig['ioDataStore']['filename']+'.hdf5',tableName='MonocularEyeSample',experiment_id=0,session_id=0)
+        tend=runtime.currentMsec()
+        print "Saved %d rows to excel file in %.3f sec (%.3f msec / row)"%(nrows,(tend-tstart)/1000.0,(tend-tstart)/nrows)
         # terminate psychopy
         core.quit()
         

@@ -12,7 +12,7 @@ import ioHub
 currentMsec=Computer.currentMsec
 import numpy as N
 
-class ExperimentRuntimeDevice(Device):
+class ExperimentDevice(Device):
     dataType = list(Device.dataType)
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
@@ -23,8 +23,8 @@ class ExperimentRuntimeDevice(Device):
     def __init__(self,*args,**kwargs):
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
-            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[ExperimentRuntimeDevice.categoryTypeString],
-            'type_id':ioHub.DEVICE_TYPE_LABEL[ExperimentRuntimeDevice.deviceTypeString],
+            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[ExperimentDevice.categoryTypeString],
+            'type_id':ioHub.DEVICE_TYPE_LABEL[ExperimentDevice.deviceTypeString],
             'device_class':deviceConfig['device_class'],
             'user_label':deviceConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',

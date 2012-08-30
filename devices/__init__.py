@@ -217,9 +217,9 @@ class DeviceEvent(ioObject):
 
     @classmethod
     def createFromOrderedList(cls,list):
-        vdict={n:list[i] for i,n in enumerate(cls.attributeNames)}
-        print 'vdict:',vdict
-        return cls(**vdict)
+        combo = zip(cls.attributeNames,eventValueList)
+        kwargs = dict(combo)
+        return cls(**kwargs)
         
 import keyboard as keyboard_module
 from keyboard import Keyboard
@@ -234,7 +234,7 @@ from parallelPort import ParallelPort
 from parallelPort import ParallelPortEvent
 
 import experiment
-from experiment import ExperimentRuntimeDevice
+from experiment import ExperimentDevice
 from experiment import MessageEvent, CommandEvent
 
 import eyeTrackerInterface

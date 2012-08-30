@@ -28,7 +28,7 @@ except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
     
-HERE_DIR=os.path.dirname(os.path.abspath(__file__))
+EXPERIMENT_DIR=os.path.dirname(os.path.abspath(__file__))
 
 class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
     def __init__(self,configFile):

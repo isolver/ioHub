@@ -66,6 +66,7 @@ import os, sys, atexit, shutil
 import ioHub
 import ioHub.devices as D
 from log import ExperimentLog,LogLevels
+import util
 
 parameters.MAX_NUMEXPR_THREADS=None
 """The maximum number of threads that PyTables should use internally in

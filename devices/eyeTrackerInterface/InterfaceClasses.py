@@ -647,7 +647,6 @@ class EyeTracker(Device):
             event=args[0]
             
         currentTime=int(Computer.currentUsec())
-        confidenceInterval=currentTime-EyeTracker.lastCallbackTime
         
         # do any manipulation to the native event object here before putting it in the devices
         # circular buffer. Remember to keep work done in the callback to a minimum. For example,
@@ -695,7 +694,6 @@ class EyeTracker(Device):
         # CASE 2: Callback is used to register events
         # if len(args)==2:
         #    logged_time,event=args[0]
-        #    device_instance_code=args[1]
         #
         # Convert the native event type to the appropriate DeviceEvenet type for an EyeTracker.
         # See iohub.devices.eyeTrackerInterface.eye_events.py for the list of intended eye tracker 
