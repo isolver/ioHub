@@ -9,17 +9,23 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 from .. import Device,Computer,DeviceEvent
 import ioHub
-currentMsec=Computer.currentMsec
+currentUsec=Computer.currentUsec
 import numpy as N
 
 class ExperimentDevice(Device):
-    dataType = list(Device.dataType)
+    dataType = Device.dataType+[]
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
     categoryTypeString='VIRTUAL'
     deviceTypeString='EXPERIMENT_DEVICE'
+    
+    STAT_COLLECTION_COUNT=200
+    
+    runningTimebaseOffset=0
+    eventCount=0
+    
     def __init__(self,*args,**kwargs):
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
@@ -31,10 +37,25 @@ class ExperimentDevice(Device):
             'max_event_buffer_length':deviceConfig['event_buffer_length']
             }          
         Device.__init__(self,**deviceSettings)
- 
+        
     def _nativeEventCallback(self,event):
-        notifiedTime=int(currentMsec())
-        self.I_nativeEventBuffer.append((notifiedTime,event))
+        event[6]=int(currentUsec()) # set logged time of event
+        
+        ExperimentDevice.eventCount+=1
+        
+        if self.eventCount<self.STAT_COLLECTION_COUNT:
+            ExperimentDevice.runningTimebaseOffset+=(event[6]-event[5])
+            event[9]=1000.0 # for first 100 events, assume 1 msec (1000 usec) delay while stats are being gathered
+        elif self.eventCount == self.STAT_COLLECTION_COUNT:
+            ExperimentDevice.runningTimebaseOffset=ExperimentDevice.runningTimebaseOffset/float(self.STAT_COLLECTION_COUNT)
+            event[9]=1000.0 # for first 100 events, assume 1 msec (1000 usec) delay while stats are being gathered
+        else:
+            ExperimentDevice.runningTimebaseOffset=(ExperimentDevice.runningTimebaseOffset*0.99)+((event[6]-event[5])*0.01)
+            event[9]=(event[6]-self.runningTimebaseOffset)-event[5] # calc delay based on running avg. of timebase offsets
+        
+        event[7]=int(event[6]-event[9]) # hub time
+        
+        self.I_nativeEventBuffer.append(event)
         return True
     
     def _poll(self):
@@ -42,8 +63,8 @@ class ExperimentDevice(Device):
  
     @staticmethod
     def _getIOHubEventObject(event,device_instance_code):
-        print "Exp event:",event
-        event_type = event[1][3]
+        #print "Exp event:",event
+        event_type = event[3]
         if event_type==ioHub.EVENT_TYPES['MESSAGE']:
             return MessageEvent.createFromOrderedList(event)
         if event_type==ioHub.EVENT_TYPES['COMMAND']:
@@ -51,49 +72,33 @@ class ExperimentDevice(Device):
             
 ######### Experiment Events ###########
 
-class ExperimentEvent(DeviceEvent):
-    dataType=list(DeviceEvent.dataType)
+class MessageEvent(DeviceEvent):
+    dataType=DeviceEvent.dataType+[('msg_offset','i2'),('prefix','a3'),('text','a128')]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict={'experiment_id':0,'session_id':0,'event_id':0,'event_type':ioHub.EVENT_TYPES['EXPERIMENT_EVENT'],
-                    'device_instance_code':'UNDEFINED','device_time':0,'logged_time':0,'hub_time':0,
-                    'confidence_interval': 0.0,'delay':0.0}
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
     def __init__(self,**kwargs):
         DeviceEvent.__init__(self,**kwargs)
 
-class MessageEvent(ExperimentEvent):
-    dataType=ExperimentEvent.dataType+[('msg_offset','i2'),('prefix','a3'),('text','a128')]
-    attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(ExperimentEvent.defaultValueDict,**{'msg_offset':0,'prefix':'','text':'','event_type':ioHub.EVENT_TYPES['MESSAGE']})
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=attributeNames
-    def __init__(self,**kwargs):
-        dargs=dict(MessageEvent.defaultValueDict,**kwargs)
-        ExperimentEvent.__init__(self,**dargs)
-
     @staticmethod
-    def create(text='',msg_offset=0.0,prefix=''):
-        device_time=currentMsec()
-        return MessageEvent(device_time=device_time,text=text,msg_offset=msg_offset,prefix=prefix) 
+    def createAsList(text,prefix='',msg_offset=0.0):
+        cusec=int(currentUsec())
+        return (0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['MESSAGE'],'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text)
     
 class CommandEvent(MessageEvent):
     dataType=MessageEvent.dataType+[('priority','u1'),('command','a32')]
     attributeNames=[e[0] for e in dataType]
-    defaultValueDict=dict(MessageEvent.defaultValueDict,**{'priority':255,'command':'','event_type':ioHub.EVENT_TYPES['COMMAND']})
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=attributeNames
     def __init__(self,**kwargs):
-        dargs=dict(CommandEvent.defaultValueDict,**kwargs)
-        MessageEvent.__init__(self,**dargs)
+        MessageEvent.__init__(self,**kwargs)
         
     @staticmethod
-    def create(text='',priority=0,command='',msg_offset=0.0,msg_prefix=''):
-        device_time=currentMsec()
-        return CommandEvent(device_time=device_time,priority=priority,command=command,text=text,msg_offset=msg_offset,prefix=prefix)
+    def createAsList(command,text,priority=0,prefix='',msg_offset=0.0):
+        cusec=int(currentUsec())
+        return (0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['COMMAND'],'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text,priority,command)
         
 
 '''

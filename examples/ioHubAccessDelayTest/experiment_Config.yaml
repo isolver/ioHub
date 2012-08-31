@@ -9,6 +9,7 @@ runtime:
     api_version: 1.7.03         # minumum version of psychopy supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
     python_version: 2.7         # minimum python version supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
     python_exe: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\python.bat
+event_buffer_length: 2048
 ioHub:
     enable: True                # True = enable ioHub functionality
     config: ioHub_config.yaml   # specifies the config file to use for the ioHub, if enabled. File must be in experiment dir.

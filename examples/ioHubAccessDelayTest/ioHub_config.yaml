@@ -71,7 +71,7 @@ udpPort: 9000
 #                  unique across all devices for your site. 
 #                   
 #
-# - event_buffer_size: maximum length of event buffer for the device in the ioHub. 
+# - event_buffer_length: maximum length of event buffer for the device in the ioHub. 
 #                      Once it is full, oldest first events are dropped from the
 #                      buffer to make room for new ones.
 #
@@ -92,14 +92,14 @@ monitor_devices:
         instance_code: kb_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_size: 256
+        event_buffer_length: 256
     - device:
         device_class: Mouse
         name: ExperimentPCmouse
         instance_code: mouse_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_size: 256
+        event_buffer_length: 256
     - device:
         device_class: ParallelPort
         name: ExperimentPCpport
@@ -107,7 +107,7 @@ monitor_devices:
         saveEvents: True
         streamEvents: True
         base_address: 0x378
-        event_buffer_size: 256
+        event_buffer_length: 256
         device_timer:
             interval: 0.0001
     - device:
@@ -115,7 +115,7 @@ monitor_devices:
         name: PsychoPy
         instance_code: computer_serial_number+psychopy
         saveEvents: True
-        event_buffer_size: 64
+        event_buffer_length: 64
     - device:
         device_class: Display 
         name: calibrationPlane
@@ -183,7 +183,7 @@ monitor_devices:
 ioDataStore:
     enable: True
     filename: temp
-    filepath: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\emrt_lib\ioHub\examples\ioHubAccessDelayTest\
+    filepath: C:\Users\isolver\Desktop\ioHubResultsFiles
     storage_type: pytables
     multiple_experiments: True
     flush_interval: 64

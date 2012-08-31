@@ -1,5 +1,3 @@
-from __future__ import division
-
 """
 Tests the round trip time to request and reveive events from the I/O hub. 
 The test is performed 'numEventRequests' times. Only responses with >= 1 event count
@@ -16,23 +14,12 @@ and the test will exit, printing out some stat's.
 
 If you get high MAX delays, turn off cloud drive apps, especially Google Drive; that fixes it for me.
 """
+import ioHub.psychopyIOHubRuntime
+from ioHub.psychopyIOHubRuntime import *
 
-import psychopy
-from psychopy import logging, core, visual
-import os,gc,psutil
-import simpleIOHubRuntime
-from yaml import load, dump
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    print "*** Using Python based YAML Parsing"
-    from yaml import Loader, Dumper
-    
-EXPERIMENT_DIR=os.path.dirname(os.path.abspath(__file__))
-
-class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
-    def __init__(self,configFile):
-        simpleIOHubRuntime.SimpleIOHubRuntime.__init__(self,configFile)
+class ExperimentRuntime(SimpleIOHubRuntime):
+    def __init__(self,configFileDirectory, configFile):
+        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
         
     def run(self,*args,**kwargs):
         '''
@@ -49,6 +36,12 @@ class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
         
         psychopy code is taken from an example psychopy scipt in the coder documentation.
         '''
+        
+        # try sending an Experiment Event
+        self.hub.sendMessageEvent("This is a test message")
+        self.hub.sendCommandEvent("Command","Command Value")
+        
+        
         numEventRequests=kwargs['numEventRequests']
         
         if self.hub is None:
@@ -68,22 +61,19 @@ class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
 
         # enable high priority mode for the experiment process.
         self.enableHighPriority()
-        
-        # get some shortcuts to save some '.'s in the looping call (they add up you know)
-        hub=self.hub
-        getEvents=hub.getEvents
-        
+                
         #enable high priority in the ioHub Server process
-        #hub.sendToHub(('RPC','enableHighPriority'))
+        #self.hub.sendToHub(('RPC','enableHighPriority'))
 
         #draw the stimuli and flip the window
         grating.draw()
         fixation.draw()
         mywin.flip()
+        
         # clear the ioHub event Buffer before starting the test.
         # This is VERY IMPORTANT, given an existing bug in ioHub.
         # You would want to do this before each trial started until the bug is fixed. 
-        hub.sendToHub(('RPC','clearEventBuffer'))
+        self.clearEvents()
 
         i=0
         lastFlipTime=0.0
@@ -92,16 +82,17 @@ class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
             grating.setPhase(0.05, '+')#advance phase by 0.05 of a cycle
             grating.draw()
             fixation.draw()
-            mywin.flip()
+            mywin.flip()           
             # <<<
-            
+
+            # try sending an Experiment Event
+            stime=self.currentTime()
+            self.hub.sendMessageEvent("This is a test message %.3f"%stime)
+            self.hub.sendCommandEvent("Command","Command Value %d"%i)
+                 
             # get the time we reqquest events from the ioHub
             stime=self.currentTime()
-            r = getEvents()
-            #print 'r:',r
-            # this should be cleaned up, but the way the messaging protocal returns the events, 
-            # the actual events start are the below index.
-            r=r[0][1]
+            r = self.getEvents()
             if r:
                 # so there were events returned in the request, so include this getEvent request in the tally
                 etime=self.currentTime()    
@@ -139,6 +130,8 @@ class ExperimentRuntime(simpleIOHubRuntime.SimpleIOHubRuntime):
         median=N.median(flips)
         print "IFI:\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f"%(min,max,mean,std,median)
         
+        
+        
 
 ##################################################################        
 if __name__ == "__main__":
@@ -147,8 +140,10 @@ if __name__ == "__main__":
     if len(sys.argv)>1:
         configFile=sys.argv[1]
     try:
+        EXPERIMENT_DIR=os.path.dirname(os.path.abspath(__file__))
+        
         # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
-        runtime=ExperimentRuntime(configFile)
+        runtime=ExperimentRuntime(EXPERIMENT_DIR, configFile)
         
         # run a test on event access delay
         runtime.run(numEventRequests=1000)

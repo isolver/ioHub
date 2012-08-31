@@ -88,7 +88,7 @@ class SimpleIOHubRuntime(object):
                     self.hub.createDeviceList(dlist)                   
                         
                     
-                self.allEvents=deque(maxlen=self.configuration['eventBufferLength'])
+                self.allEvents=deque(maxlen=self.configuration['event_buffer_length'])
         else:
             print "** ioHub is Disabled (or should be) **"
             

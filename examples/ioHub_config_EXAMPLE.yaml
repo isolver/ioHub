@@ -78,7 +78,7 @@ udpPort: 9000
 #                  unique across all devices for your site. 
 #                   
 #
-# - event_buffer_size: maximum length of event buffer for the device in the ioHub. 
+# - event_buffer_length: maximum length of event buffer for the device in the ioHub. 
 #                      Once it is full, oldest first events are dropped from the
 #                      buffer to make room for new ones.
 #
@@ -99,14 +99,14 @@ monitor_devices:
         instance_code: kb_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_size: 256
+        event_buffer_length: 256
     device:
         device_class: Mouse
         name: ExperimentPCmouse
         instance_code: mouse_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_size: 256
+        event_buffer_length: 256
     device:
         device_class: ParallelPort
         name: ExperimentPCpport
@@ -114,7 +114,7 @@ monitor_devices:
         saveEvents: True
         streamEvents: True
         base_address: 0x378
-        event_buffer_size: 256
+        event_buffer_length: 256
         device_timer:
             interval: 0.0001
     device:
@@ -122,7 +122,7 @@ monitor_devices:
         name: PsychoPy
         instance_code: computer_serial_number+psychopy
         saveEvents: True
-        event_buffer_size: 64
+        event_buffer_length: 64
     device: &DisplaySettings
         device_class: Display 
         name: calibrationPlane
@@ -180,7 +180,7 @@ monitor_devices:
         instance_code: et_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_size: 2048
+        event_buffer_length: 2048
         device_timer:
             interval: 0.0005        
         #

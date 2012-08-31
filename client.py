@@ -15,7 +15,6 @@ from ioHub.devices.experiment import MessageEvent,CommandEvent
 
 currentMsec= Computer.currentMsec
 
-
 class SocketConnection(object):
     def __init__(self,local_host=None,local_port=None,remote_host=None,remote_port=None,rcvBufferLength=1492, broadcast=False, blocking=0, timeout=0,coder=None):
         self._local_port= local_port
@@ -235,9 +234,9 @@ class ioHubClient(object):
         
         Send a list of Experiment Events to the ioHub.
         
-        -> Method : events=client.sendEvents([{event1_as_dict},{event2_as_dict},....}])
-        -> Sends: List of experiment events, as dictionaries. You can convery an event object to a dictionary
-                  representation by calling the_event.toDict(), which returns the_event as a dict.
+        -> Method : events=client.sendEvents([{event1_as_tuple},{event2_as_tuple},....}])
+        -> Sends: List of experiment events, as dictionaries. You can convert an event object to a tuple
+                  representation by calling the_event._asTuple(), which returns the_event as a tuple.
         -> Response: ('SEND_EVENTS_RESULT',number_of_events_received)
         -> Error Return: Not defined.     
         '''
@@ -260,10 +259,10 @@ class ioHubClient(object):
         return self.sendToHub(('EXP_DEVICE','EVENT_TX',eventList))
 
     def sendMessageEvent(self,text,prefix='',offset=0.0):
-        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.create(text=text,msg_offset=offset,msg_prefix=prefix)._asTuple()]))
+        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.createAsList(text,prefix=prefix,msg_offset=offset),]))
     
     def sendCommandEvent(self,command,text,priority=255,prefix='',offset=0.0):
-        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.create(text=text,command=command,priority=priority,msg_offset=offset,msg_prefix=prefix)._asTuple()]))
+        return self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.createAsList(command,text,priority=priority,prefix=prefix,msg_offset=offset),]))
 
         
     # client utility methods.

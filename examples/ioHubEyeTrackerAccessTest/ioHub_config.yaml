@@ -62,7 +62,7 @@ udpPort: 9000
 #                  unique across all devices for your site. 
 #                   
 #
-# - event_buffer_size: maximum length of event buffer for the device in the ioHub. 
+# - event_buffer_length: maximum length of event buffer for the device in the ioHub. 
 #                      Once it is full, oldest first events are dropped from the
 #                      buffer to make room for new ones.
 #

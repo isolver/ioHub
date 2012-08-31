@@ -54,7 +54,7 @@ class Computer(object):
     #return time in msec.usec format
     @staticmethod
     def currentMsec():
-        return Computer.currentSec()*1000.0
+        return timeit.default_timer()*1000.0
 
     #return time in usec format
     @staticmethod
@@ -216,7 +216,7 @@ class DeviceEvent(ioObject):
         return self.hub_time
 
     @classmethod
-    def createFromOrderedList(cls,list):
+    def createFromOrderedList(cls,eventValueList):
         combo = zip(cls.attributeNames,eventValueList)
         kwargs = dict(combo)
         return cls(**kwargs)

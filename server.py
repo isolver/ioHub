@@ -130,7 +130,7 @@ class udpServer(DatagramServer):
         if request_type == 'EVENT_TX':
             exp_events=request.pop(0)
             for eventAsTuple in exp_events:
-                self.iohub.experimentDevice._nativeEventCallback(eventAsTuple)
+                self.iohub.deviceDict['ExperimentDevice']._nativeEventCallback(eventAsTuple)
             self.sendResponse(('EVENT_TX_RESULT',len(exp_events)),replyTo)
         elif request_type == 'DEV_RPC':
             dclass=request.pop(0)
