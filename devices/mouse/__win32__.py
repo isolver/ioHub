@@ -10,10 +10,10 @@ Distributed under the terms of the GNU General Public License
 """
 import ioHub
 from .. import Device,Computer
-currentMsec=Computer.currentMsec
-import pythoncom
+currentUsec=Computer.currentUsec
 import numpy as N
-
+import ctypes
+ 
 
 class MouseWindows32(object):
     WM_MOUSEMOVE = int(0x0200)
@@ -41,8 +41,73 @@ class MouseWindows32(object):
     def __init__(self, *args,**kwargs):
         self._lastCallbackTime=None
 
+        self._scrollPositionX=0
+        self._devicePosition=0,0
+        self._lastDevicePosition=0,0
+        self._displayPosition=0,0
+        self._lastDisplayPosition=0,0
+        
+        self._isVisible=0
+        self._user32=ctypes.windll.user32
+        self.getVisibility()
+        
+        display = ioHub.devices.Display
+        h,v=display.getScreenResolution()
+        self.setDevicePosition((h/2,v/2))
+
+    def getDevicePosition(self):
+        return tuple(self._devicePosition)
+
+    def setDevicePosition(self,p):
+        if isinstance(p[0], (int, long, float, complex)) and isinstance(p[1], (int, long, float, complex)):
+            self._lastDevicePosition=self._devicePosition
+            self._devicePosition=p[0],p[1]
+            self._user32.SetCursorPos(p[0],p[1])
+        return self._devicePosition
+
+    def getDisplayPositionAndChange(self):
+        dvp=self._devicePosition
+        ldvp=self._lastDevicePosition
+        change_x=dvp[0]-ldvp[0]
+        change_y=dvp[1]-ldvp[1]
+        dsp=ioHub.devices.Display.pixel2DisplayCoord(self._devicePosition[0],self._devicePosition[1])
+        self._displayPosition=dsp
+        if change_x or change_y:
+            self._lastDevicePosition=self._devicePosition
+            self._displayPosition=dsp
+            ldsp=self._lastDisplayPosition
+            self._lastDisplayPosition=self._displayPosition
+            dchange_x=dsp[0]-ldsp[0]
+            dchange_y=dsp[1]-ldsp[1]            
+            return dsp, (dchange_x,dchange_y), (change_x,change_y)
+        return dsp, None, None
+
+    def setDisplayPosition(self,p):
+        #if isinstance(p[0], (int, long, float, complex)) and isinstance(p[1], (int, long, float, complex)):
+        #    self._positionXY=p[0],p[1]
+        #    self._user32.SetCursorPos(p[0],p[1])
+        ioHub.print2stderr('Mouse.setDisplayPosition not yet implemented. Use Mouse.setDevicePosition')
+        return self._displayPosition
+        
+    def getVerticalScroll(self):
+        return self._scrollPositionX
+     
+    def setVerticalScroll(self,s):
+        if isinstance(s, (int, long, float, complex)):
+            self._scrollPositionX=s
+        return self.scrollPositionX
+                
+    def getVisibility(self):
+        v=self._user32.ShowCursor(False)    
+        self._isVisible = self._user32.ShowCursor(True)
+        return self._isVisible >= 0
+ 
+    def setVisibility(self,v):
+        self._isVisible=self._user32.ShowCursor(v)
+        return self._isVisible >= 0
+            
     def _nativeEventCallback(self,event):
-        ctime=currentMsec()
+        ctime=int(currentUsec())
 
         ci=0.0
         if self._lastCallbackTime:
@@ -52,6 +117,9 @@ class MouseWindows32(object):
         
         notifiedTime=int(ctime)
 
+        self._scrollPositionX+= event.Wheel
+        self._devicePosition = event.Position[0],event.Position[1]
+        #ioHub.print2stderr(str(event.Position)+" = px : coord = "+str(self._positionXY))
         self.I_nativeEventBuffer.append((notifiedTime,event))
         return True
     
@@ -65,25 +133,20 @@ class MouseWindows32(object):
         p = event.Position
         px=p[0]
         py=p[1]
-        
+
         bstate=MouseWindows32.BUTTON_STATE_NONE
         etype=ioHub.EVENT_TYPES['MOUSE_MOVE']
-        eclass=MouseMoveEvent
         if event.Message in (MouseWindows32.WM_RBUTTONDOWN,MouseWindows32.WM_MBUTTONDOWN,MouseWindows32.WM_LBUTTONDOWN):
             bstate=MouseWindows32.BUTTON_STATE_PRESSED
             etype=ioHub.EVENT_TYPES['MOUSE_PRESS']
-            eclass=MouseButtonDownEvent
         elif event.Message in (MouseWindows32.WM_RBUTTONUP,MouseWindows32.WM_MBUTTONUP,MouseWindows32.WM_LBUTTONUP):     
             bstate=MouseWindows32.BUTTON_STATE_RELEASED
             etype=ioHub.EVENT_TYPES['MOUSE_RELEASE']
-            eclass=MouseButtonUpEvent
         elif event.Message in (MouseWindows32.WM_RBUTTONDBLCLK,MouseWindows32.WM_MBUTTONDBLCLK,MouseWindows32.WM_LBUTTONDBLCLK):     
             bstate=MouseWindows32.BUTTON_STATE_DOUBLE_CLICK
             etype=ioHub.EVENT_TYPES['MOUSE_DOUBLE_CLICK']
-            eclass=MouseDoubleClickEvent
         elif event.Message == MouseWindows32.WM_MOUSEWHEEL:
             etype=ioHub.EVENT_TYPES['MOUSE_WHEEL']
-            eclass=MouseWheelEvent
             
         bnum=MouseWindows32.BUTTON_ID_NONE        
         if event.Message in (MouseWindows32.WM_RBUTTONDOWN,MouseWindows32.WM_RBUTTONUP,MouseWindows32.WM_RBUTTONDBLCLK):
@@ -93,9 +156,20 @@ class MouseWindows32(object):
         elif event.Message in (MouseWindows32.WM_MBUTTONDOWN,MouseWindows32.WM_MBUTTONUP,MouseWindows32.WM_MBUTTONDBLCLK):
                 bnum=MouseWindows32.BUTTON_ID_MIDDLE
         
-        r= eclass(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['MOUSE_DEVICE'],
-                                device_instance_code=device_instance_code,device_time=int(event.Time),logged_time=notifiedTime,hub_time=notifiedTime,
-                                confidence_interval=0.0 ,delay=0.0,button_state=bstate,button_id=bnum,
-                                x_position=px,y_position=py,wheel=event.Wheel,windowID=event.Window)
+        confidence_interval=0.0
+        delay=0.0
+
+        # From MSDN: http://msdn.microsoft.com/en-us/library/windows/desktop/ms644939(v=vs.85).aspx
+        # The time is a long integer that specifies the elapsed time, in milliseconds, from the time the system was started to the time the message was 
+        # created (that is, placed in the thread's message queue).REMARKS: The return value from the GetMessageTime function does not necessarily increase
+        # between subsequent messages, because the value wraps to zero if the timer count exceeds the maximum value for a long integer. To calculate time
+        # delays between messages, verify that the time of the second message is greater than the time of the first message; then, subtract the time of the
+        # first message from the time of the second message.
+        device_time = int(event.Time)*1000 # convert to usec
         
+        hubTime = notifiedTime #TODO correct mouse times to factor in offset.
+        
+        r= [0,0,Computer.getNextEventID(),etype,device_instance_code,device_time,notifiedTime,hubTime,
+                    confidence_interval, delay, bstate, bnum, px, py, event.Wheel, event.Window]
+            
         return r

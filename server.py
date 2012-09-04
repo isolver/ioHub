@@ -11,8 +11,8 @@ import gevent
 from gevent.server import DatagramServer
 from gevent import Greenlet
 import os,sys,gc
-import time, bisect
-import pythoncom
+import time
+from operator import itemgetter, attrgetter
 from collections import deque
 import ioHub
 from ioHub.devices import Computer,computer
@@ -43,8 +43,7 @@ class udpServer(DatagramServer):
 
         
         DatagramServer.__init__(self,address)
-        print " **** TO DO: Implement multipacket sending when size of response is > packet size **** " 
-        
+         
     def handle(self, request, replyTo):
         if self._running is False:
             return
@@ -109,18 +108,11 @@ class udpServer(DatagramServer):
             self.sendResponse(edata,replyTo)
             
     def handleGetEvents(self,replyTo):
-        currentEvents=[]
-        eventBuffer=self.iohub.eventBuffer
-
-        while len(eventBuffer)>0:
-            e=eventBuffer.popleft()
-            currentEvents.append(e.I_tuple)
-        #     print '--'
-        #     print e._asTuple()
-        #     bisect.insort(currentEvents, e)       
-        #events=[e.I_tuple for e in currentEvents]
+        currentEvents=list(self.iohub.eventBuffer)
+        self.iohub.eventBuffer.clear()
 
         if len(currentEvents)>0:
+            sorted(currentEvents, key=itemgetter(7))
             self.sendResponse(('GET_EVENTS_RESULT',currentEvents),replyTo)
         else:
             self.sendResponse(('GET_EVENTS_RESULT', None),replyTo)
@@ -176,15 +168,18 @@ class udpServer(DatagramServer):
             
     def sendResponse(self,data,address,printResponseInfo=False):
         packet_data=self.pack(data)+'\r\n'
-        if printResponseInfo:
-            print "==================="
-            print "ioHub Response Element Count:", len(data)
-            #print data
-            #print '------'
-            print "ResponseLength: ",len(packet_data)
-            print "===================\n"
         self.socket.sendto(packet_data,address)         
-           
+    
+    def setExperimentInfo(self,experimentInfoList):
+        if self.iohub.emrt_file:
+            return self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList)           
+        return None
+        
+    def createExperimentSessionEntry(self,sessionInfoDict):
+        if self.iohub.emrt_file:
+            return self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
+        return None
+        
     def clearEventBuffer(self):
         l= len(self.iohub.eventBuffer)
         self.iohub.eventBuffer.clear()
@@ -258,10 +253,12 @@ class DeviceMonitor(Greenlet):
         
 class ioServer(object):
     eventBuffer=None 
+    _logMessageBuffer=None
     def __init__(self,config=None):
         self._running=True
         self.config=config
         ioServer.eventBuffer=deque(maxlen=config['global_event_buffer'])
+        ioServer._logMessageBuffer=deque(maxlen=128)
         self.emrt_file=None
         self.devices=[]
         self.deviceDict={}
@@ -272,12 +269,11 @@ class ioServer(object):
 
         # dataStore setup
         if 'ioDataStore' in config and config['ioDataStore']['enable'] is True:
-            self.createDataStoreFile(config['ioDataStore']['filename']+'.hdf5',config['ioDataStore']['filepath'],'w',config['ioDataStore']['storage_type'])
+            self.createDataStoreFile(config['ioDataStore']['filename']+'.hdf5',config['ioDataStore']['filepath'],'a',config['ioDataStore']['storage_type'])
         
         # device configuration
         if len(config['monitor_devices']) > 0:
             import ioHub.devices as devices
-            devices.buildTypeCodeToClassDict()
 
         #built device list and config from yaml config settings
         for iodevice in config['monitor_devices']:
@@ -333,8 +329,9 @@ class ioServer(object):
                     iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
         
                 def _poll(self):
-                    quit=pythoncom.PumpWaitingMessages()
-                    if quit == 1:
+                    import pythoncom
+                    # PumpWaitingMessages returns 1 if a WM_QUIT message was received, else 0
+                    if pythoncom.PumpWaitingMessages() == 1:
                         raise KeyboardInterrupt()               
 
             hookMonitor=DeviceMonitor(pyHookDevice(),0.00375)
@@ -361,9 +358,13 @@ class ioServer(object):
 
     def log(self,text,level=1):
         if self.emrt_file:
+            while len(self._logMessageBuffer)>0:
+                time,text,level=self._logMessageBuffer.popleft()
+                self.emrt_file.log(time,text,level)
             self.emrt_file.log(currentUsec(),text,level)
         else:
-            print ">> %d\t\t%d\t%s"%(currentUsec(),level,text)
+            logMsg=(currentUsec(),text,level)
+            self._logMessageBuffer.append(logMsg)
 
     def createDataStoreFile(self,fileName,folderPath,fmode,ftype):        
         from ioHub import ioDataStore
@@ -393,6 +394,9 @@ class ioServer(object):
             m.start()
         
         gevent.spawn(self.processDeviceEvents,0.0009)
+        
+        sys.stdout.write("IOHUB_READY\n\r\n\r")
+        sys.stdout.flush()
         
         gevent.run()
         

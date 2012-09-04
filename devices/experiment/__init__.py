@@ -13,19 +13,17 @@ currentUsec=Computer.currentUsec
 import numpy as N
 
 class ExperimentDevice(Device):
-    dataType = Device.dataType+[]
+    newDataTypes=[]
+    baseDataType=Device.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     categoryTypeString='VIRTUAL'
     deviceTypeString='EXPERIMENT_DEVICE'
-    
     STAT_COLLECTION_COUNT=200
-    
     runningTimebaseOffset=0
     eventCount=0
-    
     def __init__(self,*args,**kwargs):
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
@@ -64,20 +62,23 @@ class ExperimentDevice(Device):
     @staticmethod
     def _getIOHubEventObject(event,device_instance_code):
         #print "Exp event:",event
-        event_type = event[3]
-        if event_type==ioHub.EVENT_TYPES['MESSAGE']:
-            return MessageEvent.createFromOrderedList(event)
-        if event_type==ioHub.EVENT_TYPES['COMMAND']:
-            return CommandEvent.createFromOrderedList(event)
+        return event
+        #event_type = event[3]
+        #if event_type==ioHub.EVENT_TYPES['MESSAGE']:
+        #    return MessageEvent.createFromOrderedList(event)
+        #if event_type==ioHub.EVENT_TYPES['COMMAND']:
+        #    return CommandEvent.createFromOrderedList(event)
             
 ######### Experiment Events ###########
 
 class MessageEvent(DeviceEvent):
-    dataType=DeviceEvent.dataType+[('msg_offset','i2'),('prefix','a3'),('text','a128')]
+    newDataTypes=[('msg_offset','i2'),('prefix','a3'),('text','a128')]
+    baseDataType=DeviceEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
+    __slots__=[e[0] for e in newDataTypes]
     def __init__(self,**kwargs):
         DeviceEvent.__init__(self,**kwargs)
 
@@ -87,11 +88,13 @@ class MessageEvent(DeviceEvent):
         return (0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['MESSAGE'],'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text)
     
 class CommandEvent(MessageEvent):
-    dataType=MessageEvent.dataType+[('priority','u1'),('command','a32')]
+    newDataTypes=[('priority','u1'),('command','a32')]
+    baseDataType=MessageEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
+    __slots__=[e[0] for e in newDataTypes]
     def __init__(self,**kwargs):
         MessageEvent.__init__(self,**kwargs)
         
@@ -148,9 +151,7 @@ class DeviceMetaData(object):
 ########
           
 class DeviceConfigurationData(object):
-    pass
-
-print "***** TO DO: Update all ExperimentEvents to use new DeviceEvent class structure *****"        
+    pass     
         
 class ExperimentIndependentVariable(ExperimentEvent):
     dataType = list(ExperimentEvent.dataType)+[('variable','a16'),('value','a32')]

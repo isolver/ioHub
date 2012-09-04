@@ -1,10 +1,11 @@
 #
-# *** The following changes need to be made to this config file for the 
-# associated program to run:
-#       1) Search for MY_DATA and replace with the name of the pytables data file (no path) you want saved 
-#       2) Search for C:\MY_EXPERIMENT_FOLDER and replace with the directory you want your dat files to be saved in.
+# *** The following changes need to be made to this config file for the associated program to run:
+#       1) Search for filename: and replace with the name of the pytables data file (no path) you want saved.  
+#       2) Search for filepath: parameter and set to the location you want the ioDataStore event files saved to. Directory must already exist.
+# Both of these settings are at the end of this file.
 #
-# To view pytables data files (hdf5 files), the ViTables python program works very well. install version 2.1
+# To view pytables data files (hdf5 files), the ViTables python program works very well. install version 2.1. 
+# Also, the HDF5 viewer from the HDF Group also seems good: http://www.hdfgroup.org/hdf-java-html/hdfview/
 #
 # ----------------------------------------------------------------------------------------------------------
 #
@@ -88,55 +89,60 @@ udpPort: 9000
 monitor_devices:
     - device:
         device_class: Keyboard
-        name: ExperimentPCkeyboard
+        name: kb
         instance_code: kb_serial_number
         saveEvents: True
         streamEvents: True
         event_buffer_length: 256
     - device:
         device_class: Mouse
-        name: ExperimentPCmouse
+        name: mouse
         instance_code: mouse_serial_number
         saveEvents: True
         streamEvents: True
         event_buffer_length: 256
-    - device:
-        device_class: ParallelPort
-        name: ExperimentPCpport
-        instance_code: computer_serial_number+pport
-        saveEvents: True
-        streamEvents: True
-        base_address: 0x378
-        event_buffer_length: 256
-        device_timer:
-            interval: 0.0001
+#    - device:
+#        device_class: ParallelPort
+#        name: ExperimentPCpport
+#        instance_code: computer_serial_number+pport
+#        saveEvents: True
+#        streamEvents: True
+#        base_address: 0x378
+#        event_buffer_length: 256
+#        device_timer:
+#            interval: 0.0001
     - device:
         device_class: ExperimentDevice
-        name: PsychoPy
+        name: psychopy
         instance_code: computer_serial_number+psychopy
         saveEvents: True
         event_buffer_length: 64
     - device:
         device_class: Display 
-        name: calibrationPlane
+        name: display
+        manufacturer: Samsung
+        model: T23A350
+        year: 2010
+        comments: Cheap 23" LCD 1900x1080 that works well for everyday office use.
         instance_code: display_serial_number
         psychopy_config_file: unknown
         # left,top,right,bottom bounds of the  calibration surface in calibration units (pixels, degrees, etc)
         calibration_surface_bounds:
-            left: -10.0
-            top: 10.0
-            right: 10.0
-            bottom: -10.0 
-        calibration_surface_bounds_unit_type: degrees
-        physical_calibration_surface_unit_type: mm
+            left: -20.0
+            top: 12.5
+            right: 20.0
+            bottom: -12.5 
+            unit_type: degrees
         # - width and height of calibration plane in mm
-        physical_calibration_surface_dimensions:
-            width: 900
-            height: 600
+        calibration_surface_dimensions:
+            width: 500
+            height: 281
+            unit_type: mm
+            origin: CENTER   # origin to use for dimension unit mapping. CENTER, TOP_LEFT, BOTTOM_RIGHT are options
         # - the orthoganal center point relative to line of site in mm
         orthoganal_eye_to_physical_calibration_surface_location: 
-            horizontal: 450
-            vertical: 300
+            horizontal: 140
+            vertical: 250
         #  
         #  default_eye_plane_distance
         #
@@ -147,9 +153,10 @@ monitor_devices:
         #     (top, bottom) : top_center, bottom_center
         #   4 point == distance to 4 corners of plane 
         #     : top_left,top_right,bottom_left,bottom_right   
-        default_eye_physical_calibration_surface_distance: 
-            top_center: 600
-            bottom_center: 660    
+        # *** Currently ONLY 1 POINT ( i.e. plane_center is supported )
+        default_eye_to_calibration_surface_distance: 
+            plane_center: 500
+            unit_type: mm
         #
         # Inter Pupil Distance (IPD) in mm
         #

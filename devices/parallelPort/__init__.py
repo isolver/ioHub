@@ -11,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 import binascii
 from .. import computer,Device
 import numpy as N
-currentMsec=computer.currentMsec
+currentUsec=computer.currentUsec
 import ioHub
 
 #----------------------------
@@ -21,11 +21,13 @@ if computer.system == 'Windows':
     from __win32__ import ParallelPortWin32
     
     class ParallelPort(Device,ParallelPortWin32):
-        dataType = Device.dataType+[('base_address',N.uint32),('address_offset',N.uint32)]
+        newDataTypes=[('base_address',N.uint32),('address_offset',N.uint32)]
+        baseDataType=Device.dataType
+        dataType=baseDataType+newDataTypes
         attributeNames=[e[0] for e in dataType]
         ndType=N.dtype(dataType)
         fieldCount=ndType.__len__()
-        __slots__=attributeNames
+        __slots__=[e[0] for e in newDataTypes]
         categoryTypeString='DIGITAL_IO'
         deviceTypeString='PARALLEL_PORT_DEVICE'
         def __init__(self,*args,**kwargs):
@@ -54,12 +56,14 @@ else:
 from .. import DeviceEvent
 
 class ParallelPortEvent(DeviceEvent):
-    dataType = DeviceEvent.dataType+[('base_address',N.uint32),('address_offset',N.uint32),
+    newDataTypes = [('base_address',N.uint32),('address_offset',N.uint32),
                                     ('current_value',N.uint8),('last_value', N.uint8)]
+    baseDataType=DeviceEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames   
+    __slots__=[e[0] for e in newDataTypes]  
     def __init__(self,*args,**kwargs):
         DeviceEvent.__init__(self,*args,**kwargs)
 

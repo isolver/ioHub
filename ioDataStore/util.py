@@ -1,3 +1,4 @@
+import tables
 from tables import *
 import os
 
@@ -75,3 +76,72 @@ def hubTableToExcel(filePath, fileName, tableName, experiment_id=0,session_id=0)
     closeHubFile(hf)
     
     return nrows
+    
+########### Experiment / Experiment Session Based Data Access #################
+
+class ExperimentDataAccessUtility(object):
+    def __init__(self, hdfFilePath, hdfFileName, experimentCodes,mode='r'):
+        if isinstance(str,experimentCodes) or isinstance(unicode,experimentCodes):
+            self.experimentCodes=[experimentCodes,]
+        else:
+            self.experimentCodes=experimentCodes
+        self.hdfFilePath=hdfFilePath
+        self.hdfFileName=hdfFileName
+        self.mode=mode
+        self.hdfFile=None
+        self._tables={}
+        try:
+            self.hdfFile=openHubFile(hdfFilePath,hdfFileName,mode)
+            self._tables['EXPERIMENT_METADATA']=self.hdfFile.root.data_collection.experiment_meta_data
+            self._tables['SESSION_METADATA']=self.hdfFile.root.data_collection.session_meta_data
+            
+        except Exception as e:
+            raise ExperimentDataAccessException(e)
+    
+    def printHubFileMetaData(self):
+        if self.hdfFile:
+            printHubFileMetaData(self.hdfFile)
+
+    def printHubFileStructure(self):
+        if self.hdfFile:
+            printHubFileStructure(self.hdfFile)
+    
+    def getExperimentDetails(self):
+        if self.hdfFile:
+            
+            experimentrows=[]
+            exptable=self._tables['EXPERIMENT_METADATA']
+            if self.experimentCodes:
+                for code in self.experimentCodes:
+                    wherecluase='code = "%s"'%(code,)
+                    experimentrows.append([row.fetch_all_fields() for row in exptable.where(whereclause)])
+            else:
+                experimentrows=[row.fetch_all_fields() for row in exptable]
+            
+            sesstable=self._tables['SESSION_METADATA']
+            experimentSessionData=[]
+            for exp in experimentrows:
+                wherecluase='experiment_id = %d'%(exp[0],)
+                sessionrows=[row.fetch_all_fields() for row in sesstable.where(whereclause)]
+                experimentSessionData.append((exp,sessionrows))
+            
+            return experimentSessionData
+          
+    def close(self):
+        closeHubFile(self.hdfFile)
+        keys = self._tables.keys()
+        for key in keys:
+            del self._tables[key]
+        self._tables=dict()
+        
+        self.experimentCodes=None
+        self.hdfFilePath=None
+        self.hdfFileName=None
+        self.mode=None
+        self.hdfFile=None
+    
+    def __del__(self):
+        self.close()
+        
+class ExperimentDataAccessException(Exception):
+    pass

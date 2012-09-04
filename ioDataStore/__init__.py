@@ -65,8 +65,10 @@ from tables import parameters
 import os, sys, atexit, shutil
 import ioHub
 import ioHub.devices as D
+from ioHub.devices import EventConstants
 from log import ExperimentLog,LogLevels
 import util
+import numpy as N
 
 parameters.MAX_NUMEXPR_THREADS=None
 """The maximum number of threads that PyTables should use internally in
@@ -88,16 +90,19 @@ threads and therefore actually improve performance > """
 DATA_STORE_ROOT_DIR=os.path.dirname(os.path.abspath(__file__))
 BLANK_EXPERIMENT_TEMPLPATE_PATH=os.path.join(DATA_STORE_ROOT_DIR,"templates")
 NEW_EXPEREMINET_FILE_DIR=os.path.join(DATA_STORE_ROOT_DIR,"local")
-EMRT_FILE_VERSION = '0.1 Alpha'
+EMRT_FILE_VERSION = '0.5 Alpha'
 EMRT_SCHEMA_AUTHORS='Sol Simpson'
-EMRT_SCHEMA_MODIFIED_DATE='July 27th, 2012'
+EMRT_SCHEMA_MODIFIED_DATE='September 1, 2012'
         
 class EMRTpyTablesFile():
     
-    def __init__(self,fileName,folderPath=NEW_EXPEREMINET_FILE_DIR,fmode='w'):
+    def __init__(self,fileName,folderPath=NEW_EXPEREMINET_FILE_DIR,fmode='a'):
         self.fileName=fileName
         self.folderPath=folderPath
         self.filePath=os.path.join(folderPath,fileName)
+        
+        self.active_experiment_id=None
+        self.active_session_id=None
         
         self.flushCounter=128        
         self._eventCounter=0
@@ -107,14 +112,50 @@ class EMRTpyTablesFile():
         self.emrtFile = openFile(self.filePath, mode = fmode)
                
         atexit.register(close_open_data_files, False)
-        try:
-            self.emrtFile.root.EMRT_FILE_VER
-        except:
-            self.buildOutTemplate()
-            
-        self.flush()
         
+        if len(self.emrtFile.title) == 0:
+            self.buildOutTemplate()
+            self.flush()
+        else:
+            self.loadTableMappings()
+    
+    def loadTableMappings(self):
+        self.emrtFile.title="EMRT ioDataHub File"
+        # create meta-data tables
+        self.TABLES['EXPERIMENT_METADETA']=self.emrtFile.root.data_collection.experiment_meta_data
+        self.TABLES['SESSION_METADETA']=self.emrtFile.root.data_collection.session_meta_data
+
+        # log table
+        self.TABLES['LOG_TABLE']=self.emrtFile.root.logs.ExperimentLog
+        
+        # create event tables
+        self.TABLES['KEYBOARD_PRESS']=self.emrtFile.root.data_collection.events.keyboard.KeyboardPressEvent
+        self.TABLES['KEYBOARD_RELEASE']=self.emrtFile.root.data_collection.events.keyboard.KeyboardReleaseEvent
+
+        self.TABLES['MOUSE_MOVE']=self.emrtFile.root.data_collection.events.mouse.MouseMoveEvent
+        self.TABLES['MOUSE_WHEEL']=self.emrtFile.root.data_collection.events.mouse.MouseWheelEvent
+        self.TABLES['MOUSE_PRESS']=self.emrtFile.root.data_collection.events.mouse.MouseButtonDownEvent
+        self.TABLES['MOUSE_RELEASE']=self.emrtFile.root.data_collection.events.mouse.MouseButtonUpEvent
+        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.root.data_collection.events.mouse.MouseDoubleClickEvent    
+
+        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent    
+       
+        self.TABLES['COMMAND']=self.emrtFile.root.data_collection.events.experiment.Command   
+        self.TABLES['MESSAGE']=self.emrtFile.root.data_collection.events.experiment.Message
+
+        self.TABLES['EYE_SAMPLE']=self.emrtFile.root.data_collection.events.eye_tracker.MonocularEyeSample     
+        self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.root.data_collection.events.eye_tracker.BinocularEyeSample     
+        self.TABLES['FIXATION_START']=self.emrtFile.root.data_collection.events.eye_tracker.FixationStartEvent     
+        #self.TABLES['FIXATION_UPDATE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixatonUpdateEvent', D.FixatonUpdateEvent.ndType, title='Fixation Update Events')     
+        self.TABLES['FIXATION_END']=self.emrtFile.root.data_collection.events.eye_tracker.FixationEndEvent     
+        self.TABLES['SACCADE_START']=self.emrtFile.root.data_collection.events.eye_tracker.SaccadeStartEvent     
+        self.TABLES['SACCADE_END']=self.emrtFile.root.data_collection.events.eye_tracker.SaccadeEndEvent     
+        self.TABLES['BLINK_START']=self.emrtFile.root.data_collection.events.eye_tracker.BlinkStartEvent     
+        self.TABLES['BLINK_END']=self.emrtFile.root.data_collection.events.eye_tracker.BlinkEndEvent     
+    
+    
     def buildOutTemplate(self): 
+        self.emrtFile.title="EMRT ioDataHub File"
         self.emrtFile.root.EMRT_FILE_VER=EMRT_FILE_VERSION
         self.emrtFile.root.SCHEMA_DESIGNER=EMRT_SCHEMA_AUTHORS
         self.emrtFile.root.SCHEMA_MODIFIED=EMRT_SCHEMA_MODIFIED_DATE
@@ -237,15 +278,71 @@ class EMRTpyTablesFile():
 
         logline.append()
         self.TABLES['LOG_TABLE'].flush()
+    
+          
+    def createOrUpdateExperimentEntry(self,experimentInfoList):
+        experiment_metadata=self.TABLES['EXPERIMENT_METADETA']
+
+        result = [ row for row in experiment_metadata.iterrows() if row['code'] == experimentInfoList[1] ]
+        if len(result)>0:
+            result=result[0]
+            self.active_experiment_id=result['experiment_id']
+            return self.active_experiment_id
         
+        max_id=0
+        id_col=experiment_metadata.col('experiment_id')
+
+        if len(id_col) > 0:
+            max_id=N.amax(id_col)
+            
+        self.active_experiment_id=max_id+1
+        experimentInfoList[0]=self.active_experiment_id
+        experiment_metadata.append([experimentInfoList,])
+        self.flush()
+        return self.active_experiment_id
+    
+    def createExperimentSessionEntry(self,sessionInfoDict):
+        session_metadata=self.TABLES['SESSION_METADETA']
+
+        max_id=0
+        id_col=session_metadata.col('session_id')
+        if len(id_col) > 0:
+            max_id=N.amax(id_col)
+        
+        self.active_session_id=int(max_id+1)
+        
+        values=(self.active_session_id,self.active_experiment_id,sessionInfoDict['code'],sessionInfoDict['name'],sessionInfoDict['comments'],sessionInfoDict['user_variables'])
+        session_metadata.append([values,])
+        self.flush()
+
+        return self.active_session_id
+    
     def addMetaDataToFile(self,metaData):
         pass
     
     def _handleEvent(self, event):
+        if self.active_experiment_id is None or self.active_session_id is None:
+            return
+        
+        eventClass=EventConstants.eventTypeCodeToClass[event[3]]
+        
         #print 'ioDataStore event:',ioHub.EVENT_TYPES[event.event_type],event.event_type
-        etable=self.TABLES[ioHub.EVENT_TYPES[event.event_type]]
-        #print etable
-        etable.append(event._asNumpyArray())
+        etable=self.TABLES[ioHub.EVENT_TYPES[event[3]]]
+        
+        #sys.stderr.write(str(event))
+        #sys.stderr.write('\n')
+        #sys.stderr.write(str(eventClass.ndType))
+        #sys.stderr.write('\n')
+        #sys.stderr.write(str(eventClass)+' '+repr(type(eventClass))+' lengths: '+str(len(event))+' '+str(len(eventClass.ndType)))
+        #sys.stderr.flush()
+
+        event[0]=self.active_experiment_id 
+        event[1]=self.active_session_id 
+        
+        np_array= N.array([tuple(event),],dtype=eventClass.ndType) #event._asNumpyArray()
+
+
+        etable.append(np_array)
         
         # if flushCounter threshold is >=0 then do some checks. If it is < 0, then 
         # flush only occurs when command is sent to ioHub, so do nothing here.
@@ -298,30 +395,27 @@ except:
 
 class ExperimentMetaData(IsDescription):
     experiment_id = UInt32Col(pos=1)
-    experiment_code = StringCol(8,pos=2)
+    code = StringCol(8,pos=2)
     title = StringCol(48,pos=3)
     description  = StringCol(256,pos=4)
     version = StringCol(6,pos=5)
-    date_created = Time64Col(pos=6)
-    last_updated = Time64Col(pos=7)
-    created_by_id = UInt32Col(pos=8)
-    sessions_run_to_date = UInt16Col(pos=9)
-    total_sessions_to_run = UInt16Col(pos=10)    
-    status = EnumCol([ 'NOT_STARTED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'],'NOT_STARTED','uint8',pos=11)
-    phase = EnumCol([ 'EXPERIMENT_DESIGN', 'DATA_COLLECTION', 'ANALYSIS', 'WRITE_UP', 'COMPLETE', 'NONE'],'NONE','uint8',pos=12)
-    parent_experiment_id = UInt32Col(pos=13)
+    total_sessions_to_run = UInt16Col(pos=9)    
+#    status = EnumCol([ 'NOT_STARTED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'],'NOT_STARTED','int16',pos=10)
+#    phase = EnumCol([ 'EXPERIMENT_DESIGN', 'TESTING', 'DATA_COLLECTION', 'ANALYSIS', 'WRITE_UP', 'NONE'],'NONE','int16',pos=11)
+#    parent_experiment_id = UInt32Col(pos=10)
     
 class SessionMetaData(IsDescription):
     session_id = UInt32Col(pos=1)
     experiment_id = UInt32Col(pos=2)
-    session_code = StringCol(8,pos=3)
+    code = StringCol(8,pos=3)
     name = StringCol(16,pos=4)
     comments  = StringCol(128,pos=5)
-    date = Time64Col(pos=6)
-    member_id=UInt32Col(pos=7)
-    participant_id=UInt32Col(pos=8)
-    completion_status=EnumCol([ 'FULLY_COMPLETED', 'PARTIAL_COMPLETION', 'NOT_ABLE_TO_START','N/A'],'N/A','uint8',pos=9)
-    data_rating=EnumCol([ 'EXCELLENT', 'VERY_GOOD', 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE', 'POOR', 'NOT_SATISFACTORY','N/A'],'N/A','uint8',pos=10)
+    user_variables = StringCol(512,pos=6) # will hold json encoded version of user variable dict for session
+#    date = Time64Col(pos=6)
+#    participant_id=UInt32Col(pos=8)
+#    member_id=UInt32Col(pos=7)
+#    completion_status=EnumCol([ 'FULLY_COMPLETED', 'PARTIAL_COMPLETION', 'NOT_ABLE_TO_START','N/A'],'N/A','uint8',pos=9)
+#    data_rating=EnumCol([ 'EXCELLENT', 'VERY_GOOD', 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE', 'POOR', 'NOT_SATISFACTORY','N/A'],'N/A','uint8',pos=10)
 
 
 # NEEDS TO BE COMPLETED    

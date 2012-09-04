@@ -19,7 +19,7 @@ PortOut=io.PortOut
 PortIn=io.PortIn
 from collections import deque
 from ... import Device, Computer
-currentMsec=Computer.currentMsec
+currentUsec=Computer.currentUsec
 import numpy as N
 
 # note real starting address of MY pCIx card is 0xEF00 = 61184
@@ -40,7 +40,7 @@ class ParallelPortWin32(object):
         PortOut(self.base_address,word)
         
     def _poll(self):
-        currentTime=int(currentMsec())
+        currentTime=int(currentUsec())
         currentValue=self.read()
         
         if currentValue == self.lastReadValue:
@@ -48,7 +48,7 @@ class ParallelPortWin32(object):
         else:    
             from .. import ParallelPortEvent
             
-            print 'PPort event VALUES:',currentValue, self.lastReadValue
+            #print 'PPort event VALUES:',currentValue, self.lastReadValue
             ci=0
             lrv=self.lastReadValue
             if self.lastReadTime is not None:
@@ -56,12 +56,9 @@ class ParallelPortWin32(object):
             else:
                 lrv=0
                 
-            ppe= ParallelPortEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],
-                                    device_type=ioHub.DEVICE_TYPE_LABEL['PARALLEL_PORT_DEVICE'],
-                                    device_instance_code=self.instance_code,device_time=currentTime,
-                                    logged_time=currentTime,hub_time=currentTime,confidence_interval=ci,
-                                    delay=0.025,base_address=self.base_address,address_offset=self.address_offset,current_value=currentValue,
-                                    last_value=lrv)
+            ppe= [0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],
+                        ioHub.DEVICE_TYPE_LABEL['PARALLEL_PORT_DEVICE'], self.instance_code, currentTime,
+                        currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
 
             self.I_nativeEventBuffer.append(ppe)
 

@@ -8,13 +8,17 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from gevent import socket
-import sys
+import os,sys
 import ioHub
 from ioHub.devices import Computer
 from ioHub.devices.experiment import MessageEvent,CommandEvent
+import subprocess
 
 currentMsec= Computer.currentMsec
 
+class ioHubClientException(Exception):
+    pass
+    
 class SocketConnection(object):
     def __init__(self,local_host=None,local_port=None,remote_host=None,remote_port=None,rcvBufferLength=1492, broadcast=False, blocking=0, timeout=0,coder=None):
         self._local_port= local_port
@@ -150,12 +154,89 @@ class ioHubDevices(object):
         self.hubClient=hubClient
     
 class ioHubClient(object):
-    def __init__(self,ipcCoder='msgpack'):
+    def __init__(self,config,configAbsPath):
+        self.ioHubConfig=config
+        self.ioHubConfigAbsPath=configAbsPath
         # udp port setup
-        self.udp_client = UDPClientConnection(coder=ipcCoder)
+        self.udp_client = UDPClientConnection(coder=self.ioHubConfig['ipcCoder'])
+        
         self.devices=ioHubDevices(self)
         self.deviceByLabel=dict()
+        self.experimentID=None
+        self.experimentSessionID=None
+
+    def startServer(self):
+            # start up ioHub using subprocess module so we can have it run for duration of experiment only       
+            p=os.path.dirname(sys.executable)
+            p=p[:p.rfind('\\')]
+            PYTHON_PATH=p+'\python.bat'
+            
+            subprocessArgList=["%s"%PYTHON_PATH, '%s\\server.py'%ioHub.IO_HUB_DIRECTORY,"%s"%self.ioHubConfigAbsPath]
+            self.server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.server_pid = self.server_process.pid
+            #print "started ioHub Server subprocess %d"%self.server_pid
+            
+            hubonline=False
+            
+            server_output='hi there'
+            while server_output:
+                stime=currentMsec()
+                isDataAvail=self.serverStdOutHasData()
+                if isDataAvail is True:
+                    server_output=self.readServerStdOutLine().next()
+                    etime=currentMsec()
+                    #print 'get ioHub line dur:',etime-stime,server_output
+                    if server_output.rstrip() == 'IOHUB_READY':
+                        hubonline=True
+                        break
+                else:
+                    import time
+                    time.sleep(0.0001)
+            
+            if hubonline is False:
+                print "ioHub could not be contacted, exiting...."
+                try:
+                    self.server_process.terminate()
+                except Exception as e:
+                    raise e
+                finally:
+                    sys.exit(1)
+                                            
+
+    def _get_maxsize(self, maxsize):
+        if maxsize is None:
+            maxsize = 1024
+        elif maxsize < 1:
+            maxsize = 1
+        return maxsize
         
+    def serverStdOutHasData(self, maxsize=256):
+        import pywintypes
+        import msvcrt
+        from win32pipe import PeekNamedPipe
+        
+        maxsize = self._get_maxsize(maxsize)
+        conn=self.server_process.stdout
+        
+        if conn is None:
+            return False
+        try:
+            x = msvcrt.get_osfhandle(conn.fileno())
+            (read, nAvail, nMessage) = PeekNamedPipe(x, 0)
+            if maxsize < nAvail:
+                nAvail = maxsize
+            if nAvail > 0:
+                return True
+        except Exception as e:
+            raise e
+            return False
+              
+    
+    def readServerStdOutLine(self):
+        for line in iter(self.server_process.stdout.readline, ''):
+            yield line   
+
+   
     def getDevices(self):
         return self.devices
     
@@ -235,8 +316,8 @@ class ioHubClient(object):
         Send a list of Experiment Events to the ioHub.
         
         -> Method : events=client.sendEvents([{event1_as_tuple},{event2_as_tuple},....}])
-        -> Sends: List of experiment events, as dictionaries. You can convert an event object to a tuple
-                  representation by calling the_event._asTuple(), which returns the_event as a tuple.
+        -> Sends: List of experiment events, as dictionaries. You can convert an event object to a list
+                  representation by calling the_event._asList(), which returns the_event as a python list.
         -> Response: ('SEND_EVENTS_RESULT',number_of_events_received)
         -> Error Return: Not defined.     
         '''
@@ -248,6 +329,39 @@ class ioHubClient(object):
         
         r = (result,bytes_sent,address)
         return r
+    
+    def sendExperimentInfo(self,experimentInfoDict):
+        fieldOrder=(('experiment_id',0), ('code','') , ('title','') , ('description','')  , ('version','') , ('total_sessions_to_run',0))
+        values=[]
+        for key,defaultValue in fieldOrder:
+            if key in experimentInfoDict:
+                values.append(experimentInfoDict[key])
+            else:
+                values.append(defaultValue)
+                
+        r=self.sendToHub(('RPC','setExperimentInfo',(values,)))
+        r=r[0][2]
+        self.experimentID=r
+
+    def sendSessionInfo(self,sessionInfoDict):
+        if self.experimentID is None:
+            raise ioHubClientException("Experiment ID must be set by calling sendExperimentInfo before calling sendSessionInfo.")
+        if 'code' not in sessionInfoDict:
+            raise ioHubClientException("code must be provided in sessionInfoDict ( StringCol(8) ).")
+        if 'name' not in sessionInfoDict:
+            sessionInfoDict['name']=''
+        if 'comments' not in sessionInfoDict:
+            sessionInfoDict['comments']=''
+        if 'user_variables' not in sessionInfoDict:
+            sessionInfoDict['user_variables']={}
+
+        import ujson
+        sessionInfoDict['user_variables']=ujson.encode(sessionInfoDict['user_variables'])
+
+        r=self.sendToHub(('RPC','createExperimentSessionEntry',(sessionInfoDict,)))
+        r=r[0][2]       
+        self.experimentSessionID=r
+        return r
         
     def getEvents(self):
         return self.sendToHub(('GET_EVENTS',))
@@ -255,7 +369,7 @@ class ioHubClient(object):
     def sendEvents(self,events):
         eventList=[]
         for e in events:
-            eventList.append(e._asTuple())
+            eventList.append(e._asList())
         return self.sendToHub(('EXP_DEVICE','EVENT_TX',eventList))
 
     def sendMessageEvent(self,text,prefix='',offset=0.0):
@@ -267,10 +381,14 @@ class ioHubClient(object):
         
     # client utility methods.
     def getDeviceList(self):
-        return self.sendToHub(('EXP_DEVICE','GET_DEV_LIST'))
+        r=self.sendToHub(('EXP_DEVICE','GET_DEV_LIST'))
+        try:
+            return r[0][2] # return the actual device list
+        except:
+            raise ioHubClientException(r) 
     
     def testConnection(self):
-        return self.sendToHub(('RPC','getProcessInfoString'))
+        return self.sendToHub(('RPC','currentUsec'))
         
     def shutDownServer(self): 
         self.udp_client.sendTo(('RPC','shutDown'))

@@ -92,11 +92,6 @@ class EyeTracker(Device):
                              # Init in Device init before any calls to getTime() 
     DEVICE_TIMEBASE_TO_USEC=1000.0
     
-    dataType = Device.dataType+[]
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=attributeNames
     # <<<<<
     
     # used for simple lookup of device type and category number from strings
@@ -925,8 +920,8 @@ class EyeTracker(Device):
                     vel_y=-1.0
                     vel_xy=-1.0
                     
-
-                    binocSample=BinocularEyeSample(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                    '''
+                    binocSample=(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
                                 event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
                                 device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
                                 confidence_interval=confidenceInterval, delay=event_delay,
@@ -940,7 +935,7 @@ class EyeTracker(Device):
                                 right_angle_x=rightHref[0],right_angle_y=rightHref[1],right_raw_x=rightRawPupil[0],right_raw_y=rightRawPupil[1],
                                 right_pupil_measure1=rightPupilSize,right_pupil_measure2=-1, right_ppd_x=ppd[0], right_ppd_y=ppd[1], 
                                 right_velocity_x=vel_x,right_velocity_y=vel_y,right_velocity_xy=vel_xy,status=0)
-  
+                    ''' 
                     EyeTracker._latestSample=binocSample      
                     self.I_nativeEventBuffer.append(binocSample)
                     
@@ -966,8 +961,8 @@ class EyeTracker(Device):
                     vel_y=-1.0
                     vel_xy=-1.0
                     
-
-                    monoSample=MonocularEyeSample(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                    '''
+                    monoSample=(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
                                 event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
                                 device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
                                 confidence_interval=confidenceInterval, delay=event_delay,
@@ -976,7 +971,7 @@ class EyeTracker(Device):
                                 angle_x=href[0],angle_y=href[1],raw_x=rawPupil[0],raw_y=rawPupil[1],
                                 pupil_measure1=pupilSize,pupil_measure2=-1, ppd_x=ppd[0], ppd_y=ppd[1], 
                                 velocity_x=vel_x,velocity_y=vel_y,velocity_xy=vel_xy,status=0)
-                    
+                    '''                   
                     EyeTracker._latestSample=monoSample      
                     self.I_nativeEventBuffer.append(monoSample)
                     
@@ -1038,8 +1033,8 @@ class EyeTracker(Device):
                 a_vel=ne.getAverageVelocity()
                 
                 peak_vel=ne.getPeakVelocity()
-                
-                fee=FixationEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
+                '''
+                fee=(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
                                     event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
                                     device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
                                     confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
@@ -1056,6 +1051,7 @@ class EyeTracker(Device):
                                     average_pupil_measure1=a_pupilsize,average_pupil_measure2=-1.0,average_ppd_x=-1.0,average_ppd_y=-1.0,
                                     average_velocity_x=-1.0,average_velocity_y=-1.0,average_velocity_xy=a_vel,
                                     peak_velocity_x=-1.0, peak_velocity_y=-1.0, peak_velocity_xy=peak_vel,status=estatus) 
+                '''
                 self.I_nativeEventBuffer.append(fee)
                 
             elif isinstance(ne,pylink.EndSaccadeEvent):
@@ -1091,21 +1087,12 @@ class EyeTracker(Device):
                 a_vel=ne.getAverageVelocity()
                 peak_vel=ne.getPeakVelocity()
                 
-                see=SaccadeEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
-                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                                    device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
-                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                                    duration=event_duration, amplitude_x=e_amp[0], amplitude_y=e_amp[1], angle=e_angle, 
-                                    start_gaze_x=s_gaze[0],start_gaze_y=s_gaze[1],start_gaze_z=-1.0,
-                                    start_angle_x=s_href[0], start_angle_y=s_href[1], start_raw_x=-1.0, start_raw_y=-1.0,
-                                    start_pupil_measure1=s_pupilsize, start_pupil_measure2=-1.0, start_ppd_x=s_ppd[0], start_ppd_y=s_ppd[1],
-                                    start_velocity_x = -1, start_velocity_y = -1, start_velocity_xy = s_vel,
-                                    end_gaze_x = e_gaze[0], end_gaze_y = e_gaze[1], end_gaze_z = -1.0,
-                                    end_angle_x= e_href[0], end_angle_y = e_href[1], end_raw_x = -1, end_raw_y = -1,
-                                    end_pupil_measure1 = e_pupilsize, end_pupil_measure2 = -1, end_ppd_x = e_ppd[0], end_ppd_y= e_ppd[1],
-                                    end_velocity_x = -1, end_velocity_y= -1, end_velocity_xy = e_vel,
-                                    average_velocity_x=-1.0,average_velocity_y=-1.0,average_velocity_xy=a_vel,
-                                    peak_velocity_x=-1.0, peak_velocity_y=-1.0, peak_velocity_xy=peak_vel,status=estatus) 
+                see=[0,0,Computer.getNextEventID(),
+                            etype,self.eyeTrackerConfig['instance_code'],
+                            end_event_time, currentTime, hub_timestamp, confidenceInterval, event_delay, which_eye, event_duration, e_amp[0], e_amp[1], e_angle, 
+                            s_gaze[0],s_gaze[1],-1.0, s_href[0], s_href[1], -1.0, -1.0, s_pupilsize, -1.0, s_ppd[0], s_ppd[1],
+                            -1,  -1, s_vel, e_gaze[0], e_gaze[1], -1.0, e_href[0], e_href[1], -1,  -1,
+                            _pupilsize, -1, e_ppd[0], e_ppd[1],-1, -1, e_vel,-1.0,-1.0,a_vel,-1.0,-1.0,peak_vel,estatus]
                 self.I_nativeEventBuffer.append(see)               
             elif isinstance(ne,pylink.EndBlinkEvent):
                 etype=ioHub.EVENT_TYPES['BLINK_END']
@@ -1122,20 +1109,18 @@ class EyeTracker(Device):
                 end_event_time = ne.getEndTime()
                 event_duration = end_event_time-start_event_time
                                
-                bee=BlinkEndEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
-                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                                    device_time=end_event_time, logged_time=currentTime, hub_time=hub_timestamp,
-                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                                    duration=event_duration, status=estatus)
+                bee=(0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],
+                            end_event_time, currentTime, hub_timestamp,confidenceInterval, event_delay, which_eye,
+                            event_duration, estatus)
                 self.I_nativeEventBuffer.append(bee)
                 
             elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):                
                 etype=ioHub.EVENT_TYPES['FIXATION_START']
-                ioEventClass=FixationStartEvent
+                #ioEventClass=FixationStartEvent
                 
                 if isinstance(ne,pylink.StartSaccadeEvent):
                     etype=ioHub.EVENT_TYPES['SACCADE_START']
-                    ioEventClass=SaccadeStartEvent
+                    #ioEventClass=SaccadeStartEvent
                 which_eye=ne.getEye()
                 if which_eye:
                     which_eye=EYE_CODES.RIGHT
@@ -1151,14 +1136,10 @@ class EyeTracker(Device):
                 ppd=ne.getStartPPD()
                 estatus=ne.getStatus()
                 
-                se=ioEventClass(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
-                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                                    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                                    gaze_x=gaze[0], gaze_y=gaze[1],gaze_z=-1, 
-                                    angle_x=href[0],angle_y=href[1],raw_x=-1.0,raw_y=-1.0,
-                                    pupil_measure1=pupil_size, pupil_measure2=-1.0,
-                                    ppd_x=ppd[0],ppd_y=ppd[1],velocity_x=-1.0,velocity_y=-1.0,velocity_xy=velocity,status=estatus)
+                se=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],
+                   event_timestamp, currentTime, hub_timestamp, confidenceInterval, event_delay, which_eye,
+                   gaze[0], gaze[1], -1, href[0], href[1], -1.0, -1.0, pupil_size, -1.0, ppd[0], ppd[1],
+                   -1.0,-1.0,velocity,estatus]
                 self.I_nativeEventBuffer.append(se)
                 
             elif isinstance(ne,pylink.StartBlinkEvent):
@@ -1174,10 +1155,8 @@ class EyeTracker(Device):
                 
                 start_event_time= ne.getStartTime()
                                
-                bse=BlinkStartEvent(experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),
-                                    event_type=etype,device_instance_code=self.eyeTrackerConfig['instance_code'],
-                                    device_time=start_event_time, logged_time=currentTime, hub_time=hub_timestamp,
-                                    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,status=estatus)
+                bse=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],start_event_time, currentTime, hub_timestamp,
+                            confidenceInterval, event_delay, which_eye, estatus]
                                     
                 self.I_nativeEventBuffer.append(bse)
                 

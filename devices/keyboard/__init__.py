@@ -48,13 +48,15 @@ MODIFIER_ACTIVE=N.array((False,False,False,False,False,False,False),dtype=dt)
 if computer.system == 'Windows':
     global Keyboard
     from  __win32__ import  KeyboardWindows32        
-
+    
     class Keyboard(Device,KeyboardWindows32):
-        dataType = Device.dataType+[]
+        newDataTypes=[]
+        baseDataType=Device.dataType
+        dataType=baseDataType+newDataTypes
         attributeNames=[e[0] for e in dataType]
         ndType=N.dtype(dataType)
         fieldCount=ndType.__len__()
-        __slots__=attributeNames
+        __slots__=[e[0] for e in newDataTypes]
         categoryTypeString='KEYBOARD'
         deviceTypeString='KEYBOARD_DEVICE'
         def __init__(self,*args,**kwargs):
@@ -81,34 +83,38 @@ from .. import DeviceEvent
 class KeyboardEvent(DeviceEvent):
     # TODO: Determine real maximum key name string and modifiers string
     # lengths and set appropriately.
-    dataType = list(DeviceEvent.dataType)+[('is_pressed',N.bool),('flags',N.uint8),('alt',N.uint8),
+    newDataTypes = [('is_pressed',N.bool),('flags',N.uint8),('alt',N.uint8),
                                             ('extended',N.bool),('transition',N.uint8),('scan_code',N.uint8),
                                             ('ascii_code',N.uint),('key_id',N.uint),('key',N.string_,12),('char',N.string_,1),
                                             ('modifiers',N.uint8),('window_id',N.uint32)]
+    baseDataType=DeviceEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
+    __slots__=[e[0] for e in newDataTypes]
     def __init__(self,*args,**kwargs):
         kwargs['device_type']=ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE']
         DeviceEvent.__init__(self,**kwargs)
 
 class KeyboardPressEvent(KeyboardEvent):
-    dataType = KeyboardEvent.dataType
+    newDataTypes=[]
+    baseDataType=KeyboardEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,**kwargs):
         KeyboardEvent.__init__(self,**kwargs)
 
 
 class KeyboardReleaseEvent(KeyboardEvent):
-    dataType = KeyboardEvent.dataType
+    newDataTypes=[]
+    baseDataType=KeyboardEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,**kwargs):
         KeyboardEvent.__init__(self,**kwargs)
 

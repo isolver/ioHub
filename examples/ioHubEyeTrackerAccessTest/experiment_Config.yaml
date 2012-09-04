@@ -13,7 +13,6 @@ event_buffer_length: 2048         #length of 'client side' event buffer.
 ioHub:
     enable: True                # True = enable ioHub functionality
     config: ioHub_config.yaml   # specifies the config file to use for the ioHub, if enabled. File must be in experiment dir.
-    ioHub_path: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\emrt_lib
 #
 # Defines what Experiment Events can be sent from the experiment and stored to the ioHub file.
 # See Experiment Event documentation for config param meanings. ( TO DO: NO DOCS YET )

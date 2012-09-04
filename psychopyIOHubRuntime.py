@@ -1,6 +1,6 @@
 from __future__ import division
 import psychopy
-from psychopy import logging, core, visual
+from psychopy import logging, core, visual, gui
 import os,gc,psutil
 from collections import deque
 import time
@@ -10,7 +10,8 @@ try:
 except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
-
+from ioHub.devices import EventConstants
+            
 class SimpleIOHubRuntime(object):
     def __init__(self, configFilePath, configFile):
         '''
@@ -28,6 +29,16 @@ class SimpleIOHubRuntime(object):
         # load the experiment config settings from the experiment_config.yaml file.
         # The file must be in the same directory as the experiment script.
         self.configuration=load(file(os.path.join(configFilePath,configFile),'r'), Loader=Loader)
+
+        self.experimentConfig=dict()
+        self._experimentConfigKeys=['title','code','version','description','total_sessions_to_run']
+        for key in self._experimentConfigKeys:
+            if key in self.configuration:
+                self.experimentConfig[key]=self.configuration[key]
+ 
+        self.experimentSessionDefaults=self.configuration['session_defaults']
+        self.sessionUserVariables=self.experimentSessionDefaults['user_variables']
+        del self.experimentSessionDefaults['user_variables']
         
         # self.hub will hold the reference to the ioHubClient object, used to access the ioHubServer
         # process and devices.
@@ -48,49 +59,67 @@ class SimpleIOHubRuntime(object):
         configure the experiment environment.
         '''
         if 'ioHub' in self.configuration and self.configuration['ioHub']['enable'] is True:
-            global typeCodeToClass
             import ioHub
-            import ioHub.devices
-            ioHub.devices.buildTypeCodeToClassDict()
-            from ioHub.devices import typeCodeToClass
-            
-            from ioHub.client import ioHubClient
-            
-            # start up ioHub using subprocess module so you can have it run for duration of experiment only
-            import subprocess
+            from ioHub.client import ioHubClient       
 
             ioHubConfigFileName=self.configuration['ioHub']['config']
             configAbsPath=os.path.join(self.configFilePath,ioHubConfigFileName)
-            subprocessArgLIst=["%s"%self.configuration['runtime']['python_exe'], '%s\ioHub\server.py'%self.configuration['ioHub']['ioHub_path'],"%s"%configAbsPath]
-            self.hub_pid = subprocess.Popen(subprocessArgLIst).pid
-            print "started subprocess %d"%self.hub_pid
-           
-            # for now just giving hub 5 seconds to spin up; 
-            # this is logged as a bug; ioHub to notify client
-            # when ready to accept requests.            
-            import time
-            time.sleep(5)
-                        
-            ioHubConfig=load(file(configAbsPath,'r'), Loader=Loader)
-            self.ioHubConfig=ioHubConfig
+            self.ioHubConfig=load(file(configAbsPath,'r'), Loader=Loader)
             
-            self.hub=ioHubClient(ioHubConfig['ipcCoder'])
+            self.hub=ioHubClient(self.ioHubConfig,configAbsPath)
  
+            self.hub.startServer()
+            
             # Is ioHub configured to be run in experiment?
-            if self.hub: 
-                # check if a connection can be made to the hub
-                r=self.hub.getDeviceList()
-                if r is None:
-                    print " ** ioHub Server could not be started. Is it running, check for already running python instances in the task manager? **"
+            if self.hub:
+            
+                # display a read only dialog verifying the experiment parameters 
+                # (based on the experiment .yaml file) to be run. User can hit OK to continue,
+                # or Cancel to end the experiment session if the wrong experiment was started.
+                exitExperiment=self.displayExperimentSettingsDialog()
+                if exitExperiment:
+                    print "User Cancelled Experiment Launch."
+                    self.close()
+                    import sys
                     sys.exit(1)
-                else:
-                    dlist=r[0][2]
-                    self.hub.createDeviceList(dlist)                   
+            
+            
+                # send experiment info and set exp. id
+                self.hub.sendExperimentInfo(self.experimentConfig)
+                
+                # display editable session variable dialog displaying the ioHub required session variables
+                # and any user defined session variables (as specified in the experiment config .yaml file)
+                # User can enter correct values and hit OK to continue, or Cancel to end the experiment session.
+                exitExperiment=self.displayExperimentSessionSettingsDialog()
+                if exitExperiment:
+                    print "User Cancelled Experiment Launch."
+                    self.close()
+                    import sys
+                    sys.exit(1)
+                
+                # send session data to ioHub and get session ID (self.hub.sessionID)
+                tempdict=(self.experimentSessionDefaults)
+                tempdict['user_variables']=self.sessionUserVariables
+                r=self.hub.sendSessionInfo(tempdict)
+                
+                # get the list of devices regigisted with the ioHub
+                dlist=self.hub.getDeviceList()
+
+                # create a local 'thin' representation of the registered ioHub devices,
+                # allowing such things as device level event access (if supported) 
+                # and transparent IPC calls of public device methods and return value access.
+                # Devices are available as hub.devices.[device_name] , where device_name
+                # is the name given to the device in the ioHub .yaml config file to be access;
+                # i.e. hub.devices.ExperimentPCkeyboard would access the experiment PC keyboard
+                # device if the default name was being used.
+                self.hub.createDeviceList(dlist)                   
                         
-                    
+                # A circular buffer used to hold events retrieved from self.getEvents() during 
+                # self.delay() calls. self.getEvents() appends any events in the allEvents
+                # buffer to the result of the hub.getEvents() call that is made.                
                 self.allEvents=deque(maxlen=self.configuration['event_buffer_length'])
         else:
-            print "** ioHub is Disabled (or should be) **"
+            print "** ioHub is Disabled (or should be). Why are you using this utility class then? ;) **"
             
         return self.hub
     
@@ -123,30 +152,6 @@ class SimpleIOHubRuntime(object):
             p.nice=psutil.NORMAL_PRIORITY_CLASS
             self._inHighPriorityMode=False
     
-    @staticmethod    
-    def printExceptionDetails():
-        import sys, traceback
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        print "*** print_tb:"
-        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
-        print "*** print_exception:"
-        traceback.print_exception(exc_type, exc_value, exc_traceback,
-                                  limit=2, file=sys.stdout)
-        print "*** print_exc:"
-        traceback.print_exc()
-        print "*** format_exc, first and last line:"
-        formatted_lines = traceback.format_exc().splitlines()
-        print formatted_lines[0]
-        print formatted_lines[-1]
-        print "*** format_exception:"
-        print repr(traceback.format_exception(exc_type, exc_value,
-                                              exc_traceback))
-        print "*** extract_tb:"
-        print repr(traceback.extract_tb(exc_traceback))
-        print "*** format_tb:"
-        print repr(traceback.format_tb(exc_traceback))
-        print "*** tb_lineno:", exc_traceback.tb_lineno
-
     def currentMsec(self):
         return self.currentTime()*1000.0
         
@@ -180,7 +185,7 @@ class SimpleIOHubRuntime(object):
                 
         return self.currentMsec()-stime
     
-    def getEvents(self,deviceLabel=None,asType='list'):
+    def getEvents(self,deviceLabel=None,asType='dict'):
         if self.hub:
             r=None
             if deviceLabel is None:
@@ -224,20 +229,82 @@ class SimpleIOHubRuntime(object):
     
     @staticmethod
     def eventListToObject(eventValueList):
-        eclass=typeCodeToClass[eventValueList[3]]
+        eclass=EventConstants.eventTypeCodeToClass[eventValueList[3]]
         combo = zip(eclass.attributeNames,eventValueList)
         kwargs = dict(combo)
         return eclass(**kwargs)
 
     @staticmethod
     def eventListToDict(eventValueList):
-        eclass=typeCodeToClass[eventValueList[3]]
+        #print '-----------------'
+        #print eventValueList
+        #print '-----------------'
+        eclass=EventConstants.eventTypeCodeToClass[eventValueList[3]]
         combo = zip(eclass.attributeNames,eventValueList)
         return dict(combo)
          
     def run(self,*args,**kwargs):
         pass
+    
+    def close(self):
+        # terminate the ioServer
+        if self.hub:
+            self.hub.shutDownServer()
+            
+        # terminate psychopy
+        core.quit()
+        
+    def displayExperimentSettingsDialog(self):
+        experimentDlg=psychopy.gui.DlgFromDict(self.experimentConfig, 'Experiment Launcher', self._experimentConfigKeys, self._experimentConfigKeys, {})
+        if experimentDlg.OK:
+            return False
+        return True
 
-class IOHubClientError(Exception):
+    def displayExperimentSessionSettingsDialog(self):
+        allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
+        sessionVariableOrder=self.configuration['session_variable_order']
+        if 'user_variables' in allSessionDialogVariables:
+            del allSessionDialogVariables['user_variables']
+        
+        sessionDlg=psychopy.gui.DlgFromDict(allSessionDialogVariables, 'Experiment Session Settings', [], sessionVariableOrder)
+        
+        if sessionDlg.OK:
+            for key,value in allSessionDialogVariables.iteritems():
+                if key in self.experimentSessionDefaults:
+                    self.experimentSessionDefaults[key]=str(value)
+                elif  key in self.sessionUserVariables:
+                    self.sessionUserVariables[key]=str(value)   
+            return False
+        return True
+
+    @staticmethod    
+    def printExceptionDetails():
+        '''
+        No idea if all of this is needed, infact I know it is not. But for now why not. 
+        Taken straight from the python manual on Exceptions.
+        '''
+        import sys, traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print "*** print_tb:"
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+        print "*** print_exception:"
+        traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                  limit=2, file=sys.stdout)
+        print "*** print_exc:"
+        traceback.print_exc()
+        print "*** format_exc, first and last line:"
+        formatted_lines = traceback.format_exc().splitlines()
+        print formatted_lines[0]
+        print formatted_lines[-1]
+        print "*** format_exception:"
+        print repr(traceback.format_exception(exc_type, exc_value,
+                                              exc_traceback))
+        print "*** extract_tb:"
+        print repr(traceback.extract_tb(exc_traceback))
+        print "*** format_tb:"
+        print repr(traceback.format_tb(exc_traceback))
+        print "*** tb_lineno:", exc_traceback.tb_lineno
+        
+class SimpleIOHubRuntimeError(Exception):
     """Base class for exceptions raised by SimpleIOHubRuntime class."""
     pass        

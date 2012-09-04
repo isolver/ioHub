@@ -92,11 +92,13 @@ class EyeTracker(Device):
     
     DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
     
-    dataType = Device.dataType+[]
+    newDataTypes=[]
+    baseDataType=Device.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
+    __slots__=[e[0] for e in newDataTypes]
     # <<<<<
     
     lastPollTime=0.0    

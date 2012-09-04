@@ -7,7 +7,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 """
 from __future__ import division
-    
+
+ 
 class ioDeviceError(Exception):
     def __init__(self, device,msg):
         self.device = device
@@ -104,5 +105,16 @@ if 50 not in EVENT_TYPES:
                  TTL_INPUT =70, TTL_OUPUT =71,PARALLEL_PORT_OUPUT =74,
                  AUDIO_OUT_START =40, AUDIO_OUT_END =41, VOICE_KEY =42, AUDIO_IN_START =43, AUDIO_IN_END =44,
 '''
+import sys
+ 
+def print2stderr(text):
+    sys.stderr.write(text)
+    sys.stderr.write('\n\r')
+    sys.stderr.flush()
+
+    
  
 import devices
+import os
+global IO_HUB_DIRECTORY
+IO_HUB_DIRECTORY=os.path.dirname(os.path.abspath(__file__))

@@ -22,11 +22,12 @@ if computer.system == 'Windows':
     from __win32__ import MouseWindows32         
 
     class Mouse(Device,MouseWindows32):
-        dataType = Device.dataType+[]
+        newDataTypes=[]
+        baseDataType=Device.dataType
+        dataType=baseDataType+newDataTypes
         attributeNames=[e[0] for e in dataType]
         ndType=N.dtype(dataType)
         fieldCount=ndType.__len__()
-        __slots__=attributeNames
         categoryTypeString='MOUSE'
         deviceTypeString='MOUSE_DEVICE'        
         def __init__(self,*args,**kwargs):
@@ -55,56 +56,63 @@ from .. import DeviceEvent
 class MouseEvent(DeviceEvent):
     # TODO: Determine real maximum key name string and modifiers string
     # lengths and set appropriately.
-    dataType = DeviceEvent.dataType+[('button_state',N.uint8),('button_id',N.uint8),('x_position',N.uint16),
+    newDataTypes = [('button_state',N.uint8),('button_id',N.uint8),('x_position',N.uint16),
                                     ('y_position',N.uint16), ('wheel', N.int8),('windowID',N.uint64)]
+    baseDataType=DeviceEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
+    __slots__=[e[0] for e in newDataTypes]
     def __init__(self,*args,**kwargs):
         DeviceEvent.__init__(self,*args,**kwargs)
 
 class MouseMoveEvent(MouseEvent):
-    dataType = MouseEvent.dataType
+    newDataTypes = []
+    baseDataType=MouseEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseWheelEvent(MouseEvent):
-    dataType = MouseEvent.dataType
+    newDataTypes = []
+    baseDataType=MouseEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseButtonDownEvent(MouseEvent):
-    dataType = MouseEvent.dataType
+    newDataTypes = []
+    baseDataType=MouseEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseButtonUpEvent(MouseEvent):
-    dataType = MouseEvent.dataType
+    newDataTypes = []
+    baseDataType=MouseEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
 
 class MouseDoubleClickEvent(MouseEvent):
-    dataType = MouseEvent.dataType
+    newDataTypes = []
+    baseDataType=MouseEvent.dataType
+    dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=attributeNames
     def __init__(self,*args,**kwargs):
         MouseEvent.__init__(self,*args,**kwargs)
