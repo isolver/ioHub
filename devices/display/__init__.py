@@ -1,4 +1,5 @@
-﻿"""
+﻿# coding=utf-8
+"""
 ioHub Python Module
 
 Copyright (C) 2012 Sol Simpson
@@ -8,12 +9,12 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from .. import Device,Computer
+from __builtin__ import float, staticmethod, classmethod
 import ioHub
 currentUsec=Computer.currentUsec
 import numpy as N
 import ctypes
-import unit_conversions
-import math
+import unit_conversions as ucs
 
 vis_degrees,screen_res,ppd=None,None,None
 
@@ -48,11 +49,10 @@ class Display(Device):
                                                                 # Also note that specifying the width and height to be equal will not result in a square stimulus if your window is not square
                                                                 # the image will have the same aspect ratio as your window. e.g. on a 1024x768 window the size=(0.75,1) will be square.
                                                                 # Spatial frequency: cycles per stimulus (so will scale with the size of the stimulus).
-                    'cm':'cm',                                  # - Set the size and location of the stimulus in centimeters on the screen.Spatial frequency: cycles per cm. 
+                    'cm':'cm'}                                  # - Set the size and location of the stimulus in centimeters on the screen.Spatial frequency: cycles per cm.
                                                                 # Requires : information about the screen width in cm and size in pixels Assumes : pixels are square. Can be verified by drawing
                                                                 # a stimulus with matching width and height and verifying that it is in fact square. For a CRT this can be controlled by setting
                                                                 # the size of the viewable screen (settings on the monitor itself). Requires : No monitor information
-                     'cm': 'cm'}
                      
     def __init__(self,*args,**kwargs):
         Display._settings=kwargs['dconfig']
@@ -222,11 +222,14 @@ class Display(Device):
     
     
     ################################################
-        
     @classmethod
     def getScreenResolution(cls):
+        """
+
+        :rtype : list
+        """
         return cls._user32.GetSystemMetrics(0), cls._user32.GetSystemMetrics(1)
-        
+
     def _poll(self):
         pass
  

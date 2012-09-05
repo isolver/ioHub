@@ -7,14 +7,21 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 """
 from __future__ import division
+from __builtin__ import isinstance, repr, dict
+from exceptions import Exception
 
- 
+
 class ioDeviceError(Exception):
-    def __init__(self, device,msg):
+    def __init__(self, device, msg, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
         self.device = device
-        self.msg=msg
+        self.msg = msg
+
     def __str__(self):
-        return repr("ioDeviceError:\nMsg: %s\nDevice: %s\n"%(self.msg),repr(self.device))
+        return repr(self)
+
+    def __repr__(self):
+        return "ioDeviceError:\nMsg: {0:>s}\nDevice: {1:>s}\n".format(self.msg),repr(self.device)
 
 DEVICE_CATERGORY_ID_LABEL={
         1:'KEYBOARD',
@@ -91,20 +98,20 @@ if 50 not in EVENT_TYPES:
         temp[value]=key
     EVENT_TYPES.update(temp)
     
-    del temp                
-'''
-                 EVENT_TRIGGER =35,FUNCTION_START =30, FUNCTION_END =31,
-                 SEQUENCE_START =10, SEQUENCE_END =11, EXPERIMENT_START =12, EXPERIMENT_END =13, BLOCK_START =14, BLOCK_END =15,
-                 TRIAL_START =16, TRIAL_END =17, EXPERIMENT_LOG =20, EXPERIMENT_DV =21, EXPERIMENT_IV =22,
-                 DRAW_START =23, DRAW_END =24, SWAP_START =25, SWAP_END =26, VBLANK =27, DISPLAY_START =28, DISPLAY_END =29,                 ANALOG_INPUT_SAMPLE =73, ANALOG_OUTPUT_SAMPLE =74, ANALOG_INPUT_EVENT =75, ANALOG_OUTPUT_EVENT =76,
-                 INTEREST_AREA_ACTIVE =90, INTEREST_AREA_INACTIVE =91, INTEREST_AREA_POSITION_CHANGE =92, INTEREST_AREA_SHAPE_CHANGE =93, INTEREST_AREA_SHAPE_POSITION_CHANGE =94,
-                 DATA_MISSING =200, DATA_MISSING_START =201, DATA_MISSING_END =202,
-                 DATA_GAP =205, DATA_GAP_START =206, DATA_GAP_END =207,
-                 IP_DATA_INPUT =79, IP_DATA_OUTPUT =80,
-                 SERIAL_DATA_INPUT =77, SERIAL_DATA_OUTPUT =78,
-                 TTL_INPUT =70, TTL_OUPUT =71,PARALLEL_PORT_OUPUT =74,
-                 AUDIO_OUT_START =40, AUDIO_OUT_END =41, VOICE_KEY =42, AUDIO_IN_START =43, AUDIO_IN_END =44,
-'''
+    del temp
+#'''
+#                 EVENT_TRIGGER =35,FUNCTION_START =30, FUNCTION_END =31,
+#                 SEQUENCE_START =10, SEQUENCE_END =11, EXPERIMENT_START =12, EXPERIMENT_END =13, BLOCK_START =14, BLOCK_END =15,
+#                 TRIAL_START =16, TRIAL_END =17, EXPERIMENT_LOG =20, EXPERIMENT_DV =21, EXPERIMENT_IV =22,
+#                 DRAW_START =23, DRAW_END =24, SWAP_START =25, SWAP_END =26, VBLANK =27, DISPLAY_START =28, DISPLAY_END =29,                 ANALOG_INPUT_SAMPLE =73, ANALOG_OUTPUT_SAMPLE =74, ANALOG_INPUT_EVENT =75, ANALOG_OUTPUT_EVENT =76,
+#                 INTEREST_AREA_ACTIVE =90, INTEREST_AREA_INACTIVE =91, INTEREST_AREA_POSITION_CHANGE =92, INTEREST_AREA_SHAPE_CHANGE =93, INTEREST_AREA_SHAPE_POSITION_CHANGE =94,
+#                 DATA_MISSING =200, DATA_MISSING_START =201, DATA_MISSING_END =202,
+#                 DATA_GAP =205, DATA_GAP_START =206, DATA_GAP_END =207,
+#                 IP_DATA_INPUT =79, IP_DATA_OUTPUT =80,
+#                 SERIAL_DATA_INPUT =77, SERIAL_DATA_OUTPUT =78,
+#                 TTL_INPUT =70, TTL_OUPUT =71,PARALLEL_PORT_OUPUT =74,
+#                 AUDIO_OUT_START =40, AUDIO_OUT_END =41, VOICE_KEY =42, AUDIO_IN_START =43, AUDIO_IN_END =44,
+#'''
 import sys
  
 def print2stderr(text):
@@ -112,7 +119,19 @@ def print2stderr(text):
     sys.stderr.write('\n\r')
     sys.stderr.flush()
 
-    
+from collections import Iterable,OrderedDict
+
+def isIterable(o):
+    return isinstance(o, Iterable)
+
+class LastUpdatedOrderedDict(OrderedDict):
+    """Store items in the order the keys were last added"""
+
+    #noinspection PyMethodOverriding
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[key]
+        OrderedDict.__setitem__(self, key, value)
  
 import devices
 import os

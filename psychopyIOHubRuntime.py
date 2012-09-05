@@ -100,7 +100,7 @@ class SimpleIOHubRuntime(object):
                 # send session data to ioHub and get session ID (self.hub.sessionID)
                 tempdict=(self.experimentSessionDefaults)
                 tempdict['user_variables']=self.sessionUserVariables
-                r=self.hub.sendSessionInfo(tempdict)
+                self.hub.sendSessionInfo(tempdict)
                 
                 # get the list of devices regigisted with the ioHub
                 dlist=self.hub.getDeviceList()
@@ -170,7 +170,7 @@ class SimpleIOHubRuntime(object):
                 else:
                     time.sleep(checkHubInterval/1000.0)
                 
-                events=self.hub.getEvents()[0][1]
+                events=self.hub.getEvents()
                 if events:
                     self.allEvents.extend(events)
                 
@@ -189,7 +189,7 @@ class SimpleIOHubRuntime(object):
         if self.hub:
             r=None
             if deviceLabel is None:
-                events=self.hub.getEvents()[0][1]
+                events=self.hub.getEvents()
                 if events is None:
                     r=self.allEvents    
                 else:
@@ -236,9 +236,6 @@ class SimpleIOHubRuntime(object):
 
     @staticmethod
     def eventListToDict(eventValueList):
-        #print '-----------------'
-        #print eventValueList
-        #print '-----------------'
         eclass=EventConstants.eventTypeCodeToClass[eventValueList[3]]
         combo = zip(eclass.attributeNames,eventValueList)
         return dict(combo)

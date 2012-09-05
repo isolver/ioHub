@@ -157,6 +157,8 @@ The **main features / goals** of the ioHub are:
     
    pyHook: http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download
    
+   pyYAML: http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.7.exe
+   
    'Finally', the ioHub source to your site-packages folder, putting the ioHub directory in the site-packages directory 
    of your Python 2.7 installation. 
 
