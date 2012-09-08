@@ -1,10 +1,10 @@
 # ioHub Framework, including the pyEyeTrackerInterface
 
-# Project Status
+## Project Status
 
 Please see the project webpage http://isolver.github.com/ioHub for current status details.
 
-#Overview
+## Overview
 
 The ioHub is a Python framework that runs in a seperate system process in parallel
 to psycopy ( http://www.psychopy.org ) during experiment runtime / data collection.
@@ -64,7 +64,7 @@ The **main features / goals** of the ioHub are:
    to move implementation beyond an alpha stage of functionality. With that said, it also has a huge 
    amount of potential.
 
-# Installing
+## Installing
 
   Currently only Windows is supported. This will change to Linux and Mac OS X as well
   as time permits.
@@ -117,20 +117,20 @@ The **main features / goals** of the ioHub are:
    'Finally', the ioHub source to your site-packages folder, putting the ioHub directory in the site-packages directory 
    of your Python 2.7 installation. 
 
-# Known Issues / Black Holes
+## Known Issues / Black Holes
 
 See the Bug Tracker.
 
-# Examples
+## Examples
 
 See the examples directory (https://github.com/isolver/ioHub/tree/master/examples) in the ioHub folder. Also see the project webpage for details on which examples are
 currently running.
 
-# Getting Help
+## Getting Help
 
 email: sds-git _AT_ isolver-software.coT (change _AT_ to an @ and the T to an m)
 
-# License
+## License
 
 ioHub and ioDataStore are Copyright (C) 2012 Sol Simpson, except for files where otherwise noted.
 
