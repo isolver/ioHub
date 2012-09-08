@@ -1,10 +1,19 @@
 """
-ioHub Python Module
+ioHub
+pyEyeTracker Interface
+.. file: ioHub/devices/eyeTrackerInterface/HW/SR_Research/EyeLink/eyetracker.py
 
-Copyright (C) 2012 Sol Simpson 
-Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). 
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
+
+---------------------------------------------------------------------------------------------------------------------
+This file uses the pylink module, Copyright (C) SR Research Ltd. License type unknown as it is not provided in the
+pylink distribution (atleast when downloaded May 2012). At the time of writting, Pylink is freely avalaible for
+download from  www.sr-support.com once you are registered and includes the necessary C DLLs.
+---------------------------------------------------------------------------------------------------------------------
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
 import sys,gc

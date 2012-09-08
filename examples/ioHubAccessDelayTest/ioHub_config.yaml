@@ -1,8 +1,8 @@
+# iohub_config.yaml: settings related to the iohub process and the device types that are to be enabled for the
+# experiment. The ioHub.ioDataStore datafile location and file name are also provided here.
 #
-# *** The following changes need to be made to this config file for the associated program to run:
-#       1) Search for filename: and replace with the name of the pytables data file (no path) you want saved.  
-#       2) Search for filepath: parameter and set to the location you want the ioDataStore event files saved to. Directory must already exist.
-# Both of these settings are at the end of this file.
+# Items that are REQUIRED to be changed to run the program as is:
+#     - None
 #
 # To view pytables data files (hdf5 files), the ViTables python program works very well. install version 2.1. 
 # Also, the HDF5 viewer from the HDF Group also seems good: http://www.hdfgroup.org/hdf-java-html/hdfview/
@@ -101,21 +101,22 @@ monitor_devices:
         saveEvents: True
         streamEvents: True
         event_buffer_length: 256
-#    - device:
-#        device_class: ParallelPort
-#        name: ExperimentPCpport
-#        instance_code: computer_serial_number+pport
-#        saveEvents: True
-#        streamEvents: True
-#        base_address: 0x378
-#        event_buffer_length: 256
-#        device_timer:
-#            interval: 0.0001
+    - device:
+        device_class: ParallelPort
+        name: parallelPort
+        instance_code: computer_serial_number+pport
+        saveEvents: True
+        streamEvents: True
+        base_address: 0x378
+        event_buffer_length: 256
+        device_timer:
+            interval: 0.0001
     - device:
         device_class: ExperimentDevice
-        name: psychopy
+        name: experimentRuntime
         instance_code: computer_serial_number+psychopy
         saveEvents: True
+        streamEvents: True
         event_buffer_length: 64
     - device:
         device_class: Display 
@@ -190,7 +191,7 @@ monitor_devices:
 ioDataStore:
     enable: True
     filename: temp
-    filepath: C:\Users\isolver\Desktop\ioHubResultsFiles
+    filepath: .
     storage_type: pytables
     multiple_experiments: True
     flush_interval: 64

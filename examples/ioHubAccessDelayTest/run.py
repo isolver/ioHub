@@ -1,27 +1,87 @@
 """
-Tests the round trip time to request and reveive events from the I/O hub.
-The test is performed 'numEventRequests' times. Only responses with >= 1 event count
-toward the tally.
+ioHub
+.. file: ioHub/examples/ioHubAccessDelayTest/run.py
 
-See the experiment_config.yaml and ioHub_config.yaml files for changes you need to make
-for this program to run in your environement, as well as the ioHub github project README for
-a list of dependencies and install instructions.
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
-Only keyboard and mouse events are enabled for this test, so once you start the program and see
-the example psychopy application, move the mouse around, press mouse button, press keyboard keys,
-etc. This will generate events. After a minute or so, the default 1000 requests will be satisfied
-and the test will exit, printing out some stat's.
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
+
+------------------------------------------------------------------------------------------------------------------------
+
+ioHubAccessDelayTest
+++++++++++++++++++++
+
+Overview:
+---------
+
+This script is implemnted by extending the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime class to a  class
+called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
+also launches the ioHub server process so the script has access to the ioHub service and associated devices.
+
+The program loads many configuration values for the experiment process by using the experiment_Config.yaml file that
+is located in the same directory as this script. Configuration settings for the ioHub server process are defined in
+the ioHub_configuration.yaml file.
+
+The __main__ of this script file simply calls the start() function, which creates the ExperimentRuntime class instance,
+calls the run() method for the instance which is what contains the actual 'program / experiment execution code' ,
+and then when run() completes, closes the ioHubServer process and ends the local program.
+
+Desciption:
+-----------
+
+The main purpose for the ioHubAccessDelayTest is to test the round trip time it takes to request and reveive events
+from the I/O hub. Retrace intervals are also calculated and stored to monitor for skipped retraces.
+
+A full screen Window is opened that shows some graphics, including a moving grating as well as a small gaussian
+that is controlled by mouse events from the ioHub. At the top of the screen is an area that will display the last key
+pressed on the keyboard.
+
+The script runs for until 1000 getEvent() requests to the ioHub have returned with >= 1 event. A number near the
+bottom of the screen displays the number of remaining successful getEvent calls before the experiment will end.
+By default the script also sends an Experiment MessageEvent to the ioHub on each retrace. This message is stored
+in the ioHub datafile, but is also sent back as an ioHub MessageEvent to the experiment. Therefore, the getEvent()
+request counter shown on the screen will decrease even if you do not move your mouse or keyboard,
+as the MessageEvents are retrieved from the ioHub Server.
+
+At the end of the test, plots are displayed showing the getEvent() round trip delays in a histogram,
+the retrace intervals as a fucntion of time, and the retrace intervals in a histogram. All times in the plots are
+in msec.
+
+To Run:
+-------
+
+1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub
+2. Edit the experiment_config.yaml file that is in the same directory as the run.py script you will be starting. See the
+comments at the top of each config file regarding any paramemters that 'must' be changed for the program to run.
+In this example, nothing 'must' be changed.
+3. Open a command prompt to the directory containing this file.
+4. Start the test program by running:
+   python.exe run.py
+
+Any issues or questions, please let me know.
+
+Notes:
+------
 
 If you get high MAX delays, turn off cloud drive apps, especially Google Drive; that fixes it for me.
-"""
-from __builtin__ import len, isinstance, dict, float, sum, str, type, int
-from exceptions import Exception
-import ioHub.psychopyIOHubRuntime
-import numpy as N
 
-class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
+If you are getting dropped frames, try commenting out the text stim that changes based on the number of getEvents()
+left to call. It seems that resetting text on a text stim is a 'very' expensive operation.
+
+"""
+from __builtin__ import len, isinstance, dict, float, sum, int, unicode
+from exceptions import Exception
+import time
+import ioHub
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, core, visual
+from numpy import zeros
+
+
+class ExperimentRuntime(SimpleIOHubRuntime):
     def __init__(self,configFileDirectory, configFile):
-        ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
+        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
         self.initAttributes()
 
     def initAttributes(self):
@@ -32,34 +92,24 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
         self.totalEventRequestsForTest=None
         self.numEventRequests=0
         self.totalEventRequestsForTest=None
+        self.psychoWindow=None
 
     def run(self,*args,**kwargs):
         """
-        tests the round trip time to request and receive events from the I/O hub.
-        The test is performed 'numEventRequests' times. Only responses with >= 1 event count
-        toward the tally.
-
-        Only keyboard and mouse events are enabled for this test, so once you start the program and see
-        the example psychopy application, move the mouse around, press mouse button, press keyboard keys,
-        etc. This will generate events. After a minute or so, the default 1000 requests will be satisfied
-        and the test will exit, printing out some stat's.
-
-        If you get high MAX delays, turn off cloud drive apps, especially Google Drive; that fixes it for me.
-
-        psychopy code is taken from an example psychopy scipt in the coder documentation.
+        psychopy code is taken from an example psychopy script in the coder documentation.
         """
 
+        print "ExperimentPCkeyboard methods:",self.hub.devices.kb.getRemoteMethodNames()
+        print "ExperimentPCmouse methods:",self.hub.devices.mouse.getRemoteMethodNames()
+        print "ExperimentRuntime methods:",self.hub.devices.experimentRuntime.getRemoteMethodNames()
+        print "ParallelPort methods:",self.hub.devices.parallelPort.getRemoteMethodNames()
+
         self.totalEventRequestsForTest=kwargs['numEventRequests']
-
-        # try sending an Experiment Event
-        self.hub.sendMessageEvent("This is a test message")
-        self.hub.sendCommandEvent("Command","Command Value")
-
 
         # create fullscreen pyglet window at current resolution, as well as required resources / drawings
         self.createPsychoGraphicsWindow()
 
-        # create stats numpy arrays, set system to high priority.
+        # create stats numpy arrays, set experiment process and ioHubServer to high priority.
         self.initTestResourcesAndState()
 
         #draw and flip to the updated graphics state.
@@ -91,31 +141,24 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
         self.plotResults()
 
     def createPsychoGraphicsWindow(self):
-        print '-----'
-        print self.hub
-        print self.hub.devices
-        print self.hub.devices.mouse
-        print self.hub.devices.display
-        print '------'
         #create a window
         self.hub.devices.display.getScreenResolution()
-        print "self.hub.devices.display.getScreenResolution():",self.hub.devices.display.getScreenResolution()
-        self.psychoWindow = ioHub.psychopyIOHubRuntime.visual.Window(self.hub.devices.display.getScreenResolution(),monitor="testMonitor", units="deg", fullscr=True)
+        self.psychoWindow = visual.Window(self.hub.devices.display.getScreenResolution(),monitor="testMonitor", units="deg", fullscr=True)
 
 
         self.mouse=self.hub.devices.mouse
         currentPosition,displayPositionDelta,devicePositionDelta=self.mouse.getDisplayPositionAndChange()
 
-        self.instructionText2Pattern='.... %d event captures left .....'
+        self.instructionText2Pattern='%d'
 
         self.psychoStim=ioHub.LastUpdatedOrderedDict()
-        self.psychoStim['grating'] = ioHub.psychopyIOHubRuntime.visual.PatchStim(self.psychoWindow, mask="circle", size=3,pos=[-4,0], sf=3)
-        self.psychoStim['fixation'] =ioHub.psychopyIOHubRuntime.visual.PatchStim(self.psychoWindow, size=0.5, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        self.psychoStim['title'] =ioHub.psychopyIOHubRuntime.visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,6],  color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=15.0)
-        self.psychoStim['instructions'] =ioHub.psychopyIOHubRuntime.visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-3],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
-        self.psychoStim['instructions2'] =ioHub.psychopyIOHubRuntime.visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-6],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
-        self.psychoStim['keytext'] =ioHub.psychopyIOHubRuntime.visual.TextStim(win=self.psychoWindow, text='key', pos = [0,10],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=40.0)
-        self.psychoStim['mouseDot'] =ioHub.psychopyIOHubRuntime.visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(1,1),color='purple')
+        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=3,pos=[-4,0], sf=3)
+        self.psychoStim['fixation'] =visual.PatchStim(self.psychoWindow, size=0.5, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        self.psychoStim['title'] =visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,6],  color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=15.0)
+        self.psychoStim['instructions'] =visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-3],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
+        self.psychoStim['instructions2'] =visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-6],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
+        self.psychoStim['keytext'] =visual.TextStim(win=self.psychoWindow, text='key', pos = [0,10],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=40.0)
+        self.psychoStim['mouseDot'] =visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(1,1),color='purple')
 
     def drawAndFlipPsychoWindow(self):
         self.psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
@@ -128,7 +171,7 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
         return d
 
     def checkForEvents(self):
-        # get the time we reqquest events from the ioHub
+        # get the time we request events from the ioHub
         stime=self.currentTime()
         r = self.getEvents()
         if r and len(r) > 0:
@@ -138,26 +181,27 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
             return r, dur*1000.0
         return None,None
 
+
     def initTestResourcesAndState(self):
 
         self.mouse=self.hub.devices.mouse
+        self.kb=self.hub.devices.kb
+        self.expRuntime=self.hub.devices.experimentRuntime
+        self.pport=self.hub.devices.parallelPort
 
         if self.hub is None:
             print "Error: ioHub must be enabled to run the testEventRetrievalTiming test."
             return
 
         # Init Results numpy array
-        self.results=N.zeros((self.totalEventRequestsForTest,3),dtype='f4')
+        self.results= zeros((self.totalEventRequestsForTest,3),dtype='f4')
 
         self.numEventRequests=0
         self.flipTime=0.0
         self.lastFlipTime=0.0
 
-        # enable high priority mode for the experiment process.
-        self.enableHighPriority()
-
-        #enable high priority in the ioHub Server process
-        #self.hub.sendToHub(('RPC','enableHighPriority'))
+        # enable high priority mode for the experiment process and optionally the ioHub server process.
+        self.enableHighPriority(ioHubServerToo=True)
 
         # clear the ioHub event Buffer before starting the test.
         # This is VERY IMPORTANT, given an existing bug in ioHub.
@@ -168,14 +212,14 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
         self.results[self.numEventRequests][0]=duration     # ctime it took to get events from ioHub
         self.results[self.numEventRequests][1]=len(events)  # number of events returned
         self.results[self.numEventRequests][2]=ifi*1000.0   # calculating inter flip interval.
-        self.numEventRequests+=1        # incrementing tally counter
+        self.numEventRequests+=1                            # incrementing tally counter
 
         self.psychoStim['instructions2'].setText(self.instructionText2Pattern%(self.totalEventRequestsForTest-self.numEventRequests,))
 
         for r in events:
             if not isinstance(r,dict):
                 r=self.eventListToDict(r)
-            if r['event_type'] == 51: #keypress code
+            if r['event_type'] == ioHub.EVENT_TYPES['KEYBOARD_PRESS']: #keypress code
                 keystring=r['key']
                 self.psychoStim['keytext'].setText(keystring)
 
@@ -185,8 +229,7 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
         self.psychoWindow.close()
 
         # disable high priority in both processes
-        self.disableHighPriority()
-        #hub.sendToHub(('RPC','disableHighPriority'))
+        self.disableHighPriority(ioHubServerToo=True)
 
 
 
@@ -252,50 +295,32 @@ class ExperimentRuntime(ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime):
 
         show()
 
-def start(cfile='experiment_config.yaml'):
+def start(cfile=u'experiment_config.yaml'):
     configFile=cfile
+    runtime=None
     try:
-        print "******************************************************"
-        print "*            Unicode tests                           *"
-        print "******************************************************"
-
-        print "os.path.supports_unicode_filenames: ",ioHub.psychopyIOHubRuntime.os.path.supports_unicode_filenames
-        cwd=ioHub.psychopyIOHubRuntime.os.getcwd()
-        print "os.getcwd()",cwd,str(type(cwd))
-        print 'lstat(cwd):',ioHub.psychopyIOHubRuntime.os.lstat(cwd)
-        try:
-            print ''
-            EXPERIMENT_DIR=ioHub.psychopyIOHubRuntime.os.path.dirname(ioHub.psychopyIOHubRuntime.os.path.abspath(__file__))
-            print "EXPERIMENT_DIR",EXPERIMENT_DIR,str(type(EXPERIMENT_DIR))
-            print 'lstat(EXPERIMENT_DIR):',ioHub.psychopyIOHubRuntime.os.lstat(EXPERIMENT_DIR)
-        except Exception as e:
-            print " *Error composing EXPERIMENT_DIR* "
-            print ''
-            print str(e)
-        print "******************************************************"
-        print "*                                                    *"
-        print "******************************************************"
-
-        EXPERIMENT_DIR=ioHub.psychopyIOHubRuntime.os.path.dirname(ioHub.psychopyIOHubRuntime.os.path.abspath(__file__))
-
+        import os
+        runtime=None
         # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
 
-        runtime=ExperimentRuntime(EXPERIMENT_DIR, configFile)
+        runtime=ExperimentRuntime(ioHub.module_directory(start), configFile)
 
         # run a test on event access delay
         runtime.run(numEventRequests=1000)
 
-        runtime.close()
-
     except Exception:
         ExperimentRuntime.printExceptionDetails()
-        
+
+    finally:
+        # close ioHub, shut down ioHub process, clean-up.....
+        if runtime:
+            runtime.close()
 
 ##################################################################
 if __name__ == "__main__":
     import sys
     if len(sys.argv)>1:
-        configFile=sys.argv[1]
+        configFile=unicode(sys.argv[1])
         start(configFile)
     else:
         start()

@@ -1,10 +1,12 @@
 ﻿"""
-ioHub Python Module
+ioHub
+.. file: ioHub/server.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
 import gevent
@@ -184,7 +186,10 @@ class udpServer(DatagramServer):
         l= len(self.iohub.eventBuffer)
         self.iohub.eventBuffer.clear()
         return l
-        
+
+    def currentSec(self):
+        return Computer.currentSec()
+
     def currentMsec(self):
         return currentMsec()
 
@@ -254,22 +259,24 @@ class DeviceMonitor(Greenlet):
 class ioServer(object):
     eventBuffer=None 
     _logMessageBuffer=None
-    def __init__(self,config=None):
+    def __init__(self,configFilePath,config):
         self._running=True
         self.config=config
+        self.configFilePath=configFilePath
         ioServer.eventBuffer=deque(maxlen=config['global_event_buffer'])
         ioServer._logMessageBuffer=deque(maxlen=128)
         self.emrt_file=None
         self.devices=[]
         self.deviceDict={}
         self.deviceMonitors=[]
-        
         # start UDP service
         self.udpService=udpServer(self,':%d'%config['udpPort'])
 
         # dataStore setup
         if 'ioDataStore' in config and config['ioDataStore']['enable'] is True:
-            self.createDataStoreFile(config['ioDataStore']['filename']+'.hdf5',config['ioDataStore']['filepath'],'a',config['ioDataStore']['storage_type'])
+            configFileDir,cfn=os.path.split(self.configFilePath)
+            resultsFilePath=os.path.join(configFileDir,config['ioDataStore']['filepath'])
+            self.createDataStoreFile(config['ioDataStore']['filename']+'.hdf5',resultsFilePath,'a',config['ioDataStore']['storage_type'])
         
         # device configuration
         if len(config['monitor_devices']) > 0:
@@ -415,7 +422,7 @@ class ioServer(object):
 
 
 
-def run(configFile=None):
+def run(configFilePath=None):
     from yaml import load, dump
     try:
         from yaml import CLoader as Loader, CDumper as Dumper
@@ -423,9 +430,9 @@ def run(configFile=None):
         self.log("*** Using Python based YAML Parsing")
         from yaml import Loader, Dumper
 
-    ioHubConfig=load(file(configFile,'r'), Loader=Loader)
+    ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
     
-    s = ioServer(ioHubConfig)
+    s = ioServer(configFilePath, ioHubConfig)
     s.start()    
     
 if __name__ == '__main__':
@@ -436,4 +443,4 @@ if __name__ == '__main__':
     else:
         configFileName=None
         
-    run(configFile=configFileName)
+    run(configFilePath=configFileName)

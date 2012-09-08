@@ -1,7 +1,13 @@
+# experiment_config.yaml: settings related to the experiment being run when the run.py script is launched,
+# any custom session variables you want displayed in a dialog for input at the start of the experiment,
+# and settings related to the local process the experiment run.py is launched in.
+#
+# Items that are REQUIRED to be changed to run the program as is:
+#     - None
 title: ioHubAccessDelayTest
 code: ioHubDT
 version: '0.5'
-description: Example psychopy experiment running with ioHub (including pyEyeTrackerInterface) and ioDataStore.
+description: Test running within psychopy that collects keyboard and mouse events, updates the display based on the events, and calculates stats which are displayed by matplotlib graphs.
 total_sessions_to_run: 50
 session_defaults:
     name: Session Name
@@ -17,12 +23,6 @@ session_variable_order: [ name, code, comments, participant_age, participant_gen
 authors:
 - name: Sol Simpson
   email: N/A
-runtime: 
-    script: run.py       # name of main script file for experiment (should contain the if __name__ is "__main__" : )
-    name: psychopy              # name of experiment runtime environment used a.k.a psychopy
-    api_version: 1.7.03         # minumum version of psychopy supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
-    python_version: 2.7         # minimum python version supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
-    python_exe: C:\python27\python.exe
 event_buffer_length: 2048
 ioHub:
     enable: True                # True = enable ioHub functionality

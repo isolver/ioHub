@@ -1,24 +1,41 @@
-import ioHub.psychopyIOHubRuntime
-from ioHub.psychopyIOHubRuntime import *
-from eyeTrackerConstants import *
+"""
+ioHub
+.. file: ioHub/examples/ioHubEyeTrackerAccessTest/run.py
 
-EXPERIMENT_DIR=os.path.dirname(os.path.abspath(__file__))
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
+
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
+"""
+
+import os
+from devices.eyeTrackerInterface import DATA_FILTER
+import ioHub
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, core, visual
+from numpy import zeros
+
 
 class ExperimentRuntime(SimpleIOHubRuntime):
-    def __init__(self, configFile):
-        SimpleIOHubRuntime.__init__(self,EXPERIMENT_DIR,configFile)
-               
+    def __init__(self,configFileDirectory, configFile):
+        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
+        self.initAttributes()
+
+    def initAttributes(self):
+        pass
+
+
     def run(self,*args,**kwargs):
         TEST_BLOCK_COUNT=2
         TEST_TRIAL_COUNT=3
         print '\n\n'
         print "Starting Experiment 1 Test"
 
-        print "ExperimentPCkeyboard:",self.hub.devices.ExperimentPCkeyboard._methods
-        print "ExperimentPCmouse:",self.hub.devices.ExperimentPCmouse._methods
+        print "ExperimentPCkeyboard methods:",self.hub.devices.ExperimentPCkeyboard._methods
+        print "ExperimentPCmouse methods:",self.hub.devices.ExperimentPCmouse._methods
         
         #create a window
-        mywin = visual.Window([1024,768],monitor="testMonitor", units="deg")#,fullscr=True)
+        mywin = visual.Window([1024,768],monitor="testMonitor", units="deg",fullscr=True)
         
         DIVIDER="-----------------------"
         """
@@ -34,7 +51,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.hub.sendToHub(('RPC','clearEventBuffer'))
         
         print DIVIDER
-        print 'isConnected():',eyetracker.isConnected()
+        print 'isConnected():',eyetracker.isConnected
 
         print DIVIDER
         print 'setConnectionState:',eyetracker.setConnectionState(True)
@@ -154,33 +171,39 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         
         mywin.close()
 
-##################################################################        
-if __name__ == "__main__":
-    import sys
-    configFile='experiment_config.yaml'
-    if len(sys.argv)>1:
-        configFile=sys.argv[1]
-    try:
-        # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
-        runtime=ExperimentRuntime(configFile)
-        
-        # run a test on event access delay
-        runtime.run()
-        
-        # terminate the ioServer
-        runtime.hub.shutDownServer()
-        
         # save ioHubFile to xlsx format
         print "Saving Sample Excel File ...."
         import ioHub.ioDataStore.util as dsUtil
-        tstart=runtime.currentMsec()
-        nrows=dsUtil.hubTableToExcel(EXPERIMENT_DIR,runtime.ioHubConfig['ioDataStore']['filename']+'.hdf5',tableName='MonocularEyeSample',experiment_id=0,session_id=0)
-        tend=runtime.currentMsec()
+        tstart=self.currentMsec()
+        nrows=dsUtil.hubTableToExcel(os.getcwdu(),self.ioHubConfig['ioDataStore']['filename']+'.hdf5',tableName='MonocularEyeSample',experiment_id=0,session_id=0)
+        tend=self.currentMsec()
         print "Saved %d rows to excel file in %.3f sec (%.3f msec / row)"%(nrows,(tend-tstart)/1000.0,(tend-tstart)/nrows)
-        # terminate psychopy
-        core.quit()
-        
+
+
+
+###################################################################
+def start(cfile=u'experiment_config.yaml'):
+    configFile=cfile
+    try:
+        import os
+        # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
+        runtime=ExperimentRuntime(os.getcwd(), configFile)
+
+        # run a test on event access delay
+        runtime.run()
+
+        # close ioHub, shut down ioHub process, clean-up.....
+        runtime.close()
+
     except Exception:
         ExperimentRuntime.printExceptionDetails()
-###################################################################
- 
+
+
+##################################################################
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv)>1:
+        configFile=unicode(sys.argv[1])
+        start(configFile)
+    else:
+        start()

@@ -1,15 +1,23 @@
-title: Psycho Test
+title: ioHubAccessDelayTest
+code: pyCETItest
+version: '0.5'
+description: Test running within psychopy, testing the eye tracker interface for the specified eye tracker device.
+total_sessions_to_run: 50
+session_defaults:
+    name: Session Name
+    code: E1S01
+    comments: None
+    user_variables:
+        participant_age: Unknown
+        participant_gender: [ Select, Male, Female ]
+        glasses: [Select, Yes, No ]
+        contacts: [Select, Yes, No ]
+        eye_color: Unknown
+session_variable_order: [ name, code, comments, participant_age, participant_gender, glasses, contacts, eye_color ]
 authors:
 - name: Sol Simpson
   email: N/A
-description: Example psychopy experiment running with ioHub (including pyEyeTrackerInterface) and ioDataStore.
-runtime: 
-    script: psychotest.py       # name of main script file for experiment (should contain the if __name__ is "__main__" : )
-    name: psychopy              # name of experiment runtime environment used a.k.a psychopy
-    api_version: 1.7.03         # minumum version of psychopy supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
-    python_version: 2.7         # minimum python version supported by experiment. (TO DO:  CURRENLY NOT CHECKED)
-    python_exe: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\python.bat #(TO DO:  CURRENLY NOT USED)
-event_buffer_length: 2048         #length of 'client side' event buffer. 
+event_buffer_length: 2048
 ioHub:
     enable: True                # True = enable ioHub functionality
     config: ioHub_config.yaml   # specifies the config file to use for the ioHub, if enabled. File must be in experiment dir.
@@ -24,4 +32,3 @@ events:
   msg_offset: 0
 - event_class: CommandEvent
   priority: 0
-  

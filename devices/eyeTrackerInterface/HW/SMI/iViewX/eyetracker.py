@@ -1,11 +1,13 @@
 """
-pyEyeTrackerInterface: common Python interface for multiple eye tracking devices.
+ioHub
+pyEyeTrackerInterface
+.. file: iohub/devices/eyeTrackerInterface/HW/SMI/iViewX/eyetracker.py
 
-Part of the pyEyeTracker library 
-Copyright (C) 2012  Florian Niefind (SMI GmbH), Sol Simpson 
+This file Copyright (C) 2012  Florian Niefind (SMI GmbH), Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version). 
 
-.. moduleauthor::  Florian Niefind < Florian.Niefind@smi.de> + contributors, please see credits section of documentation.
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor::  Florian Niefind < Florian.Niefind@smi.de>
 """
 
 from collections import deque

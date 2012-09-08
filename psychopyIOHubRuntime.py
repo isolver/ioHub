@@ -1,10 +1,25 @@
+"""
+ioHub
+.. file: ioHub/psychopyIOHubRuntime.py
+
+Copyright (C) 2012 Sol Simpson
+Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
+
+.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
+"""
+
 from __future__ import division
+from __builtin__ import unicode, file, repr, dict, object, staticmethod, zip, str
+from exceptions import Exception, ImportError
 import psychopy
-from psychopy import logging, core, visual, gui
+#noinspection PyUnresolvedReferences
+from psychopy import  core, gui, visual
 import os,gc,psutil
 from collections import deque
 import time
-from yaml import load, dump
+from yaml import load
+
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -14,9 +29,9 @@ from ioHub.devices import EventConstants
             
 class SimpleIOHubRuntime(object):
     def __init__(self, configFilePath, configFile):
-        '''
-        Initialize the Experiment Object. 
-        ''' 
+        """
+        Initialize the Experiment Object.
+        """
         # as of 2.7, timeit.default_timer correctly selects the best clock based on OS
         # for high precision timing. < 2.7, you need to check the OS version yourself
         # and select; or use the psychopy clocks since it does the work for you. ;)
@@ -25,10 +40,12 @@ class SimpleIOHubRuntime(object):
 
         self.configFilePath=configFilePath
         self.configFileName=configFile
-        
+
+        self.fullPath= os.path.join(self.configFilePath,self.configFileName)
+
         # load the experiment config settings from the experiment_config.yaml file.
         # The file must be in the same directory as the experiment script.
-        self.configuration=load(file(os.path.join(configFilePath,configFile),'r'), Loader=Loader)
+        self.configuration=load(file(self.fullPath,u'r'), Loader=Loader)
 
         self.experimentConfig=dict()
         self._experimentConfigKeys=['title','code','version','description','total_sessions_to_run']
@@ -54,22 +71,22 @@ class SimpleIOHubRuntime(object):
         self.initalizeConfiguration()
         
     def initalizeConfiguration(self):
-        '''
+        """
         Based on the configuration data in the experiment_config.yaml and iohub_config.yaml,
         configure the experiment environment.
-        '''
+        """
         if 'ioHub' in self.configuration and self.configuration['ioHub']['enable'] is True:
-            import ioHub
-            from ioHub.client import ioHubClient       
+            from ioHub.client import ioHubClient
 
-            ioHubConfigFileName=self.configuration['ioHub']['config']
-            configAbsPath=os.path.join(self.configFilePath,ioHubConfigFileName)
-            self.ioHubConfig=load(file(configAbsPath,'r'), Loader=Loader)
-            
-            self.hub=ioHubClient(self.ioHubConfig,configAbsPath)
+            ioHubConfigFileName=unicode(self.configuration['ioHub']['config'])
+            ioHubConfigAbsPath=os.path.join(self.configFilePath,unicode(ioHubConfigFileName))
+            self.ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
+
+
+            self.hub=ioHubClient(self.ioHubConfig,ioHubConfigAbsPath)
  
             self.hub.startServer()
-            
+            self.hub._calculateClientServerTimeOffset(500)
             # Is ioHub configured to be run in experiment?
             if self.hub:
             
@@ -98,12 +115,12 @@ class SimpleIOHubRuntime(object):
                     sys.exit(1)
                 
                 # send session data to ioHub and get session ID (self.hub.sessionID)
-                tempdict=(self.experimentSessionDefaults)
+                tempdict= self.experimentSessionDefaults
                 tempdict['user_variables']=self.sessionUserVariables
                 self.hub.sendSessionInfo(tempdict)
                 
                 # get the list of devices regigisted with the ioHub
-                dlist=self.hub.getDeviceList()
+                dlist=self.hub._getDeviceList()
 
                 # create a local 'thin' representation of the registered ioHub devices,
                 # allowing such things as device level event access (if supported) 
@@ -122,45 +139,55 @@ class SimpleIOHubRuntime(object):
             print "** ioHub is Disabled (or should be). Why are you using this utility class then? ;) **"
             
         return self.hub
-    
-    def enableHighPriority(self,disable_gc=True):
-        '''
+
+    def enableHighPriority(self,disable_gc=True,ioHubServerToo=False):
+        """
         sets the priority of the experiment process to high prority
         and optionally (default is true) disable the python GC. This is very
         useful for the duration of a trial, for example, where you enable at
-        start of trial and disable at end of trial. Improves Windows 
+        start of trial and disable at end of trial. Improves Windows
         sloppyness greatly in general.
-        '''
+        """
         if self._inHighPriorityMode is False:
             if disable_gc:
                 gc.disable()
             p = psutil.Process(os.getpid())
             p.nice=psutil.HIGH_PRIORITY_CLASS
             self._inHighPriorityMode=True
+        if self.hub and ioHubServerToo is True:
+            self.hub.sendToHub(('RPC','enableHighPriority'))
 
-    def disableHighPriority(self):
-        '''
+    def disableHighPriority(self,ioHubServerToo=False):
+        """
         sets the priority of the experiment process back to normal prority
         and enables the python GC. This is very useful for the duration of a trial,
         for example, where you call enableHighPriority() at
-        start of trial and call disableHighPriority() at end of trial. 
+        start of trial and call disableHighPriority() at end of trial.
         Improves Windows sloppyness greatly in general.
-        '''        
+        """
         if self._inHighPriorityMode is True:
             gc.enable()
             p = psutil.Process(os.getpid())
             p.nice=psutil.NORMAL_PRIORITY_CLASS
             self._inHighPriorityMode=False
-    
+        if self.hub and ioHubServerToo is True:
+            self.hub.sendToHub(('RPC','disableHighPriority'))
+
+    def currentSec(self):
+        return self.currentTime()
+
     def currentMsec(self):
         return self.currentTime()*1000.0
-        
+
+    def currentUsec(self):
+        return self.currentTime()*1000000.0
+
     def msecDelay(self,msecDelay,checkHubInterval=10):
         stime=self.currentMsec()
         targetEndTime=stime+msecDelay
 
         if checkHubInterval < 0:
-            raise IOHubClientError("checkHubInterval parameter for msecDelay method must be a >= 0 msec.")        
+            raise SimpleIOHubRuntimeError("checkHubInterval parameter for msecDelay method must be a >= 0 msec.")
         
         if self.hub and checkHubInterval > 0:
             remainingMsec=targetEndTime-self.currentMsec()
@@ -276,10 +303,10 @@ class SimpleIOHubRuntime(object):
 
     @staticmethod    
     def printExceptionDetails():
-        '''
-        No idea if all of this is needed, infact I know it is not. But for now why not. 
+        """
+        No idea if all of this is needed, infact I know it is not. But for now why not.
         Taken straight from the python manual on Exceptions.
-        '''
+        """
         import sys, traceback
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print "*** print_tb:"

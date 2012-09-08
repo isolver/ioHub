@@ -1,14 +1,18 @@
 """
 ioHub Python Module
+.. file: ioHub/__init__.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
+
 from __future__ import division
 from __builtin__ import isinstance, repr, dict
 from exceptions import Exception
+import inspect
 
 
 class ioDeviceError(Exception):
@@ -124,6 +128,16 @@ from collections import Iterable,OrderedDict
 def isIterable(o):
     return isinstance(o, Iterable)
 
+def module_path(local_function):
+    """ returns the module path without the use of __file__.  Requires a function defined
+   locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
+    return os.path.abspath(inspect.getsourcefile(local_function))
+
+def module_directory(local_function):
+    mp=module_path(local_function)
+    moduleDirectory,mname=os.path.split(mp)
+    return moduleDirectory
+
 class LastUpdatedOrderedDict(OrderedDict):
     """Store items in the order the keys were last added"""
 
@@ -136,4 +150,4 @@ class LastUpdatedOrderedDict(OrderedDict):
 import devices
 import os
 global IO_HUB_DIRECTORY
-IO_HUB_DIRECTORY=os.path.dirname(os.path.abspath(__file__))
+IO_HUB_DIRECTORY=module_directory(isIterable)

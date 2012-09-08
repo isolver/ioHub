@@ -1,10 +1,12 @@
 """
-ioHub Python Module
+ioHub
+.. file: ioHub/devices/mouse/__init__.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
+.. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
 from .. import computer, Device
@@ -19,7 +21,7 @@ import ioHub
 
 if computer.system == 'Windows':
     global Mouse
-    from __win32__ import MouseWindows32         
+    from _win32 import MouseWindows32
 
     class Mouse(Device,MouseWindows32):
         newDataTypes=[]
@@ -43,10 +45,10 @@ if computer.system == 'Windows':
             Device.__init__(self,**deviceSettings)
             MouseWindows32.__init__(self,**deviceSettings)        
 elif computer.system == 'Linux':
-    import __linux__
+    import _linux
     print 'Mouse not implemented on Linux yet.'
 else: # assume OS X
-    import __osx__
+    import _osx
     print 'Mouse not implemented on OS X yet.'
 
 ############# OS Independent Mouse Event Classes ####################
