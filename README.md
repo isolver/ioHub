@@ -2,7 +2,7 @@
 
 # Project Status
 
-Please see the project webpage for current status details.
+Please see the project webpage http://isolver.github.com/ioHub for current status details.
 
 #Overview
 
@@ -123,7 +123,7 @@ See the Bug Tracker.
 
 # Examples
 
-See the examples directory in the ioHub folder. Also see the project webpage for details on which examples are
+See the examples directory (https://github.com/isolver/ioHub/tree/master/examples) in the ioHub folder. Also see the project webpage for details on which examples are
 currently running.
 
 # Getting Help
