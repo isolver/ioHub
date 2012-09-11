@@ -19,6 +19,8 @@ import os,gc,psutil
 from collections import deque
 import time
 from yaml import load
+import ioHub
+from ioHub.devices import computer
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -32,11 +34,13 @@ class SimpleIOHubRuntime(object):
         """
         Initialize the Experiment Object.
         """
-        # as of 2.7, timeit.default_timer correctly selects the best clock based on OS
+        # currently computer.currentSec uses a ctypes implementation of direct access to the
+        # Windows QPC functions in win32 (so no python interpreter start time offset is applied between processes)
+        # and timeit.default_timer is used for all other platforms at this time.
+        # Note on timeit.default_timer: As of 2.7, timeit.default_timer correctly selects the best clock based on OS
         # for high precision timing. < 2.7, you need to check the OS version yourself
         # and select; or use the psychopy clocks since it does the work for you. ;)
-        import timeit
-        self.currentTime=timeit.default_timer
+        self.currentTime=computer.currentSec
 
         self.configFilePath=configFilePath
         self.configFileName=configFile
@@ -66,9 +70,12 @@ class SimpleIOHubRuntime(object):
         # indicates if the experiment is in high priority mode or not. Do not set directly.
         # See enableHighPriority() and disableHighPriority()
         self._inHighPriorityMode=False
-        
+
+        self.sysutil=ioHub.devices.computer
+
         # initialize the experiment object based on the configuration settings.
         self.initalizeConfiguration()
+
         
     def initalizeConfiguration(self):
         """
@@ -137,7 +144,35 @@ class SimpleIOHubRuntime(object):
                 self.allEvents=deque(maxlen=self.configuration['event_buffer_length'])
         else:
             print "** ioHub is Disabled (or should be). Why are you using this utility class then? ;) **"
-            
+
+        # set process affinities based on config file settings
+        cpus=range(computer.cpuCount)
+        experiment_process_affinity=cpus
+        other_process_affinity=cpus
+        iohub_process_affinity=cpus
+
+        if 'process_affinity' in self.configuration:
+            experiment_process_affinity=self.configuration['process_affinity']
+            if len(experiment_process_affinity) == 0:
+                experiment_process_affinity=cpus
+        if 'remaining_processes_affinity' in self.configuration:
+            other_process_affinity=self.configuration['remaining_processes_affinity']
+            if len(other_process_affinity) == 0:
+                other_process_affinity=cpus
+        if self.hub and 'process_affinity' in self.configuration['ioHub']:
+            iohub_process_affinity=self.configuration['ioHub']['process_affinity']
+            if len(iohub_process_affinity) == 0:
+                iohub_process_affinity=cpus
+
+        if len(experiment_process_affinity) < len(cpus) or len(iohub_process_affinity) < len(cpus):
+            self.setProcessAffinities(experiment_process_affinity,iohub_process_affinity)
+
+        if len(other_process_affinity) < len(cpus):
+            ignore=[computer.currentProcessID,]
+            if self.hub:
+                ignore.append(self.hub.server_pid)
+            computer.setAllOtherProcessesAffinity(other_process_affinity,ignore)
+
         return self.hub
 
     def enableHighPriority(self,disable_gc=True,ioHubServerToo=False):
@@ -148,12 +183,7 @@ class SimpleIOHubRuntime(object):
         start of trial and disable at end of trial. Improves Windows
         sloppyness greatly in general.
         """
-        if self._inHighPriorityMode is False:
-            if disable_gc:
-                gc.disable()
-            p = psutil.Process(os.getpid())
-            p.nice=psutil.HIGH_PRIORITY_CLASS
-            self._inHighPriorityMode=True
+        self.sysutil.enableHighPriority(disable_gc)
         if self.hub and ioHubServerToo is True:
             self.hub.sendToHub(('RPC','enableHighPriority'))
 
@@ -165,15 +195,46 @@ class SimpleIOHubRuntime(object):
         start of trial and call disableHighPriority() at end of trial.
         Improves Windows sloppyness greatly in general.
         """
-        if self._inHighPriorityMode is True:
-            gc.enable()
-            p = psutil.Process(os.getpid())
-            p.nice=psutil.NORMAL_PRIORITY_CLASS
-            self._inHighPriorityMode=False
+        self.sysutil.disableHighPriority()
         if self.hub and ioHubServerToo is True:
             self.hub.sendToHub(('RPC','disableHighPriority'))
 
+    def getSystemProcessorCount(self):
+        return self.sysutil.cpuCount
+
+    def getProcessAffinities(self):
+        """
+        Returns experimentProcessAffinity , ioHubProcessAffinity
+        """
+        if self.hub is None:
+            return self.sysutil.getCurrentProcessAffinity(),None
+        return self.sysutil.getCurrentProcessAffinity(),self.hub._psutil_server_process.get_cpu_affinity()
+
+    def setProcessAffinities(self,experimentProcessorList, ioHubProcessList=None):
+        self.sysutil.setCurrentProcessAffinity(experimentProcessorList)
+        if self.hub and ioHubProcessList:
+            self.hub._psutil_server_process.set_cpu_affinity(ioHubProcessList)
+
+    def autoAssignAffinities(self):
+        cpu_count=self.sysutil.cpuCount
+        print "System processor count:", cpu_count
+        if cpu_count == 2 and self.hub:
+            print 'Assigning experiment process to CPU 0, ioHubServer process to CPU 1'
+            self.setProcessAffinities([0,],[1,])
+        elif cpu_count == 4 and self.hub:
+            print 'Assigning experiment process to CPU 0,1, ioHubServer process to CPU 2,3'
+            self.setProcessAffinities([0,1],[2,3])
+        elif cpu_count == 8 and self.hub:
+            print 'Assigning experiment process to CPU 2,3, ioHubServer process to CPU 4,5, attempting to assign all others to 0,1,6,7'
+            self.setProcessAffinities([2,3],[4,5])
+            self.sysutil.setAllOtherProcessesAffinity([0,1,6,7],[self.sysutil.currentProcessID,self.hub.server_pid])
+        else:
+            print "autoAssignAffinities does not support %d processors."%(cpu_count,)
+
     def currentSec(self):
+        """
+
+        """
         return self.currentTime()
 
     def currentMsec(self):

@@ -10,9 +10,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import numpy as N
-from .. import computer
 
-from .. import Device
+from .. import Device, computer
 import ioHub
 ##### Modifier Keys #####
 

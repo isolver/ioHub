@@ -20,12 +20,12 @@ import ioHub
 from ioHub.devices import Computer,computer
 currentMsec= Computer.currentMsec
 currentUsec= Computer.currentUsec
-             
+
+#noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
     def __init__(self,ioHubServer,address,coder='msgpack'):
         self.iohub=ioHubServer
         self.feed=None
-        self._inHighPriorityMode=False
         self._running=True
         if coder=='ujson':
             self.iohub.log(" ioHub Server configuring ujson...")
@@ -91,7 +91,7 @@ class udpServer(DatagramServer):
                         result = funcPtr(*args)
                     elif not args and kwargs:
                         result = funcPtr(**kwargs)
-                except:
+                except Exception, e:
                     print "Unexpected error:", sys.exc_info()[0]
                     print sys.exc_info()
                     print '-----------------------'
@@ -197,22 +197,17 @@ class udpServer(DatagramServer):
         return currentUsec()
         
     def enableHighPriority(self,disable_gc=True):
-        import psutil, os
-        if self._inHighPriorityMode is False:
-            if disable_gc:
-                gc.disable()
-            p = psutil.Process(os.getpid())
-            p.nice=psutil.HIGH_PRIORITY_CLASS
-            self._inHighPriorityMode=True
+        ioHub.computer.enableHighPriority(disable_gc)
 
     def disableHighPriority(self):
-        import psutil, os
-        if self._inHighPriorityMode is True:
-            gc.enable()
-            p = psutil.Process(os.getpid())
-            p.nice=psutil.NORMAL_PRIORITY_CLASS
-            self._inHighPriorityMode=False
-    
+        ioHub.computer.disableHighPriority()
+
+    def getProcessAffinity(self):
+        return ioHub.computer.getCurrentProcessAffinity()
+
+    def setProcessAffinity(self, processorList):
+        return ioHub.computer.setCurrentProcessAffinity(processorList)
+
     def shutDown(self):
         import time
         self._running=False
@@ -285,40 +280,44 @@ class ioServer(object):
         #built device list and config from yaml config settings
         for iodevice in config['monitor_devices']:
             for _key,deviceConfig in iodevice.iteritems():
-                # build devices to monitor
-                self.log("Creating Device: %s"%deviceConfig['device_class'])
-                dclass=deviceConfig['device_class']
-                parentModule=devices
-                modulePathTokens=dclass.split('.')
-                for mt in modulePathTokens:
-                    DeviceClass=getattr(parentModule,mt)
-                    parentModule=DeviceClass  
-                deviceInstance=DeviceClass(dconfig=deviceConfig)
-                self.devices.append(deviceInstance)
-                self.deviceDict[deviceConfig['device_class']]=deviceInstance
-                
-                if 'device_timer' in deviceConfig:
-                    interval = deviceConfig['device_timer']['interval']
-                    self.log("%s has requested a timer with period %.5f"%(deviceConfig['device_class'], interval))
-                    dPoller=DeviceMonitor(deviceInstance,interval)
-                    self.deviceMonitors.append(dPoller)
-                    
-                # add event listeners for streaming events
-                if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
-                    self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
-                    # add listener for global event queue
-                    deviceInstance._addEventListener(self)
-                    # add listener for device event queue
-                    deviceInstance._addEventListener(deviceInstance)
+                try:
+                    # build devices to monitor
+                    self.log("Creating Device: %s"%deviceConfig['device_class'])
+                    dclass=deviceConfig['device_class']
+                    parentModule=devices
+                    modulePathTokens=dclass.split('.')
+                    for mt in modulePathTokens:
+                        DeviceClass=getattr(parentModule,mt)
+                        parentModule=DeviceClass
+                    deviceInstance=DeviceClass(dconfig=deviceConfig)
+                    self.devices.append(deviceInstance)
+                    self.deviceDict[deviceConfig['device_class']]=deviceInstance
 
-                # add event listeners for saving events
-                if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
-                    self.log("Event saving is being enabled for: %s"%deviceConfig['device_class'])
-                    deviceInstance._addEventListener(self.emrt_file)
-                self.log("==============================")
+                    if 'device_timer' in deviceConfig:
+                        interval = deviceConfig['device_timer']['interval']
+                        self.log("%s has requested a timer with period %.5f"%(deviceConfig['device_class'], interval))
+                        dPoller=DeviceMonitor(deviceInstance,interval)
+                        self.deviceMonitors.append(dPoller)
+
+                    # add event listeners for streaming events
+                    if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
+                        self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
+                        # add listener for global event queue
+                        deviceInstance._addEventListener(self)
+                        # add listener for device event queue
+                        deviceInstance._addEventListener(deviceInstance)
+
+                    # add event listeners for saving events
+                    if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
+                        self.log("Event saving is being enabled for: %s"%deviceConfig['device_class'])
+                        deviceInstance._addEventListener(self.emrt_file)
+                    self.log("==============================")
+                except Exception as e:
+                    ioHub.print2stderr("Exception creating device %s: %s. Is device connected?"%(deviceConfig['device_class'],str(e)))
+                    self.log("Exception creating device %s: %s"%(deviceConfig['device_class'],str(e)))
         deviceDict=self.deviceDict
         iohub=self
-        if (('Mouse' in deviceDict) or ('Keyboard' in deviceDict)) and computer.system == 'Windows':
+        if ('Mouse' in deviceDict or 'Keyboard' in deviceDict) and computer.system == 'Windows':
             class pyHookDevice(object):
                 def __init__(self):
                     import pyHook
@@ -354,7 +353,7 @@ class ioServer(object):
                     e=device._getIOHubEventObject(evt,device.instance_code)
                     for l in device._getEventListeners():
                         l._handleEvent(e) 
-            gevent.sleep(sleep_interval)    
+            gevent.sleep(sleep_interval)
 
     def closeDataStoreFile(self):
         if self.emrt_file:
@@ -427,12 +426,14 @@ def run(configFilePath=None):
     try:
         from yaml import CLoader as Loader, CDumper as Dumper
     except ImportError:
-        self.log("*** Using Python based YAML Parsing")
         from yaml import Loader, Dumper
 
     ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
     
     s = ioServer(configFilePath, ioHubConfig)
+
+    ioHub.devices.Computer.isIoHubProcess=True
+
     s.start()    
     
 if __name__ == '__main__':

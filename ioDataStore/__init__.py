@@ -137,9 +137,12 @@ class EMRTpyTablesFile():
         self.TABLES['MOUSE_WHEEL']=self.emrtFile.root.data_collection.events.mouse.MouseWheelEvent
         self.TABLES['MOUSE_PRESS']=self.emrtFile.root.data_collection.events.mouse.MouseButtonDownEvent
         self.TABLES['MOUSE_RELEASE']=self.emrtFile.root.data_collection.events.mouse.MouseButtonUpEvent
-        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.root.data_collection.events.mouse.MouseDoubleClickEvent    
+        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.root.data_collection.events.mouse.MouseDoubleClickEvent
 
-        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent    
+        self.TABLES['JOYSTICK_BUTTON_PRESS']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonPressEvent
+        self.TABLES['JOYSTICK_BUTTON_RELEASE']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonReleaseEvent
+
+        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent
        
         self.TABLES['COMMAND']=self.emrtFile.root.data_collection.events.experiment.Command   
         self.TABLES['MESSAGE']=self.emrtFile.root.data_collection.events.experiment.Message
@@ -193,6 +196,7 @@ class EMRTpyTablesFile():
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'experiment', title='Experiment Generated Events')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'keyboard', title='Keyboard Created Events')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'mouse', title='Mouse Device Created Events')
+        self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'joystick', title='Joystick Created Events')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'eye_tracker', title='Eye Tracker Generated Events')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'parallel_port', title='Parallel Port Created Events')
         #self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'monitor', title='Computer Monitor Created Events')
@@ -214,9 +218,12 @@ class EMRTpyTablesFile():
         self.TABLES['MOUSE_WHEEL']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseWheelEvent', D.MouseWheelEvent.ndType, title='Mouse Wheel Event Logging.')
         self.TABLES['MOUSE_PRESS']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonDownEvent', D.MouseButtonDownEvent.ndType, title='Mouse Button Down Event Logging.')
         self.TABLES['MOUSE_RELEASE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonUpEvent', D.MouseButtonUpEvent.ndType, title='Mouse Button Up Event Logging.')
-        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseDoubleClickEvent', D.MouseDoubleClickEvent.ndType, title='Mouse Double Click Event Logging.')    
+        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseDoubleClickEvent', D.MouseDoubleClickEvent.ndType, title='Mouse Double Click Event Logging.')
 
-        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.ndType, title='Parallel Port Event Logging.')    
+        self.TABLES['JOYSTICK_BUTTON_PRESS']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonPressEvent', D.JoystickButtonPressEvent.ndType, title='Joystick Button Press Event Logging.')
+        self.TABLES['JOYSTICK_BUTTON_RELEASE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonReleaseEvent', D.JoystickButtonReleaseEvent.ndType, title='Joystick Button Release Event Logging.')
+
+        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.ndType, title='Parallel Port Event Logging.')
 
         
        

@@ -8,24 +8,30 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
+from __future__ import division
+import gc
+import timeit
 
 import numpy as N
 import platform
-import timeit
 from collections import deque
 from operator import itemgetter
+import psutil
 
 class Computer(object):
     _instance=None
     _nextEventID=1
-    def __init__(self,system, node, release, version, machine, processor):
-        if Computer._instance!=None:
+    isIoHubProcess=False
+    _inHighPriorityMode=False
+    def __init__(self):
+        if Computer._instance is not None:
             raise "Error creating Computer object; instance already exists. \
                    Use Computer.getInstance() to existing instance, or Computer. \
                    deleteInstance() to delete the existing instance before creating a new one."
         else:
             import psutil, os
-            
+            system, node, release, version, machine, processor = platform.uname()
+
             self.system=system
             self.node=node
             self.release=release
@@ -33,10 +39,9 @@ class Computer(object):
             self.machine=machine
             self.processor=processor
             self.cpuCount=psutil.NUM_CPUS
-            
-            
             self.currentProcessID=os.getpid()
             self.currentProcess=psutil.Process(self.currentProcessID)
+
  
     # return time in sec.msec format
     @classmethod
@@ -50,55 +55,68 @@ class Computer(object):
         cls._instance=None
         del i
 
-        # return time in sec.msec format
+    def getCurrentProcess(self):
+        return self.currentProcess
+
+    def enableHighPriority(self,disable_gc=True):
+        if Computer._inHighPriorityMode is False:
+            if disable_gc:
+                gc.disable()
+            self.currentProcess.nice=psutil.HIGH_PRIORITY_CLASS
+            Computer._inHighPriorityMode=True
+
+    def disableHighPriority(self):
+        if Computer._inHighPriorityMode is True:
+            gc.enable()
+            self.currentProcess.nice=psutil.NORMAL_PRIORITY_CLASS
+            Computer._inHighPriorityMode=False
+
+    def getCurrentProcessAffinity(self):
+        return self.currentProcess.get_cpu_affinity()
+
+    def setCurrentProcessAffinity(self,processorList):
+        return self.currentProcess.set_cpu_affinity(processorList)
+
+    def setProcessAffinityByID(self,processID,processorList):
+        p=psutil.Process(processID)
+        return p.set_cpu_affinity(processorList)
+
+    def getProcessAffinityByID(self,processID):
+        p=psutil.Process(processID)
+        return p.get_cpu_affinity()
+
+    def setAllOtherProcessesAffinity(self, processorList, excludeProcessByIDList=[]):
+        """
+
+        """
+        for p in psutil.process_iter():
+            if p.pid not in excludeProcessByIDList:
+                try:
+                    p.set_cpu_affinity(processorList)
+                    ioHub.print2stderr('Set OK process affinity: '+str(p.name)+" : "+str(p.pid))
+                except Exception:
+                    ioHub.print2stderr('Error setting process affinity: '+str(p.name)+" : "+str(p.pid))
+
+    # return time in sec.msec format
     @staticmethod
     def currentSec():
-        return timeit.default_timer()
+        return highPrecisionTimer()
 
     #return time in msec.usec format
     @staticmethod
     def currentMsec():
-        return timeit.default_timer()*1000.0
+        return highPrecisionTimer()*1000.0
 
     #return time in usec format
     @staticmethod
     def currentUsec():
-        return int(timeit.default_timer()*1000000.0)
+        return int(highPrecisionTimer()*1000000.0)
 
     @staticmethod
     def getNextEventID():
         n = Computer._nextEventID
         Computer._nextEventID+=1
         return n
-        
-    # From Python 2.6 Doc
-    # timeit.timeit(stmt, setup='pass', timer=default_timer, number=1000000)
-    # Create a Timer instance with the given statement, setup code and timer
-    # function and run its timeit() method with number executions.
-    @staticmethod
-    def profileCode(stmt, setup='pass', timer=timeit.default_timer, number=1000000):
-        return timeit.timeit(stmt, setup, timer, number)
-
-    # From Python 2.6 Doc
-    # timeit.repeat(stmt, setup='pass', timer=default_timer, repeat=3, number=1000000)
-    # Create a Timer instance with the given statement, setup code and
-    # timer function and run its repeat() method with the given repeat count
-    # and number executions.
-    @staticmethod
-    def repeatedProfile(stmt, setup='pass', timer=timeit.default_timer, repeat=3, number=1000000):
-        return timeit.repeat(stmt, setup, timer, repeat, number)
-
-    def printProcessInfo(self):
-        tcount= self.currentProcess.get_num_threads()
-        pthreads=self.currentProcess.get_threads()
-        
-        print '--------------------------------------'
-        print 'Process ( %d ): '%(self.currentProcessID,)
-        print p
-        print 'Thread Count:', tcount
-        print 'Thread Info:'
-        for t in pthreads:
-            print t
 
     def getProcessInfoString(self):
         tcount= self.currentProcess.get_num_threads()
@@ -116,8 +134,30 @@ class Computer(object):
         self._instance=None
         del self._instance
             
-Computer._instance=Computer(*platform.uname())
+Computer._instance=Computer()
 computer=Computer.getInstance()
+
+global highPrecisionTimer
+
+def highPrecisionTimer():
+    raise ioHub.ioDeviceError(computer,"highPrecisionTimer function must be overwritten by a platform specific implementation.")
+
+if computer.system == 'Windows':
+    global _fcounter,_ffreq,_Kernel32,highPrecisionTimer
+    from ctypes import byref, c_int64, windll
+    _Kernel32=windll.Kernel32
+    _fcounter = c_int64()
+    _ffreq = c_int64()
+
+    def highPrecisionTimer():
+        _Kernel32.QueryPerformanceCounter(byref(_fcounter))
+        _Kernel32.QueryPerformanceFrequency(byref(_ffreq))
+        return  _fcounter.value/_ffreq.value
+
+elif computer.system == 'Linux':
+    highPrecisionTimer = timeit.default_timer
+else: # assume OS X?
+    highPrecisionTimer = timeit.default_timer
 
 class ioObject(object):
     newDataTypes=[]
@@ -163,7 +203,7 @@ class Device(ioObject):
 
         if len(currentEvents)>0:
             sorted(currentEvents, key=itemgetter(7))
-        return eventList
+        return currentEvents
     
     def clearEvents(self):
         self.I_ioHubEventBuffer.clear()
@@ -319,7 +359,8 @@ if computer.system == 'Windows':
         WM_SYSKEYUP = _win32EventConstants.WM_SYSKEYUP
         WM_SYSCHAR = _win32EventConstants.WM_SYSCHAR
         WM_SYSDEADCHAR = _win32EventConstants.WM_SYSDEADCHAR
-        WM_KEYLAST = _win32EventConstants.WM_KEYLAST    
+        WM_KEYLAST = _win32EventConstants.WM_KEYLAST
+
         def __init__(self):
             EventConstantsBase.__init__(self)
         
@@ -363,6 +404,10 @@ import parallelPort as parallelPort_module
 from parallelPort import ParallelPort
 from parallelPort import ParallelPortEvent
 
+import joystick as joystick_module
+from joystick import Joystick
+from joystick import JoystickButtonPressEvent, JoystickButtonReleaseEvent
+
 import experiment
 from experiment import ExperimentDevice
 from experiment import MessageEvent, CommandEvent
@@ -385,6 +430,8 @@ if len(EventConstantsBase.eventTypeCodeToClass)==0:
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_PRESS']]=MouseButtonDownEvent
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_RELEASE']]=MouseButtonUpEvent
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_DOUBLE_CLICK']]=MouseDoubleClickEvent
+    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['JOYSTICK_BUTTON_PRESS']]=JoystickButtonPressEvent
+    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['PARALLEL_PORT_INPUT']]=ParallelPortEvent
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MESSAGE']]=MessageEvent
     EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['COMMAND']]=CommandEvent

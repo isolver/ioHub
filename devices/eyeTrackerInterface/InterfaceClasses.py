@@ -170,6 +170,7 @@ class EyeTracker(Device):
         #                       'ANY': 0
         #                      }
         runtimeSettings=self.eyeTrackerConfig['runtime_settings']
+
         #print ''
         #print " #### EyeTracker Runtime Settings #### "
         #print runtimeSettings
@@ -180,34 +181,8 @@ class EyeTracker(Device):
         #
         # Current settings, example from possible values.
         #
-        # 'device_class': 'Display'
-        # 'enable': True 
-        # 'name': 'calibrationPlane'
-        # 'instance_code': 'display_serial_number'
-        # 'head_stationary': True 
-        # 'IPD': 30.0 
-        # 'physical_calibration_surface_dimensions': {
-        #                        'width': 900
-        #                        'height': 600
-        #                        }
-        # 'default_eye_physical_calibration_surface_distance': {
-        #                               'bottom_center': 660
-        #                               'top_center': 600
-        #                               }
-        # 'orthoganal_eye_to_physical_calibration_surface_location': {
-        #                   'horizontal': 450
-        #                   'vertical': 300
-        #                   }
-        # 'physical_calibration_surface_unit_type' : 'mm'
-        # 'calibration_surface_bounds': {
-        #                    'left': 0
-        #                    'top': 0 
-        #                    'right': 1920
-        #                    'bottom': 1080
-        #                    }
-        # 'calibration_surface_bounds_unit_type': 'pixels'
-        # 'psychopy_config_file': 'unknown'
         EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
+
         #print ''
         #print " #### EyeTracker Display Settings #### "
         #print self.displaySettings

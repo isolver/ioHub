@@ -15,6 +15,7 @@ from exceptions import Exception
 from gevent import socket
 import os,sys
 import time
+import psutil
 import ioHub
 from ioHub.devices import Computer
 from ioHub.devices.experiment import MessageEvent,CommandEvent
@@ -185,8 +186,10 @@ class ioHubClient(object):
             # start up ioHub using subprocess module so we can have it run for duration of experiment only
             run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
             subprocessArgList=[sys.executable, run_script,self.ioHubConfigAbsPath]
-            self.server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            self.server_pid = self.server_process.pid
+            self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.server_pid = self._server_process.pid
+            self._psutil_server_process=psutil.Process(self.server_pid)
+
             #print "started ioHub Server subprocess %d"%self.server_pid
 
             hubonline=False
@@ -209,7 +212,7 @@ class ioHubClient(object):
             if hubonline is False:
                 print "ioHub could not be contacted, exiting...."
                 try:
-                    self.server_process.terminate()
+                    self._server_process.terminate()
                 except Exception as e:
                     raise ioHubClientException(e)
                 finally:
@@ -229,7 +232,7 @@ class ioHubClient(object):
         from win32pipe import PeekNamedPipe
 
         maxsize = self._get_maxsize(maxsize)
-        conn=self.server_process.stdout
+        conn=self._server_process.stdout
 
         if conn is None:
             return False
@@ -245,19 +248,19 @@ class ioHubClient(object):
 
 
     def readServerStdOutLine(self):
-        for line in iter(self.server_process.stdout.readline, ''):
+        for line in iter(self._server_process.stdout.readline, ''):
             yield line
 
     def _calculateClientServerTimeOffset(self, sampleSize=100):
         results=N.zeros((sampleSize,2),dtype='f4')
-        for i in xrange(sampleSize):
-            ts1=self.currentMsec()
-            tc=Computer.currentMsec()
-            ts2=self.currentMsec()
-            results[i][0]=ts1-tc
-            results[i][1]=ts2-ts1
-            time.sleep(0.001)
-        self._timeOffset,self._offsetDelay=N.min(results,axis=0)
+        for i in xrange(sampleSize):     # make multiple calles to local and ioHub times to calculate 'offset' and 'delay' in calling the ioHub server time
+            tc=Computer.currentMsec()    # get the local time 1
+            ts=self.currentMsec()        # get the ioHub server time (this results in a RPC call and response from the server)
+            tc2=Computer.currentMsec()   # get local time 2, to calculate e2e delay for the ioHub server time call
+            results[i][0]=ts-tc          # calculate time difference between returned iohub server time, and 1 read local time (offset)
+            results[i][1]=tc2-tc         # calculate delay / duration it took to make the call to the ioHub server and get reply
+            time.sleep(0.001)            # sleep for a little before going next loop
+        print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
 
     def getDevices(self):
         return self.devices
@@ -441,6 +444,11 @@ class ioHubClient(object):
     def shutDownServer(self):
         self.udp_client.sendTo(('RPC','shutDown'))
         self.udp_client.close()
+        if self._psutil_server_process.is_running():
+            print "Warning: Having to force kill ioHub Server process."
+            self._psutil_server_process.kill()
+        self._server_process=None
+        self._psutil_server_process=None
         return True
 
     def currentSec(self):
@@ -455,9 +463,18 @@ class ioHubClient(object):
         r=self.sendToHub(('RPC','currentUsec'))
         return r[2]
 
+    def getIoHubServerProcessAffinity(self):
+        r=self.sendToHub(('RPC','getProcessAffinity'))
+        return r[2]
 
+    def setIoHubServerProcessAffinity(self, processorList):
+        r=self.sendToHub(('RPC','setProcessAffinity',processorList))
+        return r[2]
 
     def isErrorReply(self,data):
+        """
+
+        """
         if ioHub.isIterable(data) and len(data)>0:
             if ioHub.isIterable(data[0]):
                 return False

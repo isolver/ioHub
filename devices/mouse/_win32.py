@@ -13,7 +13,6 @@ from .. import Device,Computer
 currentUsec=Computer.currentUsec
 import numpy as N
 import ctypes
- 
 
 class MouseWindows32(object):
     WM_MOUSEMOVE = int(0x0200)
@@ -42,69 +41,62 @@ class MouseWindows32(object):
         self._lastCallbackTime=None
 
         self._scrollPositionX=0
-        self._devicePosition=0,0
-        self._lastDevicePosition=0,0
-        self._displayPosition=0,0
-        self._lastDisplayPosition=0,0
-        
+        self._position=0,0
+        self._lastPosition=0,0
         self._isVisible=0
         self._user32=ctypes.windll.user32
-        self.getVisibility()
+        self.getSysCursorVisibility()
         
-        display = ioHub.devices.Display
-        h,v=display.getScreenResolution()
-        self.setDevicePosition((h/2,v/2))
+        self._display = ioHub.devices.Display
 
-    def getDevicePosition(self):
-        return tuple(self._devicePosition)
 
-    def setDevicePosition(self,p):
+    def getPosition(self):
+        if self._display is None:
+            self._display = ioHub.devices.Display
+        return tuple(self._position)
+
+    def setPosition(self,p, updateSystemMousePosition=True):
         if isinstance(p[0], (int, long, float, complex)) and isinstance(p[1], (int, long, float, complex)):
-            self._lastDevicePosition=self._devicePosition
-            self._devicePosition=p[0],p[1]
-            self._user32.SetCursorPos(p[0],p[1])
-        return self._devicePosition
+            if self._display is None:
+                self._display = ioHub.devices.Display
+            self._lastPosition=self._position
+            self._position=p[0],p[1]
+            if updateSystemMousePosition is True:
+                pixLocation=self._display.displayCoord2Pixel(p[0],p[1])
+                #ioHub.print2stderr('pixLocation:'+str(pixLocation))
+                self._user32.SetCursorPos(*pixLocation)
+        return self._position
 
-    def getDisplayPositionAndChange(self):
-        dvp=self._devicePosition
-        ldvp=self._lastDevicePosition
-        change_x=dvp[0]-ldvp[0]
-        change_y=dvp[1]-ldvp[1]
-        dsp=ioHub.devices.Display.pixel2DisplayCoord(self._devicePosition[0],self._devicePosition[1])
-        self._displayPosition=dsp
-        if change_x or change_y:
-            self._lastDevicePosition=self._devicePosition
-            self._displayPosition=dsp
-            ldsp=self._lastDisplayPosition
-            self._lastDisplayPosition=self._displayPosition
-            dchange_x=dsp[0]-ldsp[0]
-            dchange_y=dsp[1]-ldsp[1]            
-            return dsp, (dchange_x,dchange_y), (change_x,change_y)
-        return dsp, None, None
+    def getPositionAndChange(self):
+        try:
+            cpos=self._position
+            lpos=self._lastPosition
+            change_x=cpos[0]-lpos[0]
+            change_y=cpos[1]-lpos[1]
+            if change_x or change_y:
+                return cpos, (change_x,change_y)
+            return cpos, None
+        except Exception, e:
+            ioHub.print2stderr(">>ERROR getPositionAndChange: "+str(e))
+            ioHub.printExceptionDetailsToStdErr()
+            return (0.0,0.0),(0.0,0.0)
 
-    def setDisplayPosition(self,p):
-        #if isinstance(p[0], (int, long, float, complex)) and isinstance(p[1], (int, long, float, complex)):
-        #    self._positionXY=p[0],p[1]
-        #    self._user32.SetCursorPos(p[0],p[1])
-        ioHub.print2stderr('Mouse.setDisplayPosition not yet implemented. Use Mouse.setDevicePosition')
-        return self._displayPosition
-        
     def getVerticalScroll(self):
         return self._scrollPositionX
      
     def setVerticalScroll(self,s):
         if isinstance(s, (int, long, float, complex)):
             self._scrollPositionX=s
-        return self.scrollPositionX
+        return self._scrollPositionX
                 
-    def getVisibility(self):
+    def getSysCursorVisibility(self):
         v=self._user32.ShowCursor(False)    
         self._isVisible = self._user32.ShowCursor(True)
         return self._isVisible >= 0
  
-    def setVisibility(self,v):
+    def setSysCursorVisibility(self,v):
         self._isVisible=self._user32.ShowCursor(v)
-        return self._isVisible >= 0
+        return self._isVisible >= 0,self._isVisible
             
     def _nativeEventCallback(self,event):
         ctime=int(currentUsec())
@@ -118,8 +110,10 @@ class MouseWindows32(object):
         notifiedTime=int(ctime)
 
         self._scrollPositionX+= event.Wheel
-        self._devicePosition = event.Position[0],event.Position[1]
+        p=ioHub.devices.Display.pixel2DisplayCoord(event.Position[0],event.Position[1])
+        self.setPosition(p,updateSystemMousePosition=False)
         #ioHub.print2stderr(str(event.Position)+" = px : coord = "+str(self._positionXY))
+        event.Position=p
         self.I_nativeEventBuffer.append((notifiedTime,event))
         return True
     

@@ -36,7 +36,7 @@ DEVICE_CATERGORY_ID_LABEL={
 #        32:'DA_CONVERTER',
 #        64:'AD_CONVERTER',
 #        128:'BUTTON_BOX',
-#        256:'TOUCH_SCREEN',
+        256:'JOYSTICK',
 #        512:'SPEAKER',
 #        1024:'AMPLIFIER',
 #        2048:'MICROPHONE',
@@ -64,7 +64,7 @@ DEVICE_TYPE_LABEL={
 #        6:'ANALOG_INPUT_DEVICE',
 #        7:'ANALOG_OUTPUT_DEVICE',
         8:'BUTTON_BOX_DEVICE',
-#        9:'TOUCH_SCREEN_DEVICE',
+        9:'JOYSTICK_DEVICE',
 #        10:'SPEAKER_DEVICE',
 #        11:'AMPLIFIER_DEVICE',
 #        12:'MICROPHONE_DEVICE',
@@ -87,21 +87,44 @@ DEVICE_LABELS = DEVICE_TYPE_LABEL
 
 DEVICE_ID_TO_CATERGORYS=dict()
 
-EVENT_TYPES=dict(UNDEFINED_EVENT=0, EXPERIMENT_EVENT =1,  MESSAGE =2,  COMMAND =3, 
-                 KEYBOARD_EVENT =50, KEYBOARD_PRESS =51, KEYBOARD_RELEASE =52,BUTTON_BOX_PRESS =60, BUTTON_BOX_RELEASE =61,
-                 MOUSE_EVENT =54, MOUSE_PRESS =55, MOUSE_RELEASE =56, MOUSE_WHEEL =57, MOUSE_MOVE =58, MOUSE_DOUBLE_CLICK=59,
-                 PARALLEL_PORT_INPUT =73, TTL_INPUT =70,EYE_SAMPLE=100,BINOC_EYE_SAMPLE =101, 
-                 FIXATION_START =106, FIXATION_UPDATE =107, FIXATION_END =108,
-                 SACCADE_START =111, SACCADE_END =112,
-                 BLINK_START =116, BLINK_END =117, 
-                 SMOOTH_PURSUIT_START =119, SMOOTH_PURSUIT_END =120,
+EVENT_TYPES=dict(
+                UNDEFINED_EVENT=0,
+                EXPERIMENT_EVENT =1,
+                MESSAGE =2,
+                COMMAND =3,
+                KEYBOARD_EVENT =50,
+                KEYBOARD_PRESS =51,
+                KEYBOARD_RELEASE =52,
+                BUTTON_BOX_PRESS =60,
+                BUTTON_BOX_RELEASE =61,
+                JOYSTICK_BUTTON_PRESS =63,
+                JOYSTICK_BUTTON_RELEASE =64,
+                JOYSTICK_POSITION=65,
+                MOUSE_EVENT =54,
+                MOUSE_PRESS =55,
+                MOUSE_RELEASE =56,
+                MOUSE_WHEEL =57,
+                MOUSE_MOVE =58,
+                MOUSE_DOUBLE_CLICK=59,
+                PARALLEL_PORT_INPUT =73,
+                TTL_INPUT =70,
+                EYE_SAMPLE=100,
+                BINOC_EYE_SAMPLE =101,
+                FIXATION_START =106,
+                FIXATION_UPDATE =107,
+                FIXATION_END =108,
+                SACCADE_START =111,
+                SACCADE_END =112,
+                BLINK_START =116,
+                BLINK_END =117,
+                SMOOTH_PURSUIT_START =119,
+                SMOOTH_PURSUIT_END =120,
                 )
 if 50 not in EVENT_TYPES:
     temp={}
     for key,value in EVENT_TYPES.iteritems():
         temp[value]=key
     EVENT_TYPES.update(temp)
-    
     del temp
 #'''
 #                 EVENT_TRIGGER =35,FUNCTION_START =30, FUNCTION_END =31,
@@ -137,6 +160,31 @@ def module_directory(local_function):
     mp=module_path(local_function)
     moduleDirectory,mname=os.path.split(mp)
     return moduleDirectory
+
+def printExceptionDetailsToStdErr():
+        """
+        No idea if all of this is needed, infact I know it is not. But for now why not.
+        Taken straight from the python manual on Exceptions.
+        """
+        import sys, traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print2stderr("*** print_tb:")
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+        print2stderr("*** print_exception:")
+        traceback.print_exception(exc_type, exc_value, exc_traceback,limit=2, file=sys.stdout)
+        print2stderr("*** print_exc:")
+        traceback.print_exc()
+        print2stderr("*** format_exc, first and last line:")
+        formatted_lines = traceback.format_exc().splitlines()
+        print2stderr(str(formatted_lines[0]))
+        print2stderr((formatted_lines[-1]))
+        print2stderr("*** format_exception:")
+        print2stderr(repr(traceback.format_exception(exc_type, exc_value,exc_traceback)))
+        print2stderr("*** extract_tb:")
+        print2stderr(repr(traceback.extract_tb(exc_traceback)))
+        print2stderr("*** format_tb:")
+        print2stderr(repr(traceback.format_tb(exc_traceback)))
+        print2stderr("*** tb_lineno:"+str( exc_traceback.tb_lineno))
 
 class LastUpdatedOrderedDict(OrderedDict):
     """Store items in the order the keys were last added"""

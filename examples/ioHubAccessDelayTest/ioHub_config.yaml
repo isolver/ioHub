@@ -112,6 +112,16 @@ monitor_devices:
         device_timer:
             interval: 0.0001
     - device:
+        device_class: Joystick
+        name: joystick
+        instance_code: ms_sidewinder
+        joystick_index: 0
+        saveEvents: True
+        streamEvents: True
+        event_buffer_length: 256
+        device_timer:
+            interval: 0.0001
+    - device:
         device_class: ExperimentDevice
         name: experimentRuntime
         instance_code: computer_serial_number+psychopy
@@ -127,23 +137,14 @@ monitor_devices:
         comments: Cheap 23" LCD 1900x1080 that works well for everyday office use.
         instance_code: display_serial_number
         psychopy_config_file: unknown
-        # left,top,right,bottom bounds of the  calibration surface in calibration units (pixels, degrees, etc)
-        calibration_surface_bounds:
-            left: -20.0
-            top: 12.5
-            right: 20.0
-            bottom: -12.5 
-            unit_type: degrees
+        # what ccordinate space shoule databe rported in (pixels, degrees, etc)
+        reporting_unit_type: pixels
         # - width and height of calibration plane in mm
         calibration_surface_dimensions:
             width: 500
             height: 281
             unit_type: mm
             origin: CENTER   # origin to use for dimension unit mapping. CENTER, TOP_LEFT, BOTTOM_RIGHT are options
-        # - the orthoganal center point relative to line of site in mm
-        orthoganal_eye_to_physical_calibration_surface_location: 
-            horizontal: 140
-            vertical: 250
         #  
         #  default_eye_plane_distance
         #

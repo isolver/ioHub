@@ -78,7 +78,6 @@ import ioHub
 from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, core, visual
 from numpy import zeros
 
-
 class ExperimentRuntime(SimpleIOHubRuntime):
     def __init__(self,configFileDirectory, configFile):
         SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
@@ -99,10 +98,16 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         psychopy code is taken from an example psychopy script in the coder documentation.
         """
 
+        #report process affinities
+        print "Current process affinities (experiment proc, ioHub proc):", self.getProcessAffinities()
+
+
         print "ExperimentPCkeyboard methods:",self.hub.devices.kb.getRemoteMethodNames()
         print "ExperimentPCmouse methods:",self.hub.devices.mouse.getRemoteMethodNames()
         print "ExperimentRuntime methods:",self.hub.devices.experimentRuntime.getRemoteMethodNames()
         print "ParallelPort methods:",self.hub.devices.parallelPort.getRemoteMethodNames()
+
+        self.hub.devices.mouse.setPosition((0.0,0.0))
 
         self.totalEventRequestsForTest=kwargs['numEventRequests']
 
@@ -142,27 +147,35 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
     def createPsychoGraphicsWindow(self):
         #create a window
-        self.hub.devices.display.getScreenResolution()
-        self.psychoWindow = visual.Window(self.hub.devices.display.getScreenResolution(),monitor="testMonitor", units="deg", fullscr=True)
-
 
         self.mouse=self.hub.devices.mouse
-        currentPosition,displayPositionDelta,devicePositionDelta=self.mouse.getDisplayPositionAndChange()
+        self.kb=self.hub.devices.kb
+        self.expRuntime=self.hub.devices.experimentRuntime
+        self.pport=self.hub.devices.parallelPort
+        self.display=self.hub.devices.display
+
+        self.hub.devices.display.getScreenResolution()
+        self.psychoWindow = visual.Window(self.display.getScreenResolution(),monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False)
+
+        currentPosition=self.mouse.setPosition((0,0))
+
+        print '###self.mouse.setVisibility:',  self.mouse.setSysCursorVisibility(False)
 
         self.instructionText2Pattern='%d'
 
         self.psychoStim=ioHub.LastUpdatedOrderedDict()
-        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=3,pos=[-4,0], sf=3)
-        self.psychoStim['fixation'] =visual.PatchStim(self.psychoWindow, size=0.5, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        self.psychoStim['title'] =visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,6],  color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=15.0)
-        self.psychoStim['instructions'] =visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-3],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
-        self.psychoStim['instructions2'] =visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-6],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=30.0)
-        self.psychoStim['keytext'] =visual.TextStim(win=self.psychoWindow, text='key', pos = [0,10],  color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=40.0)
-        self.psychoStim['mouseDot'] =visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(1,1),color='purple')
+        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        self.psychoStim['fixation'] =visual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        self.psychoStim['title'] =visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,125], height=36, color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['instructions'] =visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-125], height=32, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['instructions2'] =visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-250],  color=[-1,-1,-1], height=32, colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['keytext'] =visual.TextStim(win=self.psychoWindow, text='key', pos = [0,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=800.0)
+        self.psychoStim['mouseDot'] =visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
     def drawAndFlipPsychoWindow(self):
         self.psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
-        currentPosition,displayPositionDelta,devicePositionDelta=self.mouse.getDisplayPositionAndChange()
+        currentPosition=self.mouse.getPosition()
+        #print "Current Position:",currentPosition
         self.psychoStim['mouseDot'].setPos(currentPosition)
         [self.psychoStim[stimName].draw() for stimName in self.psychoStim]
         self.flipTime=self.psychoWindow.flip()
@@ -183,12 +196,6 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
 
     def initTestResourcesAndState(self):
-
-        self.mouse=self.hub.devices.mouse
-        self.kb=self.hub.devices.kb
-        self.expRuntime=self.hub.devices.experimentRuntime
-        self.pport=self.hub.devices.parallelPort
-
         if self.hub is None:
             print "Error: ioHub must be enabled to run the testEventRetrievalTiming test."
             return
@@ -201,7 +208,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.lastFlipTime=0.0
 
         # enable high priority mode for the experiment process and optionally the ioHub server process.
-        self.enableHighPriority(ioHubServerToo=True)
+        self.enableHighPriority()
 
         # clear the ioHub event Buffer before starting the test.
         # This is VERY IMPORTANT, given an existing bug in ioHub.
@@ -229,8 +236,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.psychoWindow.close()
 
         # disable high priority in both processes
-        self.disableHighPriority(ioHubServerToo=True)
-
+        self.disableHighPriority()
 
 
     def plotResults(self):

@@ -56,9 +56,8 @@ class ParallelPortWin32(object):
             else:
                 lrv=0
                 
-            ppe= [0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],
-                        ioHub.DEVICE_TYPE_LABEL['PARALLEL_PORT_DEVICE'], self.instance_code, currentTime,
-                        currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
+            ppe= [0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['PARALLEL_PORT_INPUT'],  self.instance_code, currentTime,
+                   currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
 
             self.I_nativeEventBuffer.append(ppe)
 
