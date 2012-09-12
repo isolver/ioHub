@@ -8,10 +8,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
-from .. import Device, Computer
+from .. import Device, Computer, EventConstants
 import ioHub
-from ioHub.devices import EventConstants
-
 currentUsec=Computer.currentUsec
 import numpy as N
 
@@ -55,10 +53,10 @@ class KeyboardWindows32(object):
     @staticmethod
     def _getIOHubEventObject(event,device_instance_code):
         notifiedTime, event=event
-        etype = ioHub.EVENT_TYPES['KEYBOARD_RELEASE']
+        etype = ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']
         pressed=0
         if event.Message in KeyboardWindows32.WIN32_KEYBOARD_PRESS_EVENT_TYPES:
-            etype = ioHub.EVENT_TYPES['KEYBOARD_PRESS']
+            etype = ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_PRESS']
             pressed=1
         
         chrv=chr(event.Ascii)
@@ -69,14 +67,14 @@ class KeyboardWindows32(object):
         # between subsequent messages, because the value wraps to zero if the timer count exceeds the maximum value for a long integer. To calculate time
         # delays between messages, verify that the time of the second message is greater than the time of the first message; then, subtract the time of the
         # first message from the time of the second message.
-        device_time = int(event.Time)*1000 # convert to usec
-        
+        device_time = int(event.Time*1000) # convert to usec
+        #ioHub.print2err("dev_time,log_time, delta: "+ioHub.devices.EventConstants.EVENT_TYPES[etype]+" : "+str(device_time)+" : "+str(notifiedTime)+" : "+str(notifiedTime-device_time))
         hub_time = notifiedTime #TODO correct mouse times to factor in offset.
  
-        confidence_interval=0.0
-        delay=0.0
+        confidence_interval=0.0 # since this is a keyboard deice using a callback method, confidence_interval is not applicable
+        delay=0.0 # since this is a keyboard, we 'know' there is a delay, but until we support setting a delay in the device properties based on external testing for a given keyboard, we will leave at 0.
  
-        #return (experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE'],
+        #return (experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPES['KEYBOARD_DEVICE'],
         #                        device_instance_code=device_instance_code,device_time=int(event.Time),logged_time=notifiedTime,hub_time=0,
         #                        confidence_interval=0.0,delay=0.0,is_pressed=pressed,flags=event.flags,
         #                        alt=event.IsAlt(),extended=event.IsExtended(),transition=event.IsTransition(),
