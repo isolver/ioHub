@@ -35,8 +35,8 @@ if computer.system == 'Windows':
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[Mouse.categoryTypeString],
-                'type_id':ioHub.DEVICE_TYPE_LABEL[Mouse.deviceTypeString],
+                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Mouse.categoryTypeString],
+                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Mouse.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',

@@ -77,7 +77,7 @@ class MouseWindows32(object):
                 return cpos, (change_x,change_y)
             return cpos, None
         except Exception, e:
-            ioHub.print2stderr(">>ERROR getPositionAndChange: "+str(e))
+            ioHub.print2err(">>ERROR getPositionAndChange: "+str(e))
             ioHub.printExceptionDetailsToStdErr()
             return (0.0,0.0),(0.0,0.0)
 
@@ -129,18 +129,18 @@ class MouseWindows32(object):
         py=p[1]
 
         bstate=MouseWindows32.BUTTON_STATE_NONE
-        etype=ioHub.EVENT_TYPES['MOUSE_MOVE']
+        etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_MOVE']
         if event.Message in (MouseWindows32.WM_RBUTTONDOWN,MouseWindows32.WM_MBUTTONDOWN,MouseWindows32.WM_LBUTTONDOWN):
             bstate=MouseWindows32.BUTTON_STATE_PRESSED
-            etype=ioHub.EVENT_TYPES['MOUSE_PRESS']
+            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_PRESS']
         elif event.Message in (MouseWindows32.WM_RBUTTONUP,MouseWindows32.WM_MBUTTONUP,MouseWindows32.WM_LBUTTONUP):     
             bstate=MouseWindows32.BUTTON_STATE_RELEASED
-            etype=ioHub.EVENT_TYPES['MOUSE_RELEASE']
+            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_RELEASE']
         elif event.Message in (MouseWindows32.WM_RBUTTONDBLCLK,MouseWindows32.WM_MBUTTONDBLCLK,MouseWindows32.WM_LBUTTONDBLCLK):     
             bstate=MouseWindows32.BUTTON_STATE_DOUBLE_CLICK
-            etype=ioHub.EVENT_TYPES['MOUSE_DOUBLE_CLICK']
+            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']
         elif event.Message == MouseWindows32.WM_MOUSEWHEEL:
-            etype=ioHub.EVENT_TYPES['MOUSE_WHEEL']
+            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_WHEEL']
             
         bnum=MouseWindows32.BUTTON_ID_NONE        
         if event.Message in (MouseWindows32.WM_RBUTTONDOWN,MouseWindows32.WM_RBUTTONUP,MouseWindows32.WM_RBUTTONDBLCLK):

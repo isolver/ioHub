@@ -33,8 +33,8 @@ if computer.system == 'Windows':
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[ParallelPort.categoryTypeString],
-                'type_id':ioHub.DEVICE_TYPE_LABEL[ParallelPort.deviceTypeString],
+                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[ParallelPort.categoryTypeString],
+                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[ParallelPort.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'base_address':deviceConfig['base_address'],

@@ -125,7 +125,6 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         while self.numEventRequests < self.totalEventRequestsForTest:
             # try sending an Experiment Event
             self.hub.sendMessageEvent("This is a test message %.3f"%self.flipTime)
-            self.hub.sendCommandEvent("Command","Command Value %d"%self.numEventRequests)
 
 
             #draw and flip to the updated graphics state.
@@ -226,7 +225,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         for r in events:
             if not isinstance(r,dict):
                 r=self.eventListToDict(r)
-            if r['event_type'] == ioHub.EVENT_TYPES['KEYBOARD_PRESS']: #keypress code
+            if r['event_type'] == ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_PRESS']: #keypress code
                 keystring=r['key']
                 self.psychoStim['keytext'].setText(keystring)
 

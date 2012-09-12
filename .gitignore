@@ -165,3 +165,4 @@ pip-log.txt
 # dlls, etc
 *.dll
 *.[ao]
+*.hdf5

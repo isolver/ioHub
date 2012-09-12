@@ -60,8 +60,8 @@ class Display(Device):
     def __init__(self,*args,**kwargs):
         Display._settings=kwargs['dconfig']
         deviceSettings={'instance_code':self._settings['instance_code'],
-            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[Display.categoryTypeString],
-            'type_id':ioHub.DEVICE_TYPE_LABEL[Display.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Display.categoryTypeString],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Display.deviceTypeString],
             'device_class':self._settings['device_class'],
             'user_label':self._settings['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -94,7 +94,7 @@ class Display(Device):
 
         if Display._displayCoordinateType is None:
             Display._displayCoordinateType='pix'
-            ioHub.print2stderr("ERROR: Display._determineDIsplayCoordSpace: Unknown coord space parameter setting; using 'pix': "+dispCoordType)
+            ioHub.print2err("ERROR: Display._determineDIsplayCoordSpace: Unknown coord space parameter setting; using 'pix': "+dispCoordType)
 
         return Display._displayCoordinateType
 
@@ -121,13 +121,13 @@ class Display(Device):
                 #eyeDist=cls._settings['default_eye_to_calibration_surface_distance']['plane_center']
                 #r=cls.convertDistToNd(eyeDist,distH,distV)
                 #ioHub.print2stderr(">>>> Pixels x,y to Angle h,v: "+str((px,py))+" : "+str(r))
-                ioHub.print2stderr(">>>> UNIMPLEMENTED dispCoordType: "+coordSpace)
+                ioHub.print2err(">>>> UNIMPLEMENTED dispCoordType: "+coordSpace)
                 return 0.0,0.0
             else:
-                ioHub.print2stderr(">>>> UNKNOWN dispCoordType: "+coordSpace)
+                ioHub.print2err(">>>> UNKNOWN dispCoordType: "+coordSpace)
                 return 0.0,0.0
         except Exception, e:
-            ioHub.print2stderr('ERROR pixel2DisplayCoord: '+str(e))
+            ioHub.print2err('ERROR pixel2DisplayCoord: '+str(e))
             ioHub.printExceptionDetailsToStdErr()
             return 0.0,0.0
 
@@ -144,13 +144,13 @@ class Display(Device):
                 return px,py
 
             elif coordSpace == 'deg':
-                ioHub.print2stderr(">>>> getDisplayCoordinateType for degrees not implemented yet.: "+coordSpace)
+                ioHub.print2err(">>>> getDisplayCoordinateType for degrees not implemented yet.: "+coordSpace)
                 return 0.0,0.0
             else:
-                ioHub.print2stderr(">>>> UNIMPLEMENTED dispCoordType: "+coordSpace)
+                ioHub.print2err(">>>> UNIMPLEMENTED dispCoordType: "+coordSpace)
                 return 0.0,0.0
         except Exception, e:
-            ioHub.print2stderr('ERROR displayCoord2Pixel: '+str(e))
+            ioHub.print2err('ERROR displayCoord2Pixel: '+str(e))
             ioHub.printExceptionDetailsToStdErr()
             return 0.0,0.0
 

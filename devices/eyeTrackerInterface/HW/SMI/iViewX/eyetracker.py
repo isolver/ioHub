@@ -137,8 +137,8 @@ class EyeTracker(Device):
         
         # create Device level class setting dictionary and pass it Device constructor
         deviceSettings = {'instance_code':self.eyeTrackerConfig['instance_code'],
-            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[EyeTracker.categoryTypeString],
-            'type_id':ioHub.DEVICE_TYPE_LABEL[EyeTracker.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
             'device_class':self.eyeTrackerConfig['device_class'],
             'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -668,7 +668,7 @@ class EyeTracker(Device):
             #case monocular sample
             if event.rightEye.gazeX == 0 or event.leftEye.gazeX == 0:
                 
-                event_type = ioHub.EVENT_TYPES['EYE_SAMPLE']
+                event_type = ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
                 
                 if event.rightEye.gazeX == 0:
                     myeye = EYE_CODES.LEFT
@@ -699,7 +699,7 @@ class EyeTracker(Device):
             
             else: #case: Binocular Eye Sample
                 
-                event_type = ioHub.EVENT_TYPES['BINOC_EYE_SAMPLE']
+                event_type = ioHub.devices.EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']
                 myeye = EYE_CODES.BINOCULAR
                 
                 leftEye = event.leftEye
@@ -740,7 +740,7 @@ class EyeTracker(Device):
         elif isinstance(event, CEvent):
             #fixations are the only event supported by iViewX
             #generates a start and end event from the single SMI native event
-            event_type = ioHub.EVENT_TYPES['FIXATION_START']
+            event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
                 
             event_status = 0
             
@@ -766,7 +766,7 @@ class EyeTracker(Device):
                                     pupil_measure1= -1.0, pupil_measure2= -1.0,
                                     ppd_x= -1.0, ppd_y= -1.0, velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=estatus)
             
-            event_type = ioHub.EVENT_TYPES['FIXATION_END']
+            event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
             
             fee = FixationEndEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
                                 event_type=event_type, device_instance_code=self.eyeTrackerConfig['instance_code'],

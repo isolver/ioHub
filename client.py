@@ -18,7 +18,7 @@ import time
 import psutil
 import ioHub
 from ioHub.devices import Computer
-from ioHub.devices.experiment import MessageEvent,CommandEvent
+from ioHub.devices.experiment import MessageEvent #,CommandEvent
 import subprocess
 from collections import deque
 import struct
@@ -246,7 +246,6 @@ class ioHubClient(object):
         except Exception as e:
             raise ioHubClientException(e)
 
-
     def readServerStdOutLine(self):
         for line in iter(self._server_process.stdout.readline, ''):
             yield line
@@ -260,7 +259,8 @@ class ioHubClient(object):
             results[i][0]=ts-tc          # calculate time difference between returned iohub server time, and 1 read local time (offset)
             results[i][1]=tc2-tc         # calculate delay / duration it took to make the call to the ioHub server and get reply
             time.sleep(0.001)            # sleep for a little before going next loop
-        print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
+        #print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
+        return results
 
     def getDevices(self):
         return self.devices
@@ -413,8 +413,8 @@ class ioHubClient(object):
         r=self.sendToHub(('EXP_DEVICE','EVENT_TX',eventList))
         return r
 
-    def sendMessageEvent(self,text,prefix='',offset=0.0):
-        self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.createAsList(text,prefix=prefix,msg_offset=offset),]))
+    def sendMessageEvent(self,text,prefix='',offset=0.0,usec_time=None):
+        self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.createAsList(text,prefix=prefix,msg_offset=offset,usec_time=usec_time),]))
         return True
 
     def sendMessages(self,msgArgList):
@@ -424,16 +424,16 @@ class ioHubClient(object):
         self.sendToHub(('EXP_DEVICE','EVENT_TX',msgEvents))
         return True
 
-    def sendMessages(self,cmdArgList):
-        cmdEvents=[]
-        for cmde in cmdArgList:
-            cmdEvents.append(MessageEvent.createAsList(*cmde))
-        self.sendToHub(('EXP_DEVICE','EVENT_TX',cmdEvents))
-        return True
+    #def sendCommands(self,cmdArgList):
+    #    cmdEvents=[]
+    #    for cmde in cmdArgList:
+    #        cmdEvents.append(CommandEvent.createAsList(*cmde))
+    #    self.sendToHub(('EXP_DEVICE','EVENT_TX',cmdEvents))
+    #    return True
 
-    def sendCommandEvent(self,command,text,priority=255,prefix='',offset=0.0):
-        self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.createAsList(command,text,priority=priority,prefix=prefix,msg_offset=offset),]))
-        return True
+    #def sendCommandEvent(self,command,text,priority=255,prefix='',offset=0.0):
+    #    self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.createAsList(command,text,priority=priority,prefix=prefix,msg_offset=offset),]))
+    #    return True
 
     # client utility methods.
     def _getDeviceList(self):

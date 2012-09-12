@@ -63,8 +63,8 @@ if computer.system == 'Windows':
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[Keyboard.categoryTypeString],
-                'type_id':ioHub.DEVICE_TYPE_LABEL[Keyboard.deviceTypeString],
+                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Keyboard.categoryTypeString],
+                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Keyboard.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -95,7 +95,7 @@ class KeyboardEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
     def __init__(self,*args,**kwargs):
-        kwargs['device_type']=ioHub.DEVICE_TYPE_LABEL['KEYBOARD_DEVICE']
+        kwargs['device_type']=ioHub.devices.EventConstants.DEVICE_TYPES['KEYBOARD_DEVICE']
         DeviceEvent.__init__(self,**kwargs)
 
 class KeyboardPressEvent(KeyboardEvent):

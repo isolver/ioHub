@@ -10,13 +10,26 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 from __future__ import division
 import gc
-import timeit
-
+import os
 import numpy as N
 import platform
 from collections import deque
 from operator import itemgetter
 import psutil
+
+class ioDeviceError(Exception):
+    def __init__(self, device, msg, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+        self.device = device
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return "ioDeviceError:\nMsg: {0:>s}\nDevice: {1:>s}\n".format(self.msg),repr(self.device)
+
+
 
 class Computer(object):
     _instance=None
@@ -29,7 +42,6 @@ class Computer(object):
                    Use Computer.getInstance() to existing instance, or Computer. \
                    deleteInstance() to delete the existing instance before creating a new one."
         else:
-            import psutil, os
             system, node, release, version, machine, processor = platform.uname()
 
             self.system=system
@@ -93,9 +105,9 @@ class Computer(object):
             if p.pid not in excludeProcessByIDList:
                 try:
                     p.set_cpu_affinity(processorList)
-                    ioHub.print2stderr('Set OK process affinity: '+str(p.name)+" : "+str(p.pid))
+                    print2err('Set OK process affinity: '+str(p.name)+" : "+str(p.pid))
                 except Exception:
-                    ioHub.print2stderr('Error setting process affinity: '+str(p.name)+" : "+str(p.pid))
+                    print2err('Error setting process affinity: '+str(p.name)+" : "+str(p.pid))
 
     # return time in sec.msec format
     @staticmethod
@@ -137,28 +149,6 @@ class Computer(object):
 Computer._instance=Computer()
 computer=Computer.getInstance()
 
-global highPrecisionTimer
-
-def highPrecisionTimer():
-    raise ioHub.ioDeviceError(computer,"highPrecisionTimer function must be overwritten by a platform specific implementation.")
-
-if computer.system == 'Windows':
-    global _fcounter,_ffreq,_Kernel32,highPrecisionTimer
-    from ctypes import byref, c_int64, windll
-    _Kernel32=windll.Kernel32
-    _fcounter = c_int64()
-    _ffreq = c_int64()
-
-    def highPrecisionTimer():
-        _Kernel32.QueryPerformanceCounter(byref(_fcounter))
-        _Kernel32.QueryPerformanceFrequency(byref(_ffreq))
-        return  _fcounter.value/_ffreq.value
-
-elif computer.system == 'Linux':
-    highPrecisionTimer = timeit.default_timer
-else: # assume OS X?
-    highPrecisionTimer = timeit.default_timer
-
 class ioObject(object):
     newDataTypes=[]
     baseDataType=[]
@@ -182,7 +172,17 @@ class ioObject(object):
         return self.I_np_array
         
 ########### Base Abstract Device that all other Devices inherit from ##########
+
 class Device(ioObject):
+    DEVICE_INSTANCE_CODE_INDEX=0
+    DEVICE_CATEGORY_ID_INDEX=1
+    DEVICE_TYPE_ID_INDEX=2
+    DEVICE_CLASS_NAME_INDEX=3
+    DEVICE_USER_LABEL_INDEX=4
+    DEVICE_OS_CODE_INDEX=5
+    DEVICE_BUFFER_LENGTH_INDEX=6
+    BASE_DEVICE_MAX_ATTRIBUTE_INDEX=DEVICE_BUFFER_LENGTH_INDEX
+
     newDataTypes=[('instance_code','a48'),('category_id','u1'),('type_id','u1'),('device_class','a24'),('user_label','a24'),('os_device_code','a64'),('max_event_buffer_length','u2')]
     baseDataType=ioObject.dataType
     dataType=baseDataType+newDataTypes
@@ -237,6 +237,18 @@ class Device(ioObject):
 ########### Base Device Event that all other Device Events inherit from ##########
 
 class DeviceEvent(ioObject):
+    EVENT_EXPERIMENT_ID_INDEX=0
+    EVENT_SESSION_ID_INDEX=1
+    EVENT_ID_INDEX=2
+    EVENT_TYPE_ID_INDEX=3
+    EVENT_DEVICE_INSTANCE_CODE_INDEX=4
+    EVENT_DEVICE_TIME_INDEX=5
+    EVENT_LOGGED_TIME_INDEX=6
+    EVENT_HUB_TIME_INDEX=7
+    EVENT_CONFIDENCE_INTERVAL_INDEX=8
+    EVENT_DELAY_INDEX=9
+    BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_DELAY_INDEX
+
     newDataTypes=[('experiment_id','u4'),('session_id','u4'),('event_id','u8'),('event_type','u1'),
                   ('device_instance_code','a48'),('device_time','u8'), ('logged_time', 'u8'), ('hub_time','u8'),
                   ('confidence_interval', 'f4'),('delay', 'f4')]
@@ -261,28 +273,63 @@ class DeviceEvent(ioObject):
         combo = zip(cls.attributeNames,eventValueList)
         kwargs = dict(combo)
         return cls(**kwargs)
-        
 
-        
-class EventConstantsBase(object):
-    eventTypeCodeToClass=dict()    
-    def __init__(self):    
+class _EventConstantsBase(object):
+    EVENT_TYPES = dict(UNDEFINED_EVENT=0, EXPERIMENT_EVENT=1, MESSAGE=2, COMMAND=3, KEYBOARD_EVENT=50, KEYBOARD_PRESS=51,
+        KEYBOARD_RELEASE=52, BUTTON_BOX_PRESS=60, BUTTON_BOX_RELEASE=61, JOYSTICK_BUTTON_PRESS=63,
+        JOYSTICK_BUTTON_RELEASE=64, JOYSTICK_POSITION=65, MOUSE_EVENT=54, MOUSE_PRESS=55, MOUSE_RELEASE=56, MOUSE_WHEEL=57,
+        MOUSE_MOVE=58, MOUSE_DOUBLE_CLICK=59, PARALLEL_PORT_INPUT=73, TTL_INPUT=70, EYE_SAMPLE=100, BINOC_EYE_SAMPLE=101,
+        FIXATION_START=106, FIXATION_UPDATE=107, FIXATION_END=108, SACCADE_START=111, SACCADE_END=112, BLINK_START=116,
+        BLINK_END=117, SMOOTH_PURSUIT_START=119, SMOOTH_PURSUIT_END=120)
+
+    DEVICE_TYPES = {1: 'KEYBOARD_DEVICE',
+                    2: 'MOUSE_DEVICE',
+                    3: 'DISPLAY_DEVICE',
+                    4: 'PARALLEL_PORT_DEVICE',
+                    5: 'EXPERIMENT_DEVICE',
+                    #6:'ANALOG_INPUT_DEVICE',         #        7:'ANALOG_OUTPUT_DEVICE',         8:'BUTTON_BOX_DEVICE',         9:'JOYSTICK_DEVICE',         #        10:'SPEAKER_DEVICE',         #        11:'AMPLIFIER_DEVICE',         #        12:'MICROPHONE_DEVICE',         13:'EYE_TRACKER_DEVICE',         #        14:'EEG_DEVICE',         #        15:'MRI_DEVICE',         #        16:'MEG_DEVICE',         17:'OTHER_DEVICE'
+    }
+
+    EVENT_CLASSES=dict()
+
+    DEVICE_CATERGORIES={
+                    1:'KEYBOARD',
+                    2:'MOUSE',
+                    4:'VISUAL_STIMULUS_PRESENTER',
+                    8:'VIRTUAL',
+                    16:'DIGITAL_IO',
+                    #        32:'DA_CONVERTER',
+                    #        64:'AD_CONVERTER',
+                    #        128:'BUTTON_BOX',
+                    256:'JOYSTICK',
+                    #        512:'SPEAKER',
+                    #        1024:'AMPLIFIER',
+                    #        2048:'MICROPHONE',
+                    4096:'EYE_TRACKER',
+                    #        8192:'EEG',
+                    #        16384:'MRI',
+                    #        32768:'MEG',
+                    18446744073709551616:'OTHER'
+                }
+
+    _prepped=False
+    def __init__(self):
         pass
-    
+
     @classmethod
     def eventIDtoClass(cls,eid):
         '''
         Class method. Converts a an ioHub event id to the associated ioHub event class name.
         '''
-        return cls.eventTypeCodeToClass[eid]
+        return cls.EVENT_CLASSES[eid]
 
     @staticmethod
     def eventIDtoName(eid):
         '''
         Static method. Converts a an ioHub event id to the associated ioHub event name.
         '''
-        return EVENT_TYPES[eid]
-        
+        return EventConstants.EVENT_TYPES[eid]
+
     @staticmethod
     def VKeyToID(vkey):
         '''
@@ -311,12 +358,14 @@ class EventConstantsBase(object):
     def GetKeyState(key_id):
         return None
 
-        
+
+# Windows Version of Constants Class
+
 if computer.system == 'Windows':
     import pyHook
     from pyHook.HookManager import HookConstants as _win32EventConstants
-    
-    class EventConstants(EventConstantsBase):
+
+    class EventConstants(_EventConstantsBase):
         WH_MIN = _win32EventConstants.WH_MIN
         WH_MSGFILTER = _win32EventConstants.WH_MSGFILTER
         WH_JOURNALRECORD = _win32EventConstants.WH_JOURNALRECORD
@@ -361,9 +410,20 @@ if computer.system == 'Windows':
         WM_SYSDEADCHAR = _win32EventConstants.WM_SYSDEADCHAR
         WM_KEYLAST = _win32EventConstants.WM_KEYLAST
 
+        #VK_0 thru VK_9 are the same as ASCII '0' thru '9' (0x30 -' : 0x39)
+        #VK_A thru VK_Z are the same as ASCII 'A' thru 'Z' (0x41 -' : 0x5A)
+
+        #virtual keycode constant names to virtual keycodes numerical id
+        vk_to_id = _win32EventConstants.vk_to_id
+
+        # virtual keycodes numerical id to virtual keycode constant names
+        id_to_vk = _win32EventConstants.id_to_vk
+
+        #event_to_name =
+
         def __init__(self):
-            EventConstantsBase.__init__(self)
-        
+            _EventConstantsBase.__init__(self)
+
         @classmethod
         def VKeyToID(cls, vkey):
             '''
@@ -391,7 +451,8 @@ if computer.system == 'Windows':
         @staticmethod
         def GetKeyState(key_id):
             return pyHook.HookManager.GetKeyState(key_id)
-            
+
+
 import keyboard as keyboard_module
 from keyboard import Keyboard
 from keyboard import KeyboardPressEvent,KeyboardReleaseEvent
@@ -410,7 +471,7 @@ from joystick import JoystickButtonPressEvent, JoystickButtonReleaseEvent
 
 import experiment
 from experiment import ExperimentDevice
-from experiment import MessageEvent, CommandEvent
+from experiment import MessageEvent #, CommandEvent
 
 import eyeTrackerInterface
 from eyeTrackerInterface.HW import *
@@ -418,28 +479,33 @@ from eyeTrackerInterface.eye_events import *
 
 import display
 from display import Display
+from ioHub import print2err, highPrecisionTimer
 
-import ioHub
-from ioHub import EVENT_TYPES
+if EventConstants._prepped is False:
+    EventConstants._prepped=True
 
-if len(EventConstantsBase.eventTypeCodeToClass)==0:
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['KEYBOARD_PRESS']]=KeyboardPressEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['KEYBOARD_RELEASE']]=KeyboardReleaseEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_MOVE']]=MouseMoveEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_WHEEL']]=MouseWheelEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_PRESS']]=MouseButtonDownEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_RELEASE']]=MouseButtonUpEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MOUSE_DOUBLE_CLICK']]=MouseDoubleClickEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['JOYSTICK_BUTTON_PRESS']]=JoystickButtonPressEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['PARALLEL_PORT_INPUT']]=ParallelPortEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['MESSAGE']]=MessageEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['COMMAND']]=CommandEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['EYE_SAMPLE']]=MonocularEyeSample
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['BINOC_EYE_SAMPLE']]=BinocularEyeSample
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['FIXATION_START']]=FixationStartEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['FIXATION_END']]=FixationEndEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['SACCADE_START']]=SaccadeStartEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['SACCADE_END']]=SaccadeEndEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['BLINK_START']]=BlinkStartEvent
-    EventConstantsBase.eventTypeCodeToClass[EVENT_TYPES['BLINK_END']]=BlinkEndEvent
+    EventConstants.EVENT_CLASSES.update({EventConstants.EVENT_TYPES['KEYBOARD_PRESS']:KeyboardPressEvent,
+                                         EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']:KeyboardReleaseEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_MOVE']:MouseMoveEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL']:MouseWheelEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_PRESS']:MouseButtonDownEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_RELEASE']:MouseButtonUpEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']:MouseDoubleClickEvent,
+                                         EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']:JoystickButtonPressEvent,
+                                         EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']:JoystickButtonReleaseEvent,
+                                         EventConstants.EVENT_TYPES['PARALLEL_PORT_INPUT']:ParallelPortEvent,
+                                         EventConstants.EVENT_TYPES['MESSAGE']:MessageEvent,
+                                         EventConstants.EVENT_TYPES['EYE_SAMPLE']:MonocularEyeSample,
+                                         EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']:BinocularEyeSample,
+                                         EventConstants.EVENT_TYPES['FIXATION_START']:FixationStartEvent,
+                                         EventConstants.EVENT_TYPES['FIXATION_END']:FixationEndEvent,
+                                         EventConstants.EVENT_TYPES['SACCADE_START']:SaccadeStartEvent,
+                                         EventConstants.EVENT_TYPES['SACCADE_END']:SaccadeEndEvent,
+                                         EventConstants.EVENT_TYPES['BLINK_START']:BlinkStartEvent,
+                                         EventConstants.EVENT_TYPES['BLINK_END']:BlinkEndEvent
+                                        })
+
+    EventConstants.EVENT_TYPES.update(dict([(v,k) for k,v in EventConstants.EVENT_TYPES.items()]))
+    EventConstants.DEVICE_TYPES.update(dict([(v,k) for k,v in EventConstants.DEVICE_TYPES.items()]))
+    EventConstants.EVENT_CLASSES.update(dict([(v,k) for k,v in EventConstants.EVENT_CLASSES.items()]))
+    EventConstants.DEVICE_CATERGORIES.update(dict([(v,k) for k,v in EventConstants.DEVICE_CATERGORIES.items()]))

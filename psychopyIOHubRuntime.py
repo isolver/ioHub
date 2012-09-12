@@ -20,7 +20,7 @@ from collections import deque
 import time
 from yaml import load
 import ioHub
-from ioHub.devices import computer
+from ioHub.devices import computer,highPrecisionTimer
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -28,7 +28,8 @@ except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 from ioHub.devices import EventConstants
-            
+
+
 class SimpleIOHubRuntime(object):
     def __init__(self, configFilePath, configFile):
         """
@@ -317,14 +318,14 @@ class SimpleIOHubRuntime(object):
     
     @staticmethod
     def eventListToObject(eventValueList):
-        eclass=EventConstants.eventTypeCodeToClass[eventValueList[3]]
+        eclass=EventConstants.EVENT_CLASSES[eventValueList[3]]
         combo = zip(eclass.attributeNames,eventValueList)
         kwargs = dict(combo)
         return eclass(**kwargs)
 
     @staticmethod
     def eventListToDict(eventValueList):
-        eclass=EventConstants.eventTypeCodeToClass[eventValueList[3]]
+        eclass=EventConstants.EVENT_CLASSES[eventValueList[3]]
         combo = zip(eclass.attributeNames,eventValueList)
         return dict(combo)
          

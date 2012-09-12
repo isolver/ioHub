@@ -147,8 +147,8 @@ class EyeTracker(Device):
         
         # create Device level class setting dictionary and pass it Device constructor
         deviceSettings={'instance_code':self.eyeTrackerConfig['instance_code'],
-            'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[EyeTracker.categoryTypeString],
-            'type_id':ioHub.DEVICE_TYPE_LABEL[EyeTracker.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
             'device_class':self.eyeTrackerConfig['device_class'],
             'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -909,7 +909,7 @@ class EyeTracker(Device):
                 
                 if ne.isBinocular():
                     # binocular sample
-                    event_type=ioHub.EVENT_TYPES['BINOC_EYE_SAMPLE']
+                    event_type=ioHub.devices.EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']
                     myeye=EYE_CODES.BINOCULAR
                     leftData=ne.getLeftEye()
                     rightData=ne.getRightEye()
@@ -950,7 +950,7 @@ class EyeTracker(Device):
                     
                 else:
                     # monocular sample
-                    etype=ioHub.EVENT_TYPES['EYE_SAMPLE']
+                    etype=ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
                     leftEye=ne.isLeftSample()
                     eyeData=None
                     if leftEye == 1:
@@ -985,7 +985,7 @@ class EyeTracker(Device):
                     self.I_nativeEventBuffer.append(monoSample)
                     
             #elif isinstance(ne,pylink.FixationUpdateEvent):
-            #    etype=ioHub.EVENT_TYPES['FIXATION_UPDATE']
+            #    etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_UPDATE']
             #     
             #    which_eye=ne.getEye()
             #    if which_eye:
@@ -1010,7 +1010,7 @@ class EyeTracker(Device):
                 self.I_nativeEventBuffer.append(fue)
                 '''
             elif isinstance(ne,pylink.EndFixationEvent):
-                etype=ioHub.EVENT_TYPES['FIXATION_END']
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
                 
                 estatus = ne.getStatus()
                 
@@ -1064,7 +1064,7 @@ class EyeTracker(Device):
                 self.I_nativeEventBuffer.append(fee)
                 
             elif isinstance(ne,pylink.EndSaccadeEvent):
-                etype=ioHub.EVENT_TYPES['SACCADE_END']
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['SACCADE_END']
                 
                 estatus = ne.getStatus()
                 
@@ -1104,7 +1104,7 @@ class EyeTracker(Device):
                             _pupilsize, -1, e_ppd[0], e_ppd[1],-1, -1, e_vel,-1.0,-1.0,a_vel,-1.0,-1.0,peak_vel,estatus]
                 self.I_nativeEventBuffer.append(see)               
             elif isinstance(ne,pylink.EndBlinkEvent):
-                etype=ioHub.EVENT_TYPES['BLINK_END']
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_END']
                 
                 estatus = ne.getStatus()
                 
@@ -1124,11 +1124,11 @@ class EyeTracker(Device):
                 self.I_nativeEventBuffer.append(bee)
                 
             elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):                
-                etype=ioHub.EVENT_TYPES['FIXATION_START']
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
                 #ioEventClass=FixationStartEvent
                 
                 if isinstance(ne,pylink.StartSaccadeEvent):
-                    etype=ioHub.EVENT_TYPES['SACCADE_START']
+                    etype=ioHub.devices.EventConstants.EVENT_TYPES['SACCADE_START']
                     #ioEventClass=SaccadeStartEvent
                 which_eye=ne.getEye()
                 if which_eye:
@@ -1137,7 +1137,7 @@ class EyeTracker(Device):
                     which_eye=EYE_CODES.LEFT
                 
                 pupil_size=-1
-                if etype == ioHub.EVENT_TYPES['FIXATION_START']:
+                if etype == ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']:
                     pupil_size=ne.getStartPupilSize()
                 gaze=ne.getStartGaze()
                 href=ne.getStartHREF()
@@ -1152,7 +1152,7 @@ class EyeTracker(Device):
                 self.I_nativeEventBuffer.append(se)
                 
             elif isinstance(ne,pylink.StartBlinkEvent):
-                etype=ioHub.EVENT_TYPES['BLINK_START']
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_START']
                 
                 estatus = ne.getStatus()
                 

@@ -111,7 +111,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                 events=self.getEvents(asType='dict')
                 etime=self.currentMsec()
                 #for e in events:
-                #    print '%s %s'%(ioHub.EVENT_TYPES[e['event_type']],str(e['hub_time']))
+                #    print '%s %s'%(ioHub.devices.EventConstants.EVENT_TYPES[e['event_type']],str(e['hub_time']))
                 print 'Get All Events (msec):',etime-stime
                 print 'Event Count:',len(events)
                 print DIVIDER

@@ -132,7 +132,7 @@ class EyeTracker(Device):
         **If an instance of EyeTracker has already been created, trying to create a second will raise an exception. Either destroy the first instance and then create the new instance, or use the class method EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
         """
         if EyeTracker._INSTANCE is not None:
-            raise ioHub.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
+            raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
         
         # >>>> eye tracker config
         EyeTracker.eyeTrackerConfig=kwargs['dconfig']
@@ -143,8 +143,8 @@ class EyeTracker(Device):
         
         # create Device level class setting dictionary and pass it Device constructor
         deviceSettings= dict(instance_code=self.eyeTrackerConfig['instance_code'],
-            category_id=ioHub.DEVICE_CATERGORY_ID_LABEL['EYE_TRACKER'],
-            type_id=ioHub.DEVICE_TYPE_LABEL['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
+            category_id=ioHub.devices.EventConstants.DEVICE_CATERGORIES['EYE_TRACKER'],
+            type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
             user_label=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
             max_event_buffer_length=self.eyeTrackerConfig['event_buffer_length'])
         Device.__init__(self,**deviceSettings)

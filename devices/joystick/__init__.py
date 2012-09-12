@@ -40,8 +40,8 @@ class Joystick(Device):
     def __init__(self,*args,**kwargs):
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
-                        'category_id':ioHub.DEVICE_CATERGORY_ID_LABEL[Joystick.categoryTypeString],
-                        'type_id':ioHub.DEVICE_TYPE_LABEL[Joystick.deviceTypeString],
+                        'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Joystick.categoryTypeString],
+                        'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Joystick.deviceTypeString],
                         'device_class':deviceConfig['device_class'],
                         'user_label':deviceConfig['name'],
                         'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -63,7 +63,7 @@ class Joystick(Device):
         if 'joystick_index' in kwargs['dconfig']:
             self._jid=kwargs['dconfig']['joystick_index']
             if not glfw.GetJoystickParam(self._jid,glfw.PRESENT):
-                raise ioHub.ioDeviceError(self,"Requested joystick ID is not present on the computer: %d"%(deviceSettings['joystick_index']))
+                raise ioHub.devices.ioDeviceError(self,"Requested joystick ID is not present on the computer: %d"%(deviceSettings['joystick_index']))
             jbuttons=glfw.GetJoystickButtons(self._jid)
             jpositions= glfw.GetJoystickPos(self._jid)
             self._joystickButtonStates=N.copy((jbuttons,jbuttons))
@@ -75,7 +75,7 @@ class Joystick(Device):
             #ioHub.print2stderr('Positions:')
             #ioHub.print2stderr(str(self._jid)+' : '+str(self._joystickPositionStates.shape)+' : '+str(self._joystickPositionStates[1])+' : '+str(len(jpositions)))
         else:
-            raise ioHub.ioDeviceError(self,"joystick_index must be supplied as an entry in the configuration for this device.")
+            raise ioHub.devices.ioDeviceError(self,"joystick_index must be supplied as an entry in the configuration for this device.")
 
     def getDetetectedJoysticks(self):
         return self._detectedJoysticks
@@ -96,8 +96,8 @@ class Joystick(Device):
 
             if not N.array_equal(self._joystickPositionStates[1],self._joystickPositionStates[0]):
                 #ioHub.print2stderr("Joystick Position Event: "+str(self._jid)+' : '+str(self._joystickPositionStates[1]-self._joystickPositionStates[0]))
-                #jpe= [0,0,Computer.getNextEventID(),ioHub.EVENT_TYPES['JOYSTICK_POSITIONAL_EVENT'],
-                #      ioHub.DEVICE_TYPE_LABEL['JOYSTICK_DEVICE'], self.instance_code, currentTime,
+                #jpe= [0,0,Computer.getNextEventID(),ioHub.devices.EventConstants.EVENT_TYPES['JOYSTICK_POSITIONAL_EVENT'],
+                #      ioHub.DEVICE_TYPES['JOYSTICK_DEVICE'], self.instance_code, currentTime,
                 #      currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
                 #self.I_nativeEventBuffer.append(jbe)
                 pass
@@ -105,17 +105,17 @@ class Joystick(Device):
                 #ioHub.print2stderr("Joystick Button Event: "+str(self._jid)+' : '+str(self._joystickButtonStates[1]-self._joystickButtonStates[0]))
                 bchanges=self._joystickButtonStates[1]-self._joystickButtonStates[0]
                 multibuttonEventCount=N.count_nonzero(bchanges)
-                devicetype=ioHub.DEVICE_TYPE_LABEL['JOYSTICK_DEVICE']
+                devicetype=ioHub.devices.EventConstants.DEVICE_TYPES['JOYSTICK_DEVICE']
                 for i, bstate in enumerate(bchanges):
                     is_pressed = 0
                     etype=None
                     button_id=i+1
                     if bstate < 0:
                         is_pressed = False
-                        etype=ioHub.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']
+                        etype=ioHub.devices.EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']
                     elif bstate > 0 :
                         is_pressed = True
-                        etype=ioHub.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']
+                        etype=ioHub.devices.EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']
 
                     if etype:
                         jbe= [0,0,Computer.getNextEventID(),etype, self.instance_code, sTime,
@@ -125,7 +125,7 @@ class Joystick(Device):
 
         except Exception as e:
             ioHub.printExceptionDetailsToStdErr()
-            raise ioHub.ioDeviceError(self,"An error orricced what polling GAMEPAD_%d"%(self._jid+1),e)
+            raise ioHub.devices.ioDeviceError(self,"An error orricced what polling GAMEPAD_%d"%(self._jid+1),e)
         finally:
             self._lastPollTime=sTime
 
@@ -142,7 +142,7 @@ class JoystickEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
     def __init__(self,*args,**kwargs):
-        kwargs['device_type']=ioHub.DEVICE_TYPE_LABEL['JOYSTICK_DEVICE']
+        kwargs['device_type']=ioHub.devices.EventConstants.DEVICE_TYPES['JOYSTICK_DEVICE']
         DeviceEvent.__init__(self,**kwargs)
 
 class JoystickButtonPressEvent(JoystickEvent):
