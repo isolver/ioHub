@@ -97,6 +97,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         """
         psychopy code is taken from an example psychopy script in the coder documentation.
         """
+        self.totalEventRequestsForTest=1000
 
         #report process affinities
         print "Current process affinities (experiment proc, ioHub proc):", self.getProcessAffinities()
@@ -108,8 +109,6 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         print "ParallelPort methods:",self.hub.devices.parallelPort.getRemoteMethodNames()
 
         self.hub.devices.mouse.setPosition((0.0,0.0))
-
-        self.totalEventRequestsForTest=kwargs['numEventRequests']
 
         # create fullscreen pyglet window at current resolution, as well as required resources / drawings
         self.createPsychoGraphicsWindow()
@@ -138,10 +137,12 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
         # END TEST LOOP <<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        # close neccessary files / objects, 'disable high priority.
+        # _close neccessary files / objects, 'disable high priority.
+        print "plot spinDownTest"
         self.spinDownTest()
 
         # plot collected delay and retrace detection results.
+        print "plot results"
         self.plotResults()
 
     def createPsychoGraphicsWindow(self):
@@ -224,14 +225,14 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
         for r in events:
             if not isinstance(r,dict):
-                r=self.eventListToDict(r)
+                r=self._eventListToDict(r)
             if r['event_type'] == ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_PRESS']: #keypress code
                 keystring=r['key']
                 self.psychoStim['keytext'].setText(keystring)
 
     def spinDownTest(self):
         # OK, we have collected the number of requested getEvents, that have returned >0 events
-        # so close psychopy window
+        # so _close psychopy window
         self.psychoWindow.close()
 
         # disable high priority in both processes
@@ -300,33 +301,19 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
         show()
 
-def start(cfile=u'experiment_config.yaml'):
-    configFile=cfile
-    runtime=None
-    try:
-        import os
-        runtime=None
-        # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
-
-        runtime=ExperimentRuntime(ioHub.module_directory(start), configFile)
-
-        # run a test on event access delay
-        runtime.run(numEventRequests=1000)
-
-    except Exception:
-        ExperimentRuntime.printExceptionDetails()
-
-    finally:
-        # close ioHub, shut down ioHub process, clean-up.....
-        if runtime:
-            runtime.close()
 
 ##################################################################
-if __name__ == "__main__":
+def main(configurationDirectory):
     import sys
     if len(sys.argv)>1:
         configFile=unicode(sys.argv[1])
-        start(configFile)
+        runtime=ExperimentRuntime(configurationDirectory, configFile)
     else:
-        start()
+        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+
+    runtime.start()
+
+if __name__ == "__main__":
+    configurationDirectory=ioHub.module_directory(main)
+    main(configurationDirectory)
 

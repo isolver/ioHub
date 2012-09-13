@@ -438,7 +438,6 @@ class ioHubClient(object):
     # client utility methods.
     def _getDeviceList(self):
         r=self.sendToHub(('EXP_DEVICE','GET_DEV_LIST'))
-        print 'GET_DEV_LIST:',r[2]
         return r[2]
 
     def shutDownServer(self):

@@ -1,0 +1,178 @@
+# iohub_config.yaml: settings related to the iohub process and the device types that are to be enabled for the
+# experiment. The ioHub.ioDataStore datafile location and file name are also provided here.
+#
+# Items that are REQUIRED to be changed to run the program as is:
+#     - None
+#
+# To view pytables data files (hdf5 files), the ViTables python program works very well. install version 2.1. 
+# Also, the HDF5 viewer from the HDF Group also seems good: http://www.hdfgroup.org/hdf-java-html/hdfview/
+#
+# ----------------------------------------------------------------------------------------------------------
+#
+# ipcCoder = 'ujson' | 'msgpack'
+#                                                               
+# Select which encoder / decoder to use for sending
+# data in UDP packets
+# 
+ipcCoder: msgpack
+#
+# asyncClient = True | False
+#                                                               
+# Note: ONLY False is currenly supported.
+# i.e. client calls to hub are blocking calls
+# in experiment program. If set to True, will ( should ? ) raise exception!
+# 
+asyncClient: False
+#
+# global_event_buffer: unsigned int
+#
+# The number of events held in the ioHub device wide integrated event deque. 
+# These are events that have been retrieved from the individual device event deque's 
+# and converted to normalized ioHub event objects, ready to be retrieved by 
+# the experiment runtime. If the exp. runtime is getting events every, say 20 msec,
+# then there should never really be more than maybe 30 events (inc. eye samples)
+# in the queue at most, but having a high value for the maximum size does not hurt.
+#
+# If the deque becomes full, each new event added removes one oldest event from the
+# deque to make room for it.
+#
+global_event_buffer: 2048
+#
+# udpPort: unsigned int
+# Port number that the ioHub server should receive UDP requests from the experiment client on.
+#
+udpPort: 9000
+#
+# monitor_devices lists the devices that are to be included for event
+# streaming, saving, or experiment interaction. 
+#
+# Currently, Keyboard, Mouse, ParallelPort (on the Experiment PC) and EyeTracker
+# (via the pyEyeTrackerInterface) are supported.
+#
+# If a device is enabled, then it can be monitored and events can be
+# streamed to the experiment application and / or saved to a file.
+#
+# Currently, if a device is enabled and events are being streamed or saved,
+# ALL event types for that device are activated. This will be enhanced so you can
+# control what event types you want to stream and / or save to file individually
+# in a future release.
+#
+# - device_class : name of the ioHub device class to instantiate. This is the literal 
+#                  platform independent device class name, so spelling and capilatization
+#                  are critical.
+#
+# - enabled : have the ioHub monitor that device type
+#
+# - name: The name you want to give the device. Can be any valid python attribute name
+#         up to 24 characters in length. So name can not 'start' with a number,
+#         and can only contain letters a-z, A-Z, and numbers 0-9
+#
+# - instance_code: This should be a unique string up to 48 characters in length. Generally using
+#                  the devices serial number is a safe bet, otherwise make something up that will be
+#                  unique across all devices for your site. 
+#                   
+#
+# - event_buffer_length: maximum length of event buffer for the device in the ioHub. 
+#                      Once it is full, oldest first events are dropped from the
+#                      buffer to make room for new ones.
+#
+# - stream_events: Enables events from this device being included in events sent when the
+#   ioHubClient calls getEvents()
+#
+# - save_events: Enables saving of events to file, based on the ioDataStore config settings.
+#
+# - device_timer: Specifies that a periodic timer should be created for this device.
+#   - interval: the sec.msec interval that the timer should be run at. 0.001 is 1 msec, 0.0001 specifies 
+#               100 usec interval, however on Windows 7 64 bit with an i5 mobile, it seemed I could not get intervals
+#               below 250-300 usec, so I suggest anything below 1 msec be tested for validity on your system.
+#
+monitor_devices:
+    - device:
+        device_class: Keyboard
+        name: kb
+        instance_code: kb_serial_number
+        saveEvents: True
+        streamEvents: True
+        event_buffer_length: 256
+    - device:
+        device_class: Mouse
+        name: mouse
+        instance_code: mouse_serial_number
+        saveEvents: True
+        streamEvents: True
+        event_buffer_length: 256
+    - device:
+        device_class: ExperimentDevice
+        name: experimentRuntime
+        instance_code: computer_serial_number+psychopy
+        saveEvents: True
+        streamEvents: True
+        event_buffer_length: 64
+    - device:
+        device_class: Display 
+        name: display
+        manufacturer: Samsung
+        model: T23A350
+        year: 2010
+        comments: Cheap 23" LCD 1900x1080 that works well for everyday office use.
+        instance_code: display_serial_number
+        psychopy_config_file: unknown
+        # what ccordinate space shoule databe rported in (pixels, degrees, etc)
+        reporting_unit_type: pixels
+        # - width and height of calibration plane in mm
+        calibration_surface_dimensions:
+            width: 500
+            height: 281
+            unit_type: mm
+            origin: CENTER   # origin to use for dimension unit mapping. CENTER, TOP_LEFT, BOTTOM_RIGHT are options
+        #  
+        #  default_eye_plane_distance
+        #
+        #  distance of eye being tracked in mm 
+        # (from horiz. center point of both eyes if binocular).
+        #   1 point == distance to plane x,y center : plane_center
+        #   2 point == distance to horizontal midline,
+        #     (top, bottom) : top_center, bottom_center
+        #   4 point == distance to 4 corners of plane 
+        #     : top_left,top_right,bottom_left,bottom_right   
+        # *** Currently ONLY 1 POINT ( i.e. plane_center is supported )
+        default_eye_to_calibration_surface_distance: 
+            plane_center: 500
+            unit_type: mm
+        #
+        # Inter Pupil Distance (IPD) in mm
+        #
+        # Does not need to be super accurate, can just be used by
+        # eye_plane_distance in binocular case to expand out to distances
+        # for both eyes if significant.  
+        #
+        IPD: 30.0
+        #
+        # head_stationary: True | False
+        #  
+        # - Is the above eye distance info actually
+        #   useful? True == Yes, False == No. 
+        #   i.e. True == head is fixed, False == head is free to move
+        head_stationary: True          
+#
+# ioDataStore Configuration Settings
+# - enabled: True = ioDataStore module will be initialized and a dataStore file created., False = ignore config settings.
+# - filename: name of file to save
+# - filepath: absolution path of file to save.  CURRENT_DIR == location of experiment script.
+# - storage_type: Currently only 'pytables' is supported. That may not be a bad thing. ;) 
+#                 However we may want to support different file types / formats in the future.
+# - multiple_experiments: If True, a single ioStoreFile can save multiple experiments work of data. 
+#                         False == 1 experiment session per file.
+# - flush_interval: How often should explicit flush be called by ioHub ( in number of events ):
+#                   n == 0 : after every event
+#                   n  > 0 : after every n events
+#                   n  < 0 : only when IOHUB_FLUSH_EVENTS command is received 
+#                            from experiment (TO DO: not yet implemented ) 
+#
+ioDataStore:
+    enable: True
+    filename: temp
+    filepath: .
+    storage_type: pytables
+    multiple_experiments: True
+    flush_interval: 64

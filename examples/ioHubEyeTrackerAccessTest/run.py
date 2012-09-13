@@ -169,7 +169,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         print 'isConnected() 4:',eyetracker.isConnected()        
         print '\n\n'
         
-        mywin.close()
+        mywin._close()
 
         # save ioHubFile to xlsx format
         print "Saving Sample Excel File ...."
@@ -192,8 +192,8 @@ def start(cfile=u'experiment_config.yaml'):
         # run a test on event access delay
         runtime.run()
 
-        # close ioHub, shut down ioHub process, clean-up.....
-        runtime.close()
+        # _close ioHub, shut down ioHub process, clean-up.....
+        runtime._close()
 
     except Exception:
         ExperimentRuntime.printExceptionDetails()
