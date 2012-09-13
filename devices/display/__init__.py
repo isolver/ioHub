@@ -86,9 +86,7 @@ class Display(Device):
         dispCoordType=self._settings['reporting_unit_type']
 
         for ctype,cvalues in self.ccordinateTypes.iteritems():
-            #ioHub.print2stderr("coords set:"+str(dispCoordType)+' : '+str(cvalues)+' : '+str(ctype))
             if dispCoordType in cvalues:
-                #ioHub.print2stderr("**** COORDS HIT:"+str(dispCoordType)+' : '+str(cvalues)+' : '+str(ctype))
                 Display._displayCoordinateType=ctype
                 break
 
@@ -97,7 +95,6 @@ class Display(Device):
             ioHub.print2err("ERROR: Display._determineDIsplayCoordSpace: Unknown coord space parameter setting; using 'pix': "+dispCoordType)
 
         return Display._displayCoordinateType
-
 
     @classmethod
     def getDisplayCoordinateType(cls):
@@ -109,10 +106,9 @@ class Display(Device):
             dw,dh=cls.getScreenResolution()
             coordSpace=cls.getDisplayCoordinateType()
 
-            #ioHub.print2stderr("self.getDisplayCoordinateType: "+coordSpace)
             dx= px-dw/2
             dy=-(py-dh/2)
-            #ioHub.print2stderr(">>self.pixel2DisplayCoord: "+str((px,py))+" : "+str((dx,dy)))
+
             if coordSpace == 'pix':
                 return dx,dy
 
@@ -160,7 +156,11 @@ class Display(Device):
 
         :rtype : list
         """
-        return cls._user32.GetSystemMetrics(0), cls._user32.GetSystemMetrics(1)
+        #  >> WIN32_ONLY
+        r= cls._user32.GetSystemMetrics(0), cls._user32.GetSystemMetrics(1)
+        #  << WIN32_ONLY
+        return r
+
 
     def _poll(self):
         pass

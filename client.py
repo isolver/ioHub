@@ -154,80 +154,124 @@ class ioHubClientDevice(object):
         return self._methods
 
 
-#
-# ioHubDevices is a class that contains an attribute (dynamically created)
-# for each device that is created in the ioHub. These devices are each of type
-# ioHubClientDevice. The attribute name for the device is the user_label / name
-# given to the device by the user, so it must be a valid python attribute name.
-# The ioHubClientDevice itself  has a list of methods that can be called
-# (matching the list of methods for the device in the ioHub.devices module),
-# however here, each results in an RPC call to the ioHub for the device, which returns
-# the result.
-#
 class ioHubDevices(object):
+    """
+    ioHubDevices is a class that contains an attribute (dynamically created) for each device that is created in the ioHub.
+    These devices are each of type ioHubClientDevice. The attribute name for the device is the user name given to
+    the device by the user in the ioHub config file label: field, so it must be a valid python attribute name.
+
+    Each ioHubClientDevice itself has a list of methods that can be called (matching the list of public methods for the
+    device in the ioHub.devices module), however here, each results in an IPC call to the ioHub Server for the device,
+    which returns the result to the experiment process.
+
+    A user never uses this class directly, it is used internallby by the ioHubVlient class to dynamically build out
+    the experiment process side representation of the ioHub Server device set.
+    """
     def __init__(self,hubClient):
         self.hubClient=hubClient
 
 class ioHubClient(object):
-    _replyDictionary=dict()
+    """
+    ioHubClient is the main experiment process side class that is responsible to communicating with the ioHub Server process.
+    The and instance of the ioHubClient is created and associated with the self.hub attribute of the SimpleIOHubRuntime
+    utility class.
 
+    ioHubClient is responsible for for creating the ioHub Server Process, sending message requests to the ioHub server and
+    reading the server process reply, as well as telling the ioHub server when to close down and disconnect. The ioHubClient also
+    has an experiment side representation of the devices that have been registered with the ioHub for monitoring, which
+    can be accessed via the ioHubClient's devices attribute.
+
+    If using the SimpleIOHubRuntime utility class to create your experiment, an instance of this class is created
+    for you automatically and is accessable via self.hub.
+    """
+    _replyDictionary=dict()
     def __init__(self,config,configAbsPath):
+
+        # A dictionary containing the ioHub configuration file settings
         self.ioHubConfig=config
+
+        # the path to the ioHub configuration file itself.
         self.ioHubConfigAbsPath=configAbsPath
+
         # udp port setup
         self.udp_client = UDPClientConnection(coder=self.ioHubConfig['ipcCoder'])
 
+        # the dynamically generated object that contains an attribute for each device registed for monitoring
+        # with the ioHub server so that devices can be accessed experiment process side by device name.
         self.devices=ioHubDevices(self)
+
+        # a dictionary that holds the same devices represented in .devices, but stored in a dictionary using the device
+        # name as the dictionary key
         self.deviceByLabel=dict()
+
+        # attribute to hold the current experiment ID that has been created by the ioHub ioDataStore if saving data to the
+        # ioHub hdf5 file type.
         self.experimentID=None
+
+        # attribute to hold the current experiment session ID that has been created by the ioHub ioDataStore if saving data to the
+        # ioHub hdf5 file type.
         self.experimentSessionID=None
 
     def startServer(self):
-            # start up ioHub using subprocess module so we can have it run for duration of experiment only
-            run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
-            subprocessArgList=[sys.executable, run_script,self.ioHubConfigAbsPath]
-            self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            self.server_pid = self._server_process.pid
-            self._psutil_server_process=psutil.Process(self.server_pid)
+        """
+        Starts the ioHub Server Process, storing it's process id, and creating the experiment side device representation
+        for IPC access to public device methods.
+        """
 
-            #print "started ioHub Server subprocess %d"%self.server_pid
+        # TODO: Save ioHub Server ID to a local file so when a client starts the pid can be read and if it is still
+        #       running, it can be killed before starting another instance of the ioHub server.
 
-            hubonline=False
+        # start up ioHub using subprocess module so we can have it run for duration of experiment only
+        run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
+        subprocessArgList=[sys.executable, run_script,self.ioHubConfigAbsPath]
 
-            server_output='hi there'
-            while server_output:
-                #stime=currentMsec()
-                isDataAvail=self.serverStdOutHasData()
-                if isDataAvail is True:
-                    server_output=self.readServerStdOutLine().next()
-                    #etime=currentMsec()
-                    #print 'get ioHub line dur:',etime-stime,server_output
-                    if server_output.rstrip() == 'IOHUB_READY':
-                        hubonline=True
-                        break
-                else:
-                    import time
-                    time.sleep(0.0001)
+        # start subprocess, get pid, and get psutil process object for affinity and process priority setting
+        self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.server_pid = self._server_process.pid
+        self._psutil_server_process=psutil.Process(self.server_pid)
 
-            if hubonline is False:
-                print "ioHub could not be contacted, exiting...."
-                try:
-                    self._server_process.terminate()
-                except Exception as e:
-                    raise ioHubClientException(e)
-                finally:
-                    sys.exit(1)
+        # wait for server to send back 'IOHUB_READY' text over stdout, indicating it is running
+        # and ready to receive network packets
+        hubonline=False
+        server_output='hi there'
+        while server_output:
+            isDataAvail=self._serverStdOutHasData()
+            if isDataAvail is True:
+                server_output=self._readServerStdOutLine().next()
+                #etime=currentMsec()
+                #print 'get ioHub line dur:',etime-stime,server_output
+                if server_output.rstrip() == 'IOHUB_READY':
+                    hubonline=True
+                    break
+            else:
+                import time
+                time.sleep(0.0001)
 
+        # If ioHub server did not repond correctly, terminate process and exit the program.
+        if hubonline is False:
+            print "ioHub could not be contacted, exiting...."
+            try:
+                self._server_process.terminate()
+            except Exception as e:
+                raise ioHubClientException(e)
+            finally:
+                sys.exit(1)
 
     def _get_maxsize(self, maxsize):
+        """
+        Used by startServer pipe reader code.
+        """
         if maxsize is None:
             maxsize = 1024
         elif maxsize < 1:
             maxsize = 1
         return maxsize
 
-    def serverStdOutHasData(self, maxsize=256):
-        #import pywintypes
+    def _serverStdOutHasData(self, maxsize=256):
+        """
+        Used by startServer pipe reader code. Allows for async check for data on pipe in windows.
+        """
+        #  >> WIN32_ONLY
         import msvcrt
         from win32pipe import PeekNamedPipe
 
@@ -243,14 +287,26 @@ class ioHubClient(object):
                 nAvail = maxsize
             if nAvail > 0:
                 return True
+        # << WIN32_ONLY
         except Exception as e:
             raise ioHubClientException(e)
 
-    def readServerStdOutLine(self):
+    def _readServerStdOutLine(self):
+        """
+        Used by startServer pipe reader code. Reads a line from the ioHub server stdout. This is blocking.
+        """
         for line in iter(self._server_process.stdout.readline, ''):
             yield line
 
     def _calculateClientServerTimeOffset(self, sampleSize=100):
+        """
+        Calculates 'sampleSize' experimentTime and ioHub Server time process offsets by calling currentMsec localally
+        and via IPC to the ioHub server process repeatedly, as ewell as calculating the round trip time it took to get the server process time in each case.
+        Puts the 'sampleSize' salculates in a 2D numpy array, index [i][0] = server_time - local_time offset, index [i][1]
+        = local_time after call to server_time - local_time before call to server_time.
+
+        In Windows, since direct QPC implementation is used, offset should == delay to within 100 usec or so.
+        """
         results=N.zeros((sampleSize,2),dtype='f4')
         for i in xrange(sampleSize):     # make multiple calles to local and ioHub times to calculate 'offset' and 'delay' in calling the ioHub server time
             tc=Computer.currentMsec()    # get the local time 1
@@ -263,6 +319,9 @@ class ioHubClient(object):
         return results
 
     def getDevices(self):
+        """
+
+        """
         return self.devices
 
     def createDeviceList(self,deviceList):

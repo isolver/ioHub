@@ -287,6 +287,8 @@ class _EventConstantsBase(object):
                     3: 'DISPLAY_DEVICE',
                     4: 'PARALLEL_PORT_DEVICE',
                     5: 'EXPERIMENT_DEVICE',
+                    9: 'JOYSTICK_DEVICE',
+                    13:'EYE_TRACKER_DEVICE'
                     #6:'ANALOG_INPUT_DEVICE',         #        7:'ANALOG_OUTPUT_DEVICE',         8:'BUTTON_BOX_DEVICE',         9:'JOYSTICK_DEVICE',         #        10:'SPEAKER_DEVICE',         #        11:'AMPLIFIER_DEVICE',         #        12:'MICROPHONE_DEVICE',         13:'EYE_TRACKER_DEVICE',         #        14:'EEG_DEVICE',         #        15:'MRI_DEVICE',         #        16:'MEG_DEVICE',         17:'OTHER_DEVICE'
     }
 

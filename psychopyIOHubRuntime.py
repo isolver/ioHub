@@ -20,14 +20,13 @@ from collections import deque
 import time
 from yaml import load
 import ioHub
-from ioHub.devices import computer,highPrecisionTimer
+from ioHub.devices import computer,highPrecisionTimer,EventConstants
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
-from ioHub.devices import EventConstants
 
 
 class SimpleIOHubRuntime(object):
