@@ -425,7 +425,8 @@ class EyeTracker(Device):
         
     def closeRecordingFile(self, **kwargs):
         """
-        closeRecordingFile is used to close the currently open file that is being used to save data from the eye track to the eye tracker computer. 
+        closeRecordingFile is used to close the currently open file that is being used to save data from the eye track to the eye tracker computer.
+        closeRecordingFile is used to close the currently open file that is being used to save data from the eye track to the eye tracker computer.
         Once a file has been closed, getFile(localFileName,fileToTransfer) can be used to transfer the file from the eye tracker computer to the 
         experiment computer at the end of the experiment session.
         

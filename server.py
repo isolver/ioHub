@@ -230,7 +230,7 @@ class udpServer(DatagramServer):
         time.sleep(1)
         
         self.stop()
-        #self.close()    
+        #self.close()
         
     def getProcessInfoString(self):
         return computer.getProcessInfoString()
