@@ -318,13 +318,18 @@ class ioHubClient(object):
         #print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
         return results
 
-    def getDevices(self):
+    def _createDeviceList(self,deviceList):
         """
-
+        Populate the devices attribute object with the registered devices of the ioHub. Each ioHub device becomes an attribute
+        of the devices instance, with the attribute name == the name give the device in the ioHub configuration file.
+        Each device in allows access to the pupic method interface of the device via transparent IPC calls to the ioHub server process
+        from the expriment process.
         """
-        return self.devices
+        # get the list of devices registered with the ioHub
+        deviceList=self._getDeviceList()
 
-    def createDeviceList(self,deviceList):
+        # create an experiment process side device object to allow access to the public interface of the
+        # ioHub device via transparent IPC.
         for user_label,instance_code,device_class in deviceList:
             d=ioHubClientDevice(self,user_label,instance_code,device_class)
             self.devices.__dict__[user_label]=d
@@ -332,92 +337,68 @@ class ioHubClient(object):
 
     # UDP communication with ioHost
     def sendToHub(self,argsList):
-        '''
-        General purpose UDP packet sending routine. For the most part,
-        ioHub expect data to be sent json encoded using the ujson library
-        ( it is fast ). You should send argsList, a tuple of the form:
+        """
+        General purpose message sending routine,  used to send a message from the experiment process to the ioHub server
+        process, and then wait for the reply from the server process before returning.
 
-        (resquest_type, [optional_callable_name for RPC], (optional_inner_list_or arguements, {optional:inner, dict:of, kwarg:arguements})
+        For the most part, ioHub accesps data send either encoded using the msgpack library or json encoded using the
+        ujson library ( it is fast ). Which is used is specified in the ioHub configuration file. By default msgpack is selected,
+        as it seems to be as fast as ujson, but it compresses the data by up to 40 - 50% for transmission.
 
-        The client currently blocks until your request is fulfilled and retuned to you.
-        Any aysnc. version could be added if desired. Instead of using callbacks, I prefer the idea
-        of the client sendiong a quest and getting a request ticket #. Client can then ask status of
-        ticket based on mumber. When result is ready, it is sent back as the reply to the
-        status request.
+        All messages sent to the ioHub have the following simple format:
 
-        RPC examples:
+        (resquest_type, [optional_callable_name_fo_IPC], ( [optional_list_of_args], {optional_dict_of_kw_args} ) )
 
-        # If the method if part of the ioHub class, just provide the method name and any args:
+        The currently supported request types are:
 
-        # get current ioHub Time (msec.usec)
-        -> RPC List: ('RPC','currentMsec')
-        -> Method call: result=sendToHub(('RPC','currentMsec'))
-        -> Result if OK: ('RPC_RESULT','currentMsec',1033.473)
-        -> Result if error occurred: (*_ERROR,*args), where *_ERROR is a possible ioHub RCP error type,
-        and *args is the data frovided with the error.
+        #. RPC
+        #. GET_EVENTS
+        #. EXP_DEVICE
 
-        # clear out any events built up in the Hub event Buffer-
+        Every request to the ioHub server is sent a response, even if it is just to indicate the request was receive and
+        if it was processed successfully or not. All responses from the ioHub server are in the form:
 
-        -
-        -> Result if OK: ('RPC_RESULT','getProcessInfoString',".....see below .....")
-        -> Result if error occurred: (*_ERROR,*args), where *_ERROR is a possible ioHub RCP error type,
-        -> Example string output:
-                    HUB STATS:
-                    --------------------------------------
-                    Process ( 8952 ):
-                    psutil.Process(pid=8952, name='python.exe')Thread Count: 3
-                    Thread Info:
-                        thread(id=8776, user_time=16.0057026, system_time=4.8984314)
-                        thread(id=9816, user_time=0.0, system_time=0.0)
-                        thread(id=9452, user_time=0.0, system_time=0.0)
+        (response_type, *response_values)
 
-        Non-RCP Calls
-        ++++++++++++++
+        The current ioHub resposne types are:
 
-        There are some calls to the Hub that are treated specially, to try and fast track their response.
-        They are:
+        #. RPC_RESULT
+        #. GET_EVENTS_RESULT
+        #. DEV_RPC_RESULT
+        #. GET_DEV_LIST_RESULT
+        #. GET_DEV_INTERFACE
+        #. IOHUB_ERROR
+        #. RPC_ERROR
 
-        getEvents
-        +++++++++
+        The client currently blocks until the request is fulfilled and and a response is received from the ioHub server.
 
-        Get the current list of bufferred events from the ioHub. Currently there is no filtering
-        etc. possible. Events are returned in chronological order 'WITHIN' each call to getEvents.
-        -> Method : events=client.getEvents()
-        -> Sends: ('GET_EVENTS',) message type
-        -> Response: ('GET_EVENTS_RESULT',[{event1_as_dict},{event2_as_dict},....}])
-                     or if no events are available: ('GET_EVENTS_RESULT', None)
-        -> Error Return: Not defined.
-
-        sendEvents
-        +++++++++
-
-        Send a list of Experiment Events to the ioHub.
-
-        -> Method : events=client.sendEvents([{event1_as_tuple},{event2_as_tuple},....}])
-        -> Sends: List of experiment events, as dictionaries. You can convert an event object to a list
-                  representation by calling the_event._asList(), which returns the_event as a python list.
-        -> Response: ('SEND_EVENTS_RESULT',number_of_events_received)
-        -> Error Return: Not defined.
-        '''
+        TODO: An aysnc. version could be added if desired. Instead of using callbacks, I prefer the idea of the client sending
+        a request and getting a request ticket # back from the ioHub server. The Client can then ask the ioHub Server
+        for the status of the ticket based on number. When the ticket number result is ready, it is sent back as the reply
+        to the status request.
+        """
         # send request to host, return is # bytes sent.
         bytes_sent=self.udp_client.sendTo(argsList)
 
-        # what for response from host, return is result ( decoded already ), and Hub address (ip4,port).
+        # wait for response from ioHub server, return is result ( decoded already ), and Hub address (ip4,port).
         result,address=self.udp_client.receive()
 
+        # store result received in an address based dictionary (incase we ever support multiple ioHub Servers)
         ioHubClient._addResponseToHistory(result,bytes_sent,address)
 
+        # check if the reply is an error or not. If it is, raise the error.
         errorReply=self.isErrorReply(result)
-
         if errorReply:
             raise errorReply
 
+        #Otherwise return the result
         return result
 
     @classmethod
     def _addResponseToHistory(cls,result,bytes_sent,address):
         """
-
+        Adds a response from the ioHub to an ip:port based dictionary. Not used right now, but may be useful if we ever support
+        a client connecting to > 1 ioHub.
         """
         address=str(address)
         if address in cls._replyDictionary:
@@ -429,6 +410,11 @@ class ioHubClient(object):
 
 
     def sendExperimentInfo(self,experimentInfoDict):
+        """
+        Sends the experiment info from the experiment config file to the ioHub Server, which passes it to the ioDataStore,
+        determines if the experiment already exists in the experiment file based on 'experiment_code', and returns a new
+        or existing experiment ID based on that criteria.
+        """
         fieldOrder=(('experiment_id',0), ('code','') , ('title','') , ('description','')  , ('version','') , ('total_sessions_to_run',0))
         values=[]
         for key,defaultValue in fieldOrder:
@@ -442,10 +428,15 @@ class ioHubClient(object):
         return r[2]
 
     def sendSessionInfo(self,sessionInfoDict):
+        """
+        Sends the experiment session info from the experiment config file and the values entered into the session dialog
+        to the ioHub Server, which passes it to the ioDataStore, determines if the experiment already exists in the
+        experiment file based on 'experiment_code', and returns a new or existing experiment ID based on that criteria.
+        """
         if self.experimentID is None:
             raise ioHubClientException("Experiment ID must be set by calling sendExperimentInfo before calling sendSessionInfo.")
         if 'code' not in sessionInfoDict:
-            raise ioHubClientException("code must be provided in sessionInfoDict ( StringCol(8) ).")
+            raise ioHubClientException("Code must be provided in sessionInfoDict ( StringCol(8) ).")
         if 'name' not in sessionInfoDict:
             sessionInfoDict['name']=''
         if 'comments' not in sessionInfoDict:
@@ -462,10 +453,17 @@ class ioHubClient(object):
         return r[2]
 
     def getEvents(self):
+        """
+        Requests the current list of device events from the device wide event buffer in the ioHub server. The events are
+        returned and the global ioHub server event buffer is cleared.
+        """
         r = self.sendToHub(('GET_EVENTS',))
         return r[1]
 
     def sendEvents(self,events):
+        """
+        Send 1 - N Experiment Events (currently Messages) to the ioHub for storage.
+        """
         eventList=[]
         for e in events:
             eventList.append(e._asList())
@@ -473,26 +471,32 @@ class ioHubClient(object):
         return r
 
     def sendMessageEvent(self,text,prefix='',offset=0.0,usec_time=None):
+        """
+        Create and send a MessageEvent to the ioHub Server for storage with the rest of the event data.
+
+        Args:
+          text (str): The text message for the message event. Can be up to 128 chracters in length.
+          prefix (str): A 1 - 3 character prefix for the message that can be used to sort or group messages by 'types'
+          offset (float): The offset to apply to the time stamp of the message event. If you send the event before or after
+          the time the event actually occurred, and you know what the offset value is, you can provide it here and it will
+          be applied to the ioHub time stampe for the event.
+          usec_time: Since (at least on Windows currently) if you use the ioHub timers, the timebase of the experiment process
+          is identical to that of the ioHub server process, then you can specific the ioHub time for experiment events
+          right in the experiment process itself.
+        """
         self.sendToHub(('EXP_DEVICE','EVENT_TX',[MessageEvent.createAsList(text,prefix=prefix,msg_offset=offset,usec_time=usec_time),]))
         return True
 
     def sendMessages(self,msgArgList):
+        """
+        Same as the sendMessage method, but accepts a list of lists of message arguments, so you can have N messages
+        created and sent at once.
+        """
         msgEvents=[]
         for msg in msgArgList:
             msgEvents.append(MessageEvent.createAsList(*msg))
         self.sendToHub(('EXP_DEVICE','EVENT_TX',msgEvents))
         return True
-
-    #def sendCommands(self,cmdArgList):
-    #    cmdEvents=[]
-    #    for cmde in cmdArgList:
-    #        cmdEvents.append(CommandEvent.createAsList(*cmde))
-    #    self.sendToHub(('EXP_DEVICE','EVENT_TX',cmdEvents))
-    #    return True
-
-    #def sendCommandEvent(self,command,text,priority=255,prefix='',offset=0.0):
-    #    self.sendToHub(('EXP_DEVICE','EVENT_TX',[CommandEvent.createAsList(command,text,priority=priority,prefix=prefix,msg_offset=offset),]))
-    #    return True
 
     # client utility methods.
     def _getDeviceList(self):

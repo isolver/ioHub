@@ -212,9 +212,6 @@ a command prompt at the ioHub/examples/simple folder and type:
                 tempdict= self.experimentSessionDefaults
                 tempdict['user_variables']=self.sessionUserVariables
                 self.hub.sendSessionInfo(tempdict)
-                
-                # get the list of devices regigisted with the ioHub
-                dlist=self.hub._getDeviceList()
 
                 # create a local 'thin' representation of the registered ioHub devices,
                 # allowing such things as device level event access (if supported) 
@@ -223,7 +220,7 @@ a command prompt at the ioHub/examples/simple folder and type:
                 # is the name given to the device in the ioHub .yaml config file to be access;
                 # i.e. hub.devices.ExperimentPCkeyboard would access the experiment PC keyboard
                 # device if the default name was being used.
-                self.hub.createDeviceList(dlist)                   
+                self.hub._createDeviceList()
                         
                 # A circular buffer used to hold events retrieved from self.getEvents() during 
                 # self.delay() calls. self.getEvents() appends any events in the allEvents
