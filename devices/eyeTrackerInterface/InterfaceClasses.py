@@ -10,9 +10,10 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import numpy as N
-from devices import Device, Computer
-from devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
 import ioHub
+from ioHub.devices import Device, Computer
+from ioHub.devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
+
 #from ..... import Device,Computer
 #from ....eye_events import *
 
@@ -86,7 +87,8 @@ class EyeTracker(Device):
 
     _setupGraphics=None # instance of EyeTrackerSetupGraphics class, if supported
 
-    _latestSample=None
+    _latestSample=None # latest eye sample from tracker
+    _latestGazePosition=0,0 # latest gaze position from eye sample. If binocular, average valid eye positions
     
     eyeTrackerConfig=None # holds the configuration / settings dict for the device
     displaySettings=None
@@ -507,11 +509,36 @@ class EyeTracker(Device):
 
             return RTN_CODES.ET_NOT_IMPLEMENTED
 
+    def getEyesToTrack(self,*args,**kwargs):
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+
+    def setEyesToTrack(self,*args,**kwargs):
+        if len(args)==0:
+            return RTN_CODES.ET_ERROR
+        eyes=args[0]
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+
+    def getSamplingRate(self,*args,**kwargs):
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+
+    def setSamplingRate(self,*args,**kwargs):
+        if len(args)==0:
+            return RTN_CODES.ET_ERROR
+        srate=args[0]
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+
+
     def getLatestSample(self, *args, **kwargs):
         """
         Returns the latest sample retieved from the eye tracker device.
         """
         return RTN_CODES.ET_NOT_IMPLEMENTED #return self._latestSample
+
+    def getLatestGazePosition(self, *args, **kwargs):
+        """
+        Returns the latest eye Gaze Position retieved from the eye tracker device.
+        """
+        return RTN_CODES.ET_NOT_IMPLEMENTED #return self._latestGazePosition
 
     def drawToGazeOverlayScreen(self,*args,**kwargs):
         """

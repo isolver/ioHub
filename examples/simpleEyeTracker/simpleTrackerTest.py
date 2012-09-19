@@ -102,20 +102,13 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         mouse=self.hub.devices.mouse
 
         tracker.setConnectionState(True)
-
         self.msecDelay(50)
 
         tracker.setRecordingState(True)
-
         self.msecDelay(50)
 
-        lastestSample=tracker.getLatestSample()
-        print 'lastestSample:',lastestSample
-        current_gaze=0,0
-        if lastestSample['event_type'] == EventConstants.EVENT_TYPES['SAMPLE']:
-            current_gaze=lastestSample['gaze_x'],lastestSample['gaze_y']
-        else:
-            current_gaze=lastestSample['right_gaze_x'],lastestSample['right_gaze_y']
+        current_gaze=tracker.getLatestGazePosition()
+        current_gaze=int(current_gaze[0]),int(current_gaze[1])
 
         # Read the current resolution of the monitors screen in pixels.
         # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
@@ -136,6 +129,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         psychoStim=ioHub.LastUpdatedOrderedDict()
         psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
         psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['gazePosText'] =visual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
         psychoStim['gazePos'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
 
         # Clear all events from the global event buffer, and from the keyboard event buffer.
@@ -148,15 +142,12 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # for each loop, update the grating phase
             psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
 
-            # and update the mouse contingent gaussian based on the current mouse location
-            lastestSample=tracker.getLatestSample()
-            current_gaze=0,0
-            if lastestSample['event_type'] == EventConstants.EVENT_TYPES['SAMPLE']:
-                current_gaze=lastestSample['gaze_x'],lastestSample['gaze_y']
-            else:
-                current_gaze=lastestSample['right_gaze_x'],lastestSample['right_gaze_y']
+            # and update the gaze contingent gaussian based on the current gaze location
+            current_gaze=tracker.getLatestGazePosition()
+            current_gaze=int(current_gaze[0]),int(current_gaze[1])
 
             psychoStim['gazePos'].setPos(current_gaze)
+            psychoStim['gazePosText'].setText(str(current_gaze))
 
             # this is short hand for looping through the psychopy stim list and redrawing each one
             # it is also efficient, may not be as user friendly as:
@@ -176,7 +167,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
-            self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),),usec_time=flip_time)
+            self.hub.sendMessageEvent("Flip %s"%(str(current_gaze),),usec_time=flip_time)
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
         self.clearEvents()

@@ -20,10 +20,10 @@ JOYSTICK_8=7
 
 import glfw
 import numpy as N
-import time
-from devices import Device, computer, DeviceEvent, Computer
 import ioHub
-from server import currentUsec
+from ioHub.devices import Device, DeviceEvent, Computer
+
+currentUsec= Computer.currentUsec
 
 class Joystick(Device):
     newDataTypes=[]

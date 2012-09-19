@@ -314,7 +314,7 @@ class ioServer(object):
                     self.log("==============================")
                 except Exception as e:
                     ioHub.print2err("Exception creating device %s: %s. Is device connected?"%(deviceConfig['device_class'],str(e)))
-                    #ioHub.printExceptionDetailsToStdErr()
+                    ioHub.printExceptionDetailsToStdErr()
                     self.log("Exception creating device %s: %s"%(deviceConfig['device_class'],str(e)))
         deviceDict=self.deviceDict
         iohub=self

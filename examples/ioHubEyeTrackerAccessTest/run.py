@@ -10,10 +10,9 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import os
-from devices.eyeTrackerInterface import DATA_FILTER
 import ioHub
+from ioHub.devices.eyeTrackerInterface import DATA_FILTER
 from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, core, visual
-from numpy import zeros
 
 
 class ExperimentRuntime(SimpleIOHubRuntime):
@@ -31,24 +30,30 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         print '\n\n'
         print "Starting Experiment 1 Test"
 
-        print "ExperimentPCkeyboard methods:",self.hub.devices.ExperimentPCkeyboard._methods
-        print "ExperimentPCmouse methods:",self.hub.devices.ExperimentPCmouse._methods
-        
+        keyboard=self.hub.devices.kb
+
+        mouse=self.hub.devices.mouse
+        eyetracker=self.hub.devices.tracker
+        display=self.hub.devices.display
+
+        print "kb methods:",keyboard.getRemoteMethodNames()
+        print "mouse methods:",mouse.getRemoteMethodNames()
+        print "display methods:",display.getRemoteMethodNames()
+        print "tracker methods:",eyetracker.getRemoteMethodNames()
+
         #create a window
-        mywin = visual.Window([1024,768],monitor="testMonitor", units="deg",fullscr=True)
+        pix_res=display.getScreenResolution()
+        mywin = visual.Window(pix_res,monitor="testMonitor", units="pix",fullscr=True)
         
         DIVIDER="-----------------------"
-        """
-         'drawToGazeOverlayScreen', 
-         'getDataFilteringLevel', 
-        'getDigitalPortState', 'getEventHandler', 
-        'runSetupProcedure', 
-        'setDataFilteringLevel', 'setDigitalPortState', 'stopSetupProcedure'
+
+        # 'drawToGazeOverlayScreen',
+        # 'getDataFilteringLevel',
+        #'getDigitalPortState', 'getEventHandler',
+        #'runSetupProcedure',
+        #'setDataFilteringLevel', 'setDigitalPortState', 'stopSetupProcedure'
         
-        """
-        eyetracker = self.hub.devices.tracker
-        
-        self.hub.sendToHub(('RPC','clearEventBuffer'))
+        self.clearEvents()
         
         print DIVIDER
         print 'isConnected():',eyetracker.isConnected
@@ -89,9 +94,10 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         
         for b in xrange(1,TEST_BLOCK_COUNT+1):
             print DIVIDER
-            print 'blockStartDefaultLogic() %d:'%(b),eyetracker.blockStartDefaultLogic()
+            print 'blockStartDefaultLogic() %d:'%(b,),eyetracker.blockStartDefaultLogic()
             
             for t in xrange(1,TEST_TRIAL_COUNT+1):
+                self.clearEvents()
                 print DIVIDER
                 print 'trialStartDefaultLogic() %d:'%((t*b)),eyetracker.trialStartDefaultLogic()
                 
@@ -99,32 +105,49 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                 print 'isRecordingEnabled():',eyetracker.isRecordingEnabled()
 
                 print DIVIDER
-                self.clearEvents()
                 print 'setRecordingState(True):',eyetracker.setRecordingState(True)
 
-                actualdelay=self.msecDelay(5003)
+                d1=5003.0
+                actualdelay=self.msecDelay(d1)
                 print DIVIDER
-                print "Requested Delay / Actual Delay / Diff (msec):",5003.0,actualdelay,actualdelay-5003.0
+                print "Requested Delay / Actual Delay / Diff (msec):",d1,actualdelay,actualdelay-d1
                 print DIVIDER
-                
-                stime=self.currentMsec()
-                events=self.getEvents(asType='dict')
-                etime=self.currentMsec()
-                #for e in events:
-                #    print '%s %s'%(ioHub.devices.EventConstants.EVENT_TYPES[e['event_type']],str(e['hub_time']))
-                print 'Get All Events (msec):',etime-stime
-                print 'Event Count:',len(events)
+
+                print "EARs:", eyetracker.getEventArrayLengths()
+
+                print DIVIDER
+                print "getLatestGazePosition():",eyetracker.getLatestGazePosition()
+                print DIVIDER
+
+                self.clearEvents()
+                self.clearEvents(deviceLabel='mouse')
+                self.clearEvents(deviceLabel='kb')
+
+                d2=20.0
+                actualdelay=self.msecDelay(d2)
+                print DIVIDER
+                print "Requested Delay / Actual Delay / Diff (msec):",d2,actualdelay,actualdelay-d2
                 print DIVIDER
 
                 stime=self.currentMsec()
-                e=self.getEvents('ExperimentPCkeyboard')
+                events=self.getEvents()
+                etime=self.currentMsec()
+
+                print 'Get All Events (msec):',etime-stime
+                print 'events:',events
+                if events:
+                    print 'Event Count:',len(events)
+                print DIVIDER
+
+                stime=self.currentMsec()
+                e=self.getEvents('kb')
                 etime=self.currentMsec()
                 print 'Get Keyboard Events (msec):',etime-stime
  
                 print DIVIDER
                 
                 stime=self.currentMsec()
-                e=self.getEvents('ExperimentPCmouse')
+                e=self.getEvents('mouse')
                 etime=self.currentMsec()
                 print 'Get Mouse Events (msec):',etime-stime
                 
@@ -182,28 +205,26 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
 
 ###################################################################
-def start(cfile=u'experiment_config.yaml'):
-    configFile=cfile
-    try:
-        import os
-        # create a simple ExperimentRuntime class instance, passing in the experiment_config.yaml data
-        runtime=ExperimentRuntime(os.getcwd(), configFile)
-
-        # run a test on event access delay
-        runtime.run()
-
-        # _close ioHub, shut down ioHub process, clean-up.....
-        runtime._close()
-
-    except Exception:
-        ExperimentRuntime.printExceptionDetails()
-
-
-##################################################################
-if __name__ == "__main__":
+def main(configurationDirectory):
+    """
+    Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+    command line, and launches the experiment logic.
+    """
     import sys
     if len(sys.argv)>1:
         configFile=unicode(sys.argv[1])
-        start(configFile)
+        runtime=ExperimentRuntime(configurationDirectory, configFile)
     else:
-        start()
+        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+
+    runtime.start()
+
+if __name__ == "__main__":
+    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
+    #
+    # The module_directory function determines what the current directory is of the function that is passed to it. It is
+    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+    configurationDirectory=ioHub.module_directory(main)
+
+    # run the main function, which starts the experiment runtime
+    main(configurationDirectory)

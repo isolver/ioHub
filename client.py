@@ -318,7 +318,7 @@ class ioHubClient(object):
         #print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
         return results
 
-    def _createDeviceList(self,deviceList):
+    def _createDeviceList(self):
         """
         Populate the devices attribute object with the registered devices of the ioHub. Each ioHub device becomes an attribute
         of the devices instance, with the attribute name == the name give the device in the ioHub configuration file.

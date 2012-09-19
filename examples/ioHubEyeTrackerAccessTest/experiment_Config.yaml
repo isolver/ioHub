@@ -1,7 +1,7 @@
-title: ioHubAccessDelayTest
-code: pyCETItest
+title: ioHubEyeTrackerAccessTest
+code: iohub_ET
 version: '0.5'
-description: Test running within psychopy, testing the eye tracker interface for the specified eye tracker device.
+description: Test running within psychopy, running ioHub with the pyEyeTrackerInterface
 total_sessions_to_run: 50
 session_defaults:
     name: Session Name
@@ -15,11 +15,27 @@ session_defaults:
         eye_color: Unknown
 session_variable_order: [ name, code, comments, participant_age, participant_gender, glasses, contacts, eye_color ]
 authors:
-- name: Sol Simpson
+- name: ioHub Team
   email: N/A
 event_buffer_length: 2048
+# Experimental: sets the processors/cores/hyperthreads that the experiment process should run on.
+# [] = all processors
+# [0,1] = first and second processor/core/hyperthread.
+# Note that on CPUs that support hyperthreading, each core will appear as 2 ( for the 2 hyperthreads on the core )
+# I would 'suggest' that you do not bother trying to tie a process to a hyperthread, and only test at the CPU / core level.
+# So for example, on an i5 Intel CPU with hypertheading and 2 cores, the list of 'available' processors would be [0,1,2,3]
+# however in practice, you should only consider maybe putting the experiment process on core 1 = [0,1],
+# and the ioHub process on core 2, = [2,3]. Whether this will improve or decrease performance is not clear yet.
+# Support will; be available on Windows and Linux for sure. Mac TBD.
+process_affinity: []
+# Experimental: 'try' and set all other processes running on the system (other than the experiment and ioHub process) to the following
+# cpu / processor / core / hyperthreads
+# [] = all
+remaining_processes_affinity: []
 ioHub:
     enable: True                # True = enable ioHub functionality
+    # Experimental: sets the processors/cores/hyperthreads that the ioHub Server process should run on.
+    process_affinity: []
     config: ioHub_config.yaml   # specifies the config file to use for the ioHub, if enabled. File must be in experiment dir.
 #
 # Defines what Experiment Events can be sent from the experiment and stored to the ioHub file.
@@ -30,5 +46,3 @@ events:
 - event_class: MessageEvent
   prefix: 0
   msg_offset: 0
-- event_class: CommandEvent
-  priority: 0

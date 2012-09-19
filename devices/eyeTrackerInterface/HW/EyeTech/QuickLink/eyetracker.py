@@ -10,8 +10,9 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import numpy as N
-from devices import Device, Computer
-from devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
+import ioHub
+from ioHub.devices import Device, Computer
+from ioHub.devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
 import ioHub
 from ..... import Device,Computer
 from ....eye_events import *

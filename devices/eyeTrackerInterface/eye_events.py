@@ -94,6 +94,7 @@ class BinocularEyeSample(DeviceEvent):
 ################### Fixation Event Types ##########################
 # 
 class FixationStartEvent(DeviceEvent):
+    # 26 fields
     newDataTypes = [('eye', 'u1'), ('gaze_x','f4'),('gaze_y','f4'),('gaze_z','f4'),
         ('angle_x','f4'),('angle_y','f4'),('raw_x','f4'),('raw_y','f4'),
         ('pupil_measure1','f4'),('pupil_measure2','f4'),('ppd_x','f4'),('ppd_y','f4'),
@@ -118,6 +119,7 @@ class FixatonUpdateEvent(FixationStartEvent):
 '''
        
 class FixationEndEvent(DeviceEvent):
+    # 58 fields
     newDataTypes = [('eye', 'u1'), ('duration','u4'),
         ('start_gaze_x','f4'),('start_gaze_y','f4'),('start_gaze_z','f4'),
         ('start_angle_x','f4'),('start_angle_y','f4'),('start_raw_x','f4'),('start_raw_y','f4'),
