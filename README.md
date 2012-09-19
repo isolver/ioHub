@@ -20,11 +20,8 @@ The pyEyeTrackerInterface acts as the *eyetracker* device implementation in the 
 include keyboard, mouse, parallel port, and joysticks.
 
 The ioHub and pyEyeTrackerInterface are being developed for use by the [COGAIN Technical Committee on Eye Data Quality](http://www.cogain.org/info/eye-data-quality)
-and as an open resource for the eye tracking and psychology research community in general. The implementation would not be possible without
-the input of the members of the committee and subcommittee. I would like to acknowledge all the hard work that the volenteers
-of the committee membership have been contributing toward the effort overall. If you are interested in participating or
-supporting the [COGAIN Technical Committee on Eye Data Quality](http://www.cogain.org/info/eye-data-quality), please contact
-[Fiona Mulvey](fiona.mulvey@humlab.lu.se).
+and as an open resource for the eye tracking and psychology research community in general. I would like to acknowledge all the hard work that the volenteers
+of the committee membership have been contributing toward the effort overall.
 
 Thank you,
 
