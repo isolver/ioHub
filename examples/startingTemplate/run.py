@@ -1,6 +1,6 @@
 """
 ioHub
-.. file: ioHub/examples/simple/simpleTest.py
+.. file: ioHub/examples/startingTemplate/run.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -10,7 +10,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 ------------------------------------------------------------------------------------------------------------------------
 
-simpleTest
+startingTemplate
 ++++++++++
 
 Overview:
@@ -31,8 +31,9 @@ that has been added to this file. When run() completes, the ioHubServer process 
 Desciption:
 -----------
 
-The main purpose for the simpleEyeTRackerTest is to isllustrate the overall structure of the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime
-utility class and how to extend it and use it to run a psychopy program with ioHub and pyEyeTrackerInterface fucntionality.
+The main purpose for the startingTemplate is to act as a blank starting template that can be copied and then used as a
+starting point to create a new experiment by writing your psychopy / ioHub code in the run method and editing the two .yaml
+config files as needed.
 
 To Run:
 -------
@@ -40,11 +41,11 @@ To Run:
 1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub/wiki
 2. Open a command prompt to the directory containing this file.
 3. Start the test program by running:
-   python.exe simpleTrackerTest.py
+   python.exe run.py
 
 Any issues or questions, please let me know.
 """
-from __builtin__ import len, unicode
+
 import ioHub
 from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, visual
 
@@ -95,95 +96,8 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #
         # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
 
-        # Let's make some short-cuts to the devices we will be using in this 'experiment'.
-        tracker=self.hub.devices.tracker
-        display=self.hub.devices.display
-        kb=self.hub.devices.kb
-        mouse=self.hub.devices.mouse
-
-        tracker.runSetupProcedure()
-        self.clearEvents()
-        self.msecDelay(50)
-
-        tracker.setRecordingState(True)
-        self.msecDelay(50)
-        self.clearEvents()
-
-        current_gaze=tracker.getLatestGazePosition()
-        current_gaze=int(current_gaze[0]),int(current_gaze[1])
-
-        # Read the current resolution of the monitors screen in pixels.
-        # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
-        screen_resolution= display.getScreenResolution()
-
-        # Read the coordinate space the script author specified in the config file (right now only pix are supported)
-        coord_type=display.getDisplayCoordinateType()
-
-        # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
-        # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False)
-
-        # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
-        mouse.setSysCursorVisibility(False)
-
-        # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
-        # they are added, you you can use it to reference stim by a name or by 'zorder'
-        psychoStim=ioHub.LastUpdatedOrderedDict()
-        psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['gazePosText'] =visual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
-        psychoStim['gazePos'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
-
-        # Clear all events from the global event buffer, and from the keyboard event buffer.
-        self.clearEvents()
-        self.clearEvents('kb')
-
-        # Loop until we get a keyboard event
-        while len(kb.getEvents())==0:
-
-            # for each loop, update the grating phase
-            psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
-
-            # and update the gaze contingent gaussian based on the current gaze location
-            current_gaze=tracker.getLatestGazePosition()
-            current_gaze=int(current_gaze[0]),int(current_gaze[1])
-
-            psychoStim['gazePos'].setPos(current_gaze)
-            psychoStim['gazePosText'].setText(str(current_gaze))
-
-            # this is short hand for looping through the psychopy stim list and redrawing each one
-            # it is also efficient, may not be as user friendly as:
-            # for stimName, stim in psychoStim.itervalues():
-            #    stim.draw()
-            # which does the same thing if you like and is probably just as efficent.
-            [psychoStim[stimName].draw() for stimName in psychoStim]
-
-            # flip the psychopy window buffers, so the stim changes you just made get displayed.
-            psychoWindow.flip()
-            # it is on this side of the call that you know the changes have been displayed, so you can
-            # make a call to one of the built-in time methods and get the event time of the flip, as the built in
-            # time methods represent both experiment process and ioHub server process time.
-            # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
-            # as a timescale is appropriate.
-            flip_time=self.currentUsec()
-
-            # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
-            # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
-            self.hub.sendMessageEvent("Flip %s"%(str(current_gaze),),usec_time=flip_time)
-
-        # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
-        self.clearEvents()
-        tracker.setRecordingState(False)
-
-
-        # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.msecDelay(250)
-        self.clearEvents()
-        tracker.setConnectionState(False)
-
-        # _close neccessary files / objects, 'disable high priority.
-        psychoWindow._close()
-
+		print "HELLO WORLD"
+		
         ### End of experiment logic
 
 ##################################################################

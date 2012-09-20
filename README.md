@@ -2,7 +2,7 @@
 
 ## Project Status
 
-Please see the [project wiki](http://www.github.com/ioHub/wiki/) for current status details, installation instructions,
+Please see the [project wiki](https://www.github.com/isolver/ioHub/wiki/) for current status details, installation instructions,
 and current documentation etc. for the ioHub and pyEyeTrackerInterface.
 
 ## Overview

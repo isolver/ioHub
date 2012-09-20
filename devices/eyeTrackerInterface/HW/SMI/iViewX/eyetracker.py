@@ -104,12 +104,13 @@ class EyeTracker(Device):
     recording = False #recording?
     saved_data = False #has data already been stored?
     recording_file = None
-    sample_rate = None
+    sample_rate = 0
     _eyes = 'BINOCULAR'
     EVENT_HANDLER = None
     SAMPLE_HANDLER = None
     handle_event = None
     handle_sample = None
+    _eventArrayLengths = {}
      
    
     def __init__(self, *args, **kwargs):
@@ -152,6 +153,8 @@ class EyeTracker(Device):
         EyeTracker._INSTANCE = self
         
         runtimeSettings = self.eyeTrackerConfig['runtime_settings']
+        EyeTracker.sample_rate = runtimeSettings['sampling_rate']
+        
         
         EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
 
@@ -177,29 +180,33 @@ class EyeTracker(Device):
 
     def _EyeTrackerToDisplayCoords(self, *args, **kwargs):
         
-        if len(args < 2):
+        if len(args) < 2:
             return ['EYETRACKER_ERROR', '_eyeTrackerToDisplayCoords requires two args gaze_x=args[0], gaze_y=args[1]']
         gaze_x = args[0]
         gaze_y = args[1]
         
+        width, height = ioHub.devices.display.Display.getScreenResolution()
+        
         # do mapping if necessary
         # default is no mapping 
-        display_x = gaze_x
-        display_y = gaze_y
+        display_x = gaze_x - (width / 2)
+        display_y = -(gaze_y - (height / 2))
         
         return display_x, display_y
     
     def _DisplayToEyeTrackerCoords(self, *args, **kwargs):
         
-        if len(args < 2):
+        if len(args) < 2:
             return ['EYETRACKER_ERROR', '_displayToEyeTrackerCoords requires two args display_x=args[0], display_y=args[1]']
         display_x = args[0]
         display_y = args[1]
         
+        width, height = ioHub.devices.display.Display.getScreenResolution()
+        
         # do mapping if necessary
         # default is no mapping 
-        gaze_x = display_x
-        gaze_y = display_y
+        gaze_x = display_x + (width / 2)
+        gaze_y = -display_y + (height / 2)
         
         return gaze_x, gaze_y
     
@@ -313,8 +320,10 @@ class EyeTracker(Device):
             #system_data is a system info data structure defined in the iViewXAPI
             system_data = CSystem(0, 0, 0, 0, 0, 0, 0, 0)
             res = EyeTracker._iViewXAPI.iV_GetSystemInfo(byref(system_data))
-            EyeTracker.sample_rate = system_data.samplerate
-            
+            if EyeTracker.sample_rate != system_data.samplerate:
+                ioHub.print2err('Warning: Sample rate mismatch. User requested sample rate of %iHz, system now recording at %iHz.' % (EyeTracker.sample_rate, system_data.samplerate))
+                EyeTracker.sample_rate = system_data.samplerate
+                
             EyeTracker.connected = True                   
             return True 
                                   
@@ -511,7 +520,7 @@ class EyeTracker(Device):
         
         if recording is True:
             res = EyeTracker._iViewXAPI.iV_StartRecording()
-            if res not in [1, 192]:
+            if res not in [1, 192]: #192 means it is already recording...
                 return ['EYETRACKER_ERROR', 'Return Code is ' + str(res) + '. Refer to the iView X SDK Manual for its meaning.']
             EyeTracker.recording = True                   
             return True                              
@@ -686,228 +695,228 @@ class EyeTracker(Device):
             event = args[0] (when polling is used to get device events)
             device_instance_code=args[1]
         '''
-        currentTime = int(Computer.currentUsec())
-
-        if len(args) == 2:
-            logged_time, event = args[0]
-            device_instance_code = args[1]
-
-        # (1sec in usec/samplerate) / 2 -> half the sampling rate is the confidence interval
-        confidenceInterval = 2000000.0 / EyeTracker.sample_rate
-        
-        if isinstance(event, CSample):
+        try:
+            currentTime = int(Computer.currentUsec())
+    
+            if len(args) == 2:
+                logged_time, event = args[0]
+                device_instance_code = args[1]
+    
+            # (1sec in usec/samplerate) / 2 -> half the sampling rate is the confidence interval
+            confidenceInterval = (1000000.0 / EyeTracker.sample_rate) / 2.0 
             
-            
-            event_timestamp = (event.timestamp - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
-            TT = self.trackerTime()
-            event_delay = TT - event_timestamp
-            hub_timestamp = currentTime - event_delay
-
-            # for monocular samples, the non-recorded eye is a dummy data_struct filled with 0-values
-            # that is the same as a binocular sample where 1 eye went missing: TODO implement a test
-            # that can distinguish these two cases
-            
-            #case monocular sample
-            if EyeTracker._eyes != 'BINOCULAR':
+            if isinstance(event, CSample):
                 
-                event_type = ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
                 
-                if event.rightEye.gazeX == 0:
-                    myeye = EYE_CODES.LEFT
-                    eye = event.leftEye
-                else:
-                    myeye = EYE_CODES.RIGHT
-                    eye = event.rightEye
-                        
-                pupilDiameter = eye.diam
-                gazeX = eye.gazeX
-                gazeY = eye.gazeY
-                eyePosX = eye.eyePositionX
-                eyePosY = eye.eyePositionY
-                eyePosZ = eye.eyePositionZ
-                
-                #monoSample = MonocularEyeSample(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                #                    event_type=event_type, device_instance_code=device_instance_code,
-                #                    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                #                    confidence_interval=confidenceInterval, delay=event_delay,
-                #                    eye=myeye, gaze_x=gazeX, gaze_y=gazeY, gaze_z= -1.0,
-                #                    eye_cam_x=eyePosX, eye_cam_y=eyePosY, eye_cam_z=eyePosZ,
-                #                    angle_x= -1.0, angle_y= -1.0, raw_x= -1.0, raw_y= -1.0,
-                #                    pupil_measure1=pupilDiameter, pupil_measure2= -1, ppd_x= -1, ppd_y= -1,
-                #                    velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=0)
-
-                monoSample = [0, 0, Computer.getNextEventID(), event_type, device_instance_code,
-                    event_timestamp, logged_time, hub_timestamp,
-                    confidenceInterval, event_delay,
-                    myeye, gazeX, gazeY, -1.0,
-                    eyePosX, eyePosY, eyePosZ,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    pupilDiameter, -1, -1, -1,
-                    - 1.0, -1.0, -1.0, 0]
-
-                EyeTracker._latestSample = monoSample    
-
-                EyeTracker._latestGazePosition = gazeX, gazeY
-                #ioHub.print2err( monoSample
-                return monoSample
-            
-            else: #case: Binocular Eye Sample
-                
-                event_type = ioHub.devices.EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']
-                myeye = EYE_CODES.BINOCULAR
-                
-                leftEye = event.leftEye
-                leftPupilDiameter = leftEye.diam
-                leftGazeX = leftEye.gazeX
-                leftGazeY = leftEye.gazeY
-                leftEyePosX = leftEye.eyePositionX
-                leftEyePosY = leftEye.eyePositionY
-                leftEyePosZ = leftEye.eyePositionZ
-                
-                rightEye = event.rightEye
-                rightPupilDiameter = rightEye.diam
-                rightGazeX = rightEye.gazeX
-                rightGazeY = rightEye.gazeY
-                rightEyePosX = rightEye.eyePositionX
-                rightEyePosY = rightEye.eyePositionY
-                rightEyePosZ = rightEye.eyePositionZ
-
-                #binocSample = BinocularEyeSample(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                #    event_type=event_type, device_instance_code=device_instance_code,
-                #    device_time=event_timestamp, logged_time=logged_time, hub_time=hub_timestamp,
-                #    confidence_interval=confidenceInterval, delay=event_delay,
-                #    eye=myeye, left_gaze_x=leftGazeX, left_gaze_y=leftGazeY, left_gaze_z= -1.0,
-                #    left_eye_cam_x=leftEyePosX, left_eye_cam_y=leftEyePosY, left_eye_cam_z=leftEyePosZ,
-                #    left_angle_x= -1.0, left_angle_y= -1.0, left_raw_x= -1.0, left_raw_y= -1.0,
-                #    left_pupil_measure1=leftPupilDiameter, left_pupil_measure2= -1, left_ppd_x= -1, left_ppd_y= -1,
-                #    left_velocity_x= -1.0, left_velocity_y= -1.0, left_velocity_xy= -1.0,
-                #    right_gaze_x=rightGazeX, right_gaze_y=rightGazeY, right_gaze_z= -1.0,
-                #    right_eye_cam_x=rightEyePosX, right_eye_cam_y=rightEyePosY, right_eye_cam_z=rightEyePosZ,
-                #    right_angle_x= -1.0, right_angle_y= -1.0, right_raw_x= -1.0, right_raw_y= -1.0,
-                #    right_pupil_measure1=rightPupilDiameter, right_pupil_measure2= -1, right_ppd_x= -1, right_ppd_y= -1,
-                #    right_velocity_x= -1.0, right_velocity_y= -1.0, right_velocity_xy= -1.0, status=0)
-
-                binocSample = [0, 0, Computer.getNextEventID(),
-                    event_type, device_instance_code,
-                    event_timestamp, logged_time, hub_timestamp,
-                    confidenceInterval, event_delay,
-                    myeye, leftGazeX, leftGazeY, -1.0,
-                    leftEyePosX, leftEyePosY, leftEyePosZ,
-                     - 1.0, -1.0, -1.0, -1.0,
-                     leftPupilDiameter, -1, -1, -1,
-                      - 1.0, -1.0, -1.0,
-                     rightGazeX, rightGazeY, -1.0,
-                     rightEyePosX, rightEyePosY, rightEyePosZ,
-                      - 1.0, -1.0, -1.0, -1.0,
-                     rightPupilDiameter, -1, -1, -1,
-                      - 1.0, -1.0, -1.0, 0]
-
-                EyeTracker._latestSample = binocSample
-                EyeTracker._latestGazePosition = (leftGazeX + rightGazeX) / 2.0, (leftGazeY + rightGazeY) / 2.0                
-                return binocSample    
-            
-            
-        elif isinstance(event, CEvent):
-            #fixations are the only event supported by iViewX
-            #generates a start and end event from the single SMI native event
-
-            event_status = 0
-            
-            which_eye = event.eye
-            if which_eye == 'r':
-                which_eye = EYE_CODES.RIGHT
-            else:
-                which_eye = EYE_CODES.LEFT
-            
-            
-            start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
-            end_event_time = (event.endTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
-            event_duration = event.duration
-            
-            a_gazeX = event.positionX
-            a_gazeY = event.positionY
-            
-            if event.endTime == 0: #start event
-                
-                event_timestamp = start_event_time
-                event_delay = self.trackerTime() - event_timestamp
+                event_timestamp = (event.timestamp - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+                TT = self.trackerTime()
+                event_delay = TT - event_timestamp
                 hub_timestamp = currentTime - event_delay
-            
-                event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
-
-                #fse = FixationStartEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                #    event_type=event_type, device_instance_code=device_instance_code,
-                #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                #    gaze_x=a_gazeX, gaze_y=a_gazeY, gaze_z= -1,
-                #    angle_x= -1.0, angle_y= -1.0, raw_x= -1.0, raw_y= -1.0,
-                #    pupil_measure1= -1.0, pupil_measure2= -1.0,
-                #    ppd_x= -1.0, ppd_y= -1.0, velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=event_status)
-
-                fse = [0, 0, Computer.getNextEventID(),
-                    event_type, device_instance_code, event_timestamp, currentTime, hub_timestamp,
-                    confidenceInterval, event_delay, which_eye,
-                    a_gazeX, a_gazeY, -1,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0, -1.0, event_status]
-
-
-                return fse
-            
-            elif end_event_time > 0: #fixation end
+    
+                # for monocular samples, the non-recorded eye is a dummy data_struct filled with 0-values
+                # that is the same as a binocular sample where 1 eye went missing: TODO implement a test
+                # that can distinguish these two cases
                 
-                event_timestamp = end_event_time
-                event_delay = self.trackerTime() - event_timestamp
-                hub_timestamp = currentTime - event_delay
+                #case monocular sample
+                if EyeTracker._eyes != 'BINOCULAR':
                     
-                event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
-
-                #fee = FixationEndEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                #    event_type=event_type, device_instance_code=device_instance_code,
-                #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                #    duration=event_duration, start_gaze_x= -1.0, start_gaze_y= -1.0, start_gaze_z= -1.0,
-                #    start_angle_x= -1.0, start_angle_y= -1.0, start_raw_x= -1.0, start_raw_y= -1.0,
-                #    start_pupil_measure1= -1.0, start_pupil_measure2= -1.0, start_ppd_x= -1.0, start_ppd_y= -1.0,
-                #    start_velocity_x= -1.0, start_velocity_y= -1.0, start_velocity_xy= -1.0,
-                #    end_gaze_x=a_gazeX, end_gaze_y=a_gazeY, end_gaze_z= -1.0,
-                #    end_angle_x= -1.0, end_angle_y= -1.0, end_raw_x= -1.0, end_raw_y= -1.0,
-                #    end_pupil_measure1= -1.0, end_pupil_measure2= -1.0, end_ppd_x= -1.0, end_ppd_y= -1.0,
-                #    end_velocity_x= -1.0, end_velocity_y= -1.0, end_velocity_xy= -1.0,
-                #    average_gaze_x= -1.0, average_gaze_y= -1.0, average_gaze_z= -1.0,
-                #    average_angle_x= -1.0, average_angle_y= -1.0, average_raw_x= -1.0, average_raw_y= -1.0,
-                #    average_pupil_measure1= -1.0, average_pupil_measure2= -1.0, average_ppd_x= -1.0, average_ppd_y= -1.0,
-                #    average_velocity_x= -1.0, average_velocity_y= -1.0, average_velocity_xy= -1.0,
-                #    peak_velocity_x= -1.0, peak_velocity_y= -1.0, peak_velocity_xy= -1.0, status=event_status)
-
-                fee = [0, 0, Computer.getNextEventID(),
-                    event_type, device_instance_code,
-                    event_timestamp, currentTime, hub_timestamp,
-                    confidenceInterval, event_delay, which_eye,
-                    event_duration, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0,
-                    a_gazeX, a_gazeY, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0,
-                    - 1.0, -1.0, -1.0, event_status]
-
-                return fee
+                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
+                    
+                    if event.rightEye.gazeX == 0:
+                        myeye = EYE_CODES.LEFT
+                        eye = event.leftEye
+                    else:
+                        myeye = EYE_CODES.RIGHT
+                        eye = event.rightEye
+                            
+                    pupilDiameter = eye.diam
+                    gazeX, gazeY = self._EyeTrackerToDisplayCoords(eye.gazeX, eye.gazeY)
+                    eyePosX = eye.eyePositionX
+                    eyePosY = eye.eyePositionY
+                    eyePosZ = eye.eyePositionZ
+                    
+                    #monoSample = MonocularEyeSample(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
+                    #                    event_type=event_type, device_instance_code=device_instance_code,
+                    #                    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                    #                    confidence_interval=confidenceInterval, delay=event_delay,
+                    #                    eye=myeye, gaze_x=gazeX, gaze_y=gazeY, gaze_z= -1.0,
+                    #                    eye_cam_x=eyePosX, eye_cam_y=eyePosY, eye_cam_z=eyePosZ,
+                    #                    angle_x= -1.0, angle_y= -1.0, raw_x= -1.0, raw_y= -1.0,
+                    #                    pupil_measure1=pupilDiameter, pupil_measure2= -1, ppd_x= -1, ppd_y= -1,
+                    #                    velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=0)
+    
+                    monoSample = [0, 0, Computer.getNextEventID(), event_type, device_instance_code,
+                        event_timestamp, logged_time, hub_timestamp,
+                        confidenceInterval, event_delay,
+                        myeye, gazeX, gazeY, -1.0,
+                        eyePosX, eyePosY, eyePosZ,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        pupilDiameter, -1, -1, -1,
+                        - 1.0, -1.0, -1.0, 0]
+                    
+                    EyeTracker._latestSample = monoSample    
+    
+                    EyeTracker._latestGazePosition = gazeX, gazeY
+                    #ioHub.print2err( monoSample
+                    EyeTracker._eventArrayLengths['EYE_SAMPLE'] = len(monoSample)
+                    return monoSample
+                
+                else: #case: Binocular Eye Sample
+                    
+                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']
+                    
+                    leftEye = event.leftEye
+                    leftPupilDiameter = leftEye.diam
+                    leftGazeX, leftGazeY = self._EyeTrackerToDisplayCoords(leftEye.gazeX, leftEye.gazeY)
+                    leftEyePosX = leftEye.eyePositionX
+                    leftEyePosY = leftEye.eyePositionY
+                    leftEyePosZ = leftEye.eyePositionZ
+                    
+                    rightEye = event.rightEye
+                    rightPupilDiameter = rightEye.diam
+                    rightGazeX, rightGazeY = self._EyeTrackerToDisplayCoords(rightEye.gazeX, rightEye.gazeY)
+                    rightEyePosX = rightEye.eyePositionX
+                    rightEyePosY = rightEye.eyePositionY
+                    rightEyePosZ = rightEye.eyePositionZ
+    
+                    #binocSample = BinocularEyeSample(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
+                    #    event_type=event_type, device_instance_code=device_instance_code,
+                    #    device_time=event_timestamp, logged_time=logged_time, hub_time=hub_timestamp,
+                    #    confidence_interval=confidenceInterval, delay=event_delay,
+                    #    eye=myeye, left_gaze_x=leftGazeX, left_gaze_y=leftGazeY, left_gaze_z= -1.0,
+                    #    left_eye_cam_x=leftEyePosX, left_eye_cam_y=leftEyePosY, left_eye_cam_z=leftEyePosZ,
+                    #    left_angle_x= -1.0, left_angle_y= -1.0, left_raw_x= -1.0, left_raw_y= -1.0,
+                    #    left_pupil_measure1=leftPupilDiameter, left_pupil_measure2= -1, left_ppd_x= -1, left_ppd_y= -1,
+                    #    left_velocity_x= -1.0, left_velocity_y= -1.0, left_velocity_xy= -1.0,
+                    #    right_gaze_x=rightGazeX, right_gaze_y=rightGazeY, right_gaze_z= -1.0,
+                    #    right_eye_cam_x=rightEyePosX, right_eye_cam_y=rightEyePosY, right_eye_cam_z=rightEyePosZ,
+                    #    right_angle_x= -1.0, right_angle_y= -1.0, right_raw_x= -1.0, right_raw_y= -1.0,
+                    #    right_pupil_measure1=rightPupilDiameter, right_pupil_measure2= -1, right_ppd_x= -1, right_ppd_y= -1,
+                    #    right_velocity_x= -1.0, right_velocity_y= -1.0, right_velocity_xy= -1.0, status=0)
+    
+                    binocSample = [0, 0, Computer.getNextEventID(),
+                        event_type, device_instance_code,
+                        event_timestamp, logged_time, hub_timestamp,
+                        confidenceInterval, event_delay,
+                        leftGazeX, leftGazeY, -1.0,
+                        leftEyePosX, leftEyePosY, leftEyePosZ,
+                         - 1.0, -1.0, -1.0, -1.0,
+                         leftPupilDiameter, -1, -1, -1,
+                          - 1.0, -1.0, -1.0,
+                         rightGazeX, rightGazeY, -1.0,
+                         rightEyePosX, rightEyePosY, rightEyePosZ,
+                          - 1.0, -1.0, -1.0, -1.0,
+                         rightPupilDiameter, -1, -1, -1,
+                          - 1.0, -1.0, -1.0, 0]
+    
+                    EyeTracker._latestSample = binocSample
+                    EyeTracker._latestGazePosition = (leftGazeX + rightGazeX) / 2.0, (leftGazeY + rightGazeY) / 2.0                
+                    EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE'] = len(binocSample)
+                    return binocSample    
+                
+                
+            elif isinstance(event, CEvent):
+                #fixations are the only event supported by iViewX
+                #generates a start and end event from the single SMI native event
+    
+                event_status = 0
+                
+                which_eye = event.eye
+                if which_eye == 'r':
+                    which_eye = EYE_CODES.RIGHT
+                else:
+                    which_eye = EYE_CODES.LEFT
+                
+                
+                start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+                end_event_time = (event.endTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+                event_duration = event.duration
+                
+                a_gazeX, a_gazeY = self._EyeTrackerToDisplayCoords(event.positionX, event.positionY)
+                
+                if event.endTime == 0: #start event
+                    
+                    event_timestamp = start_event_time
+                    event_delay = self.trackerTime() - event_timestamp
+                    hub_timestamp = currentTime - event_delay
+                
+                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
+    
+                    #fse = FixationStartEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
+                    #    event_type=event_type, device_instance_code=device_instance_code,
+                    #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                    #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                    #    gaze_x=a_gazeX, gaze_y=a_gazeY, gaze_z= -1,
+                    #    angle_x= -1.0, angle_y= -1.0, raw_x= -1.0, raw_y= -1.0,
+                    #    pupil_measure1= -1.0, pupil_measure2= -1.0,
+                    #    ppd_x= -1.0, ppd_y= -1.0, velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=event_status)
+    
+                    fse = [0, 0, Computer.getNextEventID(),
+                        event_type, device_instance_code, event_timestamp, currentTime, hub_timestamp,
+                        confidenceInterval, event_delay, which_eye,
+                        a_gazeX, a_gazeY, -1,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0, -1.0, event_status]
+                    
+                    EyeTracker._eventArrayLengths['FIXATION_START'] = len(fse)
+                    return fse
+                
+                elif end_event_time > 0: #fixation end
+                    
+                    event_timestamp = end_event_time
+                    event_delay = self.trackerTime() - event_timestamp
+                    hub_timestamp = currentTime - event_delay
+                        
+                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
+    
+                    #fee = FixationEndEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
+                    #    event_type=event_type, device_instance_code=device_instance_code,
+                    #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
+                    #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
+                    #    duration=event_duration, start_gaze_x= -1.0, start_gaze_y= -1.0, start_gaze_z= -1.0,
+                    #    start_angle_x= -1.0, start_angle_y= -1.0, start_raw_x= -1.0, start_raw_y= -1.0,
+                    #    start_pupil_measure1= -1.0, start_pupil_measure2= -1.0, start_ppd_x= -1.0, start_ppd_y= -1.0,
+                    #    start_velocity_x= -1.0, start_velocity_y= -1.0, start_velocity_xy= -1.0,
+                    #    end_gaze_x=a_gazeX, end_gaze_y=a_gazeY, end_gaze_z= -1.0,
+                    #    end_angle_x= -1.0, end_angle_y= -1.0, end_raw_x= -1.0, end_raw_y= -1.0,
+                    #    end_pupil_measure1= -1.0, end_pupil_measure2= -1.0, end_ppd_x= -1.0, end_ppd_y= -1.0,
+                    #    end_velocity_x= -1.0, end_velocity_y= -1.0, end_velocity_xy= -1.0,
+                    #    average_gaze_x= -1.0, average_gaze_y= -1.0, average_gaze_z= -1.0,
+                    #    average_angle_x= -1.0, average_angle_y= -1.0, average_raw_x= -1.0, average_raw_y= -1.0,
+                    #    average_pupil_measure1= -1.0, average_pupil_measure2= -1.0, average_ppd_x= -1.0, average_ppd_y= -1.0,
+                    #    average_velocity_x= -1.0, average_velocity_y= -1.0, average_velocity_xy= -1.0,
+                    #    peak_velocity_x= -1.0, peak_velocity_y= -1.0, peak_velocity_xy= -1.0, status=event_status)
+    
+                    fee = [0, 0, Computer.getNextEventID(),
+                        event_type, device_instance_code,
+                        event_timestamp, currentTime, hub_timestamp,
+                        confidenceInterval, event_delay, which_eye,
+                        event_duration, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0,
+                        a_gazeX, a_gazeY, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0,
+                        - 1.0, -1.0, -1.0, event_status]
+                    
+                    EyeTracker._eventArrayLengths['FIXATION_END'] = len(fee)
+                    return fee
+                else:
+                    ioHub.print2err('Error: Something went wrong with the timestamping. Got negative timestamp.')
+                    ioHub.print2err(event.endTime)
+    
+                    return RTN_CODES.ET_ERROR
             else:
-                ioHub.print2err('Error: Something went wrong with the timestamping. Got negative timestamp.')
-                ioHub.print2err(event.endTime)
-
+                ioHub.print2err("EyeTracker._getIOHubEventObject: Unknown input format.")
                 return RTN_CODES.ET_ERROR
-        else:
-            ioHub.print2err("EyeTracker._getIOHubEventObject: Unknown input format.")
-            return RTN_CODES.ET_ERROR
-   
+        except Exception, e:
+            ioHub.printExceptionDetailsToStdErr()
    
     def getLatestSample(self, *args, **kwargs):
         """
@@ -922,27 +931,60 @@ class EyeTracker(Device):
         return self._latestGazePosition 
     
     def getEyesToTrack(self, *args, **kwargs):
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        '''
+        Returns the eyes being tracked
+        '''
+        return self._eyes
     
     
     def setEyesToTrack(self, *args, **kwargs):
+        '''
+        Set the eyes to be tracked: LEFT, RIGHT, BINOCULAR
+        
+        SMI: Setting the eyes to track is not currently supported, but planned
+        in the very near future. Currently the recording will always be 
+        binocular.
+        '''
         if len(args) == 0:
             return RTN_CODES.ET_ERROR
-        EyeTracker._eyes = args[0]
+        #EyeTracker._eyes = args[0]
+#        if EyeTracker._eyes == 'BINOCULAR':
+#            EyeTracker._iViewXAPI.iV_SetTrackingParameter(c_char_p(''), c_char_p('BOTH'), c_int(0))
+#            return RTN_CODES.OK
+#        elif EyeTracker._eyes == 'LEFT':
+#            EyeTracker._iViewXAPI.iV_SetTrackingParameter(c_char_p(''), c_char_p('LEFT'), c_int(0))
+#            return RTN_CODES.OK
+#        elif EyeTracker._eyes == 'RIGHT':
+#            EyeTracker._iViewXAPI.iV_SetTrackingParameter(c_char_p(''), c_char_p('RIGHT'), c_int(0))
+#            return RTN_CODES.OK
+#        else:
+#            return RTN_CODES.ET_NOT_IMPLEMENTED    
         return RTN_CODES.ET_NOT_IMPLEMENTED
 
 
     def getSamplingRate(self, *args, **kwargs):
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        '''
+        Returns the sample rate that was last recorded with or that the user set
+        in the config file if no recording has taken place yet.
+        '''
+        return Eye_Tracker.sample_rate
     
     
     def setSamplingRate(self, *args, **kwargs):
+        '''
+        SMI: Setting the sample rate is currently not supported. The system will 
+        automatically return a warning upon connecting to the tracker, if the 
+        requested sample rate is not supported by the tracker. The sampling rate 
+        will then be set by the tracker.
+        '''
         if len(args) == 0:
             return RTN_CODES.ET_ERROR
         EyeTracker.sample_rate = args[0]
         return RTN_CODES.ET_NOT_IMPLEMENTED    
             
-        
+    def getEventArrayLengths(self, *args, **kwargs):
+        return (EyeTracker._eventArrayLengths,)
+     
     def __del__(self):
         """
         Do any final cleanup of the eye tracker before the object is destroyed. Users should not call or change this method. It is for implemetaion by interface creators and is autoatically called when an object is destroyed by the interpreter.

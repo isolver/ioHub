@@ -159,13 +159,13 @@ monitor_devices:
         #   i.e. True == head is fixed, False == head is free to move
         head_stationary: True          
     - device:
-        device_class: eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker
+        device_class: eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
         name: tracker
         instance_code: et_serial_number
         saveEvents: True
         streamEvents: True
-        device_timer:
-            interval: 0.001
+#        device_timer:
+#            interval: 0.001
         event_buffer_length: 2048
         #
         # display_settings: provides a copy of all the Display Device settings
@@ -182,7 +182,7 @@ monitor_devices:
             #
             # Save native eye tracker data file to this local directory
             #
-            save_native_data_file_to: C:\Users\isolver\Desktop\Dropbox\EMDQ and EMRA\EMRA\EMRT\DEV\EMRT DISTRO\emrt_lib\emrt\examples\experiment\
+            save_native_data_file_to: .
             #
             # Default native data file name (NOT including appropriate file name extenstion / postfix)            
             #
