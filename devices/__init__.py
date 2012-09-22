@@ -275,22 +275,131 @@ class DeviceEvent(ioObject):
         return cls(**kwargs)
 
 class _EventConstantsBase(object):
-    EVENT_TYPES = dict(UNDEFINED_EVENT=0, EXPERIMENT_EVENT=1, MESSAGE=2, COMMAND=3, KEYBOARD_EVENT=50, KEYBOARD_PRESS=51,
-        KEYBOARD_RELEASE=52, BUTTON_BOX_PRESS=60, BUTTON_BOX_RELEASE=61, JOYSTICK_BUTTON_PRESS=63,
-        JOYSTICK_BUTTON_RELEASE=64, JOYSTICK_POSITION=65, MOUSE_EVENT=54, MOUSE_PRESS=55, MOUSE_RELEASE=56, MOUSE_WHEEL=57,
-        MOUSE_MOVE=58, MOUSE_DOUBLE_CLICK=59, PARALLEL_PORT_INPUT=73, TTL_INPUT=70, EYE_SAMPLE=100, BINOC_EYE_SAMPLE=101,
-        FIXATION_START=106, FIXATION_UPDATE=107, FIXATION_END=108, SACCADE_START=111, SACCADE_END=112, BLINK_START=116,
-        BLINK_END=117, SMOOTH_PURSUIT_START=119, SMOOTH_PURSUIT_END=120)
+    UNDEFINED_EVENT=0
+    MESSAGE_EVENT=1
+    KEYBOARD_PRESS_EVENT=21
+    KEYBOARD_RELEASE_EVENT=22
+    MOUSE_PRESS_EVENT=31
+    MOUSE_RELEASE_EVENT=32
+    MOUSE_WHEEL_UP_EVENT=33
+    MOUSE_WHEEL_DOWN_EVENT=34
+    MOUSE_MOVE_EVENT=35
+    MOUSE_DOUBLE_CLICK_EVENT=39
+    JOYSTICK_BUTTON_PRESS_EVENT=51
+    JOYSTICK_BUTTON_RELEASE_EVENT=52
+    JOYSTICK_POSITION_X_EVENT=53
+    JOYSTICK_POSITION_Y_EVENT=54
+    BUTTON_BOX_PRESS_EVENT=61
+    BUTTON_BOX_RELEASE_EVENT=62
+    TTL_INPUT_EVENT=71
+    EYE_SAMPLE_EVENT=101
+    BINOC_EYE_SAMPLE_EVENT=102
+    FIXATION_START_EVENT=106
+    FIXATION_END_EVENT=108
+    SACCADE_START_EVENT=111
+    SACCADE_END_EVENT=112
+    BLINK_START_EVENT=116
+    BLINK_END_EVENT=117
 
-    DEVICE_TYPES = {1: 'KEYBOARD_DEVICE',
-                    2: 'MOUSE_DEVICE',
-                    3: 'DISPLAY_DEVICE',
-                    4: 'PARALLEL_PORT_DEVICE',
-                    5: 'EXPERIMENT_DEVICE',
-                    9: 'JOYSTICK_DEVICE',
-                    13:'EYE_TRACKER_DEVICE'
-                    #6:'ANALOG_INPUT_DEVICE',         #        7:'ANALOG_OUTPUT_DEVICE',         8:'BUTTON_BOX_DEVICE',         9:'JOYSTICK_DEVICE',         #        10:'SPEAKER_DEVICE',         #        11:'AMPLIFIER_DEVICE',         #        12:'MICROPHONE_DEVICE',         13:'EYE_TRACKER_DEVICE',         #        14:'EEG_DEVICE',         #        15:'MRI_DEVICE',         #        16:'MEG_DEVICE',         17:'OTHER_DEVICE'
-    }
+    UNKNOWN_DEVICE  = 0
+    KEYBOARD_DEVICE  = 1
+    MOUSE_DEVICE  = 2
+    KB_MOUSE_COMBO_DEVICE  = 3
+    TOUCH_PAD_DEVICE  = 5
+    TOUCH_SCREEN_DEVICE  = 6
+    DISPLAY_DEVICE  = 7
+    EYE_TRACKER_DEVICE  = 8
+    EXPERIMENT_DEVICE  = 9
+    BUTTON_BOX_DEVICE  = 10
+    JOYSTICK_DEVICE  = 11
+    AUDIO_CAPTURE_DEVICE  = 12
+    AUDIO_RECORING_DEVICE = 13
+    VIDEO_CAPTURE_DEVICE  = 14
+    VIDEO_RECORDING_DEVICE = 15
+    HAPTIC_FEEDBACK_DEVICE  = 16
+    COMPUTER_DEVICE  = 17
+    PARALLEL_PORT_DEVICE  = 18
+    TTL_INPUT_DEVICE  = 19
+    TTL_OUTPUT_DEVICE  = 20
+    TTL_IO_DEVICE  = 21
+    A2D_INPUT_DEVICE  = 22
+    D2A_OUTPUT_DEVICE  = 23
+    ANALOG_IO_DEVICE  = 24
+    GPIO_DEVICE  = 25
+    PHOTOSENSOR_DEVICE = 26
+    IR_MEASUREMENT_DEVICE = 27
+    ARTIFICIAL_EYE_DEVICE = 28
+    SPEAKER_DEVICE  = 29
+    AMPLIFIER_DEVICE  = 30
+    EEG_DEVICE  = 31
+    MRI_DEVICE  = 32
+    MEG_DEVICE  = 33
+    SERIAL_DEVICE = 34
+    NETWORK_DEVICE = 35
+    OTHER_DEVICE  = 2048
+
+    EVENT_TYPES = dict(UNDEFINED=0,
+                        MESSAGE =1,
+                        KEYBOARD_PRESS =21,
+                        KEYBOARD_RELEASE =22,
+                        MOUSE_PRESS =31,
+                        MOUSE_RELEASE =32,
+                        MOUSE_WHEEL_UP =33,
+                        MOUSE_WHEEL_DOWN =34,
+                        MOUSE_MOVE =35,
+                        MOUSE_DOUBLE_CLICK =39,
+                        JOYSTICK_BUTTON_PRESS =51,
+                        JOYSTICK_BUTTON_RELEASE =52,
+                        JOYSTICK_POSITION_X =53,
+                        JOYSTICK_POSITION_Y =54,
+                        BUTTON_BOX_PRESS =61,
+                        BUTTON_BOX_RELEASE =62,
+                        TTL_INPUT =71,
+                        EYE_SAMPLE =101,
+                        BINOC_EYE_SAMPLE =102,
+                        FIXATION_START =106,
+                        FIXATION_END =108,
+                        SACCADE_START =111,
+                        SACCADE_END =112,
+                        BLINK_START =116,
+                        BLINK_END =117)
+
+    DEVICE_TYPES = dict( UNKNOWN_DEVICE  = 0,
+                     KEYBOARD_DEVICE  =1,
+                     MOUSE_DEVICE  =2,
+                     KB_MOUSE_COMBO_DEVICE  =3,
+                     TOUCH_PAD_DEVICE  = 5,
+                     TOUCH_SCREEN_DEVICE  = 6,
+                     DISPLAY_DEVICE  = 7,
+                     EYE_TRACKER_DEVICE  = 8,
+                     EXPERIMENT_DEVICE  = 9,
+                     BUTTON_BOX_DEVICE  = 10,
+                     JOYSTICK_DEVICE  = 11,
+                     AUDIO_CAPTURE_DEVICE  = 12,
+                     AUDIO_RECORING_DEVICE = 13,
+                     VIDEO_CAPTURE_DEVICE  = 14,
+                     VIDEO_RECORDING_DEVICE = 15,
+                     HAPTIC_FEEDBACK_DEVICE  = 16,
+                     COMPUTER_DEVICE  = 17,
+                     PARALLEL_PORT_DEVICE  = 18,
+                     TTL_INPUT_DEVICE  = 19,
+                     TTL_OUTPUT_DEVICE  = 20,
+                     TTL_IO_DEVICE  = 21,
+                     A2D_INPUT_DEVICE  = 22,
+                     D2A_OUTPUT_DEVICE  = 23,
+                     ANALOG_IO_DEVICE  = 24,
+                     GPIO_DEVICE  = 25,
+                     PHOTOSENSOR_DEVICE = 26,
+                     IR_MEASUREMENT_DEVICE = 27,
+                     ARTIFICIAL_EYE_DEVICE = 28,
+                     SPEAKER_DEVICE  = 29,
+                     AMPLIFIER_DEVICE  = 30,
+                     EEG_DEVICE  = 31,
+                     MRI_DEVICE  = 32,
+                     MEG_DEVICE  = 33,
+                     SERIAL_DEVICE = 34,
+                     NETWORK_DEVICE = 35,
+                     OTHER_DEVICE  = 2048)
 
     EVENT_CLASSES=dict()
 

@@ -27,6 +27,12 @@ import numpy as N
 
 class ParallelPortWin32(object):
     def __init__(self,*args,**kwargs):
+        """
+        
+        :rtype : object
+        :param args: 
+        :param kwargs: 
+        """
         self.base_address=kwargs['base_address']
         self.address_offset=kwargs['address_offset']
 
@@ -34,12 +40,26 @@ class ParallelPortWin32(object):
         self.lastReadValue=None
 
     def read(self):
-        return PortIn(self.base_address)
+        """
         
+        :rtype : object
+        :return:
+        """
+        return PortIn(self.base_address)
+
     def write(self, word):
-        PortOut(self.base_address,word)
+        """
+        
+        :type word: object
+        :param word: 
+        """
+        PortOut(self.base_address, word)
         
     def _poll(self):
+        """
+        
+        :rtype : object
+        """
         currentTime=int(currentUsec())
         currentValue=self.read()
         

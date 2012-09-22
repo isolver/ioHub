@@ -31,6 +31,12 @@ if computer.system == 'Windows':
         categoryTypeString='DIGITAL_IO'
         deviceTypeString='PARALLEL_PORT_DEVICE'
         def __init__(self,*args,**kwargs):
+            """
+            
+            :rtype : ParallelPort
+            :param args: 
+            :param kwargs: 
+            """
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
                 'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[ParallelPort.categoryTypeString],
@@ -44,9 +50,15 @@ if computer.system == 'Windows':
                 }          
             Device.__init__(self,**deviceSettings)
             ParallelPortWin32.__init__(self,**deviceSettings)
-   
-        def byte2hex(self,v):
-            return "0x%s"%(binascii.b2a_hex(v).upper())
+
+        def byte2hex(self, v):
+            """
+            
+            :rtype : object
+            :param v: 
+            :return:
+            """
+            return "0x%s" % (binascii.b2a_hex(v).upper())
 
 else:
     print "Parallel Port is not implemented for your OS yet"
@@ -63,9 +75,16 @@ class ParallelPortEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]  
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
+    __slots__=[e[0] for e in newDataTypes]
+
+    def __init__(self, *args, **kwargs):
+        """
+        
+        :rtype : object
+        :param args: 
+        :param kwargs: 
+        """
+        DeviceEvent.__init__(self, *args, **kwargs)
 
  
 		

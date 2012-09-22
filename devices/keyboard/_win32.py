@@ -22,8 +22,15 @@ class KeyboardWindows32(object):
     WIN32_KEYBOARD_SYSKEY_PRESS=EventConstants.WM_SYSKEYDOWN    
     WIN32_KEYBOARD_RELEASE=EventConstants.WM_KEYUP
     WIN32_KEYBOARD_PRESS_EVENT_TYPES=(WIN32_KEYBOARD_PRESS,WIN32_KEYBOARD_SYSKEY_PRESS)
-    def __init__(self,*args,**kwargs):      
-        self.I_modifierValue=0;
+
+    def __init__(self, *args, **kwargs):
+        """
+        
+        :rtype : KeyboardWindows32
+        :param args: 
+        :param kwargs: 
+        """
+        self.I_modifierValue = 0;
         
     def _nativeEventCallback(self,event):
         notifiedTime=int(currentUsec())

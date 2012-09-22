@@ -36,9 +36,16 @@ class MonocularEyeSample(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]    
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
+    __slots__=[e[0] for e in newDataTypes]
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MonocularEyeSample
+        :param args:
+        :param kwargs:
+        """
+        DeviceEvent.__init__(self, *args, **kwargs)
         
 class BinocularEyeSample(DeviceEvent):
     newDataTypes = [('left_gaze_x','f4'),('left_gaze_y','f4'),('left_gaze_z','f4'), 
@@ -58,38 +65,14 @@ class BinocularEyeSample(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]     
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : BinocularEyeSample
+        :param args:
+        :param kwargs:
+        """
         DeviceEvent.__init__(self,*args,**kwargs)
-        
-######## Eye Tracker basedTTL Input Event Type ############
-# 
-#class EyeTTLInput(DeviceEvent):
-#    dataType = DeviceEvent.dataType+[('port', 'u8'),('value', 'u2')]
-#    attributeNames=[e[0] for e in dataType]
-#    ndType=N.dtype(dataType)
-#    fieldCount=ndType.__len__()
-#    __slots__=attributeNames    
-#    def __init__(self,*args,**kwargs):
-#        DeviceEvent.__init__(self,*args,**kwargs)
-         
-######## Eye Tracker based Button Box / Response Pad Event Type ############
-# 
-#class EyeButtonPress(DeviceEvent):
-#    dataType = DeviceEvent.dataType+[('button', 'u1')] 
-#    ndType=N.dtype(dataType)
-#    fieldCount=ndType.__len__()
-#    __slots__=[e[0] for e in dataType]    
-#    
-#    def __init__(self,*args,**kwargs):
-#        DeviceEvent.__init__(self,*args,**kwargs)
-#
-#class EyeButtonRelease(DeviceEvent):
-#    dataType = DeviceEvent.dataType+[('button', 'u1')] 
-#    ndType=N.dtype(dataType)
-#    fieldCount=ndType.__len__()
-#    __slots__=[e[0] for e in dataType]  
-#    
-#    def __init__(self,*args,**kwargs):
-#        DeviceEvent.__init__(self,*args,**kwargs)
+
 #
 ################### Fixation Event Types ##########################
 # 
@@ -104,9 +87,16 @@ class FixationStartEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]      
-    def __init__(self,*args,**kwargs):
-        DeviceEvent.__init__(self,*args,**kwargs)
+    __slots__=[e[0] for e in newDataTypes]
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : FixationStartEvent
+        :param args:
+        :param kwargs:
+        """
+        DeviceEvent.__init__(self, *args, **kwargs)
 '''
 class FixatonUpdateEvent(FixationStartEvent):
     dataType = FixationStartEvent.dataType+[('peak_velocity_x','f4'),('peak_velocity_y','f4'),('peak_velocity_xy','f4')]
@@ -142,6 +132,12 @@ class FixationEndEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]      
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : FixationEndEvent
+        :param args:
+        :param kwargs:
+        """
         DeviceEvent.__init__(self,*args,**kwargs)
  
 
@@ -155,6 +151,12 @@ class SaccadeStartEvent(FixationStartEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()  
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : FixationStartEvent
+        :param args:
+        :param kwargs:
+        """
         FixationStartEvent.__init__(self,*args,**kwargs)
 
 class SaccadeEndEvent(DeviceEvent):
@@ -177,9 +179,15 @@ class SaccadeEndEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]    
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : SaccadeEndEvent
+        :param args:
+        :param kwargs:
+        """
         DeviceEvent.__init__(self,*args,**kwargs)
-    
-        
+
+
 ################### Blink Event Types ##########################
 # 
 class BlinkStartEvent(DeviceEvent):
@@ -191,6 +199,12 @@ class BlinkStartEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]  
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : BlinkStartEvent
+        :param args:
+        :param kwargs:
+        """
         DeviceEvent.__init__(self,*args,**kwargs)
 
 class BlinkEndEvent(DeviceEvent):
@@ -202,26 +216,10 @@ class BlinkEndEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]   
     def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : BlinkEndEvent
+        :param args:
+        :param kwargs:
+        """
         DeviceEvent.__init__(self,*args,**kwargs)
-
-################### Smooth Pursuit Event Types ##########################
-#
-# More like place holders at this point. ;)
-# 
-#class PursuitStartEvent(DeviceEvent):
-#    dataType = DeviceEvent.dataType+[('eye', 'u1')]
-#    ndType=N.dtype(dataType)
-#    fieldCount=ndType.__len__()
-#    __slots__=[e[0] for e in dataType]    
-#    
-#    def __init__(self,*args,**kwargs):
-#        DeviceEvent.__init__(self,*args,**kwargs)
-
-#class PursuitEndEvent(PursuitStartEvent):
-#    dataType = PursuitStartEvent.dataType+[('start_event_id', 'u64'),('duration','u16')]
-#    ndType=N.dtype(dataType)
-#    fieldCount=ndType.__len__()
-#    __slots__=[e[0] for e in dataType]   
-#    
-#    def __init__(self,*args,**kwargs):
-#        PursuitStartEvent.__init__(self,*args,**kwargs)

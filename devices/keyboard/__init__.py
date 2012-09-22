@@ -106,6 +106,11 @@ class KeyboardPressEvent(KeyboardEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     def __init__(self,**kwargs):
+        """
+
+        :rtype : object
+        :param kwargs:
+        """
         KeyboardEvent.__init__(self,**kwargs)
 
 
@@ -117,5 +122,10 @@ class KeyboardReleaseEvent(KeyboardEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     def __init__(self,**kwargs):
+        """
+
+        :rtype : object
+        :param kwargs:
+        """
         KeyboardEvent.__init__(self,**kwargs)
 

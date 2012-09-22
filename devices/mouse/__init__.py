@@ -33,6 +33,12 @@ if computer.system == 'Windows':
         categoryTypeString='MOUSE'
         deviceTypeString='MOUSE_DEVICE'        
         def __init__(self,*args,**kwargs):
+            """
+            
+            :rtype : Mouse
+            :param args: 
+            :param kwargs: 
+            """
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
                 'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Mouse.categoryTypeString],
@@ -76,8 +82,15 @@ class MouseMoveEvent(MouseEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    def __init__(self,*args,**kwargs):
-        MouseEvent.__init__(self,*args,**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseMoveEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
 
 class MouseWheelEvent(MouseEvent):
     newDataTypes = []
@@ -86,8 +99,15 @@ class MouseWheelEvent(MouseEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    def __init__(self,*args,**kwargs):
-        MouseEvent.__init__(self,*args,**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseWheelEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
 
 class MouseButtonDownEvent(MouseEvent):
     newDataTypes = []
@@ -96,8 +116,15 @@ class MouseButtonDownEvent(MouseEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    def __init__(self,*args,**kwargs):
-        MouseEvent.__init__(self,*args,**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseButtonDownEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
 
 class MouseButtonUpEvent(MouseEvent):
     newDataTypes = []
@@ -106,8 +133,15 @@ class MouseButtonUpEvent(MouseEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    def __init__(self,*args,**kwargs):
-        MouseEvent.__init__(self,*args,**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseButtonUpEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
 
 class MouseDoubleClickEvent(MouseEvent):
     newDataTypes = []
@@ -116,5 +150,12 @@ class MouseDoubleClickEvent(MouseEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    def __init__(self,*args,**kwargs):
-        MouseEvent.__init__(self,*args,**kwargs)
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseDoubleClickEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
