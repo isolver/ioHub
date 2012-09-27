@@ -67,9 +67,11 @@ import os, sys, atexit, shutil
 import ioHub
 import ioHub.devices as D
 from ioHub.devices import EventConstants
-from log import ExperimentLog,LogLevels
+from log import ExperimentLog,BaseLogLevels
 import util
 import numpy as N
+
+loggingLevels=BaseLogLevels()
 
 parameters.MAX_NUMEXPR_THREADS=None
 """The maximum number of threads that PyTables should use internally in
@@ -87,17 +89,14 @@ cores in your machine or, when your machine has many of them (e.g. > 4),
 perhaps one less than this.  < S. Simpson Note: These are 'not' GIL bound
 threads and therefore actually improve performance > """
 
-
-DATA_STORE_ROOT_DIR=os.path.dirname(os.path.abspath(__file__))
-BLANK_EXPERIMENT_TEMPLPATE_PATH=os.path.join(DATA_STORE_ROOT_DIR,"templates")
-NEW_EXPEREMINET_FILE_DIR=os.path.join(DATA_STORE_ROOT_DIR,"local")
-EMRT_FILE_VERSION = '0.6 Alpha'
+EMRT_FILE_VERSION = '0.7 Alpha'
 EMRT_SCHEMA_AUTHORS='Sol Simpson'
-EMRT_SCHEMA_MODIFIED_DATE='September 10, 2012'
+EMRT_SCHEMA_MODIFIED_DATE='September 26, 2012'
+
         
 class EMRTpyTablesFile():
     
-    def __init__(self,fileName,folderPath=NEW_EXPEREMINET_FILE_DIR,fmode='a'):
+    def __init__(self,fileName,folderPath,fmode='a'):
         self.fileName=fileName
         self.folderPath=folderPath
         self.filePath=os.path.join(folderPath,fileName)
@@ -130,19 +129,15 @@ class EMRTpyTablesFile():
         self.TABLES['LOG_TABLE']=self.emrtFile.root.logs.ExperimentLog
         
         # create event tables
-        self.TABLES['KEYBOARD_PRESS']=self.emrtFile.root.data_collection.events.keyboard.KeyboardPressEvent
-        self.TABLES['KEYBOARD_RELEASE']=self.emrtFile.root.data_collection.events.keyboard.KeyboardReleaseEvent
+        self.TABLES['KEYBOARD_KEY']=self.emrtFile.root.data_collection.events.keyboard.KeyboardKeyEvent
 
         self.TABLES['MOUSE_MOVE']=self.emrtFile.root.data_collection.events.mouse.MouseMoveEvent
         self.TABLES['MOUSE_WHEEL']=self.emrtFile.root.data_collection.events.mouse.MouseWheelEvent
-        self.TABLES['MOUSE_PRESS']=self.emrtFile.root.data_collection.events.mouse.MouseButtonDownEvent
-        self.TABLES['MOUSE_RELEASE']=self.emrtFile.root.data_collection.events.mouse.MouseButtonUpEvent
-        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.root.data_collection.events.mouse.MouseDoubleClickEvent
+        self.TABLES['MOUSE_BUTTON']=self.emrtFile.root.data_collection.events.mouse.MouseButtonEvent
 
-        self.TABLES['JOYSTICK_BUTTON_PRESS']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonPressEvent
-        self.TABLES['JOYSTICK_BUTTON_RELEASE']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonReleaseEvent
+        self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonEvent
 
-        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent
+        self.TABLES['TTL_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent
        
         #self.TABLES['COMMAND']=self.emrtFile.root.data_collection.events.experiment.Command
         self.TABLES['MESSAGE']=self.emrtFile.root.data_collection.events.experiment.Message
@@ -211,19 +206,15 @@ class EMRTpyTablesFile():
         self.TABLES['LOG_TABLE']=self.emrtFile.createTable(self.emrtFile.root.logs,'ExperimentLog', ExperimentLog, title='Experiment Logging Data')
         
         # create event tables
-        self.TABLES['KEYBOARD_PRESS']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardPressEvent', D.KeyboardPressEvent.ndType, title='Keyboard Press Event Logging.')
-        self.TABLES['KEYBOARD_RELEASE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardReleaseEvent', D.KeyboardReleaseEvent.ndType, title='Keyboard Release Event Logging.')
+        self.TABLES['KEYBOARD_KEY']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardKeyEvent', D.KeyboardKeyEvent.ndType, title='Keyboard Key Event Logging.')
 
         self.TABLES['MOUSE_MOVE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseMoveEvent', D.MouseMoveEvent.ndType, title='Mouse Move Event Logging.')
         self.TABLES['MOUSE_WHEEL']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseWheelEvent', D.MouseWheelEvent.ndType, title='Mouse Wheel Event Logging.')
-        self.TABLES['MOUSE_PRESS']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonDownEvent', D.MouseButtonDownEvent.ndType, title='Mouse Button Down Event Logging.')
-        self.TABLES['MOUSE_RELEASE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonUpEvent', D.MouseButtonUpEvent.ndType, title='Mouse Button Up Event Logging.')
-        self.TABLES['MOUSE_DOUBLE_CLICK']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseDoubleClickEvent', D.MouseDoubleClickEvent.ndType, title='Mouse Double Click Event Logging.')
+        self.TABLES['MOUSE_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonEvent', D.MouseButtonEvent.ndType, title='Mouse Button Event Logging.')
 
-        self.TABLES['JOYSTICK_BUTTON_PRESS']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonPressEvent', D.JoystickButtonPressEvent.ndType, title='Joystick Button Press Event Logging.')
-        self.TABLES['JOYSTICK_BUTTON_RELEASE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonReleaseEvent', D.JoystickButtonReleaseEvent.ndType, title='Joystick Button Release Event Logging.')
+        self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonEvent', D.JoystickButtonEvent.ndType, title='Joystick Button Event Logging.')
 
-        self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.ndType, title='Parallel Port Event Logging.')
+        self.TABLES['TTL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.ndType, title='Parallel Port Event Logging.')
 
         self.TABLES['MESSAGE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'Message', D.MessageEvent.ndType, title='Experiment Message Event Logging.')
 
@@ -239,8 +230,10 @@ class EMRTpyTablesFile():
 
         self.flush()
     
-    def log(self,time,text,level=LogLevels.INFO,experiment_id=0,session_id=0):
+    def log(self,time,text,level=None,experiment_id=0,session_id=0):
         import inspect
+        if level is None:
+            level=loggingLevels.INFO
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 3)
         caller=calframe[1][3]        
@@ -299,40 +292,43 @@ class EMRTpyTablesFile():
         pass
     
     def _handleEvent(self, event):
-        if self.active_experiment_id is None or self.active_session_id is None:
-            return
+        try:
+            if self.active_experiment_id is None or self.active_session_id is None:
+                exp_id=self.active_experiment_id
+                if exp_id is None:
+                    exp_id=0
+                sess_id=self.active_session_id
+                if sess_id is None:
+                    sess_id=0
 
-        eventClass=EventConstants.EVENT_CLASSES[event[3]]
-
-        etable=self.TABLES[EventConstants.EVENT_TYPES[event[3]]]
-        
-        #sys.stderr.write(str(event))
-        #sys.stderr.write('\n')
-        #sys.stderr.write(str(eventClass.ndType))
-        #sys.stderr.write('\n')
-        #sys.stderr.write(str(eventClass)+' '+repr(type(eventClass))+' lengths: '+str(len(event))+' '+str(len(eventClass.ndType)))
-        #sys.stderr.flush()
-
-        event[0]=self.active_experiment_id 
-        event[1]=self.active_session_id 
-        
-        np_array= N.array([tuple(event),],dtype=eventClass.ndType) #event._asNumpyArray()
-
-
-        etable.append(np_array)
-        
-        # if flushCounter threshold is >=0 then do some checks. If it is < 0, then 
-        # flush only occurs when command is sent to ioHub, so do nothing here.
-        if self.flushCounter>=0:
-            if self.flushCounter==0:
-                self.emrtFile.flush()
+                self.log(ioHub.highPrecisionTimer(),"Experiment or Session ID is None, event not being saved: "+str(event),loggingLevels.WARNING,exp_id, sess_id)
                 return
-            if self.flushCounter==self._eventCounter:
-                self.emrtFile.flush()  
-                self._eventCounter=0
-                return
-            self._eventCounter+=1
-            
+
+            eventClass=EventConstants.EVENT_CLASSES[event[3]]
+
+            etable=self.TABLES[eventClass.IOHUB_DATA_TABLE]
+
+            event[0]=self.active_experiment_id
+            event[1]=self.active_session_id
+
+            np_array= N.array([tuple(event),],dtype=eventClass.ndType) #event._asNumpyArray()
+
+
+            etable.append(np_array)
+
+            # if flushCounter threshold is >=0 then do some checks. If it is < 0, then
+            # flush only occurs when command is sent to ioHub, so do nothing here.
+            if self.flushCounter>=0:
+                if self.flushCounter==0:
+                    self.emrtFile.flush()
+                    return
+                if self.flushCounter==self._eventCounter:
+                    self.emrtFile.flush()
+                    self._eventCounter=0
+                    return
+                self._eventCounter+=1
+        except ioHub.ioHubError, e:
+            ioHub.printExceptionDetailsToStdErr()
     def flush(self):
         self.emrtFile.flush()
         
@@ -437,21 +433,3 @@ class EyeTrackerSessionConfiguration(IsDescription):
 class ApparatusSetupMetaData(IsDescription):
     app_setup_id = UInt32Col(pos=1)
     
-'''
-
-class ExperimentMetaData(IsDescription):
-    experiment_id = UInt32Col(pos=1)
-    experiment_code = StringCol(8,pos=2)
-    title = StringCol(48,pos=3)
-    description  = StringCol(256,pos=4)
-    version = StringCol(6,pos=5)
-    date_created = Time64Col(pos=5)
-    last_updated = Time64Col(pos=6)
-    created_by_id = UInt32Col(pos=1)
-    status = Enum([ 'NOT_STARTED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'])
-    phase = Enum([ 'EXPERIMENT_DESIGN', 'DATA_COLLECTION', 'ANALYSIS', 'WRITE_UP', 'COMPLETE', 'NONE'])
-    
-* Data Analysis (Group) : Sub groups, tables, files, ipython_notes, custom analysis scripts, etc. Anything related to the 
-                         analysis of the data for experimentents.
-
-'''

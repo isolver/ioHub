@@ -197,7 +197,7 @@ class Device(ioObject):
         self.I_nativeEventBuffer=deque(maxlen=self.max_event_buffer_length)
         self.I_eventListeners=list()
 
-    def getEvents(self):
+    def getEvents(self,**kwargs):
         currentEvents=list(self.I_ioHubEventBuffer)
         self.I_ioHubEventBuffer.clear()
 
@@ -249,6 +249,8 @@ class DeviceEvent(ioObject):
     EVENT_DELAY_INDEX=9
     BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_DELAY_INDEX
 
+    IOHUB_DATA_TABLE=None
+
     newDataTypes=[('experiment_id','u4'),('session_id','u4'),('event_id','u8'),('event_type','u1'),
                   ('device_instance_code','a48'),('device_time','u8'), ('logged_time', 'u8'), ('hub_time','u8'),
                   ('confidence_interval', 'f4'),('delay', 'f4')]
@@ -275,16 +277,20 @@ class DeviceEvent(ioObject):
         return cls(**kwargs)
 
 class _EventConstantsBase(object):
-    UNDEFINED_EVENT=0
-    MESSAGE_EVENT=1
-    KEYBOARD_PRESS_EVENT=21
-    KEYBOARD_RELEASE_EVENT=22
-    MOUSE_PRESS_EVENT=31
-    MOUSE_RELEASE_EVENT=32
-    MOUSE_WHEEL_UP_EVENT=33
-    MOUSE_WHEEL_DOWN_EVENT=34
-    MOUSE_MOVE_EVENT=35
-    MOUSE_DOUBLE_CLICK_EVENT=39
+    UNDEFINED_EVENT_EVENT=0
+    MESSAGE_EVENT_EVENT=1
+    KEYBOARD_KEY_EVENT =20
+    KEYBOARD_PRESS_EVENT =21
+    KEYBOARD_RELEASE_EVENT =22
+    MOUSE_BUTTON_EVENT =30
+    MOUSE_PRESS_EVENT =31
+    MOUSE_RELEASE_EVENT =32
+    MOUSE_DOUBLE_CLICK_EVENT =33
+    MOUSE_WHEEL_EVENT =35
+    MOUSE_WHEEL_UP_EVENT =36
+    MOUSE_WHEEL_DOWN_EVENT =37
+    MOUSE_MOVE_EVENT =39
+    JOYSTICK_BUTTON_EVENT=50
     JOYSTICK_BUTTON_PRESS_EVENT=51
     JOYSTICK_BUTTON_RELEASE_EVENT=52
     JOYSTICK_POSITION_X_EVENT=53
@@ -340,14 +346,18 @@ class _EventConstantsBase(object):
 
     EVENT_TYPES = dict(UNDEFINED=0,
                         MESSAGE =1,
+                        KEYBOARD_KEY =20,
                         KEYBOARD_PRESS =21,
                         KEYBOARD_RELEASE =22,
+                        MOUSE_BUTTON =30,
                         MOUSE_PRESS =31,
                         MOUSE_RELEASE =32,
-                        MOUSE_WHEEL_UP =33,
-                        MOUSE_WHEEL_DOWN =34,
-                        MOUSE_MOVE =35,
-                        MOUSE_DOUBLE_CLICK =39,
+                        MOUSE_DOUBLE_CLICK =33,
+                        MOUSE_WHEEL =35,
+                        MOUSE_WHEEL_UP =36,
+                        MOUSE_WHEEL_DOWN =37,
+                        MOUSE_MOVE =39,
+                        JOYSTICK_BUTTON=50,
                         JOYSTICK_BUTTON_PRESS =51,
                         JOYSTICK_BUTTON_RELEASE =52,
                         JOYSTICK_POSITION_X =53,
@@ -566,11 +576,11 @@ if computer.system == 'Windows':
 
 import keyboard as keyboard_module
 from keyboard import Keyboard
-from keyboard import KeyboardPressEvent,KeyboardReleaseEvent
+from keyboard import KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
 
 import mouse as mouse_module
 from mouse import Mouse
-from mouse import MouseEvent,MouseMoveEvent,MouseWheelEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
+from mouse import MouseEvent,MouseButtonEvent,MouseMoveEvent,MouseWheelEvent,MouseWheelUpEvent,MouseWheelDownEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
 
 import parallelPort as parallelPort_module
 from parallelPort import ParallelPort
@@ -578,7 +588,7 @@ from parallelPort import ParallelPortEvent
 
 import joystick as joystick_module
 from joystick import Joystick
-from joystick import JoystickButtonPressEvent, JoystickButtonReleaseEvent
+from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
 
 import experiment
 from experiment import ExperimentDevice
@@ -595,16 +605,20 @@ from ioHub import print2err, highPrecisionTimer
 if EventConstants._prepped is False:
     EventConstants._prepped=True
 
-    EventConstants.EVENT_CLASSES.update({EventConstants.EVENT_TYPES['KEYBOARD_PRESS']:KeyboardPressEvent,
+    EventConstants.EVENT_CLASSES.update({EventConstants.EVENT_TYPES['KEYBOARD_KEY']:KeyboardKeyEvent,
+                                         EventConstants.EVENT_TYPES['KEYBOARD_PRESS']:KeyboardPressEvent,
                                          EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']:KeyboardReleaseEvent,
                                          EventConstants.EVENT_TYPES['MOUSE_MOVE']:MouseMoveEvent,
                                          EventConstants.EVENT_TYPES['MOUSE_WHEEL']:MouseWheelEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL_UP']:MouseWheelUpEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL_DOWN']:MouseWheelDownEvent,
+                                         EventConstants.EVENT_TYPES['MOUSE_BUTTON']:MouseButtonEvent,
                                          EventConstants.EVENT_TYPES['MOUSE_PRESS']:MouseButtonDownEvent,
                                          EventConstants.EVENT_TYPES['MOUSE_RELEASE']:MouseButtonUpEvent,
                                          EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']:MouseDoubleClickEvent,
                                          EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']:JoystickButtonPressEvent,
                                          EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']:JoystickButtonReleaseEvent,
-                                         EventConstants.EVENT_TYPES['PARALLEL_PORT_INPUT']:ParallelPortEvent,
+                                         EventConstants.EVENT_TYPES['TTL_INPUT']:ParallelPortEvent,
                                          EventConstants.EVENT_TYPES['MESSAGE']:MessageEvent,
                                          EventConstants.EVENT_TYPES['EYE_SAMPLE']:MonocularEyeSample,
                                          EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']:BinocularEyeSample,

@@ -9,9 +9,9 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 from .. import Device, Computer, EventConstants
+
 import ioHub
 currentUsec=Computer.currentUsec
-import numpy as N
 
 from . import MODIFIER_ACTIVE,MODIFIER_KEYS
 
@@ -59,11 +59,13 @@ class KeyboardWindows32(object):
             
     @staticmethod
     def _getIOHubEventObject(event,device_instance_code):
+        from . import KeyboardPressEvent,KeyboardReleaseEvent
+
         notifiedTime, event=event
-        etype = ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']
+        etype = KeyboardReleaseEvent.EVENT_TYPE_ID
         pressed=0
         if event.Message in KeyboardWindows32.WIN32_KEYBOARD_PRESS_EVENT_TYPES:
-            etype = ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_PRESS']
+            etype = KeyboardPressEvent.EVENT_TYPE_ID
             pressed=1
         
         chrv=chr(event.Ascii)

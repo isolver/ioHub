@@ -7,7 +7,7 @@
 title: ioHubAccessDelayTest
 code: ioHubDT
 version: '0.5'
-description: Test running within psychopy that collects keyboard and mouse events, updates the display based on the events, and calculates stats which are displayed by matplotlib graphs.
+description: Test getting keyboard and mouse events, updates psychopy display with event data, and calculates stats graphed at end.
 total_sessions_to_run: 50
 session_defaults:
     name: Session Name

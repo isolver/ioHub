@@ -10,7 +10,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from .. import DeviceEvent
+from .. import DeviceEvent, EventConstants
 import numpy as N
 
 """
@@ -38,6 +38,10 @@ class MonocularEyeSample(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
 
+    EVENT_TYPE_STRING='EYE_SAMPLE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self, *args, **kwargs):
         """
 
@@ -63,7 +67,12 @@ class BinocularEyeSample(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]     
+    __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='BINOC_EYE_SAMPLE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 
@@ -88,6 +97,10 @@ class FixationStartEvent(DeviceEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='FIXATION_START'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     def __init__(self, *args, **kwargs):
         """
@@ -130,7 +143,12 @@ class FixationEndEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]      
+    __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='FIXATION_END'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 
@@ -149,7 +167,13 @@ class SaccadeStartEvent(FixationStartEvent):
     dataType=baseDataType+newDataTypes
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()  
+    fieldCount=ndType.__len__()
+    __slots__=[]
+
+    EVENT_TYPE_STRING='SACCADE_START'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 
@@ -177,7 +201,12 @@ class SaccadeEndEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]    
+    __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='SACCADE_END'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 
@@ -197,7 +226,12 @@ class BlinkStartEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]  
+    __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='BLINK_START'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 
@@ -214,7 +248,12 @@ class BlinkEndEvent(DeviceEvent):
     attributeNames=[e[0] for e in dataType]
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]   
+    __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='BLINK_END'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
     def __init__(self,*args,**kwargs):
         """
 

@@ -9,8 +9,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from .. import Device,Computer,DeviceEvent
-import ioHub
+from .. import Device,Computer,DeviceEvent,EventConstants
 currentUsec=Computer.currentUsec
 import numpy as N
 
@@ -32,8 +31,8 @@ class ExperimentDevice(Device):
         """
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[ExperimentDevice.categoryTypeString],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[ExperimentDevice.deviceTypeString],
+            'category_id':EventConstants.DEVICE_CATERGORIES[ExperimentDevice.categoryTypeString],
+            'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.deviceTypeString],
             'device_class':deviceConfig['device_class'],
             'user_label':deviceConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -71,6 +70,10 @@ class MessageEvent(DeviceEvent):
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
 
+    EVENT_TYPE_STRING='MESSAGE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE='MESSAGE'
+
     def __init__(self, **kwargs):
         """
 
@@ -93,6 +96,6 @@ class MessageEvent(DeviceEvent):
         cusec=int(currentUsec())
         if usec_time is not None:
             cusec=usec_time
-        return (0,0,Computer.getNextEventID(),ioHub.devices.EventConstants.EVENT_TYPES['MESSAGE'],'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text)
+        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text)
 
 

@@ -10,6 +10,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from tables import *
+import ioHub
 
 class ExperimentLog(IsDescription):
     experiment_id = UInt32Col() # Unique site experiment ID
@@ -19,9 +20,12 @@ class ExperimentLog(IsDescription):
     caller = StringCol(32)      # name for method / function that log was called from
     text = StringCol(128)       # log line text
     
-class LogLevels(object):
-    __slots__ = ('INFO')
-    
-    def _init_(self):
-        self.INFO=1
-        
+class BaseLogLevels(object):
+    __slots__ = ('DATA','CODE','INFO','DEBUG','WARNING','EXCEPTION','ERROR')
+
+    def __init__(self):
+        for i,a in enumerate(BaseLogLevels.__slots__):
+            setattr(self,a,i)
+
+
+

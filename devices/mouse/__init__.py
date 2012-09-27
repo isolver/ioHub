@@ -9,10 +9,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from .. import computer, Device
-from collections import deque
+from .. import computer, Device, EventConstants
 import numpy as N
-import ioHub
 
 # Mouse Device Instance Settings Data
 
@@ -41,8 +39,8 @@ if computer.system == 'Windows':
             """
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Mouse.categoryTypeString],
-                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Mouse.deviceTypeString],
+                'category_id':EventConstants.DEVICE_CATERGORIES[Mouse.categoryTypeString],
+                'type_id':EventConstants.DEVICE_TYPES[Mouse.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -76,12 +74,11 @@ class MouseEvent(DeviceEvent):
         DeviceEvent.__init__(self,*args,**kwargs)
 
 class MouseMoveEvent(MouseEvent):
-    newDataTypes = []
-    baseDataType=MouseEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_MOVE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     def __init__(self, *args, **kwargs):
         """
@@ -93,12 +90,11 @@ class MouseMoveEvent(MouseEvent):
         MouseEvent.__init__(self, *args, **kwargs)
 
 class MouseWheelEvent(MouseEvent):
-    newDataTypes = []
-    baseDataType=MouseEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_WHEEL'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     def __init__(self, *args, **kwargs):
         """
@@ -109,13 +105,60 @@ class MouseWheelEvent(MouseEvent):
         """
         MouseEvent.__init__(self, *args, **kwargs)
 
-class MouseButtonDownEvent(MouseEvent):
-    newDataTypes = []
-    baseDataType=MouseEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
+class MouseWheelUpEvent(MouseWheelEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_WHEEL_UP'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=MouseWheelEvent.IOHUB_DATA_TABLE
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseWheelUpEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseWheelEvent.__init__(self, *args, **kwargs)
+
+class MouseWheelDownEvent(MouseWheelEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_WHEEL_DOWN'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=MouseWheelEvent.IOHUB_DATA_TABLE
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseWheelDownEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseWheelEvent.__init__(self, *args, **kwargs)
+
+class MouseButtonEvent(MouseEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_BUTTON'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
+    def __init__(self, *args, **kwargs):
+        """
+
+        :rtype : MouseButtonEvent
+        :param args:
+        :param kwargs:
+        """
+        MouseEvent.__init__(self, *args, **kwargs)
+
+class MouseButtonDownEvent(MouseButtonEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_PRESS'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=MouseButtonEvent.IOHUB_DATA_TABLE
 
     def __init__(self, *args, **kwargs):
         """
@@ -124,15 +167,14 @@ class MouseButtonDownEvent(MouseEvent):
         :param args:
         :param kwargs:
         """
-        MouseEvent.__init__(self, *args, **kwargs)
+        MouseButtonEvent.__init__(self, *args, **kwargs)
 
-class MouseButtonUpEvent(MouseEvent):
-    newDataTypes = []
-    baseDataType=MouseEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
+class MouseButtonUpEvent(MouseButtonEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_RELEASE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=MouseButtonEvent.IOHUB_DATA_TABLE
 
     def __init__(self, *args, **kwargs):
         """
@@ -141,15 +183,14 @@ class MouseButtonUpEvent(MouseEvent):
         :param args:
         :param kwargs:
         """
-        MouseEvent.__init__(self, *args, **kwargs)
+        MouseButtonEvent.__init__(self, *args, **kwargs)
 
-class MouseDoubleClickEvent(MouseEvent):
-    newDataTypes = []
-    baseDataType=MouseEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
+class MouseDoubleClickEvent(MouseButtonEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='MOUSE_DOUBLE_CLICK'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=MouseButtonEvent.IOHUB_DATA_TABLE
 
     def __init__(self, *args, **kwargs):
         """
@@ -158,4 +199,4 @@ class MouseDoubleClickEvent(MouseEvent):
         :param args:
         :param kwargs:
         """
-        MouseEvent.__init__(self, *args, **kwargs)
+        MouseButtonEvent.__init__(self, *args, **kwargs)

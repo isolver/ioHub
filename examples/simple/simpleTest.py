@@ -44,9 +44,9 @@ To Run:
 
 Any issues or questions, please let me know.
 """
-from __builtin__ import len, unicode
+
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, visual
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime,EventConstants, visual
 
 class ExperimentRuntime(SimpleIOHubRuntime):
     """
@@ -131,8 +131,9 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.clearEvents()
         self.clearEvents('kb')
 
-        # Loop until we get a keyboard event
-        while len(kb.getEvents())==0:
+        QUIT_EXP=False
+        # Loop until we get a keyboard event with the space, Enter (Return), or Escape key is pressed.
+        while QUIT_EXP is False:
 
             # for each loop, update the grating phase
             psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
@@ -160,6 +161,22 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
             self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),),usec_time=flip_time)
+
+            kb_events=kb.getEvents()
+            if len(kb_events)>0:
+                for k in kb_events:
+                    # key: the string representation of the key pressed, A-Z if a-zA-Z pressed, 0-9 if 0-9 pressed ect.
+                    #      To get the mapping from a key_id to a key string, use
+                    #
+                    #      key_string=EventConstants.IDToName(key_event['key_id'])
+                    #
+                    # char: the ascii char for the key pressed. This field factors in if shift was also pressed or not
+                    #       when the char was typed, so typing a 's' == char field of 's', while typing SHIFT+s == char
+                    #       field of 'S'. This is in contrast to the key field, which always returns upper case values
+                    #       regardless of shift value. If the character pressed is not an ascii printable character,
+                    #       this filed will print junk, hex, or who knows what else at this point.
+                    if k['key'] in ['Space','Return','Escape']:
+                        QUIT_EXP=True
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
         self.clearEvents()

@@ -23,6 +23,7 @@ import subprocess
 from collections import deque
 import struct
 import numpy as N
+from psychopyIOHubRuntime import SimpleIOHubRuntime
 
 currentMsec= Computer.currentMsec
 
@@ -132,9 +133,29 @@ class DeviceRPC(object):
         r = self.sendToHub(('EXP_DEVICE','DEV_RPC',self.device_class,self.method_name,args,kwargs))
         r=r[1:]
         if len(r)==1:
-            return r[0]
-        else:
-            return r
+            r=r[0]
+
+        if r and self.method_name == 'getEvents':
+            asType='dict'
+            if 'asType' in kwargs:
+                asType=kwargs['asType']
+
+            if asType == 'list':
+                return r
+            else:
+                conversionMethod=None
+                if asType == 'dict':
+                    conversionMethod=SimpleIOHubRuntime._eventListToDict
+                elif asType == 'object':
+                    conversionMethod=SimpleIOHubRuntime._eventListToObject
+
+                if conversionMethod:
+                    events=[]
+                    for el in r:
+                        events.append(conversionMethod(el))
+                    return events
+
+        return r
 
 class ioHubClientDevice(object):
     def __init__(self,hubClient,name,code,dclass):

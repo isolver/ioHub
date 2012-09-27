@@ -11,8 +11,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import numpy as N
 
-from .. import Device, computer
-import ioHub
+from .. import Device, computer, EventConstants
+
 ##### Modifier Keys #####
 
 L_CONTROL = 1
@@ -63,8 +63,8 @@ if computer.system == 'Windows':
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Keyboard.categoryTypeString],
-                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Keyboard.deviceTypeString],
+                'category_id':EventConstants.DEVICE_CATERGORIES[Keyboard.categoryTypeString],
+                'type_id':EventConstants.DEVICE_TYPES[Keyboard.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -94,38 +94,53 @@ class KeyboardEvent(DeviceEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
+
     def __init__(self,*args,**kwargs):
-        kwargs['device_type']=ioHub.devices.EventConstants.DEVICE_TYPES['KEYBOARD_DEVICE']
-        DeviceEvent.__init__(self,**kwargs)
+        kwargs['device_type']=EventConstants.DEVICE_TYPES['KEYBOARD_DEVICE']
+        DeviceEvent.__init__(self,*args,**kwargs)
 
-class KeyboardPressEvent(KeyboardEvent):
-    newDataTypes=[]
-    baseDataType=KeyboardEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    def __init__(self,**kwargs):
+class KeyboardKeyEvent(KeyboardEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='KEYBOARD_KEY'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
+    def __init__(self,*args,**kwargs):
         """
 
         :rtype : object
         :param kwargs:
         """
-        KeyboardEvent.__init__(self,**kwargs)
+        KeyboardEvent.__init__(self,*args,**kwargs)
 
+class KeyboardPressEvent(KeyboardKeyEvent):
+    __slots__=[]
 
-class KeyboardReleaseEvent(KeyboardEvent):
-    newDataTypes=[]
-    baseDataType=KeyboardEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    def __init__(self,**kwargs):
+    EVENT_TYPE_STRING='KEYBOARD_PRESS'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=KeyboardKeyEvent.IOHUB_DATA_TABLE
+
+    def __init__(self,*args,**kwargs):
         """
 
         :rtype : object
         :param kwargs:
         """
-        KeyboardEvent.__init__(self,**kwargs)
+        KeyboardKeyEvent.__init__(self,*args,**kwargs)
 
+
+class KeyboardReleaseEvent(KeyboardKeyEvent):
+    __slots__=[]
+
+    EVENT_TYPE_STRING='KEYBOARD_RELEASE'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=KeyboardKeyEvent.IOHUB_DATA_TABLE
+
+    def __init__(self,*args,**kwargs):
+        """
+
+        :rtype : object
+        :param kwargs:
+        """
+        KeyboardKeyEvent.__init__(self,*args,**kwargs)

@@ -75,7 +75,7 @@ from __builtin__ import len, isinstance, dict, float, sum, int, unicode
 from exceptions import Exception
 import time
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, core, visual
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, EventConstants, core, visual
 from numpy import zeros
 
 class ExperimentRuntime(SimpleIOHubRuntime):
@@ -87,34 +87,36 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         """
 
         """
-        self.psychoStim = None
-        self.totalEventRequestsForTest=None
+        self.psychoStim = ioHub.LastUpdatedOrderedDict()
+        self.totalEventRequestsForTest=1000
         self.numEventRequests=0
-        self.totalEventRequestsForTest=None
         self.psychoWindow=None
+        self.lastFlipTime=0.0
+        self.events=None
 
     def run(self,*args,**kwargs):
         """
         psychopy code is taken from an example psychopy script in the coder documentation.
         """
-        self.totalEventRequestsForTest=1000
 
         #report process affinities
         print "Current process affinities (experiment proc, ioHub proc):", self.getProcessAffinities()
 
+        self.mouse=self.hub.devices.mouse
+        self.kb=self.hub.devices.kb
+        self.expRuntime=self.hub.devices.experimentRuntime
+        self.display=self.hub.devices.display
 
-        print "ExperimentPCkeyboard methods:",self.hub.devices.kb.getRemoteMethodNames()
-        print "ExperimentPCmouse methods:",self.hub.devices.mouse.getRemoteMethodNames()
-        print "ExperimentRuntime methods:",self.hub.devices.experimentRuntime.getRemoteMethodNames()
-        print "ParallelPort methods:",self.hub.devices.parallelPort.getRemoteMethodNames()
 
-        self.hub.devices.mouse.setPosition((0.0,0.0))
+        print "ExperimentPCkeyboard methods:",self.kb.getRemoteMethodNames()
+        print "ExperimentPCmouse methods:",self.mouse.getRemoteMethodNames()
+        print "ExperimentRuntime methods:",self.expRuntime.getRemoteMethodNames()
 
         # create fullscreen pyglet window at current resolution, as well as required resources / drawings
         self.createPsychoGraphicsWindow()
 
         # create stats numpy arrays, set experiment process and ioHubServer to high priority.
-        self.initTestResourcesAndState()
+        self.initStats()
 
         #draw and flip to the updated graphics state.
         self.drawAndFlipPsychoWindow()
@@ -125,45 +127,35 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # try sending an Experiment Event
             self.hub.sendMessageEvent("This is a test message %.3f"%self.flipTime)
 
-
-            #draw and flip to the updated graphics state.
-            ifi=self.drawAndFlipPsychoWindow()
-
-            events,callDuration=self.checkForEvents()
-
-            if events:
+            self.events,callDuration=self.checkForEvents()
+            if self.events:
                 # events were available
-                self.updateStats(events, callDuration, ifi)
+                self.updateStats(self.events, callDuration, ifi)
+                #draw and flip to the updated graphics state.
+
+            ifi=self.drawAndFlipPsychoWindow()
 
         # END TEST LOOP <<<<<<<<<<<<<<<<<<<<<<<<<<
 
         # _close neccessary files / objects, 'disable high priority.
-        print "plot spinDownTest"
         self.spinDownTest()
 
         # plot collected delay and retrace detection results.
-        print "plot results"
         self.plotResults()
 
     def createPsychoGraphicsWindow(self):
         #create a window
 
-        self.mouse=self.hub.devices.mouse
-        self.kb=self.hub.devices.kb
-        self.expRuntime=self.hub.devices.experimentRuntime
-        self.pport=self.hub.devices.parallelPort
-        self.display=self.hub.devices.display
+        screen_res=self.display.getScreenResolution()
 
-        self.hub.devices.display.getScreenResolution()
-        self.psychoWindow = visual.Window(self.display.getScreenResolution(),monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False)
+        self.psychoWindow = visual.Window(screen_res,monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False)
 
         currentPosition=self.mouse.setPosition((0,0))
 
-        print '###self.mouse.setVisibility:',  self.mouse.setSysCursorVisibility(False)
+        self.mouse.setSysCursorVisibility(False)
 
         self.instructionText2Pattern='%d'
 
-        self.psychoStim=ioHub.LastUpdatedOrderedDict()
         self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
         self.psychoStim['fixation'] =visual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
         self.psychoStim['title'] =visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,125], height=36, color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
@@ -172,12 +164,25 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.psychoStim['keytext'] =visual.TextStim(win=self.psychoWindow, text='key', pos = [0,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=800.0)
         self.psychoStim['mouseDot'] =visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
+
     def drawAndFlipPsychoWindow(self):
         self.psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
         currentPosition=self.mouse.getPosition()
-        #print "Current Position:",currentPosition
+        currentPosition=(float(currentPosition[0]),float(currentPosition[1]))
         self.psychoStim['mouseDot'].setPos(currentPosition)
-        [self.psychoStim[stimName].draw() for stimName in self.psychoStim]
+
+
+        if self.events:
+            self.psychoStim['instructions2'].setText(self.instructionText2Pattern%(self.totalEventRequestsForTest-self.numEventRequests,))
+
+            for r in self.events:
+                if r['event_type'] is EventConstants.KEYBOARD_PRESS_EVENT: #keypress code
+                    self.psychoStim['keytext'].setText(r['key'])
+
+            self.events=None
+
+        [self.psychoStim[skey].draw() for skey in self.psychoStim]
+
         self.flipTime=self.psychoWindow.flip()
         d=self.flipTime-self.lastFlipTime
         self.lastFlipTime=self.flipTime
@@ -195,7 +200,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         return None,None
 
 
-    def initTestResourcesAndState(self):
+    def initStats(self):
         if self.hub is None:
             print "Error: ioHub must be enabled to run the testEventRetrievalTiming test."
             return
@@ -219,16 +224,8 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.results[self.numEventRequests][0]=duration     # ctime it took to get events from ioHub
         self.results[self.numEventRequests][1]=len(events)  # number of events returned
         self.results[self.numEventRequests][2]=ifi*1000.0   # calculating inter flip interval.
-        self.numEventRequests+=1                            # incrementing tally counter
+        self.numEventRequests+=1                            # incrementing tally counterfgh
 
-        self.psychoStim['instructions2'].setText(self.instructionText2Pattern%(self.totalEventRequestsForTest-self.numEventRequests,))
-
-        for r in events:
-            if not isinstance(r,dict):
-                r=self._eventListToDict(r)
-            if r['event_type'] == ioHub.devices.EventConstants.EVENT_TYPES['KEYBOARD_PRESS']: #keypress code
-                keystring=r['key']
-                self.psychoStim['keytext'].setText(keystring)
 
     def spinDownTest(self):
         # OK, we have collected the number of requested getEvents, that have returned >0 events

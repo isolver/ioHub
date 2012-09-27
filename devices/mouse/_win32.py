@@ -140,7 +140,9 @@ class MouseWindows32(object):
             bstate=MouseWindows32.BUTTON_STATE_DOUBLE_CLICK
             etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']
         elif event.Message == MouseWindows32.WM_MOUSEWHEEL:
-            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_WHEEL']
+            etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_WHEEL_DOWN']
+            if event.Wheel > 0:
+                etype=ioHub.devices.EventConstants.EVENT_TYPES['MOUSE_WHEEL_UP']
             
         bnum=MouseWindows32.BUTTON_ID_NONE        
         if event.Message in (MouseWindows32.WM_RBUTTONDOWN,MouseWindows32.WM_RBUTTONUP,MouseWindows32.WM_RBUTTONDBLCLK):

@@ -9,10 +9,10 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 
 import binascii
-from .. import computer,Device
+from .. import computer,Device,EventConstants
 import numpy as N
+
 currentUsec=computer.currentUsec
-import ioHub
 
 #----------------------------
 
@@ -39,8 +39,8 @@ if computer.system == 'Windows':
             """
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[ParallelPort.categoryTypeString],
-                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[ParallelPort.deviceTypeString],
+                'category_id':EventConstants.DEVICE_CATERGORIES[ParallelPort.categoryTypeString],
+                'type_id':EventConstants.DEVICE_TYPES[ParallelPort.deviceTypeString],
                 'device_class':deviceConfig['device_class'],
                 'user_label':deviceConfig['name'],
                 'base_address':deviceConfig['base_address'],
@@ -76,6 +76,10 @@ class ParallelPortEvent(DeviceEvent):
     ndType=N.dtype(dataType)
     fieldCount=ndType.__len__()
     __slots__=[e[0] for e in newDataTypes]
+
+    EVENT_TYPE_STRING='TTL_INPUT'
+    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     def __init__(self, *args, **kwargs):
         """
