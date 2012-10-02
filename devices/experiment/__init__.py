@@ -14,14 +14,9 @@ currentUsec=Computer.currentUsec
 import numpy as N
 
 class ExperimentDevice(Device):
-    newDataTypes=[]
-    baseDataType=Device.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    categoryTypeString='VIRTUAL'
-    deviceTypeString='EXPERIMENT_DEVICE'
+    CATEGORY_LABEL='VIRTUAL'
+    DEVICE_LABEL='EXPERIMENT_DEVICE'
+    __slots__=[]
     def __init__(self,*args,**kwargs):
         """
 
@@ -31,10 +26,10 @@ class ExperimentDevice(Device):
         """
         deviceConfig=kwargs['dconfig']
         deviceSettings={'instance_code':deviceConfig['instance_code'],
-            'category_id':EventConstants.DEVICE_CATERGORIES[ExperimentDevice.categoryTypeString],
-            'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.deviceTypeString],
+            'category_id':EventConstants.DEVICE_CATERGORIES[ExperimentDevice.CATEGORY_LABEL],
+            'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.DEVICE_LABEL],
             'device_class':deviceConfig['device_class'],
-            'user_label':deviceConfig['name'],
+            'name':deviceConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':deviceConfig['event_buffer_length']
             }          
@@ -48,7 +43,7 @@ class ExperimentDevice(Device):
         # on windows ioHub and experiment process use same timebase, so device time == hub time
         event[DeviceEvent.EVENT_HUB_TIME_INDEX]=event[DeviceEvent.EVENT_DEVICE_TIME_INDEX]
 
-        self.I_nativeEventBuffer.append(event)
+        self._nativeEventBuffer.append(event)
         return True
     
     def _poll(self):
@@ -62,25 +57,19 @@ class ExperimentDevice(Device):
 ######### Experiment Events ###########
 
 class MessageEvent(DeviceEvent):
-    newDataTypes=[('msg_offset','i2'),('prefix','a3'),('text','a128')]
-    baseDataType=DeviceEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
-
     EVENT_TYPE_STRING='MESSAGE'
     EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
     IOHUB_DATA_TABLE='MESSAGE'
 
+    _newDataTypes=[('msg_offset','i2'),('prefix','a3'),('text','a128')]
+    __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, **kwargs):
         """
 
         :rtype : object
         :param kwargs:
         """
-        DeviceEvent.__init__(self, **kwargs)
+        DeviceEvent.__init__(self, *args,**kwargs)
 
     @staticmethod
     def createAsList(text,prefix='',msg_offset=0.0, usec_time=None):

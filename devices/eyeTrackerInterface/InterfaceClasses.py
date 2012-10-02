@@ -22,7 +22,7 @@ from ioHub.devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREA
 #              DATA_FILTER,USER_SETUP_STATES
 
 #noinspection PyUnusedLocal,PyTypeChecker
-class EyeTracker(Device):
+class EyeTrackerInterface(Device):
     """
     EyeTracker class is the main class for the pyEyeTrackerInterface module,
     containing the majority of the eye tracker functionality commonly needed
@@ -94,27 +94,21 @@ class EyeTracker(Device):
     displaySettings=None
     
     #  >>>> Class attributes used by parent Device class
-    DEVICE_START_TIME = 0.0 # Time to subtract from future device time reads. 
+    DEVICE_START_TIME = 0.0  # Time to subtract from future device time reads.
                              # Init in Device init before any calls to getTime() 
     
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
-    
-    newDataTypes=[]
-    baseDataType=Device.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
+    DEVICE_TIMEBASE_TO_USEC=1000.0 # the multiplier needed to convert device times to usec times.
+
+    CATEGORY_LABEL = 'EYE_TRACKER'
+    DEVICE_LABEL = 'EYE_TRACKER_DEVICE'
+
     # <<<<<
     
     lastPollTime=0.0    
     lastCallbackTime=0.0
     
-    # >>> implementation specific private class attributes
 
-
-    # <<<
+    __slots__=[]
     def __init__(self,*args,**kwargs):
         """
         EyeTracker class. This class is to be extended by each eye tracker specific implemetation
@@ -127,17 +121,17 @@ class EyeTracker(Device):
 
            eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
 
-        where hub is the instance of the ioHubClient class that has been created for your experiment.
+        where hub is the instance of the ioHubConnection class that has been created for your experiment.
 
         **kwargs are an optional set of named parameters.
 
         **If an instance of EyeTracker has already been created, trying to create a second will raise an exception. Either destroy the first instance and then create the new instance, or use the class method EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
         """
-        if EyeTracker._INSTANCE is not None:
+        if self.__class__._INSTANCE is not None:
             raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
         
         # >>>> eye tracker config
-        EyeTracker.eyeTrackerConfig=kwargs['dconfig']
+        self.__class__.eyeTrackerConfig=kwargs['dconfig']
         #print " #### EyeTracker Configuration #### "
         #print self.eyeTrackerConfig
         #print ''
@@ -147,14 +141,14 @@ class EyeTracker(Device):
         deviceSettings= dict(instance_code=self.eyeTrackerConfig['instance_code'],
             category_id=ioHub.devices.EventConstants.DEVICE_CATERGORIES['EYE_TRACKER'],
             type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
-            user_label=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
+            name=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
             max_event_buffer_length=self.eyeTrackerConfig['event_buffer_length'])
-        Device.__init__(self,**deviceSettings)
+        Device.__init__(self,*args,**deviceSettings)
         
         # set this instance as 'THE' instance of the eye tracker.
-        EyeTracker._INSTANCE=self
+        self.__class__._INSTANCE=self
 
-        EyeTracker.DEVICE_START_TIME=0.0
+        self.__class__.DEVICE_START_TIME=0.0
         
         # >>>> eye tracker setting to config (if possible)
         #
@@ -183,7 +177,7 @@ class EyeTracker(Device):
         #
         # Current settings, example from possible values.
         #
-        EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
+        self.__class__.displaySettings = self.eyeTrackerConfig['display_settings']
 
         #print ''
         #print " #### EyeTracker Display Settings #### "
@@ -620,9 +614,9 @@ class EyeTracker(Device):
             ioHubEvent = list()
             # put the ioHub eye tracker event IN ORDERED LIST FORM in devices buffer for pickup by the ioHub.
 
-            self.I_nativeEventBuffer.append(ioHubEvent)
+            self._nativeEventBuffer.append(ioHubEvent)
 
-        EyeTracker.lastPollTime=loggedTime
+        self.__class__.lastPollTime=loggedTime
     
     def _handleNativeEvent(self,*args,**kwargs):
         """
@@ -647,13 +641,13 @@ class EyeTracker(Device):
         if 1:
             return 'EYETRACKER_ERROR','_handleNativeEvent','Default _handleNativeEvent callback Logic being Used. This must be implemented on a per eye tracker basis.'
 
-        EyeTracker.lastCallbackTime=loggedTime
+        self.__class__.lastCallbackTime=loggedTime
         
         # append the native event to the deque as a tuple of (loggedTime, event)
         # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
         #
-        self.I_nativeEventBuffer.append((loggedTime,event))
+        self._nativeEventBuffer.append((loggedTime,event))
     
     @staticmethod    
     def _getIOHubEventObject(*args,**kwargs):
@@ -742,7 +736,7 @@ class EyeTracker(Device):
         """
         Do any final cleanup of the eye tracker before the object is destroyed. Users should not call or change this method. It is for implemetaion by interface creators and is autoatically called when an object is destroyed by the interpreter.
         """
-        EyeTracker._INSTANCE=None
+        self.__class__._INSTANCE=None
 
 
 #noinspection PyUnusedLocal

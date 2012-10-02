@@ -80,7 +80,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
         has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
         #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubClient class, which is what is at the end of self.hub.
+        the docs for the ioHubConnection class, which is what is at the end of self.hub.
 
         Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
         improvement are very welcome too, please email me at sds-git@isolver-software.com .
@@ -116,12 +116,15 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
         screen_resolution= display.getScreenResolution()
 
+        # get the index of the screen to create the PsychoPy window in.
+        screen_index=display.getScreenIndex()
+
         # Read the coordinate space the script author specified in the config file (right now only pix are supported)
         coord_type=display.getDisplayCoordinateType()
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False)
+        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False, screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSysCursorVisibility(False)
@@ -182,7 +185,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         tracker.setConnectionState(False)
 
         # _close neccessary files / objects, 'disable high priority.
-        psychoWindow._close()
+        psychoWindow.close()
 
         ### End of experiment logic
 

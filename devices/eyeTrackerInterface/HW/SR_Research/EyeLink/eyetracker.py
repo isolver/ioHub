@@ -18,11 +18,11 @@ download from  www.sr-support.com once you are registered and includes the neces
 
 import sys
 import ioHub
-from ..... import Device,Computer
+from ..... import Computer
 import pylink
-from .... import RTN_CODES,EYE_CODES, DATA_STREAMS,DATA_FILTER
+from .... import RTN_CODES,EYE_CODES, DATA_STREAMS,DATA_FILTER,EyeTrackerInterface
 
-class EyeTracker(Device):
+class EyeTracker(EyeTrackerInterface):
     """EyeTracker class is the main class for the pyEyeTrackerInterface module,
     containing the majority of the eye tracker functionality commonly needed
     for a range of experiments.
@@ -100,10 +100,12 @@ class EyeTracker(Device):
     # <<<<<
     
     # used for simple lookup of device type and category number from strings
-    categoryTypeString='EYE_TRACKER'
-    deviceTypeString='EYE_TRACKER_DEVICE'
-    
-    # >>> implementation specific private class attributes
+    CATEGORY_LABEL='EYE_TRACKER'
+    DEVICE_LABEL='EYE_TRACKER_DEVICE'
+
+
+
+    # >>> Custom class attributes
     _eyelink=None
     _OPEN_EDF=None
     _VALID_SAMPLING_RATES=[250,500,1000,2000]
@@ -113,6 +115,10 @@ class EyeTracker(Device):
     _eventArrayLengths=dict()
     # <<<
 
+    # >>> Overwritten class attributes
+    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
+    __slots__=[]
+    # <<<
     def __init__(self,*args,**kwargs):
         """
         EyeTracker class. This class is to be extended by each eye tracker specific implemetation
@@ -125,7 +131,7 @@ class EyeTracker(Device):
 
            eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
 
-        where hub is the instance of the ioHubClient class that has been created for your experiment.
+        where hub is the instance of the ioHubConnection class that has been created for your experiment.
 
         **kwargs are an optional set of named parameters.
 
@@ -144,14 +150,14 @@ class EyeTracker(Device):
 
         # create Device level class setting dictionary and pass it Device constructor
         deviceSettings={'instance_code':EyeTracker.eyeTrackerConfig['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.CATEGORY_LABEL],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.DEVICE_LABEL],
             'device_class':EyeTracker.eyeTrackerConfig['device_class'],
-            'user_label':EyeTracker.eyeTrackerConfig['name'],
+            'name':EyeTracker.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':EyeTracker.eyeTrackerConfig['event_buffer_length']
             }
-        Device.__init__(self,**deviceSettings)
+        EyeTrackerInterface.__init__(self,*args,**deviceSettings)
 
         # set this instance as 'THE' instance of the eye tracker.
         EyeTracker._INSTANCE=self
@@ -910,7 +916,7 @@ class EyeTracker(Device):
                         EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE']=len(binocSample)
                         EyeTracker._latestSample=binocSample
                         EyeTracker._latestGazePosition=(leftGaze[0]+rightGaze[0])/2.0,(leftGaze[1]+rightGaze[1])/2.0
-                        self.I_nativeEventBuffer.append(binocSample)
+                        self._nativeEventBuffer.append(binocSample)
 
                     else:
                         # monocular sample
@@ -952,7 +958,7 @@ class EyeTracker(Device):
                         EyeTracker._eventArrayLengths['MONOC_EYE_SAMPLE']=len(monoSample)
                         EyeTracker._latestGazePosition=gaze
                         EyeTracker._latestSample=monoSample
-                        self.I_nativeEventBuffer.append(monoSample)
+                        self._nativeEventBuffer.append(monoSample)
 
                 elif isinstance(ne,pylink.EndFixationEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
@@ -1023,7 +1029,7 @@ class EyeTracker(Device):
                         -1.0,-1.0,a_vel,
                         -1.0, -1.0, peak_vel,estatus]
                     EyeTracker._eventArrayLengths['FIXATION_END']=len(fee)
-                    self.I_nativeEventBuffer.append(fee)
+                    self._nativeEventBuffer.append(fee)
 
                 elif isinstance(ne,pylink.EndSaccadeEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['SACCADE_END']
@@ -1065,7 +1071,7 @@ class EyeTracker(Device):
                                 -1,  -1, s_vel, e_gaze[0], e_gaze[1], -1.0, e_href[0], e_href[1], -1,  -1,
                                e_pupilsize, -1, e_ppd[0], e_ppd[1],-1, -1, e_vel,-1.0,-1.0,a_vel,-1.0,-1.0,peak_vel,estatus]
                     EyeTracker._eventArrayLengths['SACCADE_END']=len(see)
-                    self.I_nativeEventBuffer.append(see)
+                    self._nativeEventBuffer.append(see)
                 elif isinstance(ne,pylink.EndBlinkEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_END']
 
@@ -1085,7 +1091,7 @@ class EyeTracker(Device):
                                 end_event_time, currentTime, hub_timestamp,confidenceInterval, event_delay, which_eye,
                                 event_duration, estatus]
                     EyeTracker._eventArrayLengths['BLINK_END']=len(bee)
-                    self.I_nativeEventBuffer.append(bee)
+                    self._nativeEventBuffer.append(bee)
 
                 elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
@@ -1114,7 +1120,7 @@ class EyeTracker(Device):
                        gaze[0], gaze[1], -1, href[0], href[1], -1.0, -1.0, pupil_size, -1.0, ppd[0], ppd[1],
                        -1.0,-1.0,velocity,estatus]
                     EyeTracker._eventArrayLengths[ioHub.devices.EventConstants.EVENT_TYPES[etype]]=len(se)
-                    self.I_nativeEventBuffer.append(se)
+                    self._nativeEventBuffer.append(se)
 
                 elif isinstance(ne,pylink.StartBlinkEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_START']
@@ -1132,7 +1138,7 @@ class EyeTracker(Device):
                     bse=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],start_event_time, currentTime, hub_timestamp,
                                 confidenceInterval, event_delay, which_eye, estatus]
                     EyeTracker._eventArrayLengths['BLINK_START']=len(bse)
-                    self.I_nativeEventBuffer.append(bse)
+                    self._nativeEventBuffer.append(bse)
 
             pollEndLocalTime=int(Computer.currentUsec())
             EyeTracker.lastPollTime=pollEndLocalTime

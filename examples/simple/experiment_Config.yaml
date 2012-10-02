@@ -1,6 +1,6 @@
 # experiment_config.yaml: settings related to the experiment being run when the run.py script is launched,
 # any custom session variables you want displayed in a dialog for input at the start of the experiment,
-# and settings related to the local process the experiment simpleTest.py is launched in.
+# and settings related to the local process the experiment run.py is launched in.
 #
 # Items that are REQUIRED to be changed to run the program as is:
 #     - None

@@ -30,10 +30,10 @@ class KeyboardWindows32(object):
         :param args: 
         :param kwargs: 
         """
-        self.I_modifierValue = 0;
+        self._modifierValue = 0;
         
     def _nativeEventCallback(self,event):
-        notifiedTime=int(currentUsec())
+        notifiedTime=currentUsec()
         #
         # Start Tracking Modifiers that are pressed
         #
@@ -44,14 +44,14 @@ class KeyboardWindows32(object):
                 MODIFIER_ACTIVE[v] = not MODIFIER_ACTIVE[v]
                 i=MODIFIER_KEYS[v]
                 if MODIFIER_ACTIVE[v]:
-                    self.I_modifierValue+=i
+                    self._modifierValue+=i
                 else:
-                    self.I_modifierValue-=i
+                    self._modifierValue-=i
         #
         # End Tracking Modifiers that are pressed
         #
-        event.Modifiers=self.I_modifierValue
-        self.I_nativeEventBuffer.append((notifiedTime,event))
+        event.Modifiers=self._modifierValue
+        self._nativeEventBuffer.append((notifiedTime,event))
         return True
 
     def _poll(self):
@@ -80,7 +80,7 @@ class KeyboardWindows32(object):
         #ioHub.print2err("dev_time,log_time, delta: "+ioHub.devices.EventConstants.EVENT_TYPES[etype]+" : "+str(device_time)+" : "+str(notifiedTime)+" : "+str(notifiedTime-device_time))
         hub_time = notifiedTime #TODO correct mouse times to factor in offset.
  
-        confidence_interval=0.0 # since this is a keyboard deice using a callback method, confidence_interval is not applicable
+        confidence_interval=0.0 # since this is a keyboard device using a callback method, confidence_interval is not applicable
         delay=0.0 # since this is a keyboard, we 'know' there is a delay, but until we support setting a delay in the device properties based on external testing for a given keyboard, we will leave at 0.
  
         #return (experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPES['KEYBOARD_DEVICE'],
@@ -92,4 +92,4 @@ class KeyboardWindows32(object):
         return [0,0,Computer.getNextEventID(),etype,
                 device_instance_code,device_time,notifiedTime,hub_time,confidence_interval,delay,pressed,event.flags,
                 event.IsAlt(),event.IsExtended(),event.IsTransition(),event.ScanCode,event.Ascii,event.KeyID,
-                unicode(event.GetKey()),unicode(chrv),event.Modifiers,event.Window]  
+                str(event.GetKey()),str(chrv),event.Modifiers,event.Window]

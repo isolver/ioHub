@@ -77,7 +77,7 @@ udpPort: 9000
 #                      buffer to make room for new ones.
 #
 # - stream_events: Enables events from this device being included in events sent when the
-#   ioHubClient calls getEvents()
+#   ioHubConnection calls getEvents()
 #
 # - save_events: Enables saving of events to file, based on the ioDataStore config settings.
 #
@@ -127,6 +127,8 @@ monitor_devices:
         comments: Cheap 23" LCD 1900x1080 that works well for everyday office use.
         instance_code: display_serial_number
         psychopy_config_file: unknown
+        # display index for multi display setups, valid values are 0 or 1. (primary or seconday display)
+        display_index: 0
         # what ccordinate space shoule databe rported in (pixels, degrees, etc)
         reporting_unit_type: pixels
         # - width and height of calibration plane in mm

@@ -8,22 +8,23 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import os
-
-os.environ['PATH'] = os.environ['PATH'] + ';' + os.path.abspath(os.path.dirname(__file__))
 import ioHub
-import time
-from ctypes import windll,c_ushort,c_ubyte
-import binascii
-io=windll.io
-PortOut=io.PortOut
-PortIn=io.PortIn
-from collections import deque
-from ... import Device, Computer
-currentUsec=Computer.currentUsec
-import numpy as N
 
-# note real starting address of MY pCIx card is 0xEF00 = 61184
-# and I have put that into the io.ini file in this directory.    
+def _nofunc():
+    pass
+
+_HERE= ioHub.module_directory(_nofunc)
+if _HERE not in os.environ['PATH']:
+    os.environ['PATH'] = os.environ['PATH'] + ';' +_HERE
+    #ioHub.print2err("os.environ['PATH']",os.environ['PATH'])
+
+from ctypes import windll,c_short
+io=windll.inpout32
+PortOut=io.Out32
+PortIn=io.Inp32
+
+from ... import Computer
+currentUsec=Computer.currentUsec
 
 class ParallelPortWin32(object):
     def __init__(self,*args,**kwargs):
@@ -33,11 +34,11 @@ class ParallelPortWin32(object):
         :param args: 
         :param kwargs: 
         """
-        self.base_address=kwargs['base_address']
-        self.address_offset=kwargs['address_offset']
-
+        self.base_address=c_short(kwargs['base_address'])
+        #ioHub.print2err(' self.base_address', self.base_address)
         self.lastReadTime=None
         self.lastReadValue=None
+
 
     def read(self):
         """
@@ -45,7 +46,7 @@ class ParallelPortWin32(object):
         :rtype : object
         :return:
         """
-        return PortIn(self.base_address)
+        return c_short(PortIn(self.base_address)).value
 
     def write(self, word):
         """
@@ -53,7 +54,15 @@ class ParallelPortWin32(object):
         :type word: object
         :param word: 
         """
-        PortOut(self.base_address, word)
+        PortOut(self.base_address, c_short(word))
+
+    def isDriverOpen(self):
+        r=io.IsInpOutDriverOpen()
+        return bool(r)
+
+    def isOS64bit(self):
+        r= io.IsXP64Bit()
+        return bool(r)
         
     def _poll(self):
         """
@@ -65,21 +74,27 @@ class ParallelPortWin32(object):
         
         if currentValue == self.lastReadValue:
             pass
-        else:    
+        else:
             from .. import ParallelPortEvent
-            
-            #print 'PPort event VALUES:',currentValue, self.lastReadValue
-            ci=0
+            #ioHub.print2err('pport event c_short(PortIn(self.base_address)).value:',c_short(PortIn(self.base_address)).value)
+
+            ci=0.0
             lrv=self.lastReadValue
             if self.lastReadTime is not None:
                 ci=currentTime-self.lastReadTime
             else:
                 lrv=0
-                
-            ppe= [0,0,Computer.getNextEventID(),ioHub.devices.EventConstants.EVENT_TYPES['PARALLEL_PORT_INPUT'],  self.instance_code, currentTime,
-                   currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
 
-            self.I_nativeEventBuffer.append(ppe)
+            pdelay=ci/2.0 # on average, actual port state change will be the confidence interval / 2
+
+            device_time=currentTime
+            logged_time=currentTime
+            iohub_time=currentTime-int(pdelay)
+
+            ppe= [0,0,Computer.getNextEventID(),ParallelPortEvent.EVENT_TYPE_ID,self.instance_code,
+                  device_time, logged_time, iohub_time, ci,pdelay,self.base_address,currentValue,lrv]
+
+            self._nativeEventBuffer.append(ppe)
 
         self.lastReadTime=currentTime
         self.lastReadValue=currentValue

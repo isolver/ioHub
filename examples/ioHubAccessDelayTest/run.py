@@ -31,8 +31,9 @@ and then when run() completes, closes the ioHubServer process and ends the local
 Desciption:
 -----------
 
-The main purpose for the ioHubAccessDelayTest is to test the round trip time it takes to request and reveive events
-from the I/O hub. Retrace intervals are also calculated and stored to monitor for skipped retraces.
+The main purpose for the ioHubAccessDelayTest is to test the round trip time it takes for the experiment process
+to request and receive events from the ioHub Process running the ioServer. Retrace intervals are also calculated
+and stored to monitor for skipped retraces.
 
 A full screen Window is opened that shows some graphics, including a moving grating as well as a small gaussian
 that is controlled by mouse events from the ioHub. At the top of the screen is an area that will display the last key
@@ -41,8 +42,8 @@ pressed on the keyboard.
 The script runs for until 1000 getEvent() requests to the ioHub have returned with >= 1 event. A number near the
 bottom of the screen displays the number of remaining successful getEvent calls before the experiment will end.
 By default the script also sends an Experiment MessageEvent to the ioHub on each retrace. This message is stored
-in the ioHub datafile, but is also sent back as an ioHub MessageEvent to the experiment. Therefore, the getEvent()
-request counter shown on the screen will decrease even if you do not move your mouse or keyboard,
+in the ioDataStore file, but is also sent back as an ioHub MessageEvent to the experiment process.
+Therefore, the getEvent() request counter shown on the screen will decrease even if you do not move your mouse or keyboard,
 as the MessageEvents are retrieved from the ioHub Server.
 
 At the end of the test, plots are displayed showing the getEvent() round trip delays in a histogram,
@@ -102,31 +103,36 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #report process affinities
         print "Current process affinities (experiment proc, ioHub proc):", self.getProcessAffinities()
 
+        # create 'shortcuts' to the devices of interest for this experiment
         self.mouse=self.hub.devices.mouse
         self.kb=self.hub.devices.kb
         self.expRuntime=self.hub.devices.experimentRuntime
         self.display=self.hub.devices.display
 
 
-        print "ExperimentPCkeyboard methods:",self.kb.getRemoteMethodNames()
-        print "ExperimentPCmouse methods:",self.mouse.getRemoteMethodNames()
-        print "ExperimentRuntime methods:",self.expRuntime.getRemoteMethodNames()
+        # let's print out the public method names for each device type for fun.
+        print "ExperimentPCkeyboard methods:",self.kb.getDeviceInterface()
+        print "ExperimentPCmouse methods:",self.mouse.getDeviceInterface()
+        print "ExperimentRuntime methods:",self.expRuntime.getDeviceInterface()
+        print "Display methods:",self.display.getDeviceInterface()
 
         # create fullscreen pyglet window at current resolution, as well as required resources / drawings
         self.createPsychoGraphicsWindow()
 
-        # create stats numpy arrays, set experiment process and ioHubServer to high priority.
+        # create stats numpy arrays, set experiment process to high priority.
         self.initStats()
 
         #draw and flip to the updated graphics state.
-        self.drawAndFlipPsychoWindow()
+        ifi=self.drawAndFlipPsychoWindow()
 
         # START TEST LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>
 
         while self.numEventRequests < self.totalEventRequestsForTest:
-            # try sending an Experiment Event
+            # send an Experiment Event to the ioHub server process
             self.hub.sendMessageEvent("This is a test message %.3f"%self.flipTime)
 
+            # check for any new events from any of the devices, and return the events list and the time it took to
+            # request the events and receive the reply
             self.events,callDuration=self.checkForEvents()
             if self.events:
                 # events were available
@@ -137,7 +143,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
         # END TEST LOOP <<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        # _close neccessary files / objects, 'disable high priority.
+        # close neccessary files / objects, disable high priority.
         self.spinDownTest()
 
         # plot collected delay and retrace detection results.
@@ -147,12 +153,12 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #create a window
 
         screen_res=self.display.getScreenResolution()
-
-        self.psychoWindow = visual.Window(screen_res,monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False)
+        screen_index=self.display.getScreenIndex()
+        self.psychoWindow = visual.Window(screen_res,monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False,screen=screen_index)
 
         currentPosition=self.mouse.setPosition((0,0))
 
-        self.mouse.setSysCursorVisibility(False)
+        self.mouse.setSystemCursorVisibility(False)
 
         self.instructionText2Pattern='%d'
 

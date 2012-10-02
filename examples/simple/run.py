@@ -1,6 +1,6 @@
 """
 ioHub
-.. file: ioHub/examples/simple/simpleTest.py
+.. file: ioHub/examples/simple/run.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -31,7 +31,7 @@ that has been added to this file. When run() completes, the ioHubServer process 
 Desciption:
 -----------
 
-The main purpose for the simpleTest is to isllustrate the overall structure of the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime
+The main purpose for the simpleTest is to illustrate the overall structure of the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime
 utility class and how to extend it and use it to run a psycho py program with ioHub / and pyEyeTrackerInterface fucntionality if desired.
 
 To Run:
@@ -40,7 +40,7 @@ To Run:
 1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub/wiki
 2. Open a command prompt to the directory containing this file.
 3. Start the test program by running:
-   python.exe simpleTest.py
+   python.exe run.py
 
 Any issues or questions, please let me know.
 """
@@ -80,7 +80,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
         has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
         #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubClient class, which is what is at the end of self.hub.
+        the docs for the ioHubConnection class, which is what is at the end of self.hub.
 
         Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
         improvement are very welcome too, please email me at sds-git@isolver-software.com .
@@ -93,7 +93,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # -x_min, -y_min is the screen bottom left
         # +x_max, +y_max is the screen top right
         #
-        # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
+        # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
         mouse=self.hub.devices.mouse
@@ -113,12 +113,15 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # Read the coordinate space the script author specified in the config file (right now only pix are supported)
         coord_type=display.getDisplayCoordinateType()
 
+        # get the index of the screen to create the PsychoPy window in.
+        screen_index=display.getScreenIndex()
+
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False)
+        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False,screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
-        mouse.setSysCursorVisibility(False)
+        mouse.setSystemCursorVisibility(False)
 
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
@@ -162,8 +165,10 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
             self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),),usec_time=flip_time)
 
+            # get any new keyboard events from the keyboard device
             kb_events=kb.getEvents()
             if len(kb_events)>0:
+                # for each new keyboard event, check if it matches one of the end example keys.
                 for k in kb_events:
                     # key: the string representation of the key pressed, A-Z if a-zA-Z pressed, 0-9 if 0-9 pressed ect.
                     #      To get the mapping from a key_id to a key string, use
@@ -176,6 +181,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                     #       regardless of shift value. If the character pressed is not an ascii printable character,
                     #       this filed will print junk, hex, or who knows what else at this point.
                     if k['key'] in ['Space','Return','Escape']:
+                        print 'Quit key pressed: ',k['key']
                         QUIT_EXP=True
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
@@ -185,7 +191,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         self.msecDelay(250)
 
         # _close neccessary files / objects, 'disable high priority.
-        psychoWindow._close()
+        psychoWindow.close()
 
         ### End of experiment logic
 

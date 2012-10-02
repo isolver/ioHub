@@ -51,27 +51,21 @@ if computer.system == 'Windows':
     from  _win32 import  KeyboardWindows32
     
     class Keyboard(Device,KeyboardWindows32):
-        newDataTypes=[]
-        baseDataType=Device.dataType
-        dataType=baseDataType+newDataTypes
-        attributeNames=[e[0] for e in dataType]
-        ndType=N.dtype(dataType)
-        fieldCount=ndType.__len__()
-        __slots__=[e[0] for e in newDataTypes]
-        categoryTypeString='KEYBOARD'
-        deviceTypeString='KEYBOARD_DEVICE'
+        CATEGORY_LABEL='KEYBOARD'
+        DEVICE_LABEL='KEYBOARD_DEVICE'
+        __slots__=[]
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':EventConstants.DEVICE_CATERGORIES[Keyboard.categoryTypeString],
-                'type_id':EventConstants.DEVICE_TYPES[Keyboard.deviceTypeString],
+                'category_id':EventConstants.DEVICE_CATERGORIES[Keyboard.CATEGORY_LABEL],
+                'type_id':EventConstants.DEVICE_TYPES[Keyboard.DEVICE_LABEL],
                 'device_class':deviceConfig['device_class'],
-                'user_label':deviceConfig['name'],
+                'name':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
                 'max_event_buffer_length':deviceConfig['event_buffer_length']
                 }          
-            Device.__init__(self,**deviceSettings)
-            KeyboardWindows32.__init__(self,**deviceSettings)            
+            Device.__init__(self,*args,**deviceSettings)
+            KeyboardWindows32.__init__(self,*args,**deviceSettings)
 elif computer.system == 'Linux':
     import _linux
     print 'Keyboard not implemented on Linux yet.'
@@ -84,28 +78,44 @@ from .. import DeviceEvent
 class KeyboardEvent(DeviceEvent):
     # TODO: Determine real maximum key name string and modifiers string
     # lengths and set appropriately.
-    newDataTypes = [('is_pressed',N.bool),('flags',N.uint8),('alt',N.uint8),
-                                            ('extended',N.bool),('transition',N.uint8),('scan_code',N.uint8),
-                                            ('ascii_code',N.uint),('key_id',N.uint),('key',N.string_,12),('char',N.string_,1),
-                                            ('modifiers',N.uint8),('window_id',N.uint32)]
-    baseDataType=DeviceEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
+    _newDataTypes = [
+                    ('is_pressed',N.uint8), # 1 if key was pressed, 0 if key was released
 
+                    ('flags',N.uint8),      # flags from the key event. Meaning TBD.
+
+                    ('alt',N.uint8),        # 1 if alt was depressed when key event occurred, 0 otherwise
+
+                    ('extended',N.uint8),   # 1 if this is an extended key, 0 if it is a ASCII key
+
+                    ('transition',N.uint8), # 1 if the key event is the first key event for that keys event sequence
+
+                    ('scan_code',N.uint8),  # the scan code for the key that was pressed.
+                                            # Represents the physical key id on the keyboard layout
+
+                    ('ascii_code',N.uint),  # the ASCII byte value for the key (0 - 255)
+
+                    ('key_id',N.uint),      # the translated key ID, based on the keyboard local settings of the OS.
+
+                    ('key',N.str,12),       # a string representation of what key was pressed.
+                                            # Letters will always be upper case.
+
+                    ('char',N.str,1),       # the converted ascii code into a character. char will be upper
+                                            # or lower case depending on SHIFT key state.
+
+                    ('modifiers',N.uint8),  # indicates what modifier keys were active when the key was pressed.
+
+                    ('window_id',N.uint32)  # the id of the window that had focus when the key was pressed.
+                    ]
+    __slots__=[e[0] for e in _newDataTypes]
     def __init__(self,*args,**kwargs):
         kwargs['device_type']=EventConstants.DEVICE_TYPES['KEYBOARD_DEVICE']
         DeviceEvent.__init__(self,*args,**kwargs)
 
 class KeyboardKeyEvent(KeyboardEvent):
-    __slots__=[]
-
     EVENT_TYPE_STRING='KEYBOARD_KEY'
     EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING
-
+    __slots__=[]
     def __init__(self,*args,**kwargs):
         """
 
@@ -115,32 +125,27 @@ class KeyboardKeyEvent(KeyboardEvent):
         KeyboardEvent.__init__(self,*args,**kwargs)
 
 class KeyboardPressEvent(KeyboardKeyEvent):
-    __slots__=[]
-
+    """
+    A KeyboardPressEvent is generated when a key on a monitored keyboard is depressed.
+    The event is created prior to the keyboard key being released. If a key is held down for
+    an extended period of time, multiple KeyboardPressEvent events may be generated depending
+    on your OS and the OS's settings for key repeat event creation.
+    """
     EVENT_TYPE_STRING='KEYBOARD_PRESS'
-    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    EVENT_TYPE_ID=EventConstants.KEYBOARD_PRESS_EVENT
     IOHUB_DATA_TABLE=KeyboardKeyEvent.IOHUB_DATA_TABLE
-
+    __slots__=[]
     def __init__(self,*args,**kwargs):
-        """
-
-        :rtype : object
-        :param kwargs:
-        """
         KeyboardKeyEvent.__init__(self,*args,**kwargs)
 
 
 class KeyboardReleaseEvent(KeyboardKeyEvent):
-    __slots__=[]
-
+    """
+    A KeyboardReleaseEvent is generated when a key on a monitored keyboard is released.
+    """
     EVENT_TYPE_STRING='KEYBOARD_RELEASE'
-    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
+    EVENT_TYPE_ID=EventConstants.KEYBOARD_RELEASE_EVENT
     IOHUB_DATA_TABLE=KeyboardKeyEvent.IOHUB_DATA_TABLE
-
+    __slots__=[]
     def __init__(self,*args,**kwargs):
-        """
-
-        :rtype : object
-        :param kwargs:
-        """
         KeyboardKeyEvent.__init__(self,*args,**kwargs)

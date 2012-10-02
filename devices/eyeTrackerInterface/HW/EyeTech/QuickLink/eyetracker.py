@@ -11,20 +11,15 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import numpy as N
 import ioHub
-from ioHub.devices import Device, Computer
-from ioHub.devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
-import ioHub
-from ..... import Device,Computer
-from ....eye_events import *
+from ioHub.devices import Computer
+from .... import RTN_CODES, DATA_FILTER, DATA_STREAMS
+from .... import EyeTrackerInterface
 
-from .... import RTN_CODES,EYE_CODES,PUPIL_SIZE_MEASURES,DATA_TYPES,\
-              ET_MODES,CALIBRATION_TYPES,CALIBRATION_MODES,DATA_STREAMS,\
-              DATA_FILTER,USER_SETUP_STATES
 			  
 from ctypes import *
 from quicklink2 import  *      
 
-class EyeTracker(Device):
+class EyeTracker(EyeTrackerInterface):
     """
     EyeTracker class is the main class for the pyEyeTrackerInterface module,
     containing the majority of the eye tracker functionality commonly needed
@@ -75,46 +70,13 @@ class EyeTracker(Device):
     #. Syncronizing the Local Experiment timebase with the Eye Tracker Timebase, so Eye Tracker events can be provided with local time stamps when that is appropriate.
     #. Experiment Flow Generics
     """
-    
-    #: Used by pyEyeTrackerInterface implentations to store relationships between an eye 
-    #: trackers command names supported for pyEyeTrackerInterface sendCommand method and  
-    #: a private python function to call for that command. This allows an implemetation 
-    #: of the interface to expose functions that are not in the core pyEyeTrackerInterface spec 
-    #: without have to use the EXT extension class.
-    _COMMAND_TO_FUNCTION={}     
-    
-    _INSTANCE=None #: Holds the reference to the current instance of the EyeTracker object in use and ensures only one is created.
-
-    EXT=None  # IF Vendor specific extensioin of API must be done, create an extension of EyeTrackerVendorExtension class and add an instance of it here. 
-
-    _setupGraphics=None # instance of EyeTrackerSetupGraphics class, if supported
-
-    _latestSample=None
-    
-    eyeTrackerConfig=None # holds the configuration / settings dict for the device
-    displaySettings=None
-    
-    #  >>>> Class attributes used by parent Device class
-    DEVICE_START_TIME = 0.0 # Time to subtract from future device time reads. 
-                             # Init in Device init before any calls to getTime() 
-    
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
-    
-    newDataTypes=[]
-    baseDataType=Device.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
-    # <<<<<
-    
-    lastPollTime=0.0    
-    lastCallbackTime=0.0
-    
-    # >>> implementation specific private class attributes
+    # >>> Custom class attributes
     _DLL=None
+    # <<<
 
+    # >>> Overwritten class attributes
+    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
+    __slots__=[]
     # <<<
     def __init__(self,*args,**kwargs):
         """
@@ -128,7 +90,7 @@ class EyeTracker(Device):
 
            eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
 
-        where hub is the instance of the ioHubClient class that has been created for your experiment.
+        where hub is the instance of the ioHubConnection class that has been created for your experiment.
 
         **kwargs are an optional set of named parameters.
 
@@ -152,9 +114,9 @@ class EyeTracker(Device):
         deviceSettings= dict(instance_code=self.eyeTrackerConfig['instance_code'],
             category_id=ioHub.devices.EventConstants.DEVICE_CATERGORIES['EYE_TRACKER'],
             type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
-            user_label=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
+            name=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
             max_event_buffer_length=self.eyeTrackerConfig['event_buffer_length'])
-        Device.__init__(self,**deviceSettings)
+        EyeTrackerInterface.__init__(self,**deviceSettings)
         
         # set this instance as 'THE' instance of the eye tracker.
         EyeTracker._INSTANCE=self
@@ -578,7 +540,7 @@ class EyeTracker(Device):
             ioHubEvent = list()
             # put the ioHub eye tracker event IN ORDERED LIST FORM in devices buffer for pickup by the ioHub.
 
-            self.I_nativeEventBuffer.append(ioHubEvent)
+            self._nativeEventBuffer.append(ioHubEvent)
 
         EyeTracker.lastPollTime=loggedTime
     
@@ -611,7 +573,7 @@ class EyeTracker(Device):
         # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
         #
-        self.I_nativeEventBuffer.append((loggedTime,event))
+        self._nativeEventBuffer.append((loggedTime,event))
     
     @staticmethod    
     def _getIOHubEventObject(*args,**kwargs):

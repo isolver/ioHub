@@ -12,14 +12,15 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 import gevent
 from gevent.server import DatagramServer
 from gevent import Greenlet
-import os,sys,gc
-import time
-from operator import itemgetter, attrgetter
+import os,sys
+from operator import itemgetter
 from collections import deque
 import ioHub
-from ioHub.devices import Computer,computer
-currentMsec= Computer.currentMsec
-currentUsec= Computer.currentUsec
+from ioHub.devices import computer, DeviceEvent
+
+currentSec= computer.currentSec
+currentMsec= computer.currentMsec
+currentUsec= computer.currentUsec
 
 #noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
@@ -110,15 +111,18 @@ class udpServer(DatagramServer):
             self.sendResponse(edata,replyTo)
             
     def handleGetEvents(self,replyTo):
-        currentEvents=list(self.iohub.eventBuffer)
-        self.iohub.eventBuffer.clear()
+        try:
+            currentEvents=list(self.iohub.eventBuffer)
+            self.iohub.eventBuffer.clear()
 
-        if len(currentEvents)>0:
-            sorted(currentEvents, key=itemgetter(7))
-            self.sendResponse(('GET_EVENTS_RESULT',currentEvents),replyTo)
-        else:
-            self.sendResponse(('GET_EVENTS_RESULT', None),replyTo)
- 
+            if len(currentEvents)>0:
+                sorted(currentEvents, key=itemgetter(DeviceEvent.EVENT_HUB_TIME_INDEX))
+                self.sendResponse(('GET_EVENTS_RESULT',currentEvents),replyTo)
+            else:
+                self.sendResponse(('GET_EVENTS_RESULT', None),replyTo)
+        except:
+            ioHub.printExceptionDetailsToStdErr()
+
     def handleExperimentDeviceRequest(self,request,replyTo):
         request_type= request.pop(0)
         if request_type == 'EVENT_TX':
@@ -157,7 +161,7 @@ class udpServer(DatagramServer):
         elif request_type == 'GET_DEV_LIST':
             dev_list=[]
             for d in self.iohub.devices:
-                dev_list.append((d.user_label,d.instance_code,d.device_class))
+                dev_list.append((d.name,d.instance_code,d.device_class))
             self.sendResponse(('GET_DEV_LIST_RESULT',len(dev_list),dev_list),replyTo)
         elif request_type == 'GET_DEV_INTERFACE':
             dclass=request.pop(0)
@@ -169,9 +173,15 @@ class udpServer(DatagramServer):
             self.sendResponse(edata,replyTo)
             
     def sendResponse(self,data,address,printResponseInfo=False):
-        packet_data=self.pack(data)+'\r\n'
-        self.socket.sendto(packet_data,address)         
-    
+        packet_data=None
+        try:
+            packet_data=self.pack(data)+'\r\n'
+            self.socket.sendto(packet_data,address)
+        except:
+            ioHub.print2err('Error trying to send data to experiment process:')
+            ioHub.print2err('data:',data)
+            if packet_data:
+                ioHub.print2err('packet Data length: ',len(packet_data))
     def setExperimentInfo(self,experimentInfoList):
         if self.iohub.emrt_file:
             return self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList)           
@@ -188,7 +198,7 @@ class udpServer(DatagramServer):
         return l
 
     def currentSec(self):
-        return Computer.currentSec()
+        return currentSec()
 
     def currentMsec(self):
         return currentMsec()
@@ -197,40 +207,34 @@ class udpServer(DatagramServer):
         return currentUsec()
         
     def enableHighPriority(self,disable_gc=True):
-        ioHub.computer.enableHighPriority(disable_gc)
+        ioHub.devices.computer.enableHighPriority(disable_gc)
 
     def disableHighPriority(self):
-        ioHub.computer.disableHighPriority()
+        ioHub.devices.computer.disableHighPriority()
 
     def getProcessAffinity(self):
-        return ioHub.computer.getCurrentProcessAffinity()
+        return ioHub.devices.computer.getCurrentProcessAffinity()
 
     def setProcessAffinity(self, processorList):
-        return ioHub.computer.setCurrentProcessAffinity(processorList)
+        return ioHub.devices.computer.setCurrentProcessAffinity(processorList)
 
     def shutDown(self):
         import time
         self._running=False
         self.iohub._running=False
-        time.sleep(1.0)
         while len(self.iohub.deviceMonitors) > 0:
             m=self.iohub.deviceMonitors.pop(0)
             m.running=False
         self.clearEventBuffer()
         self.iohub.closeDataStoreFile()
         self.disableHighPriority()
-        time.sleep(1.0)
-            
         while len(self.iohub.devices) > 0:
             self.iohub.devices.pop(0)
-        
-        #for key in self.iohub.deviceDict:
-        #    self.iohub.deviceDict['key']=None
-        
+
         time.sleep(1)
         
         self.stop()
-        #self.close()
+
         
     def getProcessInfoString(self):
         return computer.getProcessInfoString()
@@ -388,6 +392,7 @@ class ioServer(object):
             else:
                 return False #('RPC_ERROR','createDataStoreFile','Only DataStore File Type "pytables" is currently Supported, not %s'%str(ftype)) 
         except Exception, err:
+            ioHub.printExceptionDetailsToStdErr()
             raise err
 
 
@@ -423,7 +428,7 @@ class ioServer(object):
 
 
 def run(configFilePath=None):
-    from yaml import load, dump
+    from yaml import load
     try:
         from yaml import CLoader as Loader, CDumper as Dumper
     except ImportError:

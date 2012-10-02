@@ -36,14 +36,15 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         eyetracker=self.hub.devices.tracker
         display=self.hub.devices.display
 
-        print "kb methods:",keyboard.getRemoteMethodNames()
-        print "mouse methods:",mouse.getRemoteMethodNames()
-        print "display methods:",display.getRemoteMethodNames()
-        print "tracker methods:",eyetracker.getRemoteMethodNames()
+        print "kb methods:",keyboard.getDeviceInterface()
+        print "mouse methods:",mouse.getDeviceInterface()
+        print "display methods:",display.getDeviceInterface()
+        print "tracker methods:",eyetracker.getDeviceInterface()
 
         #create a window
         pix_res=display.getScreenResolution()
-        mywin = visual.Window(pix_res,monitor="testMonitor", units="pix",fullscr=True)
+        screen_index=display.getScreenIndex()
+        mywin = visual.Window(pix_res,monitor="testMonitor", units="pix",fullscr=True,screen=screen_index)
         
         DIVIDER="-----------------------"
 
@@ -192,7 +193,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         print 'isConnected() 4:',eyetracker.isConnected()        
         print '\n\n'
         
-        mywin._close()
+        mywin.close()
 
         # save ioHubFile to xlsx format
         print "Saving Sample Excel File ...."

@@ -21,15 +21,10 @@ if computer.system == 'Windows':
     from __win32__ import ParallelPortWin32
     
     class ParallelPort(Device,ParallelPortWin32):
-        newDataTypes=[('base_address',N.uint32),('address_offset',N.uint32)]
-        baseDataType=Device.dataType
-        dataType=baseDataType+newDataTypes
-        attributeNames=[e[0] for e in dataType]
-        ndType=N.dtype(dataType)
-        fieldCount=ndType.__len__()
-        __slots__=[e[0] for e in newDataTypes]
-        categoryTypeString='DIGITAL_IO'
-        deviceTypeString='PARALLEL_PORT_DEVICE'
+        _newDataTypes=[('base_address',N.uint32),]
+        CATEGORY_LABEL='DIGITAL_IO'
+        DEVICE_LABEL='PARALLEL_PORT_DEVICE'
+        __slots__=[e[0] for e in _newDataTypes]
         def __init__(self,*args,**kwargs):
             """
             
@@ -39,17 +34,16 @@ if computer.system == 'Windows':
             """
             deviceConfig=kwargs['dconfig']
             deviceSettings={'instance_code':deviceConfig['instance_code'],
-                'category_id':EventConstants.DEVICE_CATERGORIES[ParallelPort.categoryTypeString],
-                'type_id':EventConstants.DEVICE_TYPES[ParallelPort.deviceTypeString],
+                'category_id':EventConstants.DEVICE_CATERGORIES[ParallelPort.CATEGORY_LABEL],
+                'type_id':EventConstants.DEVICE_TYPES[ParallelPort.DEVICE_LABEL],
                 'device_class':deviceConfig['device_class'],
-                'user_label':deviceConfig['name'],
+                'name':deviceConfig['name'],
                 'base_address':deviceConfig['base_address'],
-                'address_offset':0,
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
                 'max_event_buffer_length':deviceConfig['event_buffer_length']
                 }          
-            Device.__init__(self,**deviceSettings)
-            ParallelPortWin32.__init__(self,**deviceSettings)
+            Device.__init__(self,*args,**deviceSettings)
+            ParallelPortWin32.__init__(self,*args,**deviceSettings)
 
         def byte2hex(self, v):
             """
@@ -68,19 +62,11 @@ else:
 from .. import DeviceEvent
 
 class ParallelPortEvent(DeviceEvent):
-    newDataTypes = [('base_address',N.uint32),('address_offset',N.uint32),
-                                    ('current_value',N.uint8),('last_value', N.uint8)]
-    baseDataType=DeviceEvent.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
-
+    _newDataTypes = [('base_address',N.uint32),('current_value',N.uint8),('last_value', N.uint8)]
     EVENT_TYPE_STRING='TTL_INPUT'
     EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING
-
+    __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, *args, **kwargs):
         """
         
@@ -89,6 +75,3 @@ class ParallelPortEvent(DeviceEvent):
         :param kwargs: 
         """
         DeviceEvent.__init__(self, *args, **kwargs)
-
- 
-		

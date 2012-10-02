@@ -16,6 +16,7 @@ import platform
 from collections import deque
 from operator import itemgetter
 import psutil
+from ioHub import ioObject
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg, *args, **kwargs):
@@ -149,143 +150,20 @@ class Computer(object):
 Computer._instance=Computer()
 computer=Computer.getInstance()
 
-class ioObject(object):
-    newDataTypes=[]
-    baseDataType=[]
-    dataType=baseDataType+newDataTypes
-    attributeNames=[]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]+['I_np_array',]
-    def __init__(self,*args,**kwargs):
-        values=[]
-        for key in self.attributeNames:
-            value=kwargs[key]
-            setattr(self,key,value)
-            values.append(value)
-        self.I_np_array=N.array([tuple(values),],self.ndType)         
 
-    def _asList(self):
-        return self.I_np_array[0].tolist()
-
-    def _asNumpyArray(self):
-        return self.I_np_array
-        
-########### Base Abstract Device that all other Devices inherit from ##########
-
-class Device(ioObject):
-    DEVICE_INSTANCE_CODE_INDEX=0
-    DEVICE_CATEGORY_ID_INDEX=1
-    DEVICE_TYPE_ID_INDEX=2
-    DEVICE_CLASS_NAME_INDEX=3
-    DEVICE_USER_LABEL_INDEX=4
-    DEVICE_OS_CODE_INDEX=5
-    DEVICE_BUFFER_LENGTH_INDEX=6
-    BASE_DEVICE_MAX_ATTRIBUTE_INDEX=DEVICE_BUFFER_LENGTH_INDEX
-
-    newDataTypes=[('instance_code','a48'),('category_id','u1'),('type_id','u1'),('device_class','a24'),('user_label','a24'),('os_device_code','a64'),('max_event_buffer_length','u2')]
-    baseDataType=ioObject.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]+['I_nativeEventBuffer','I_eventListeners','I_ioHubEventBuffer']
-    DEVICE_TIMEBASE_TO_USEC=1.0
-    def __init__(self,*args,**kwargs):
-        ioObject.__init__(self,**kwargs)
-        self.I_ioHubEventBuffer=deque(maxlen=self.max_event_buffer_length)
-        self.I_nativeEventBuffer=deque(maxlen=self.max_event_buffer_length)
-        self.I_eventListeners=list()
-
-    def getEvents(self,**kwargs):
-        currentEvents=list(self.I_ioHubEventBuffer)
-        self.I_ioHubEventBuffer.clear()
-
-        if len(currentEvents)>0:
-            sorted(currentEvents, key=itemgetter(7))
-        return currentEvents
-    
-    def clearEvents(self):
-        self.I_ioHubEventBuffer.clear()
-        
-    def _handleEvent(self,e):
-        self.I_ioHubEventBuffer.append(e)
-        
-    def _getNativeEventBuffer(self):
-        return self.I_nativeEventBuffer
-    
-    def _addEventListener(self,l):
-        if l not in self.I_eventListeners:
-            self.I_eventListeners.append(l)
-    
-    def _removeEventListener(self,l):
-       if l in self.I_eventListeners:
-            self.I_eventListeners.remove(l)
-            
-    def _getEventListeners(self):
-        return self.I_eventListeners
-        
-    def _getRPCInterface(self):
-        rpcList=[]
-        dlist = dir(self)
-        for d in dlist:
-            if d[0] is not '_' and not d.startswith('I_'):
-                if callable(getattr(self,d)):
-                    rpcList.append(d)
-        return rpcList
-        
-########### Base Device Event that all other Device Events inherit from ##########
-
-class DeviceEvent(ioObject):
-    EVENT_EXPERIMENT_ID_INDEX=0
-    EVENT_SESSION_ID_INDEX=1
-    EVENT_ID_INDEX=2
-    EVENT_TYPE_ID_INDEX=3
-    EVENT_DEVICE_INSTANCE_CODE_INDEX=4
-    EVENT_DEVICE_TIME_INDEX=5
-    EVENT_LOGGED_TIME_INDEX=6
-    EVENT_HUB_TIME_INDEX=7
-    EVENT_CONFIDENCE_INTERVAL_INDEX=8
-    EVENT_DELAY_INDEX=9
-    BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_DELAY_INDEX
-
-    IOHUB_DATA_TABLE=None
-
-    newDataTypes=[('experiment_id','u4'),('session_id','u4'),('event_id','u8'),('event_type','u1'),
-                  ('device_instance_code','a48'),('device_time','u8'), ('logged_time', 'u8'), ('hub_time','u8'),
-                  ('confidence_interval', 'f4'),('delay', 'f4')]
-    baseDataType=ioObject.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    defaultValueDict=None
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes] 
-    def __init__(self,*args,**kwargs):
-        ioObject.__init__(self,**kwargs)
-                   
-    def __cmp__(self,other):
-        return self.hub_time-other.hub_time
-        
-    def hubTime(self):
-        return self.hub_time
-
-    @classmethod
-    def createFromOrderedList(cls,eventValueList):
-        combo = zip(cls.attributeNames,eventValueList)
-        kwargs = dict(combo)
-        return cls(**kwargs)
+####################### Device & DeviceEvent Constants ########################
 
 class _EventConstantsBase(object):
-    UNDEFINED_EVENT_EVENT=0
-    MESSAGE_EVENT_EVENT=1
+    UNDEFINED_EVENT=0
+    MESSAGE_EVENT=1
     KEYBOARD_KEY_EVENT =20
     KEYBOARD_PRESS_EVENT =21
     KEYBOARD_RELEASE_EVENT =22
-    MOUSE_BUTTON_EVENT =30
-    MOUSE_PRESS_EVENT =31
-    MOUSE_RELEASE_EVENT =32
-    MOUSE_DOUBLE_CLICK_EVENT =33
+    MOUSE_EVENT=30
+    MOUSE_BUTTON_EVENT =31
+    MOUSE_PRESS_EVENT =32
+    MOUSE_RELEASE_EVENT =33
+    MOUSE_DOUBLE_CLICK_EVENT =34
     MOUSE_WHEEL_EVENT =35
     MOUSE_WHEEL_UP_EVENT =36
     MOUSE_WHEEL_DOWN_EVENT =37
@@ -344,94 +222,105 @@ class _EventConstantsBase(object):
     NETWORK_DEVICE = 35
     OTHER_DEVICE  = 2048
 
+    MOUSE_BUTTON_STATE_RELEASED=0 # a button was released
+    MOUSE_BUTTON_STATE_PRESSED=1 # a button was pressed
+    MOUSE_BUTTON_STATE_DOUBLE_CLICK=2 # a button double click event
+
+    MOUSE_BUTTON_ID_NONE=0
+    MOUSE_BUTTON_ID_LEFT=1
+    MOUSE_BUTTON_ID_RIGHT=2
+    MOUSE_BUTTON_ID_MIDDLE=4
+
     EVENT_TYPES = dict(UNDEFINED=0,
-                        MESSAGE =1,
-                        KEYBOARD_KEY =20,
-                        KEYBOARD_PRESS =21,
-                        KEYBOARD_RELEASE =22,
-                        MOUSE_BUTTON =30,
-                        MOUSE_PRESS =31,
-                        MOUSE_RELEASE =32,
-                        MOUSE_DOUBLE_CLICK =33,
-                        MOUSE_WHEEL =35,
-                        MOUSE_WHEEL_UP =36,
-                        MOUSE_WHEEL_DOWN =37,
-                        MOUSE_MOVE =39,
-                        JOYSTICK_BUTTON=50,
-                        JOYSTICK_BUTTON_PRESS =51,
-                        JOYSTICK_BUTTON_RELEASE =52,
-                        JOYSTICK_POSITION_X =53,
-                        JOYSTICK_POSITION_Y =54,
-                        BUTTON_BOX_PRESS =61,
-                        BUTTON_BOX_RELEASE =62,
-                        TTL_INPUT =71,
-                        EYE_SAMPLE =101,
-                        BINOC_EYE_SAMPLE =102,
-                        FIXATION_START =106,
-                        FIXATION_END =108,
-                        SACCADE_START =111,
-                        SACCADE_END =112,
-                        BLINK_START =116,
-                        BLINK_END =117)
+        MESSAGE =1,
+        KEYBOARD_KEY =20,
+        KEYBOARD_PRESS =21,
+        KEYBOARD_RELEASE =22,
+        MOUSE=30,
+        MOUSE_BUTTON =31,
+        MOUSE_PRESS =32,
+        MOUSE_RELEASE =33,
+        MOUSE_DOUBLE_CLICK =34,
+        MOUSE_WHEEL =35,
+        MOUSE_WHEEL_UP =36,
+        MOUSE_WHEEL_DOWN =37,
+        MOUSE_MOVE =39,
+        JOYSTICK_BUTTON=50,
+        JOYSTICK_BUTTON_PRESS =51,
+        JOYSTICK_BUTTON_RELEASE =52,
+        JOYSTICK_POSITION_X =53,
+        JOYSTICK_POSITION_Y =54,
+        BUTTON_BOX_PRESS =61,
+        BUTTON_BOX_RELEASE =62,
+        TTL_INPUT =71,
+        EYE_SAMPLE =101,
+        BINOC_EYE_SAMPLE =102,
+        FIXATION_START =106,
+        FIXATION_END =108,
+        SACCADE_START =111,
+        SACCADE_END =112,
+        BLINK_START =116,
+        BLINK_END =117)
 
     DEVICE_TYPES = dict( UNKNOWN_DEVICE  = 0,
-                     KEYBOARD_DEVICE  =1,
-                     MOUSE_DEVICE  =2,
-                     KB_MOUSE_COMBO_DEVICE  =3,
-                     TOUCH_PAD_DEVICE  = 5,
-                     TOUCH_SCREEN_DEVICE  = 6,
-                     DISPLAY_DEVICE  = 7,
-                     EYE_TRACKER_DEVICE  = 8,
-                     EXPERIMENT_DEVICE  = 9,
-                     BUTTON_BOX_DEVICE  = 10,
-                     JOYSTICK_DEVICE  = 11,
-                     AUDIO_CAPTURE_DEVICE  = 12,
-                     AUDIO_RECORING_DEVICE = 13,
-                     VIDEO_CAPTURE_DEVICE  = 14,
-                     VIDEO_RECORDING_DEVICE = 15,
-                     HAPTIC_FEEDBACK_DEVICE  = 16,
-                     COMPUTER_DEVICE  = 17,
-                     PARALLEL_PORT_DEVICE  = 18,
-                     TTL_INPUT_DEVICE  = 19,
-                     TTL_OUTPUT_DEVICE  = 20,
-                     TTL_IO_DEVICE  = 21,
-                     A2D_INPUT_DEVICE  = 22,
-                     D2A_OUTPUT_DEVICE  = 23,
-                     ANALOG_IO_DEVICE  = 24,
-                     GPIO_DEVICE  = 25,
-                     PHOTOSENSOR_DEVICE = 26,
-                     IR_MEASUREMENT_DEVICE = 27,
-                     ARTIFICIAL_EYE_DEVICE = 28,
-                     SPEAKER_DEVICE  = 29,
-                     AMPLIFIER_DEVICE  = 30,
-                     EEG_DEVICE  = 31,
-                     MRI_DEVICE  = 32,
-                     MEG_DEVICE  = 33,
-                     SERIAL_DEVICE = 34,
-                     NETWORK_DEVICE = 35,
-                     OTHER_DEVICE  = 2048)
+        KEYBOARD_DEVICE  =1,
+        MOUSE_DEVICE  =2,
+        KB_MOUSE_COMBO_DEVICE  =3,
+        TOUCH_PAD_DEVICE  = 5,
+        TOUCH_SCREEN_DEVICE  = 6,
+        DISPLAY_DEVICE  = 7,
+        EYE_TRACKER_DEVICE  = 8,
+        EXPERIMENT_DEVICE  = 9,
+        BUTTON_BOX_DEVICE  = 10,
+        JOYSTICK_DEVICE  = 11,
+        AUDIO_CAPTURE_DEVICE  = 12,
+        AUDIO_RECORING_DEVICE = 13,
+        VIDEO_CAPTURE_DEVICE  = 14,
+        VIDEO_RECORDING_DEVICE = 15,
+        HAPTIC_FEEDBACK_DEVICE  = 16,
+        COMPUTER_DEVICE  = 17,
+        PARALLEL_PORT_DEVICE  = 18,
+        TTL_INPUT_DEVICE  = 19,
+        TTL_OUTPUT_DEVICE  = 20,
+        TTL_IO_DEVICE  = 21,
+        A2D_INPUT_DEVICE  = 22,
+        D2A_OUTPUT_DEVICE  = 23,
+        ANALOG_IO_DEVICE  = 24,
+        GPIO_DEVICE  = 25,
+        PHOTOSENSOR_DEVICE = 26,
+        IR_MEASUREMENT_DEVICE = 27,
+        ARTIFICIAL_EYE_DEVICE = 28,
+        SPEAKER_DEVICE  = 29,
+        AMPLIFIER_DEVICE  = 30,
+        EEG_DEVICE  = 31,
+        MRI_DEVICE  = 32,
+        MEG_DEVICE  = 33,
+        SERIAL_DEVICE = 34,
+        NETWORK_DEVICE = 35,
+        OTHER_DEVICE  = 2048)
 
     EVENT_CLASSES=dict()
 
     DEVICE_CATERGORIES={
-                    1:'KEYBOARD',
-                    2:'MOUSE',
-                    4:'VISUAL_STIMULUS_PRESENTER',
-                    8:'VIRTUAL',
-                    16:'DIGITAL_IO',
-                    #        32:'DA_CONVERTER',
-                    #        64:'AD_CONVERTER',
-                    #        128:'BUTTON_BOX',
-                    256:'JOYSTICK',
-                    #        512:'SPEAKER',
-                    #        1024:'AMPLIFIER',
-                    #        2048:'MICROPHONE',
-                    4096:'EYE_TRACKER',
-                    #        8192:'EEG',
-                    #        16384:'MRI',
-                    #        32768:'MEG',
-                    18446744073709551616:'OTHER'
-                }
+        0:'UNKNOWN',
+        1:'KEYBOARD',
+        2:'MOUSE',
+        4:'VISUAL_STIMULUS_PRESENTER',
+        8:'VIRTUAL',
+        16:'DIGITAL_IO',
+        #        32:'DA_CONVERTER',
+        #        64:'AD_CONVERTER',
+        #        128:'BUTTON_BOX',
+        256:'JOYSTICK',
+        #        512:'SPEAKER',
+        #        1024:'AMPLIFIER',
+        #        2048:'MICROPHONE',
+        4096:'EYE_TRACKER',
+        #        8192:'EEG',
+        #        16384:'MRI',
+        #        32768:'MEG',
+        18446744073709551616:'OTHER'
+    }
 
     _prepped=False
     def __init__(self):
@@ -478,6 +367,246 @@ class _EventConstantsBase(object):
     @staticmethod
     def GetKeyState(key_id):
         return None
+
+class EventConstants(_EventConstantsBase):
+    def __init__(self):
+        EventConstants.__init__(self)
+
+########### Base Abstract Device that all other Devices inherit from ##########
+
+class Device(ioObject):
+    """
+    The Device class is the base class for all ioHub Device types.
+    Any ioHub Device class (i.e Keyboard Device, Mouse Device, etc)
+    also include the methods and attributes of this class.
+    """
+    DEVICE_INSTANCE_CODE_INDEX=0
+    DEVICE_CATEGORY_ID_INDEX=1
+    DEVICE_TYPE_ID_INDEX=2
+    DEVICE_CLASS_NAME_INDEX=3
+    DEVICE_USER_LABEL_INDEX=4
+    DEVICE_OS_CODE_INDEX=5
+    DEVICE_BUFFER_LENGTH_INDEX=6
+    DEVICE_MAX_ATTRIBUTE_INDEX=DEVICE_BUFFER_LENGTH_INDEX
+
+    # Multiplier to use to convert this devices event time stamps to usec format.
+    # This is set by the author of the device class or interface implementation.
+    DEVICE_TIMEBASE_TO_USEC=1.0
+
+    # The device category label. Should be one of the string keys in EventConstants.DEVICE_CATEGORIES,
+    # the value of which is the category id. This is set by the author of the device class
+    # or interface implementation.
+    CATEGORY_LABEL='UNKNOWN'
+
+    # The device type label. Should be one of the string keys in EventConstants.DEVICE_TYPES,
+    # the value of which is the device type id. This is set by the author of the device class
+    # or interface implementation.
+    DEVICE_LABEL='UNKNOWN_DEVICE'
+
+    _baseDataTypes=ioObject._baseDataTypes
+    _newDataTypes=[('instance_code',N.str,48),  # The instance code assigned to the device. User defined.
+                                                # The devices serial number is a good candidate for this. It
+                                                # must be unique within and between experiment sites.
+
+                   ('category_id',N.uint8),     # The id of the device category for the device type.
+                                                # = EventConstants.DEVICE_CATERGORIES[CATEGORY_LABEL]
+
+                   ('type_id',N.uint8),         # The id of the device type = EventConstants.DEVICE_TYPES[DEVICE_LABEL]
+
+                   ('device_class',N.str,24),   # The name of the Device Class used to create an instance
+                                                # of this device type. = self.__class__.__name__
+
+                   ('name',N.str,24),           # The name given to this device instance. User Defined. Should be
+                                                # unique within all devices of the same type_id for a given experiment.
+
+                   ('os_device_code',N.str,64), # If the device can be associated with a unique OS level identifier
+                                                # the string rep. of that could be entered here. This would allow for
+                                                # consistent mappings between device names and physical devices if
+                                                # > 1 device of a given type_id is in use.
+                                                # CURRENTLY NOT USED
+
+                   ('max_event_buffer_length',N.uint16) # The maximum size of the device level event buffer for this
+                                                        # device instance. If the buffer becomes full, when a new event
+                                                        # is added, the oldest event in the buffer is removed.
+                ]
+
+
+    __slots__=[e[0] for e in _newDataTypes]+['_nativeEventBuffer','_eventListeners','_ioHubEventBuffer']
+    def __init__(self,*args,**kwargs):
+        ioObject.__init__(self,*args,**kwargs)
+        self._ioHubEventBuffer=deque(maxlen=self.max_event_buffer_length)
+        self._nativeEventBuffer=deque(maxlen=self.max_event_buffer_length)
+        self._eventListeners=list()
+
+    def getEvents(self,**kwargs):
+        """
+        Returns any DeviceEvents that have occurred since the last call to the devices getEvents() or
+        clearEvents() methods.
+
+        Note that calling the ioHub Server level getEvents() or clearEvents() methods does *not* effect
+        device level event buffers.
+
+        Args:
+            kwargs (dict): dictionary of parameter key, value object pairs.
+
+        Return (tuple): a list of lists, with each inner list being an ordered list of event attribute
+                        values, as would be taken by the events constructor, representing an event related
+                        to this device type. If no events are available, an empty list is returned.
+
+                        getEvents() clears the device event buffer after getting the event list, so
+                        duplicate events are never received.
+        """
+        currentEvents=list(self._ioHubEventBuffer)
+        self._ioHubEventBuffer.clear()
+
+        if len(currentEvents)>0:
+            sorted(currentEvents, key=itemgetter(DeviceEvent.EVENT_HUB_TIME_INDEX))
+        return currentEvents
+    
+    def clearEvents(self):
+        """
+        Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+        or clearEvents() methods.
+
+        Note that calling the ioHub Server level getEvents() or clearEvents() methods does *not*
+        effect device level event buffers.
+
+        Args: None
+        Return: None
+        """
+        self._ioHubEventBuffer.clear()
+        
+    def _handleEvent(self,e):
+        self._ioHubEventBuffer.append(e)
+        
+    def _getNativeEventBuffer(self):
+        return self._nativeEventBuffer
+    
+    def _addEventListener(self,l):
+        if l not in self._eventListeners:
+            self._eventListeners.append(l)
+    
+    def _removeEventListener(self,l):
+       if l in self._eventListeners:
+            self._eventListeners.remove(l)
+            
+    def _getEventListeners(self):
+        return self._eventListeners
+
+########### Base Device Event that all other Device Events inherit from ##########
+
+class DeviceEvent(ioObject):
+    """
+    The DeviceEvent class is the base class for all ioHub DeviceEvent types.
+
+    Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseWheelUpEvent, MouseButtonDownEvent,
+    KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of
+    the DeviceEvent class.
+    """
+    EVENT_EXPERIMENT_ID_INDEX=0
+    EVENT_SESSION_ID_INDEX=1
+    EVENT_ID_INDEX=2
+    EVENT_TYPE_ID_INDEX=3
+    EVENT_DEVICE_INSTANCE_CODE_INDEX=4
+    EVENT_DEVICE_TIME_INDEX=5
+    EVENT_LOGGED_TIME_INDEX=6
+    EVENT_HUB_TIME_INDEX=7
+    EVENT_CONFIDENCE_INTERVAL_INDEX=8
+    EVENT_DELAY_INDEX=9
+    BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_DELAY_INDEX
+
+    # The string label for the given DeviceEvent type. Should be one of the string keys in
+    # EventConstants.EVENT_TYPES, the value of which is the event type id. This is set by
+    # the author of the event class implementation.
+    EVENT_TYPE_STRING='UNDEFINED_EVENT'
+
+    # The type id int for the given DeviceEvent type. Should be one of the int values in
+    # EventConstants.EVENT_TYPES, = EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]. This is set by
+    # the author of the event class implementation.
+    EVENT_TYPE_ID=EventConstants.UNDEFINED_EVENT
+
+    # The name of the hdf5 table used to store events of this type in the ioDataStore pytables file.
+    # This is set by the author of the event class implementation.
+    IOHUB_DATA_TABLE=None
+
+    _baseDataTypes=ioObject._baseDataTypes
+    _newDataTypes=[
+                ('experiment_id',N.uint32), # The ioDataStore experiment ID assigned to the experiment code
+                                            # specified in the experiment configuration file for the experiment.
+
+                ('session_id',N.uint32),    # The ioDataStore session ID assigned to the currently running
+                                            # experiment session. Each time the experiment script is run,
+                                            # a new session id is generated for use within the hdf5 file.
+
+                ('event_id',N.uint64),      # The id assigned to the current device event instance. Every device
+                                            # event generated by monitored devices during an experiment session is
+                                            # assigned a unique id, starting from 0 for each session, incrementing
+                                            # by +1 for each new event.
+
+                ('event_type',N.uint8),     # The type id for the event. This is used to create DeviceEvent objects
+                                            # or dictionary representations of an event based on the data from an
+                                            # event value list.
+
+                ('device_instance_code',N.str,48), # The instance_code of the device that generated the event.
+
+                ('device_time',N.uint64),   # If the device that generates the given device event type also time stamps
+                                            # events, this field is the time of the event as given by the device,
+                                            # converted to usec for consistancy with all other ioHub device times.
+                                            # If the device that generates the given event type does not time stamp
+                                            # events, then the device_time is set to the logged_time for the event.
+
+                ('logged_time', N.uint64),  # The usec time that the event was 'received' by the ioHub Server Process.
+                                            # For devices that poll for events, this is the usec time that the poll
+                                            # method was called for the device and the event was retrieved. For
+                                            # devices that use the event callback, this is the usec time the callback
+                                            # executed and accept the event.
+
+                ('hub_time',N.uint64),      # The hub_time is in the normalized time base that all events share,
+                                            # regardless of device type. hub_time is calculated differently depending
+                                            # on the device and perhaps event types.
+                                            # The hub_time is what should be used when comparing times of events across
+                                            # different devices.
+
+                ('confidence_interval', N.float32), # This property attempts to give a sense of the amount to which
+                                                    # the event time may be off relative to the true time the event
+                                                    # occurred. confidence_interval is calculated differently depending
+                                                    # on the device and perhaps event types. In general though, the
+                                                    # smaller the confidence_interval, the more likely it is that the
+                                                    # calculated hub_time of the event is correct. For devices where
+                                                    # a realistic confidence_interval can not be calculated,
+                                                    # for example if the event device delay is unknown, then a value
+                                                    # of 0.0 should be used. Valid confidence_interval values are
+                                                    # in usec and will range from 1.0 usec and higher.
+
+                ('delay',N.float32)         # The delay of an event is the known (or estimated) delay from when the
+                                            # real world event occurred to when the ioHub received the event for
+                                            # processing. This is often called the real-time end-to-end delay
+                                            # of an event. If the delay for an event can not be reasonably estimated
+                                            # or is not known, a delay of 0.0 is set. Delays are in usec.nsec and valid
+                                            # values will range from 1.0 and higher.
+                ]
+    __slots__=[e[0] for e in _newDataTypes]
+    def __init__(self,*args,**kwargs):
+        ioObject.__init__(self,*args,**kwargs)
+                   
+    def __cmp__(self,other):
+        return self.hub_time-other.hub_time
+
+    @staticmethod
+    def createEventFromParamList(eventParamList):
+        """
+        Create a DeviceEvent subclass using the eventValueList as the values for the event attributes.
+
+        Args:
+            eventParamList (tuple): an ordered list of event attribute values, ordered based on how the
+                                    DeviceEvent constructor specifies them.
+        Return (DeviceEvent): a DeviceEvent instance of the correct DeviceEvent Class type based on the
+                              'event_type' element of the eventParamList, which is
+                              eventParamList[DeviceEvent.EVENT_TYPE_ID_INDEX]
+        """
+        eclass=EventConstants.EVENT_CLASSES[eventParamList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+        return eclass.createObjectFromParamList(*eventParamList)
+
 
 
 # Windows Version of Constants Class
@@ -576,7 +705,7 @@ if computer.system == 'Windows':
 
 import keyboard as keyboard_module
 from keyboard import Keyboard
-from keyboard import KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
+from keyboard import KeyboardEvent,KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
 
 import mouse as mouse_module
 from mouse import Mouse

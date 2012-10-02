@@ -47,7 +47,7 @@ Any issues or questions, please let me know.
 """
 
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, visual
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime
 
 class ExperimentRuntime(SimpleIOHubRuntime):
     """
@@ -66,22 +66,22 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         By running your script within an extension of the SimpleIOHubRuntime class's run method, you automatically
         get access to some nice features:
 
-        #. The ioHub Client class is accessable by calling self.hub . So to get all currently available events from the
+        #. The ioHub Client class is accessible by calling self.hub . So to get all currently available events from the
          ioHub event buffer, simply call events = self.hub.getEvents(). There is also a shortcut method, so you can simply call self.getEvents()
          to achieve the same thing, or self.getEvents('kb') to get keyboard events if you named your keyboard device 'kb'.
         #. To clear an event buffer, call getEvents(), as it also clears the buffer, or call self.clearEvents() to clear the global
         event buffer, or self.clearEvents('kb') to clear the keyboard devices event buffer only, assuming you named your keyboard 'kb'.
         #. All devices that have been specified in the iohub .yaml config file are available via self.hub.devices.[device_name]
-        where [device_name] is the name of the device you sepified in the config file. So to get all keyboard events since
+        where [device_name] is the name of the device you specified in the config file. So to get all keyboard events since
         the last call to the keyboard device event buffer, you can call kb_events=self.hub.devices.keyboard.getEvents(),
         assuming you named the keyboard device 'keyboard'
         #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
         is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
-        #. If you need to pause the execution of your program for a period of time, but want events to be occationally sent from the
+        #. If you need to pause the execution of your program for a period of time, but want events to be occasionally sent from the
         ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
         has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
         #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubClient class, which is what is at the end of self.hub.
+        the docs for the ioHubConnection class, which is what is at the end of self.hub.
 
         Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
         improvement are very welcome too, please email me at sds-git@isolver-software.com .
@@ -96,11 +96,9 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #
         # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
 
-		print "HELLO WORLD"
-		
-        ### End of experiment logic
+        print "Hello World"
 
-##################################################################
+        ### End of experiment logic
 
 def main(configurationDirectory):
     """

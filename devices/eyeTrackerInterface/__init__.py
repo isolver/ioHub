@@ -103,5 +103,7 @@ class FilterLevel(Enum):
         Enum.__init__(self)
 DATA_FILTER = FilterLevel()
 
-from eye_events import *
+import eye_events
+import InterfaceClasses
+from InterfaceClasses import EyeTrackerInterface
 import HW

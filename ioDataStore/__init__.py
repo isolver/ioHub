@@ -89,9 +89,9 @@ cores in your machine or, when your machine has many of them (e.g. > 4),
 perhaps one less than this.  < S. Simpson Note: These are 'not' GIL bound
 threads and therefore actually improve performance > """
 
-EMRT_FILE_VERSION = '0.7 Alpha'
+EMRT_FILE_VERSION = '0.8 Alpha'
 EMRT_SCHEMA_AUTHORS='Sol Simpson'
-EMRT_SCHEMA_MODIFIED_DATE='September 26, 2012'
+EMRT_SCHEMA_MODIFIED_DATE='October 1st, 2012'
 
         
 class EMRTpyTablesFile():
@@ -131,9 +131,7 @@ class EMRTpyTablesFile():
         # create event tables
         self.TABLES['KEYBOARD_KEY']=self.emrtFile.root.data_collection.events.keyboard.KeyboardKeyEvent
 
-        self.TABLES['MOUSE_MOVE']=self.emrtFile.root.data_collection.events.mouse.MouseMoveEvent
-        self.TABLES['MOUSE_WHEEL']=self.emrtFile.root.data_collection.events.mouse.MouseWheelEvent
-        self.TABLES['MOUSE_BUTTON']=self.emrtFile.root.data_collection.events.mouse.MouseButtonEvent
+        self.TABLES['MOUSE']=self.emrtFile.root.data_collection.events.mouse.MouseEvent
 
         self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonEvent
 
@@ -145,8 +143,7 @@ class EMRTpyTablesFile():
         self.TABLES['EYE_SAMPLE']=self.emrtFile.root.data_collection.events.eye_tracker.MonocularEyeSample     
         self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.root.data_collection.events.eye_tracker.BinocularEyeSample     
         self.TABLES['FIXATION_START']=self.emrtFile.root.data_collection.events.eye_tracker.FixationStartEvent     
-        #self.TABLES['FIXATION_UPDATE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixatonUpdateEvent', D.FixatonUpdateEvent.ndType, title='Fixation Update Events')     
-        self.TABLES['FIXATION_END']=self.emrtFile.root.data_collection.events.eye_tracker.FixationEndEvent     
+        self.TABLES['FIXATION_END']=self.emrtFile.root.data_collection.events.eye_tracker.FixationEndEvent
         self.TABLES['SACCADE_START']=self.emrtFile.root.data_collection.events.eye_tracker.SaccadeStartEvent     
         self.TABLES['SACCADE_END']=self.emrtFile.root.data_collection.events.eye_tracker.SaccadeEndEvent     
         self.TABLES['BLINK_START']=self.emrtFile.root.data_collection.events.eye_tracker.BlinkStartEvent     
@@ -160,33 +157,33 @@ class EMRTpyTablesFile():
         self.emrtFile.root.SCHEMA_MODIFIED=EMRT_SCHEMA_MODIFIED_DATE
         
         #CREATE GROUPS
-        self.emrtFile.createGroup(self.emrtFile.root, 'documentation', title='Documents related to how to use the EMRT system and user documents about experiments held within this file')
-        self.emrtFile.createGroup(self.emrtFile.root, 'implementation', title='Experiment Source Files and Resources needed to Run Experiments')
+        #self.emrtFile.createGroup(self.emrtFile.root, 'documentation', title='Documents related to how to use the EMRT system and user documents about experiments held within this file')
+        #self.emrtFile.createGroup(self.emrtFile.root, 'implementation', title='Experiment Source Files and Resources needed to Run Experiments')
         self.emrtFile.createGroup(self.emrtFile.root, 'data_collection', title='Data Collected from Experiment Sessions')
         self.emrtFile.createGroup(self.emrtFile.root, 'analysis', title='Data Analysis Files, notebooks, scripts and saved results tables.')
-        self.emrtFile.createGroup(self.emrtFile.root, 'logistics', title='Information on the members and sires involved in the experiments represented in this file.')
+        #self.emrtFile.createGroup(self.emrtFile.root, 'logistics', title='Information on the members and sires involved in the experiments represented in this file.')
         self.emrtFile.createGroup(self.emrtFile.root, 'logs', title='Logging Data')
 
-        self.emrtFile.flush()
+        self.flush()
  
-        self.emrtFile.createGroup(self.emrtFile.root.implementation, 'scripts', title='Source Experiment Script Files')
-        self.emrtFile.createGroup(self.emrtFile.root.implementation, 'resources', title='Resource Files Used within the Experiment')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation, 'scripts', title='Source Experiment Script Files')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation, 'resources', title='Resource Files Used within the Experiment')
 
-        self.emrtFile.flush()
+        #self.emrtFile.flush()
         
-        self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'images', title='Images used in the Experiments')
-        self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'audio', title='Audio files used in the Experiments')
-        self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'video', title='Video files used in the Experiments')
-        self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'condition_files', title='Condition Files used in thee experiments.images')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'images', title='Images used in the Experiments')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'audio', title='Audio files used in the Experiments')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'video', title='Video files used in the Experiments')
+        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'condition_files', title='Condition Files used in thee experiments.images')
         
-        self.emrtFile.flush()
+        #self.emrtFile.flush()
         
-        self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'experiments', title='Information about each experiment saved in this file.')
-        self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'sessions', title='Information about each experiment session run and saved in this file.')
-        self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'participants', title='Information about each participant that was employed in atleast on session in this file.')
+        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'experiments', title='Information about each experiment saved in this file.')
+        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'sessions', title='Information about each experiment session run and saved in this file.')
+        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'participants', title='Information about each participant that was employed in atleast on session in this file.')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'events', title='Events that occurred and were saved during the experiments.')
         
-        self.emrtFile.flush()
+        self.flush()
 
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'experiment', title='Experiment Generated Events')
         self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'keyboard', title='Keyboard Created Events')
@@ -206,26 +203,24 @@ class EMRTpyTablesFile():
         self.TABLES['LOG_TABLE']=self.emrtFile.createTable(self.emrtFile.root.logs,'ExperimentLog', ExperimentLog, title='Experiment Logging Data')
         
         # create event tables
-        self.TABLES['KEYBOARD_KEY']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardKeyEvent', D.KeyboardKeyEvent.ndType, title='Keyboard Key Event Logging.')
+        self.TABLES['KEYBOARD_KEY']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardKeyEvent', D.KeyboardKeyEvent.NUMPY_DTYPE, title='Keyboard Key Event Logging.')
 
-        self.TABLES['MOUSE_MOVE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseMoveEvent', D.MouseMoveEvent.ndType, title='Mouse Move Event Logging.')
-        self.TABLES['MOUSE_WHEEL']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseWheelEvent', D.MouseWheelEvent.ndType, title='Mouse Wheel Event Logging.')
-        self.TABLES['MOUSE_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseButtonEvent', D.MouseButtonEvent.ndType, title='Mouse Button Event Logging.')
+        self.TABLES['MOUSE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseEvent', D.MouseEvent.NUMPY_DTYPE, title='Mouse Event Logging.')
 
-        self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonEvent', D.JoystickButtonEvent.ndType, title='Joystick Button Event Logging.')
+        self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonEvent', D.JoystickButtonEvent.NUMPY_DTYPE, title='Joystick Button Event Logging.')
 
-        self.TABLES['TTL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.ndType, title='Parallel Port Event Logging.')
+        self.TABLES['TTL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.NUMPY_DTYPE, title='Parallel Port Event Logging.')
 
-        self.TABLES['MESSAGE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'Message', D.MessageEvent.ndType, title='Experiment Message Event Logging.')
+        self.TABLES['MESSAGE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.experiment,'Message', D.MessageEvent.NUMPY_DTYPE, title='Experiment Message Event Logging.')
 
-        self.TABLES['EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'MonocularEyeSample', D.MonocularEyeSample.ndType, title='Monocular Eye Samples')     
-        self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BinocularEyeSample', D.BinocularEyeSample.ndType, title='Binocular Eye Samples')     
-        self.TABLES['FIXATION_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationStartEvent', D.FixationStartEvent.ndType, title='Fixation Start Events')     
-        self.TABLES['FIXATION_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationEndEvent', D.FixationEndEvent.ndType, title='Fixation End Events')
-        self.TABLES['SACCADE_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeStartEvent', D.SaccadeStartEvent.ndType, title='Saccade Start Events')     
-        self.TABLES['SACCADE_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeEndEvent', D.SaccadeEndEvent.ndType, title='Saccade End Events')     
-        self.TABLES['BLINK_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkStartEvent', D.BlinkStartEvent.ndType, title='Blink Start Events')     
-        self.TABLES['BLINK_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkEndEvent', D.BlinkEndEvent.ndType, title='Blink End Events')     
+        self.TABLES['EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'MonocularEyeSample', D.MonocularEyeSample.NUMPY_DTYPE, title='Monocular Eye Samples')
+        self.TABLES['BINOC_EYE_SAMPLE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BinocularEyeSample', D.BinocularEyeSample.NUMPY_DTYPE, title='Binocular Eye Samples')
+        self.TABLES['FIXATION_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationStartEvent', D.FixationStartEvent.NUMPY_DTYPE, title='Fixation Start Events')
+        self.TABLES['FIXATION_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'FixationEndEvent', D.FixationEndEvent.NUMPY_DTYPE, title='Fixation End Events')
+        self.TABLES['SACCADE_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeStartEvent', D.SaccadeStartEvent.NUMPY_DTYPE, title='Saccade Start Events')
+        self.TABLES['SACCADE_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'SaccadeEndEvent', D.SaccadeEndEvent.NUMPY_DTYPE, title='Saccade End Events')
+        self.TABLES['BLINK_START']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkStartEvent', D.BlinkStartEvent.NUMPY_DTYPE, title='Blink Start Events')
+        self.TABLES['BLINK_END']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.eye_tracker,'BlinkEndEvent', D.BlinkEndEvent.NUMPY_DTYPE, title='Blink End Events')
          
 
         self.flush()
@@ -248,7 +243,7 @@ class EMRTpyTablesFile():
         logline['text']=text
 
         logline.append()
-        self.TABLES['LOG_TABLE'].flush()
+        self.flush()
     
           
     def createOrUpdateExperimentEntry(self,experimentInfoList):
@@ -301,18 +296,17 @@ class EMRTpyTablesFile():
                 if sess_id is None:
                     sess_id=0
 
-                self.log(ioHub.highPrecisionTimer(),"Experiment or Session ID is None, event not being saved: "+str(event),loggingLevels.WARNING,exp_id, sess_id)
+                self.log(int(ioHub.highPrecisionTimer()*100000),"Experiment or Session ID is None, event not being saved: "+str(event),loggingLevels.WARNING,exp_id, sess_id)
                 return
+            etype=event[3]
 
-            eventClass=EventConstants.EVENT_CLASSES[event[3]]
-
+            eventClass=EventConstants.EVENT_CLASSES[etype]
             etable=self.TABLES[eventClass.IOHUB_DATA_TABLE]
 
             event[0]=self.active_experiment_id
             event[1]=self.active_session_id
 
-            np_array= N.array([tuple(event),],dtype=eventClass.ndType) #event._asNumpyArray()
-
+            np_array= N.array([tuple(event),],dtype=eventClass.NUMPY_DTYPE)
 
             etable.append(np_array)
 
@@ -320,20 +314,22 @@ class EMRTpyTablesFile():
             # flush only occurs when command is sent to ioHub, so do nothing here.
             if self.flushCounter>=0:
                 if self.flushCounter==0:
-                    self.emrtFile.flush()
+                    self.flush()
                     return
                 if self.flushCounter==self._eventCounter:
-                    self.emrtFile.flush()
+                    self.flush()
                     self._eventCounter=0
                     return
                 self._eventCounter+=1
         except ioHub.ioHubError, e:
             ioHub.printExceptionDetailsToStdErr()
     def flush(self):
-        self.emrtFile.flush()
-        
+        try:
+            self.emrtFile.flush()
+        except:
+            ioHub.printExceptionDetailsToStdErr()
     def close(self):
-        self.emrtFile.flush()
+        self.flush()
         self.emrtFile.close()
         
     def __del__(self):

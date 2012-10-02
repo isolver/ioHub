@@ -77,7 +77,7 @@ udpPort: 9000
 #                      buffer to make room for new ones.
 #
 # - stream_events: Enables events from this device being included in events sent when the
-#   ioHubClient calls getEvents()
+#   ioHubConnection calls getEvents()
 #
 # - save_events: Enables saving of events to file, based on the ioDataStore config settings.
 #
@@ -119,6 +119,8 @@ monitor_devices:
         psychopy_config_file: unknown
         # what ccordinate space shoule databe rported in (pixels, degrees, etc)
         reporting_unit_type: pixels
+        # display index for multi display setups, valid values are 0 or 1. (primary or seconday display)
+        display_index: 0
         # - width and height of calibration plane in mm
         calibration_surface_dimensions:
             width: 500
@@ -155,7 +157,8 @@ monitor_devices:
         #   i.e. True == head is fixed, False == head is free to move
         head_stationary: True          
     - device:
-        device_class: eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
+        #device_class: eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
+        device_class: eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker
         name: tracker
         instance_code: et_serial_number
         saveEvents: True

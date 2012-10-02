@@ -21,15 +21,9 @@ import unit_conversions as ucs
 vis_degrees,screen_res,ppd=None,None,None
 
 class Display(Device):
-    newDataTypes=[]
-    baseDataType=Device.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
     _displayCoordinateType=None
-    categoryTypeString='VISUAL_STIMULUS_PRESENTER'
-    deviceTypeString='DISPLAY_DEVICE'
+    CATEGORY_LABEL='VISUAL_STIMULUS_PRESENTER'
+    DEVICE_LABEL='DISPLAY_DEVICE'
     _user32=ctypes.windll.user32
     _settings=None
     ccordinateTypes={'pix':('pixels','pix','pixs','pixel'),     # - You can also specify the size and location of your stimulus in pixels. Obviously this has the disadvantage that
@@ -56,21 +50,21 @@ class Display(Device):
                                                                 # Requires : information about the screen width in cm and size in pixels Assumes : pixels are square. Can be verified by drawing
                                                                 # a stimulus with matching width and height and verifying that it is in fact square. For a CRT this can be controlled by setting
                                                                 # the size of the viewable screen (settings on the monitor itself). Requires : No monitor information
-                     
+    __slots__=[]
     def __init__(self,*args,**kwargs):
         Display._settings=kwargs['dconfig']
         deviceSettings={'instance_code':self._settings['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Display.categoryTypeString],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Display.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Display.CATEGORY_LABEL],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Display.DEVICE_LABEL],
             'device_class':self._settings['device_class'],
-            'user_label':self._settings['name'],
+            'name':self._settings['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':16
             }
 
         self._determineDisplayCoordSpace()
         self._createPsychopyCalibrationFile()
-        Device.__init__(self,**deviceSettings)
+        Device.__init__(self,*args,**deviceSettings)
 
     def _createPsychopyCalibrationFile(self):
         from psychopy import monitors
@@ -153,14 +147,25 @@ class Display(Device):
     @classmethod
     def getScreenResolution(cls):
         """
+        Get the monitor's current pixel resolution based on the current graphics mode.
 
-        :rtype : list
+        Args: None
+        Return (list): (width,height) of the monitor based on it's current graphics mode.
         """
         #  >> WIN32_ONLY
         r= cls._user32.GetSystemMetrics(0), cls._user32.GetSystemMetrics(1)
         #  << WIN32_ONLY
         return r
 
+    @staticmethod
+    def getScreenIndex():
+        """
+        Get the index of display to use when creating the full screen window in multi display physical setups.
+
+        Args: None
+        Return (int): index of display in multi display psychical setups
+        """
+        return Display._settings.get('display_index',0)
 
     def _poll(self):
         pass

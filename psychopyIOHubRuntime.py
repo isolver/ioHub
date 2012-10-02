@@ -10,19 +10,16 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from __future__ import division
-from __builtin__ import unicode, file, repr, dict, object, staticmethod, zip, str
-from exceptions import Exception, ImportError
 import psychopy
-#noinspection PyUnresolvedReferences
 from psychopy import  core, gui, visual
-import os,gc,psutil
+import os
 from collections import deque
 import time
-from yaml import load
 import ioHub
-from ioHub.devices import computer,highPrecisionTimer,EventConstants
+from ioHub.devices import computer,EventConstants, DeviceEvent
 
 try:
+    from yaml import load
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     print "*** Using Python based YAML Parsing"
@@ -31,18 +28,18 @@ except ImportError:
 
 class SimpleIOHubRuntime(object):
     """
-    SimpleIOHubRuntime is a utility class that is used to 'bind' the ioHub framework to psychopy in an easy to use way,
-    hiding many of the internal complexities of the implementation and making it as easy to use within a psychopy script
-    as possible.
+    SimpleIOHubRuntime is a utility class that is used to 'bind' the ioHub framework to the PsychoPy API in an easy to use way,
+    hiding many of the internal complexities of the implementation and making it as simple to use within a PsychoPy script
+    as possible. That is the *intent* anyway.
 
     The SimpleIOHubRuntime class is intended to be extended in a user script, with the .run() method being implemented with
-    the actual contents of the main body of the experiment. As an example, a simpleExperiment.py file could be created and contain
+    the actual contents of the main body of the experiment. As an example, a run.py file could be created and contain
     the following code as a minimal implementation of using the SimpleIOHubRuntime to combine psychopy and ioHub functionality
-    to display a window and wait for a key press to _close the window and terminate the experminent. The source file and .yaml
+    to display a window and wait for a key press to close the window and terminate the experiment. The source file and .yaml
     config files for this simple example can be found in ioHub/examples/simple :
 
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, visual
+from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime
 
 class ExperimentRuntime(SimpleIOHubRuntime):
     def __init__(self,configFileDirectory, configFile):
@@ -52,16 +49,20 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         ###
         #
         # Your experiment logic start here. You can do anything you would in a standard psychopy script.
-        # You can even import a psychopy script and just call a fucntion in it to run it if you wanted
+        # You can even import a psychopy script and just call a function in it to run it if you wanted
         #
 
         #
-        # See ioHub/examples/simple/simpleTest.py for an example implementation of the contents for a run method.
+        # See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
         #
+
+        print "Starting Experiment Script..."
+
+        # ....
+
+        print "Completed Experiment Script..."
 
         ### End run method / end of experiment logic
-
-##################################################################
 
 def main(configurationDirectory):
     #
@@ -80,12 +81,15 @@ def main(configurationDirectory):
     runtime.start()
 
 if __name__ == "__main__":
+    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
     #
-    # Using if __name__ == "__main__": ensures that this logic will only be run if the file is run from a commond prompt
-    # or from executed from an interactive shell. If the file is imported as a module the code will not run. i.e. the experiment will not run.
-    #
+    # The module_directory function determines what the current directory is of the function that is passed to it. It is
+    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
     configurationDirectory=ioHub.module_directory(main)
+
+    # run the main function, which starts the experiment runtime
     main(configurationDirectory)
+
 
 ################################## End of Stub Example SimpleIOHubRuntime implementation ###############################
 
@@ -97,7 +101,7 @@ actually save time and work in the end. Comments and feedback on this would be h
 The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
 a command prompt at the ioHub/examples/simple folder and type:
 
-    python.exe simpleTest.py
+    python.exe run.py
 
     """
     def __init__(self, configFilePath, configFile):
@@ -147,7 +151,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         self.sessionUserVariables=self.experimentSessionDefaults['user_variables']
         del self.experimentSessionDefaults['user_variables']
         
-        # self.hub will hold the reference to the ioHubClient object, used to access the ioHubServer
+        # self.hub will hold the reference to the ioHubConnection object, used to access the ioHubServer
         # process and devices.
         self.hub=None
         # holds events collected from the ioHub during periods like msecWait()
@@ -170,16 +174,16 @@ a command prompt at the ioHub/examples/simple folder and type:
         and should not be called directly.
         """
         if 'ioHub' in self.configuration and self.configuration['ioHub']['enable'] is True:
-            from ioHub.client import ioHubClient
+            from ioHub.client import ioHubConnection
 
             ioHubConfigFileName=unicode(self.configuration['ioHub']['config'])
             ioHubConfigAbsPath=os.path.join(self.configFilePath,unicode(ioHubConfigFileName))
             self.ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
 
 
-            self.hub=ioHubClient(self.ioHubConfig,ioHubConfigAbsPath)
+            self.hub=ioHubConnection(self.ioHubConfig,ioHubConfigAbsPath)
  
-            self.hub.startServer()
+            self.hub._startServer()
             self.hub._calculateClientServerTimeOffset(500)
             # Is ioHub configured to be run in experiment?
             if self.hub:
@@ -187,7 +191,7 @@ a command prompt at the ioHub/examples/simple folder and type:
                 # display a read only dialog verifying the experiment parameters 
                 # (based on the experiment .yaml file) to be run. User can hit OK to continue,
                 # or Cancel to end the experiment session if the wrong experiment was started.
-                exitExperiment=self.displayExperimentSettingsDialog()
+                exitExperiment=self._displayExperimentSettingsDialog()
                 if exitExperiment:
                     print "User Cancelled Experiment Launch."
                     self._close()
@@ -196,12 +200,12 @@ a command prompt at the ioHub/examples/simple folder and type:
             
             
                 # send experiment info and set exp. id
-                self.hub.sendExperimentInfo(self.experimentConfig)
+                self.hub._sendExperimentInfo(self.experimentConfig)
                 
                 # display editable session variable dialog displaying the ioHub required session variables
                 # and any user defined session variables (as specified in the experiment config .yaml file)
                 # User can enter correct values and hit OK to continue, or Cancel to end the experiment session.
-                exitExperiment=self.displayExperimentSessionSettingsDialog()
+                exitExperiment=self._displayExperimentSessionSettingsDialog()
                 if exitExperiment:
                     print "User Cancelled Experiment Launch."
                     self._close()
@@ -211,7 +215,7 @@ a command prompt at the ioHub/examples/simple folder and type:
                 # send session data to ioHub and get session ID (self.hub.sessionID)
                 tempdict= self.experimentSessionDefaults
                 tempdict['user_variables']=self.sessionUserVariables
-                self.hub.sendSessionInfo(tempdict)
+                self.hub._sendSessionInfo(tempdict)
 
                 # create a local 'thin' representation of the registered ioHub devices,
                 # allowing such things as device level event access (if supported) 
@@ -261,110 +265,179 @@ a command prompt at the ioHub/examples/simple folder and type:
 
     def enableHighPriority(self,disable_gc=True,ioHubServerToo=False):
         """
-        sets the priority of the experiment process to high prority
+        Sets the priority of the experiment process to high priority
         and optionally (default is true) disable the python GC. This is very
         useful for the duration of a trial, for example, where you enable at
         start of trial and disable at end of trial. Improves Windows
-        sloppyness greatly in general.
+        sloppiness greatly in general.
+
+        Args:
+            disable_gc(bool): True = Turn of the Python Garbage Collector. False = Leave the Garbage Collector running.
+                              Default: True
+            ioHubServerToo(bool): True = Also set the ioHub Process to High Priority. False = Do not change the ioHub Process Priority.
+                              Default: False
+
+        Return: None
         """
         self.sysutil.enableHighPriority(disable_gc)
         if self.hub and ioHubServerToo is True:
-            self.hub.sendToHub(('RPC','enableHighPriority'))
+            self.hub.sendToHubServer(('RPC','enableHighPriority'))
 
     def disableHighPriority(self,ioHubServerToo=False):
         """
-        Sets the priority of the experiment process back to normal prority
-        and enables the python GC. This is very useful for the duration of a trial,
-        for example, where you call enableHighPriority() at
+        Sets the priority of the Experiment Process back to normal priority
+        and enables the python GC. In general you would call enableHighPriority() at
         start of trial and call disableHighPriority() at end of trial.
-        Improves Windows sloppyness greatly in general.
+
+        Args:
+            ioHubServerToo(bool): True = Also set the ioHub Process to High Priority.
+                                  False = Do not change the ioHub Process Priority.
+                                  Default: False
+
+        Return: None
         """
         self.sysutil.disableHighPriority()
         if self.hub and ioHubServerToo is True:
-            self.hub.sendToHub(('RPC','disableHighPriority'))
+            self.hub.sendToHubServer(('RPC','disableHighPriority'))
 
     def getSystemProcessorCount(self):
         """
-        Returns the number of parallel processes the computer can carry out at once. I say 'parallel processes' because
-        this number includes cpu count, cores per cpu, and hyperthreads per cpu (which is at most 2 I believe). So If you
-        have an i5 dual core system with hyperthreading enabled, this method will report 2x2=4 for the count. So 'getSystemProcessorCount'
-         really = cpu_count * cores_per_cpu * hypertheads_per_core
+        Returns the number of parallel processes the computer can carry out at once.
+        I say 'parallel processes' because this number includes cpu count, cores per cpu,
+        and hyper-threads per cpu (which is at most 2 I believe). So perhaps it would be better to
+        call this method *getSystemProcessingUnitCount*. For example, if you have an i5 dual core
+        system with hyper-threading enabled, this method will report 2x2=4 for the count. So
+        *getSystemProcessorCount* really = cpu_count * cores_per_cpu * hypertheads_per_core
 
-        If you have a dual CPU, quad core hyperthreaded system (first, can I be your friend) and second, this method
-        would report 2 x 4 x 2 = 16 for the count.
+        If you have a dual CPU, quad core hyper-threaded system (first, can I be your friend)
+        and second, this method would report 2 x 4 x 2 = 16 for the count.
 
-        It is true that all of these levels of 'parallel processing' can not perform processing in parallel at all times,
-        particularly hyperthreads, and multiple cores and even cpus can be blocked if a shared i/o resource is being used by one,
+        It is true that all of these levels of 'parallel processing' can not perform processing
+        in parallel at all times, particularly hyper-threads. Even multiple cores and cpu's can
+        blocked each other if a shared i/o resource is being used by one,
         blocking the other. (Very simply put I am sure) ;)
+
+        Args: None
+
+        Return: (int) The number of processing units the current computer has.
+
         """
         return self.sysutil.cpuCount
 
     def getProcessAffinities(self):
         """
-        Returns the experimentProcessAffinity , ioHubProcessAffinity; each as a list of 'processor' id's (from 0 to getSystemProcessorCount()-1)
-        that the relevent process is able to run on.
+        Returns the experiment Process Affinity list, ioHub Process Affinity list. Each as a list of
+        'processor' id's (from 0 to getSystemProcessorCount()-1) that the relevant process is able to
+        run on.
 
-        For example, on a 2 core CPU with typerthreading, the possible 'processor' list would be [0,1,2,3], and by default both the
-        experiment and ioHub server processes can run on any of these 'processors', so the method would return:
+        For example, on a 2 core CPU with hyper-threading, the possible 'processor' list would be
+        [0,1,2,3], and by default both the experiment and ioHub processes can run on any of these
+        'processors', so:
 
-          [0,1,2,3], [0,1,2,3]
 
-        If setProcessAffinities was used to set the experiment process to core 1 (index 0) and the ioHub server process to
-        core 2 (index 1), with each using both hyper threads of the given core, the set call would look like:
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
 
-          setProcessAffinities([0,1],[2,3])
+            >> [0,1,2,3], [0,1,2,3]
 
-        and and subsequent call to getProcessAffinities() would return:
 
-          [0,1],[2,3]
+        If setProcessAffinities was used to set the experiment process to core 1 (index 0 and 1)
+        and the ioHub server process to core 2 (index 2 and 3), with each using both hyper threads
+        of the given core, the set call would look like:
 
-        assuming the set was successful.
 
-        If the ioHub is not being used, then only the experiment process affinity list will be returned and None will be
-        returned for the ioHub process affinity: i.e.
+            self.setProcessAffinities([0,1],[2,3])
 
-          [0,1,2,3], None
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1], [2,3]
+
+
+        If the ioHub is not being used (i.e self.hub == None), then only the experiment
+        process affinity list will be returned and None will be returned for the
+        ioHub process affinity:
+
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1,2,3], None
 
         But in this case, why are you using this utility class? ;)
+
+        Args: None
+        Return (tuple,tuple): the current experiment Process Affinity list, ioHub Process Affinity list
         """
         if self.hub is None:
             return self.sysutil.getCurrentProcessAffinity(),None
         return self.sysutil.getCurrentProcessAffinity(),self.hub._psutil_server_process.get_cpu_affinity()
 
-    def setProcessAffinities(self,experimentProcessorList, ioHubProcessList=None):
+    def setProcessAffinities(self,experimentProcessorList, ioHubProcessorList=None):
         """
-        Sets the experimentProcessAffinity , ioHubProcessAffinity; each as a list of 'processor' id's (from 0 to getSystemProcessorCount()-1)
-        that the relevent process is able to run on.
+        Sets the experimentProcessAffinity , ioHubProcessAffinity; each as a list of 'processor' id's
+        (from 0 to getSystemProcessorCount()-1) that the relevant process is able to run on.
 
-        For example, on a 2 core CPU with typerthreading, the possible 'processor' list would be [0,1,2,3], and by default both the
-        experiment and ioHub server processes can run on any of these 'processors', so to have both processes have all processors available
-        (which is the default), you would call:
+        For example, on a 2 core CPU with hyper-threading, the possible 'processor' list would be [0,1,2,3],
+        and by default both the experiment and ioHub server processes can run on any of these 'processors',
+        so to have both processes have all processors available (which is the default), you would call:
 
-          setProcessAffinities([0,1,2,3], [0,1,2,3])
+            self.setProcessAffinities([0,1,2,3], [0,1,2,3])
+
+            # check the process affinities
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1,2,3], [0,1,2,3]
 
         based on the above CPU example.
 
-        If setProcessAffinities was used to set the experiment process to core 1 (index 0) and the ioHub server process to
-        core 2 (index 1), with each using both hyper threads of the given core, the set call would look like:
+        If setProcessAffinities was used to set the experiment process to core 1 (index 0,1) and the ioHub server
+        process to core 2 (index 2,3), with each using both hyper threads of the given core,
+        the set call would look like:
 
-          setProcessAffinities([0,1],[2,3])
+            self.setProcessAffinities([0,1],[2,3])
+
+            # check the process affinities
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1], [2,3]
+
+        Args:
+            experimentProcessorList(tuple): set the experiment process affinity based on processing unit indexes
+            ioHubProcessorList(tuple): set the ioHub process affinity based on processing unit indexes. Default for ioHubProcessorList
+                                       is None, which means do not set the ioHub process affinity.
+
+        Return: None
         """
         self.sysutil.setCurrentProcessAffinity(experimentProcessorList)
-        if self.hub and ioHubProcessList:
-            self.hub._psutil_server_process.set_cpu_affinity(ioHubProcessList)
+        if self.hub and ioHubProcessorList:
+            self.hub._psutil_server_process.set_cpu_affinity(ioHubProcessorList)
 
     def autoAssignAffinities(self):
         """
-        Auto sets the experiment process and ioHub server process processor affinities based on same very simple logic.
-        It is not known at this time if the implementation of this method makes any sense in terms of actually improving
-        performance. Field tests and feedaback will to occur, based on which the algorithm can be improved.
+        Auto sets the experiment process and ioHub process processor affinities based on some
+        very simple logic.
 
-        Currently, if the system is detected to have 1 processing unit or greater than 8 processing units, nothing is done
-        by the method.
-        For a system that has two processing units, the experiment process is assigned to index 0, ioHub Server assigned to 1.
-        For a system that has four processing units, the experiment process is assigned to index's 0,1, ioHub Server assigned to 1,2.
-        For a system that has eight processing units, the experiment process is assigned to index 2,3 ioHub Server assigned to 4,5
-        and all other processes are attempted to be assigned to indexes 0,1,6,7
+        It is not known at this time if the implementation of this method makes any sense in terms of
+        actually improving performance. Field tests and feedback will need to occur, based on which
+        the algorithm can be improved.
+
+        Currently, if the system is detected to have 1 processing unit, or greater than 8 processing units,
+        nothing is done by the method.
+
+        For a system that has two processing units, the PsychoPy Process is assigned to index 0,
+        ioHub Process assigned to 1.
+
+        For a system that has four processing units, the Experiment Process is assigned to index's 0,1
+        and the ioHub Process assigned to 2,3.
+
+        For a system that has eight processing units, the PsychoPy Process is assigned to index 2,3
+        ioHub Server assigned to 4,5. All other processes running on the OS are attempted to be
+        assigned to indexes 0,1,6,7.
+
+        Args: None
+        Return: None
         """
         cpu_count=self.sysutil.cpuCount
         print "System processor count:", cpu_count
@@ -383,38 +456,72 @@ a command prompt at the ioHub/examples/simple folder and type:
 
     def currentSec(self):
         """
-        Returns the current sec.msec time of the system. On Windows this is implemented by directly calling the Windows
-        QPC fucntions in ctypes (TODO: move to clib for max performance). This is done so that no offset is allied to the
-        timebase based on when the first call to the python time function was called, which will differer between processes
-        since they do not start at exactly the same time. By having a 0 offset timebase, both interpreters have a totally
-        common bimebase to share.
+        Returns the current sec.msec time of the system. On Windows this is implemented by directly
+        calling the Windows QPC functions using ctypes (TODO: move to clib for max performance).
+        This is done so that no offset is applied to the timebase based on when the first call to the
+        python time function was called, which will differed between PsychoPy and ioHub Processes
+        since they do not start at exactly the same time.
+        By having a 0 offset time-base, both interpreters have a totally common / shared time-base to use.
+        This means that either process knows the current time of the other process,
+        since they are the same. ;)
 
-        For other OS's, right now the timeit.base_timer fucntion is used, which as of python 2.7 correctly selects the
-        best high resolution clock for the OS the interpreter is running on.
+        For other OS's, right now the timeit.base_timer function is used, which as of python 2.7
+        correctly selects the best high resolution clock for the OS the interpreter is running on.
+
+        Args: None
+        Returns (float/double): sec.msec time
         """
         return self.currentTime()
 
     def currentMsec(self):
         """
-        Returns the current msec.usec time. This is simply calling currentTime()*1000.0 as a convience method.
+        Returns the current msec.usec time. This is simply calling currentSec()*1000.0
+        as a convenience method.
+
+        Args: None
+        Returns (float/double): msec.usec time
         """
         return self.currentTime()*1000.0
 
     def currentUsec(self):
         """
-        Returns the current usec.nsec time. This is simply calling currentTime()*1000000.0 as a convience method.
+        Returns the current usec.nsec time. This is simply calling currentSec()*1000000.0
+        as a convenience method.
+
+        Args: None
+        Returns (float/double): usec.nsec time
         """
         return self.currentTime()*1000000.0
 
-    def msecDelay(self,msecDelay,checkHubInterval=10):
+    def msecDelay(self,msecDelay,checkHubInterval=10.0):
         """
-        Pause the experiment execution for msec.usec interval, will checking the ioHub for any new events and rerieving
-        them every 'checkHubInterval' msec during the delay. Any events that are gathered during the delay period will
-        be handed to the experiment the next time self.getEvents() is called, unless self.clearEvents() before name.
+        Pause the experiment execution for msec.usec interval, while checking the ioHub for
+        any new events and retrieving them every 'checkHubInterval' msec during the delay. Any events
+        that are gathered during the delay period will be handed to the experiment the next time
+        self.getEvents() is called, unless self.clearEvents() beforehand.
 
-        It is important to allow the ioHub server to be monitored for events during long delaying in program execution,
-        as if a getEvents() request is made that contains too many events to fit in the maximum UDP patcket size of the
-        system, an error will occur and the events will be lost. (TODO: Support multipacket UDP messages, already in bug tracker)
+        It is important to allow the PyschoPy Process to periodically either call self.getEvents() events
+        during long delaying in program execution, as if a self.getEvents() request is made that
+        results in too many events being sent in the reply to fit in the maximum UDP packet size of the
+        system, an error will occur and the events will be lost.
+
+        Another option is to call self.clearEvents() after any long delays between calls to
+        self.getEvents() or self.clearEvents() if you do not need any events received by the
+        ioHub prior to the call. This will clear the ioHub event buffer so the next call to
+        self.getEvents() will not overflow.
+
+        (TODO: Support multi-packet UDP messages, already in bug tracker, so that this issue
+        will never occur.)
+
+        Args:
+            msecDelay (float/double): the msec.usec period that the PsychoPy Process should wait
+                              before returning from the function call.
+            checkHubInterval (float/double): the msec.usec interval after which any ioHub
+                              events will be retrieved (by calling self.getEvents) and stored
+                              in a local buffer. This is repeated every checkHubInterval msec until
+                              the method completes. Default is every 10.0 msec.
+
+        Return(float/double): actual duration of delay in msec.usec format.
         """
         stime=self.currentMsec()
         targetEndTime=stime+msecDelay
@@ -444,24 +551,38 @@ a command prompt at the ioHub/examples/simple folder and type:
                 pass
                 
         return self.currentMsec()-stime
-    
+
     def getEvents(self,deviceLabel=None,asType='dict'):
         """
-        Retrieve any events that have been collected by the ioHub server from monitored devices since the last call to getEvents
-        or since the last call to clearEvents(). By defaults all events for all monitored devices are returned, with each
-        event being represented as a dictionary of event attributes. When events are retieved from an event buffer,
+        Retrieve any events that have been collected by the ioHub server from monitored devices
+        since the last call to getEvents() or since the last call to clearEvents().
+
+        By default all events for all monitored devices are returned, with each event being
+        represented as a dictionary of event attributes. When events are retrieved from an event buffer,
         they are removed from the buffer as well.
 
         Args:
-            deviceLabel (str): if specified, indicates to only retieve events for the device with the associated label name. None returns all device events.
-            asType (str): indicated how events should be represnted when they are returned.
-            Natively, events are sent from the ioHub server as lists or ordered attributes. This is the most efficient
-            for data transmission, but not for readability. If you do want events to be kept in list form, set asType = 'list'.
-            asType = 'dict' (the default) converts the events lists to event dictionaries. This process is quite fast so the
-            conversion time is usually worth if given the huge benifit in usability within your program.
-            asType = 'object' converts the events to their ioHub DeviceObject form. This can take a bit of time if the event list
-            is long and currently there is not much benifit in doing so vs. treating events as dictionaries. This may change in
-            the future. For now, it is suggested that the default, asType='dict' setting be used.
+            deviceLabel (str): optional : if specified, indicates to only retrieve events for
+                         the device with the associated label name. None (default) returns
+                         all device events.
+            asType (str): optional : indicated how events should be represented when they are returned.
+                         Default: 'dict'
+                Events are sent from the ioHub Process as lists of ordered attributes. This is the most
+                efficient for data transmission, but not for readability.
+
+                If you do want events to be kept in list form, set asType = 'list'.
+
+                Setting asType = 'dict' (the default) converts the events lists to event dictionaries.
+                This process is quite fast so the small conversion time is usually worth it given the
+                huge benefit in usability within your program.
+
+                Setting asType = 'object' converts the events to their ioHub DeviceEvent class form.
+                This can take a bit of time if the event list is long and currently there is not much
+                benefit in doing so vs. treating events as dictionaries. This may change in
+                the future. For now, it is suggested that the default, asType='dict' setting be kept.
+
+        Return (tuple): returns a list of event objects, where the object type is defined by the
+                'asType' parameter.
         """
         if self.hub:
             r=None
@@ -494,19 +615,22 @@ a command prompt at the ioHub/examples/simple folder and type:
                         return events
                     
                     return r
-                
+
     def clearEvents(self,deviceLabel=None):
         """
-        Clears all events from the global event buffer, or if deviceLabel is not None, clears the events only from a specific device event buffer.
+        Clears all events from the global event buffer, or if deviceLabel is not None,
+        clears the events only from a specific device event buffer.
         When the global event buffer is cleared, device level event buffers are not effected.
 
         Args:
-            devicelabel: name of the device which should have it's event buffer cleared. If None (the default), the device
-            wide event buffer is cleared and device level event buffers are not changed.
+            devicelabel (str): name of the device that should have it's event buffer cleared.
+                         If None (the default), the device wide event buffer is cleared
+                         and device level event buffers are not changed.
+        Return: None
         """
         if self.hub:
             if deviceLabel is None:
-                self.hub.sendToHub(('RPC','clearEventBuffer'))
+                self.hub.sendToHubServer(('RPC','clearEventBuffer'))
                 self.allEvents=[]
             else:
                 d=self.hub.deviceByLabel[deviceLabel]
@@ -519,37 +643,50 @@ a command prompt at the ioHub/examples/simple folder and type:
         ioHub.devices.DeviceEvent subclass for the given event type.
         """
         eclass=EventConstants.EVENT_CLASSES[eventValueList[3]]
-        combo = zip(eclass.attributeNames,eventValueList)
+        combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
         kwargs = dict(combo)
         return eclass(**kwargs)
 
     @staticmethod
     def _eventListToDict(eventValueList):
         """
-        Convert an ioHub event that is current represented as an orderded list of values, and return the event as a
+        Convert an ioHub event that is current represented as an ordered list of values, and return the event as a
         dictionary of attribute name, attribute values for the object.
         """
-        eclass=EventConstants.EVENT_CLASSES[eventValueList[3]]
-        combo = zip(eclass.attributeNames,eventValueList)
+        eclass=EventConstants.EVENT_CLASSES[eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+        combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
         return dict(combo)
          
     def run(self,*args,**kwargs):
         """
         The run method is what gets calls when the SimpleIOHubRuntime.start method is called. The run method is intended
-        to be over written by your extension class and shound include your experiment / program logic. By default it does nothing.
+        to be over written by your extension class and should include your experiment / program logic. By default it does nothing.
+
+        Args:
+            *args: list of unnamed input variables passed to method
+            **kwargs: dictionary of named variables passed to method. Variable names are the dict keys.
+
+        Return: None
         """
         pass
 
     def start(self):
         """
-        The start method should be called by the main prtion of your experiment script. This method simply wraps a call
-        to the run method in an exception handler that tries to ensure any error that occurs is printed out in detail,
-        and that the ioHub server process is terminates even in the case of an expection have may not been handled
-        explicitedly in your scipt.
+        The start method should be called by the main portion of your experiment script.
+        This method simply wraps a call to self.run() in an exception handler that tries to
+        ensure any error that occurs is printed out in detail, and that the ioHub server process
+        is terminates even in the case of an exception that may not have been handled explicitly
+        in your script.
+
+        Args: None
+        Return: None
         """
         try:
             self.run()
-        except ioHub.ioHubError("Error running experimeniment."):
+        except ioHub.ioHubError, ioe:
+            print 'ioHub.ioHubError:',str(ioe)
+            self.printExceptionDetails()
+        except:
             self.printExceptionDetails()
         finally:
             # _close ioHub, shut down ioHub process, clean-up.....
@@ -562,11 +699,11 @@ a command prompt at the ioHub/examples/simple folder and type:
         """
         # terminate the ioServer
         if self.hub:
-            self.hub.shutDownServer()
+            self.hub._shutDownServer()
         # terminate psychopy
         core.quit()
         
-    def displayExperimentSettingsDialog(self):
+    def _displayExperimentSettingsDialog(self):
         """
         Display a read-only dialog showing the experiment setting retrieved from the configuration file. This gives the
         experiment operator a chance to ensure the correct configuration file was loaded for the script being run. If OK
@@ -577,10 +714,10 @@ a command prompt at the ioHub/examples/simple folder and type:
             return False
         return True
 
-    def displayExperimentSessionSettingsDialog(self):
+    def _displayExperimentSessionSettingsDialog(self):
         """
         Display an editable dialog showing the experiment session setting retrieved from the configuration file.
-        This includes the few manditory ioHub experiment session attributes, as well as any user defined experiment session
+        This includes the few mandatory ioHub experiment session attributes, as well as any user defined experiment session
         attributes that have been defined in the experiment configuration file. If OK is selected in the dialog,
         the experiment logic continues, otherwise the experiment session is terminated.
         """
@@ -603,9 +740,9 @@ a command prompt at the ioHub/examples/simple folder and type:
     @staticmethod    
     def printExceptionDetails():
         """
-        prints out stack stace info for an excption in multiple ways.
-        No idea if all of this is needed, infact I know it is not. But for now why not.
-        Taken straight from the python manual on Exceptions.
+        Prints out stack trace info for the last exception in multiple ways.
+        No idea if all of this is needed, in fact I know it is not. But for now why not.
+        Taken straight from the python 2.7.3 manual on Exceptions.
         """
         import sys, traceback
         exc_type, exc_value, exc_traceback = sys.exc_info()

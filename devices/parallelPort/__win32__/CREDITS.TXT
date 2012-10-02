@@ -1,4 +1,18 @@
-I found this solution on http://www.downtowndougbrown.com/, so all 
-credit goes to Doug Brown for finding the solution and posting it. Thanks!
+Thanks to Nate Vack for posting the solution he found for getting pport to work on win64 that does not use the
+"free for personal use" dll my other solution required.
 
-Sol 
+https://groups.google.com/forum/?fromgroups=#!topic/psychopy-users/hbIO2wHK1KU
+
+From Nate's post, to do the one time driver install required:
+
+1) Download the drivers and DLLs from http://www.highrez.co.uk/Downloads/InpOut32/default.htm
+   -- the ones from http://www.logix4u.net/parallel-port/26-inpoutx64dll-for-win-xp-64-bit
+   might work as well (I think this is the genuine source) but the driver installer executable
+   in the highrez package is nice.
+2) Extract the zip and run Win32/InstallDriver.exe -- this will prompt for admin access
+
+====================================================================================================
+
+Stated copyright of driver and dll's: (from http://www.highrez.co.uk/Downloads/InpOut32/default.htm):
+
+This product is released as Freeware. Copyright Logix4U & Highresolution Enterprises (x64 port).

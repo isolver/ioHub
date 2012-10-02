@@ -22,24 +22,17 @@ ctime=Computer.currentMsec
 class MQ1616FS(Device):
     """
     """
-    newDataTypes=[('board_number','u1'),('channel_numbers','a32'),('gain','u1'),('offset','u4'),('options','u1')]
-    baseDataType=Device.dataType
-    dataType=baseDataType+newDataTypes
-    attributeNames=[e[0] for e in dataType]
-    print 'datatype:',dataType
-    ndType=N.dtype(dataType)
-    fieldCount=ndType.__len__()
-    __slots__=[e[0] for e in newDataTypes]
-
-
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
-    categoryTypeString="AD_CONVERTER"
-    deviceTypeString="ANALOG_OUTPUT_DEVICE"
+    CATEGORY_LABEL="AD_CONVERTER"
+    DEVICE_LABEL="ANALOG_OUTPUT_DEVICE"
     # <<<<<    
     lastPollTime=0.0        
+
     # >>> implementation specific private class attributes
     _DLL=None
     # <<<
+
+    _newDataTypes=[('board_number','u1'),('channel_numbers','a32'),('gain','u1'),('offset','u4'),('options','u1')]
+    __slots__=[e[0] for e in _newDataTypes]
     def __init__(self,*args,**kwargs):
         """
         """
@@ -59,10 +52,10 @@ class MQ1616FS(Device):
         
 
         deviceSettings={'instance_code': deviceConfig['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[MQ1616FS.categoryTypeString],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[MQ1616FS.deviceTypeString],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[MQ1616FS.CATEGORY_LABEL],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[MQ1616FS.DEVICE_LABEL],
             'device_class':deviceConfig['device_class'],
-            'user_label':deviceConfig['name'],
+            'name':deviceConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':deviceConfig['event_buffer_length'],
             'board_number':0,
@@ -72,7 +65,7 @@ class MQ1616FS(Device):
             'options':DEFAULTOPTION
              }          
  
-        Device.__init__(self,**deviceSettings)
+        Device.__init__(self,*args,**deviceSettings)
 
 
         self.board_number=deviceConfig['board_number']  
