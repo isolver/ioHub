@@ -11,6 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import ioHub
+import ioHub.devices.eyeTrackerInterface.InterfaceClasses
 from ioHub.devices.eyeTrackerInterface.InterfaceClasses import EyeTrackerInterface
 
 # Idea here is to have a function that checks each implementation of the EyeTrackerInterface for
@@ -35,10 +36,34 @@ from ioHub.devices.eyeTrackerInterface.InterfaceClasses import EyeTrackerInterfa
 #   - if any standard methods == the Interface base (by comparing code lines??). if so, should they be removed or
 #     has implementer forgotten to override base method? Q for developer of interface.
 
+import inspect
+
+def checkImplementation(implementation):
+    print implementation
+
+def printSpec(aclass):
+    print aclass
+    print ''
+    print 'Methods:'
+    cdir=dir(aclass)
+
+    for a in cdir:
+        if callable(a):
+            print '\t',a
 
 if __name__ == '__main__':
 
+    from ioHub.util import describeModule
+
+
+    describeModule.describe(ioHub.devices.eyeTrackerInterface.InterfaceClasses)
+
+    print '\n\n'
+
     eyeTrackerImplementations=EyeTrackerInterface.__subclasses__()
 
-    print 'eyeTrackerImplementations: ', eyeTrackerImplementations
+    for implementation in eyeTrackerImplementations:
+            checkImplementation(implementation)
+
+
 

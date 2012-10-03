@@ -12,66 +12,68 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 import numpy as N
 import ioHub
 from ioHub.devices import Device, Computer
-from ioHub.devices.eyeTrackerInterface import RTN_CODES, DATA_FILTER, DATA_STREAMS
-
-#from ..... import Device,Computer
-#from ....eye_events import *
-
-#from .... import RTN_CODES,EYE_CODES,PUPIL_SIZE_MEASURES,DATA_TYPES,\
-#              ET_MODES,CALIBRATION_TYPES,CALIBRATION_MODES,DATA_STREAMS,\
-#              DATA_FILTER,USER_SETUP_STATES
+from ioHub.devices.eyeTrackerInterface import RTN_CODES,DATA_TYPES,\
+                                          ET_MODES,CALIBRATION_TYPES,CALIBRATION_MODES,DATA_STREAMS,\
+                                          DATA_FILTER,USER_SETUP_STATES
 
 #noinspection PyUnusedLocal,PyTypeChecker
 class EyeTrackerInterface(Device):
     """
-    EyeTracker class is the main class for the pyEyeTrackerInterface module,
+    The EyeTrackerInterface class is the main class for the pyEyeTrackerInterface module,
     containing the majority of the eye tracker functionality commonly needed
-    for a range of experiments.
+    for a range of experiments. With the integration of the pyEyeTrackerInterface into the ioHub module,
+    the EyeTrackerInterface is the Eye Tracker Device API, along with the other currently
+    supported ioHub Device Types.
 
-    With the integration of the pyEyeTrackerInterface into the ioHub module, the EyeTracker
-    device is a device along with the other currently supported ioHub devices; Keyboard, Mouse,
-    and Parallel Port.
+    The EyeTrackerInterface class is extended by a particular Eye Tracking system's implementation by creating
+    a subclass of the EyeTrackerInterface within a directory in the
+    ioHub/devices/eyeTrackerInterface/HW module path. It is these sub classes of the EyeTrackerInterface
+    that are used to define which version of the EyeTrackerInterface is to be used for a given experiment,
+    based on which eye tracker you plan on using the EyeTrackerInterface with.
 
-    For implementers of pyEyeTracker interfaces, this means that the interface itself is running
-    in the ioHub process, and communication between the computer and the eyetracker is done via
-    the ioHub.
+    For a list of current and in development Eye Tracker Implementations, please see the Eye Tracker
+    Implementations section of this page.
 
-    For users of the pyEyeTrackerInterface for an eye tracker and psychopy, there is a second,
-    experiment side ( psychopy side ) interface that has a parallel public API that 'talks'
-    to the ioHub server. The good news for users is that this is transparent and you should not
-    even realize this is happening in use. The good news for interface developers is that the
-    client side interface is dynamically generated at the start-up of the experiment based on the
-    server side interface, so you do not need to maintain 2 seperate interfaces or worry about
-    keeping them in sync.
+    For users of the pyEyeTrackerInterface, the eye tracker device is no different than any other
+    device in the ioHub, other than the device API is larger reflecting the fact that eye trackers are in
+    general somewhat more complicated than a keyboard or mouse.
 
-    Not every eye tracker implemenation of the pyEyeTrackerInterface specification will
+    For implementers of pyEyeTrackerInterface, this means that the pyEyeTrackerInterface implementation
+    you write is running in the ioHub Process, and communication between the PsychoPy Experiment Process and the
+    Eye Tracker Implementation is handled via the ioHub.
+
+    Not every eye tracker implementation of the pyEyeTrackerInterface will
     support all of the specifications functionality. This is to be expected and
     pyEyeTrackerInterface has been designed to handle this case. When a specific
     implementation does not support a given method, if that method is called,
-    a default *not supported* behaviour is built into the base implemetation.
+    a default *not supported* behaviour is built into the base implementation.
 
     On the other hand, some eye trackers offer very specialized functionality that
-    is as common across the eye tracking field so is not part of the pyEyeTrackerInterface core,
-    or functionality that is just currently missing from the pyEyeTrackerInterface. ;)
-
-    In these cases, the specific eye tracker implemetation can expose the non core pyEyeTrackerInterace
+    is not as common across the eye tracking field,  so is not part of the pyEyeTrackerInterface core
+    or functionality that is just currently missing from the pyEyeTrackerInterface. ;) In these cases,
+    the specific eye tracker implementation can expose the non core pyEyeTrackerInterface
     functionality for their device by adding extra command types to the
     sendCommand method, or as a last resort, via the *EyeTracker.EXT* attribute of the class.
 
-    .. note::
+### Note:
 
-        Only **one** instance of EyeTracker can be created within an experiment. Attempting to create > 1 instance will raise an exception. To get the current instance of the EyeTracker you can call the class method EyeTracker.getInstance(); this is useful as it saves needing to pass an eyeTracker instance variable around your code.
+> Only **one** instance of EyeTracker can be created within an experiment. Attempting to create > 1
+instance will raise an exception. To get the current instance of the EyeTracker you can call the
+class method EyeTracker.getInstance(); this is useful as it saves needing to pass an eyeTracker
+instance variable around your code.
 
-    Methods are broken down into several categories within the EyeTracker class:
+Methods are broken down into several categories within the EyeTracker class:
 
-    #. Eye Tracker Initalization / State Setting
-    #. Ability to Define the Graphics Layer for the Eye Tracker to Use During Calibration / System Setup
-    #. Starting and Stopping of Data Recording
-    #. Sending Syncronization messages to the Eye Tracker
-    #. Accessing the Eye Tracker Timebase
-    #. Accessing Eye Tracker Data During Recording
-    #. Syncronizing the Local Experiment timebase with the Eye Tracker Timebase, so Eye Tracker events can be provided with local time stamps when that is appropriate.
-    #. Experiment Flow Generics
+* Eye Tracker Initialization / State Setting
+* Ability to Define the Graphics Layer for the Eye Tracker to Use During Calibration / System Setup
+* Starting and Stopping of Data Recording
+* Sending Synchronization messages to the Eye Tracker
+* Accessing the Eye Tracker Timebase
+* Accessing Eye Tracker Data During Recording
+* Synchronizing the ioHub time base with the Eye Tracker time base, so Eye Tracker events
+can be provided with local time stamps when that is appropriate.
+* Experiment Flow Generics
+
     """
     
     #: Used by pyEyeTrackerInterface implentations to store relationships between an eye 
@@ -111,7 +113,7 @@ class EyeTrackerInterface(Device):
     __slots__=[]
     def __init__(self,*args,**kwargs):
         """
-        EyeTracker class. This class is to be extended by each eye tracker specific implemetation
+        EyeTracker class. This class is to be extended by each eye tracker specific implementation
         of the pyEyeTrackerInterface.
 
         Please review the documentation page for the specific eye tracker model that you are using the
@@ -119,13 +121,15 @@ class EyeTrackerInterface(Device):
         if you are using an interface that supports eye trackers developed by EyeTrackingCompanyET, you
         may initialize the eye tracker object for that manufacturer something similar too :
 
-           eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
+           eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(args,**kwargs)
 
         where hub is the instance of the ioHubConnection class that has been created for your experiment.
 
         **kwargs are an optional set of named parameters.
 
-        **If an instance of EyeTracker has already been created, trying to create a second will raise an exception. Either destroy the first instance and then create the new instance, or use the class method EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
+        **If an instance of EyeTracker has already been created, trying to create a second will raise an exception.
+         Either destroy the first instance and then create the new instance, or use the class method
+         EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
         """
         if self.__class__._INSTANCE is not None:
             raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
@@ -187,7 +191,7 @@ class EyeTrackerInterface(Device):
 
     def experimentStartDefaultLogic(self,*args,**kwargs):
         """
-        Experiment Centered Generic method that can be used to perform a set of
+        Experiment Centered Generic method that is used to perform a set of
         eye tracker default code associated with the start of an experiment.
         """
         recording_filename=None
@@ -239,7 +243,7 @@ class EyeTrackerInterface(Device):
         """
         return RTN_CODES.ET_NOT_IMPLEMENTED
    
-    def trackerUsecTimeSinceDeviceInit(self):
+    def trackerUsec(self):
         """
         Current eye tracker time, normalized. (in usec for since ioHub initialized Device)
         """
@@ -534,17 +538,17 @@ class EyeTrackerInterface(Device):
         """
         return RTN_CODES.ET_NOT_IMPLEMENTED #return self._latestGazePosition
 
-    def drawToGazeOverlayScreen(self,*args,**kwargs):
+    def drawToHostApplicationWindow(self,*args,**kwargs):
         """
-        drawToGazeOverlayScreen provides a generic interface for ET devices that support
+        drawToHostApplicationWindow provides a generic interface for ET devices that support
         having graphics drawn to the Host / Control computer gaze overlay area, or other similar
         graphics area functionality.
 
         The method should return the appropriate return code if successful or if the command failed,
         or if it is unsupported.
 
-        There is no set list of values for any of the arguements for this command, so please refer to the
-        ET imlpementation notes for your device for details. Hypothetical examples may be:
+        There is no set list of values for any of the arguments for this command, so please refer to the
+        ET implementation notes for your device for details. Hypothetical examples may be:
         """
         drawingcommand=None
         if len(args)==0:

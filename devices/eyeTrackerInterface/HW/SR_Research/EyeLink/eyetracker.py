@@ -18,9 +18,9 @@ download from  www.sr-support.com once you are registered and includes the neces
 
 import sys
 import ioHub
-from ..... import Computer
+from ..... import Computer, EventConstants
 import pylink
-from .... import RTN_CODES,EYE_CODES, DATA_STREAMS,DATA_FILTER,EyeTrackerInterface
+from .... import RTN_CODES, DATA_STREAMS,DATA_FILTER,EyeTrackerInterface
 
 class EyeTracker(EyeTrackerInterface):
     """EyeTracker class is the main class for the pyEyeTrackerInterface module,
@@ -355,7 +355,7 @@ class EyeTracker(EyeTrackerInterface):
         """
         return self._eyelink.trackerTime()
    
-    def trackerUsecTimeSinceDeviceInit(self):
+    def trackerUsec(self):
         """
         Current eye tracker time (in usec for since ioHub initialized Device)
         """
@@ -871,7 +871,7 @@ class EyeTracker(EyeTrackerInterface):
                     if ne.isBinocular():
                         # binocular sample
                         event_type=ioHub.devices.EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']
-                        myeye=EYE_CODES.BINOCULAR
+                        myeye=EventConstants.BINOCULAR
                         leftData=ne.getLeftEye()
                         rightData=ne.getRightEye()
 
@@ -907,12 +907,58 @@ class EyeTracker(EyeTrackerInterface):
                         #            right_velocity_x=vel_x,right_velocity_y=vel_y,right_velocity_xy=vel_xy,status=0)
 
 
-                        binocSample=[0,0,Computer.getNextEventID(), event_type,self.eyeTrackerConfig['instance_code'], event_timestamp,
-                                     currentTime,hub_timestamp, confidenceInterval,event_delay,
-                                    myeye,leftGaze[0],leftGaze[1],-1.0, -1,-1,-1.0,leftHref[0],leftHref[1],leftRawPupil[0], leftRawPupil[1],
-                                    leftPupilSize,-1,ppd[0],ppd[1], vel_x,vel_y,vel_xy, rightGaze[0],rightGaze[1],-1.0,
-                                    -1,-1,-1.0, rightHref[0],rightHref[1],rightRawPupil[0],rightRawPupil[1],
-                                    rightPupilSize,-1, ppd[0], ppd[1], vel_x,vel_y,vel_xy,0]
+                        binocSample=[
+                                     0,
+                                     0,
+                                     Computer.getNextEventID(),
+                                     event_type,
+                                     self.eyeTrackerConfig['instance_code'],
+                                     event_timestamp,
+                                     currentTime,
+                                     hub_timestamp,
+                                     confidenceInterval,
+                                     event_delay,
+                                     myeye,
+                                     leftGaze[0],
+                                     leftGaze[1],
+                                     -1.0,
+                                     -1,
+                                     -1,
+                                     -1.0,
+                                     leftHref[0],
+                                     leftHref[1],
+                                     leftRawPupil[0],
+                                     leftRawPupil[1],
+                                     leftPupilSize,
+                                     EventConstants.AREA,
+                                     -1,
+                                     EventConstants.NOT_SUPPORTED_FIELD,
+                                     ppd[0],
+                                     ppd[1],
+                                     vel_x,
+                                     vel_y,
+                                     vel_xy,
+                                     rightGaze[0],
+                                     rightGaze[1],
+                                     -1.0,
+                                     -1,
+                                     -1,
+                                     -1.0,
+                                     rightHref[0],
+                                     rightHref[1],
+                                     rightRawPupil[0],
+                                     rightRawPupil[1],
+                                     rightPupilSize,
+                                     EventConstants.AREA,
+                                     -1,
+                                     EventConstants.NOT_SUPPORTED_FIELD,
+                                     ppd[0],
+                                     ppd[1],
+                                     vel_x,
+                                     vel_y,
+                                     vel_xy,
+                                     0
+                                     ]
                         EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE']=len(binocSample)
                         EyeTracker._latestSample=binocSample
                         EyeTracker._latestGazePosition=(leftGaze[0]+rightGaze[0])/2.0,(leftGaze[1]+rightGaze[1])/2.0
@@ -925,10 +971,10 @@ class EyeTracker(EyeTrackerInterface):
                         eyeData=None
                         if leftEye == 1:
                             eyeData=ne.getLeftEye()
-                            myeye=EYE_CODES.LEFT
+                            myeye=EventConstants.LEFT
                         else:
                             eyeData=ne.getRightEye()
-                            myeye=EYE_CODES.RIGHT
+                            myeye=EventConstants.RIGHT
 
                         pupilSize=eyeData.getPupilSize()
                         rawPupil=eyeData.getRawPupil()
@@ -951,10 +997,38 @@ class EyeTracker(EyeTrackerInterface):
                         #            pupil_measure1=pupilSize,pupil_measure2=-1, ppd_x=ppd[0], ppd_y=ppd[1],
                         #            velocity_x=vel_x,velocity_y=vel_y,velocity_xy=vel_xy,status=0)
 
-                        monoSample=[0,0,Computer.getNextEventID(),event_type,self.eyeTrackerConfig['instance_code'],
-                                    event_timestamp,currentTime,hub_timestamp,confidenceInterval,event_delay,
-                                    myeye,gaze[0],gaze[1],-1.0,-1,-1,-1.0,href[0],href[1],rawPupil[0],rawPupil[1],
-                                    pupilSize,-1, ppd[0], ppd[1],vel_x,vel_y,vel_xy,0]
+                        monoSample=[0,
+                                    0,
+                                    Computer.getNextEventID(),
+                                    event_type,
+                                    self.eyeTrackerConfig['instance_code'],
+                                    event_timestamp,
+                                    currentTime,
+                                    hub_timestamp,
+                                    confidenceInterval,
+                                    event_delay,
+                                    myeye,
+                                    gaze[0],
+                                    gaze[1],
+                                    -1.0,
+                                    -1,
+                                    -1,
+                                    -1.0,
+                                    href[0],
+                                    href[1],
+                                    rawPupil[0],
+                                    rawPupil[1],
+                                    pupilSize,
+                                    EventConstants.AREA,
+                                    -1,
+                                    EventConstants.NOT_SUPPORTED_FIELD,
+                                    ppd[0],
+                                    ppd[1],
+                                    vel_x,
+                                    vel_y,
+                                    vel_xy,
+                                    0
+                                    ]
                         EyeTracker._eventArrayLengths['MONOC_EYE_SAMPLE']=len(monoSample)
                         EyeTracker._latestGazePosition=gaze
                         EyeTracker._latestSample=monoSample
@@ -967,9 +1041,9 @@ class EyeTracker(EyeTrackerInterface):
 
                     which_eye=ne.getEye()
                     if which_eye:
-                        which_eye=EYE_CODES.RIGHT
+                        which_eye=EventConstants.RIGHT
                     else:
-                        which_eye=EYE_CODES.LEFT
+                        which_eye=EventConstants.LEFT
 
                     start_event_time= ne.getStartTime()
                     end_event_time = ne.getEndTime()
@@ -1012,22 +1086,67 @@ class EyeTracker(EyeTrackerInterface):
                     #                    average_velocity_x=-1.0,average_velocity_y=-1.0,average_velocity_xy=a_vel,
                     #                    peak_velocity_x=-1.0, peak_velocity_y=-1.0, peak_velocity_xy=peak_vel,status=estatus)
 
-                    fee=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],
-                        end_event_time, currentTime, hub_timestamp,
-                        confidenceInterval, event_delay, which_eye,
-                        event_duration, s_gaze[0], s_gaze[1], -1.0,
-                        s_href[0], s_href[1], -1.0, -1.0,
-                        s_pupilsize, -1.0, s_ppd[0], s_ppd[1],
-                        -1, -1, s_vel,
-                        e_gaze[0], e_gaze[1], -1.0,
-                        e_href[0], e_href[1], -1, -1,
-                        e_pupilsize, -1, e_ppd[0], e_ppd[1],
-                        -1, -1, e_vel,
-                        a_gaze[0],a_gaze[1],-1.0,
-                        a_href[0],a_href[1],-1.0,-1.0,
-                        a_pupilsize,-1.0,-1.0,-1.0,
-                        -1.0,-1.0,a_vel,
-                        -1.0, -1.0, peak_vel,estatus]
+                    fee=[0,
+                         0,
+                         Computer.getNextEventID(),
+                         etype,
+                         self.eyeTrackerConfig['instance_code'],
+                        end_event_time,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        event_duration,
+                        s_gaze[0],
+                        s_gaze[1],
+                        -1.0,
+                        s_href[0],
+                        s_href[1],
+                        -1.0,
+                        -1.0,
+                        s_pupilsize,
+                        EventConstants.AREA,
+                        s_ppd[0],
+                        s_ppd[1],
+                        -1,
+                        -1,
+                        s_vel,
+                        e_gaze[0],
+                        e_gaze[1],
+                        -1.0,
+                        e_href[0],
+                        e_href[1],
+                        -1,
+                        -1,
+                        e_pupilsize,
+                        EventConstants.AREA,
+                        -1,
+                        e_ppd[0],
+                        e_ppd[1],
+                        -1,
+                        -1,
+                        e_vel,
+                        a_gaze[0],
+                        a_gaze[1],
+                        -1.0,
+                        a_href[0],
+                        a_href[1],
+                        -1.0,
+                        -1.0,
+                        a_pupilsize,
+                        EventConstants.AREA,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        a_vel,
+                        -1.0,
+                        -1.0,
+                        peak_vel,
+                        estatus
+                        ]
                     EyeTracker._eventArrayLengths['FIXATION_END']=len(fee)
                     self._nativeEventBuffer.append(fee)
 
@@ -1038,9 +1157,9 @@ class EyeTracker(EyeTrackerInterface):
 
                     which_eye=ne.getEye()
                     if which_eye:
-                        which_eye=EYE_CODES.RIGHT
+                        which_eye=EventConstants.RIGHT
                     else:
-                        which_eye=EYE_CODES.LEFT
+                        which_eye=EventConstants.LEFT
 
                     start_event_time= ne.getStartTime()
                     end_event_time = ne.getEndTime()
@@ -1064,12 +1183,59 @@ class EyeTracker(EyeTrackerInterface):
                     a_vel=ne.getAverageVelocity()
                     peak_vel=ne.getPeakVelocity()
 
-                    see=[0,0,Computer.getNextEventID(),
-                                etype,self.eyeTrackerConfig['instance_code'],
-                                end_event_time, currentTime, hub_timestamp, confidenceInterval, event_delay, which_eye, event_duration, e_amp[0], e_amp[1], e_angle,
-                                s_gaze[0],s_gaze[1],-1.0, s_href[0], s_href[1], -1.0, -1.0, s_pupilsize, -1.0, s_ppd[0], s_ppd[1],
-                                -1,  -1, s_vel, e_gaze[0], e_gaze[1], -1.0, e_href[0], e_href[1], -1,  -1,
-                               e_pupilsize, -1, e_ppd[0], e_ppd[1],-1, -1, e_vel,-1.0,-1.0,a_vel,-1.0,-1.0,peak_vel,estatus]
+                    see=[0,
+                         0,
+                         Computer.getNextEventID(),
+                        etype,
+                        self.eyeTrackerConfig['instance_code'],
+                        end_event_time,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        event_duration,
+                        e_amp[0],
+                        e_amp[1],
+                        e_angle,
+                        s_gaze[0],
+                        s_gaze[1],
+                        -1.0,
+                        s_href[0],
+                        s_href[1],
+                        -1.0,
+                        -1.0,
+                        s_pupilsize,
+                        EventConstants.AREA,
+                        -1.0,
+                        s_ppd[0],
+                        s_ppd[1],
+                        -1,
+                        -1,
+                        s_vel,
+                        e_gaze[0],
+                        e_gaze[1],
+                        -1.0,
+                        e_href[0],
+                        e_href[1],
+                        -1,
+                        -1,
+                        e_pupilsize,
+                        EventConstants.AREA,
+                        -1,
+                        e_ppd[0],
+                        e_ppd[1],
+                        -1,
+                        -1,
+                        e_vel,
+                        -1.0,
+                        -1.0,
+                        a_vel,
+                        -1.0,
+                        -1.0,
+                        peak_vel,
+                        estatus
+                        ]
                     EyeTracker._eventArrayLengths['SACCADE_END']=len(see)
                     self._nativeEventBuffer.append(see)
                 elif isinstance(ne,pylink.EndBlinkEvent):
@@ -1079,17 +1245,29 @@ class EyeTracker(EyeTrackerInterface):
 
                     which_eye=ne.getEye()
                     if which_eye:
-                        which_eye=EYE_CODES.RIGHT
+                        which_eye=EventConstants.RIGHT
                     else:
-                        which_eye=EYE_CODES.LEFT
+                        which_eye=EventConstants.LEFT
 
                     start_event_time= ne.getStartTime()
                     end_event_time = ne.getEndTime()
                     event_duration = end_event_time-start_event_time
 
-                    bee=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],
-                                end_event_time, currentTime, hub_timestamp,confidenceInterval, event_delay, which_eye,
-                                event_duration, estatus]
+                    bee=[
+                        0,
+                        0,
+                        Computer.getNextEventID(),
+                        etype,
+                        self.eyeTrackerConfig['instance_code'],
+                        end_event_time,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        event_duration,
+                        estatus
+                        ]
                     EyeTracker._eventArrayLengths['BLINK_END']=len(bee)
                     self._nativeEventBuffer.append(bee)
 
@@ -1102,9 +1280,9 @@ class EyeTracker(EyeTrackerInterface):
                         #ioEventClass=SaccadeStartEvent
                     which_eye=ne.getEye()
                     if which_eye:
-                        which_eye=EYE_CODES.RIGHT
+                        which_eye=EventConstants.RIGHT
                     else:
-                        which_eye=EYE_CODES.LEFT
+                        which_eye=EventConstants.LEFT
 
                     pupil_size=-1
                     if etype == ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']:
@@ -1115,10 +1293,35 @@ class EyeTracker(EyeTrackerInterface):
                     ppd=ne.getStartPPD()
                     estatus=ne.getStatus()
 
-                    se=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],
-                       event_timestamp, currentTime, hub_timestamp, confidenceInterval, event_delay, which_eye,
-                       gaze[0], gaze[1], -1, href[0], href[1], -1.0, -1.0, pupil_size, -1.0, ppd[0], ppd[1],
-                       -1.0,-1.0,velocity,estatus]
+                    se=[
+                        0,
+                        0,
+                        Computer.getNextEventID(),
+                        etype,
+                        self.eyeTrackerConfig['instance_code'],
+                        event_timestamp,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        gaze[0],
+                        gaze[1],
+                        -1,
+                        href[0],
+                        href[1],
+                        -1.0,
+                        -1.0,
+                        pupil_size,
+                        EventConstants.AREA,
+                        -1.0,
+                        ppd[0],
+                        ppd[1],
+                       -1.0,
+                       -1.0,
+                       velocity,
+                       estatus
+                        ]
                     EyeTracker._eventArrayLengths[ioHub.devices.EventConstants.EVENT_TYPES[etype]]=len(se)
                     self._nativeEventBuffer.append(se)
 
@@ -1129,14 +1332,26 @@ class EyeTracker(EyeTrackerInterface):
 
                     which_eye=ne.getEye()
                     if which_eye:
-                        which_eye=EYE_CODES.RIGHT
+                        which_eye=EventConstants.RIGHT
                     else:
-                        which_eye=EYE_CODES.LEFT
+                        which_eye=EventConstants.LEFT
 
                     start_event_time= ne.getStartTime()
 
-                    bse=[0,0,Computer.getNextEventID(),etype,self.eyeTrackerConfig['instance_code'],start_event_time, currentTime, hub_timestamp,
-                                confidenceInterval, event_delay, which_eye, estatus]
+                    bse=[
+                        0,
+                        0,
+                        Computer.getNextEventID(),
+                        etype,
+                        self.eyeTrackerConfig['instance_code'],
+                        start_event_time,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        estatus
+                        ]
                     EyeTracker._eventArrayLengths['BLINK_START']=len(bse)
                     self._nativeEventBuffer.append(bse)
 

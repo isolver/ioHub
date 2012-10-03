@@ -190,7 +190,7 @@ class EyeTracker(EyeTrackerInterface):
         """
         return RTN_CODES.ET_NOT_IMPLEMENTED
    
-    def trackerUsecTimeSinceDeviceInit(self):
+    def trackerUsec(self):
         """
         Current eye tracker time, normalized. (in usec for since ioHub initialized Device)
         """

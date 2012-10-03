@@ -49,18 +49,6 @@ class ReturnCodes(Enum):
         Enum.__init__(self)        
 RTN_CODES=ReturnCodes()
 
-class Eyes(Enum):
-    __slots__=['NO_EYE','LEFT','RIGHT','BINOCULAR','LEFT_RIGHT_AVERAGED','SIMULATED']
-    def __init__(self):
-        Enum.__init__(self)
-EYE_CODES=Eyes()        
-
-class PupilSizeMeasures(Enum):
-    __slots__=['AREA','DIAMETER','WIDTH','HEIGHT','MAJOR_AXIS','MINOR_AXIS']
-    def __init__(self):
-        Enum.__init__(self)
-PUPIL_SIZE_MEASURES=PupilSizeMeasures()
-
 class DataTypes(Enum):
     __slots__=['MONO_SAMPLE','BINOC_SAMPLE','FIXATION_START','FIXATION_UPDATE','FIXATION_END','SACCADE_START','SACCADE_END','BLINK_START','BLINK_END','PURSUIT_START', 'PURSUIT_END','MESSAGE','BUTTON','TTL_INPUT']
     def __init__(self):

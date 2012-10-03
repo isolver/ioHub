@@ -14,6 +14,7 @@ import numpy as N
 import inspect
 import sys
 import platform
+import util
 from __version__ import iohub_version
 
 #version info for ioHub

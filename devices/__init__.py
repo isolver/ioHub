@@ -154,6 +154,21 @@ computer=Computer.getInstance()
 ####################### Device & DeviceEvent Constants ########################
 
 class _EventConstantsBase(object):
+    NOT_SUPPORTED_FIELD=0
+
+    LEFT=1
+    RIGHT=2
+    BINOCULAR=4
+    LEFT_RIGHT_AVERAGED=8
+    SIMULATED=16
+
+    AREA = 1
+    DIAMETER = 2
+    WIDTH = 3
+    HEIGHT = 4
+    MAJOR_AXIS = 5
+    MINOR_AXIS = 6
+
     UNDEFINED_EVENT=0
     MESSAGE_EVENT=1
     KEYBOARD_KEY_EVENT =20

@@ -667,7 +667,7 @@ class ioHubConnection(object):
 
         Return (bool): True
         """
-        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent.createAsList(text,prefix=prefix,msg_offset=offset,usec_time=usec_time),]))
+        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent._createAsList(text,prefix=prefix,msg_offset=offset,usec_time=usec_time),]))
         return True
 
     def sendMessages(self,messageList):
@@ -683,7 +683,7 @@ class ioHubConnection(object):
         """
         msgEvents=[]
         for msg in messageList:
-            msgEvents.append(MessageEvent.createAsList(*msg))
+            msgEvents.append(MessageEvent._createAsList(*msg))
         self.sendToHubServer(('EXP_DEVICE','EVENT_TX',msgEvents))
         return True
 

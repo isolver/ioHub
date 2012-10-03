@@ -16,7 +16,7 @@ import ioHub
 from ..... import Device, Computer
 from ....eye_events import *
 
-from .... import RTN_CODES, EYE_CODES, PUPIL_SIZE_MEASURES, DATA_TYPES, \
+from .... import RTN_CODES, DATA_TYPES, \
               ET_MODES, CALIBRATION_TYPES, CALIBRATION_MODES, DATA_STREAMS, \
               DATA_FILTER, USER_SETUP_STATES,EyeTrackerInterface
 
@@ -685,13 +685,13 @@ class EyeTracker(EyeTrackerInterface):
                 #case monocular sample
                 if EyeTracker._eyes != 'BINOCULAR':
                     
-                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
+                    event_type = EventConstants.EVENT_TYPES['EYE_SAMPLE']
                     
                     if event.rightEye.gazeX == 0:
-                        myeye = EYE_CODES.LEFT
+                        myeye = EventConstants.LEFT
                         eye = event.leftEye
                     else:
-                        myeye = EYE_CODES.RIGHT
+                        myeye = EventConstants.RIGHT
                         eye = event.rightEye
                             
                     pupilDiameter = eye.diam
@@ -788,9 +788,9 @@ class EyeTracker(EyeTrackerInterface):
                 
                 which_eye = event.eye
                 if which_eye == 'r':
-                    which_eye = EYE_CODES.RIGHT
+                    which_eye = EventConstants.RIGHT
                 else:
-                    which_eye = EYE_CODES.LEFT
+                    which_eye = EventConstants.LEFT
                 
                 
                 start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC

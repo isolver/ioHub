@@ -14,6 +14,12 @@ currentUsec=Computer.currentUsec
 import numpy as N
 
 class ExperimentDevice(Device):
+    """
+    The ExperimentRuntimeDevice class represents a virtual device, being the Experiment / PsychoPy Process
+    that is running the experiment script and has created the ioHub ioServer Process.
+    A ExperimentRuntimeDevice device can generate experiment software related events that are sent to
+    the ioHub to be saved in the ioDataStore along with all other device events being saved.
+    """
     CATEGORY_LABEL='VIRTUAL'
     DEVICE_LABEL='EXPERIMENT_DEVICE'
     __slots__=[]
@@ -57,31 +63,40 @@ class ExperimentDevice(Device):
 ######### Experiment Events ###########
 
 class MessageEvent(DeviceEvent):
+    """
+    A MessageEvent can be created and sent to the ioHub to record important marker times during
+    the experiment; for example, when key display changes occur, when events related to devices
+    not supported by the ioHub have happened, or simply information about the experiment you want
+    to store in the ioDataStore along with all the other event data.
+
+    Since the PsychoPy Process can access the same time base that is used by the ioHub Process,
+    when you create a Message Event you can time stamp it at the time of MessageEvent creation, or with
+    the result of a previous call to one of the ioHub time related methods. This makes experiment messages
+    extremely accurate temporally when related to other events times saved to the ioDataSore.
+    """
     EVENT_TYPE_STRING='MESSAGE'
     EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
     IOHUB_DATA_TABLE='MESSAGE'
 
-    _newDataTypes=[('msg_offset','i2'),('prefix','a3'),('text','a128')]
+    _newDataTypes=[
+                ('msg_offset','i2'), # if you want to send the Experiment *before* or *after* the event time occurred
+                                     # and you know exactly when relative to the event time you are sending the message
+                                     # you can specify an offset that will be applied to the message time to give the
+                                     # true event time and not when the message was sent.
+
+                ('prefix','a3'), # A 0 - 3 character prefix code that you can assign to messages and use it to
+                                 # do such things as group messages into categories or types when
+                                 # retieving them for analysis.
+
+                ('text','a128')  # The actual text of the message. This can be any python string
+                                 # up to 128 characters in length.
+                ]
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, **kwargs):
-        """
-
-        :rtype : object
-        :param kwargs:
-        """
         DeviceEvent.__init__(self, *args,**kwargs)
 
     @staticmethod
-    def createAsList(text,prefix='',msg_offset=0.0, usec_time=None):
-        """
-
-        :rtype : object
-        :param text:
-        :param prefix:
-        :param msg_offset:
-        :param usec_time:
-        :return:
-        """
+    def _createAsList(text,prefix='',msg_offset=0.0, usec_time=None):
         cusec=int(currentUsec())
         if usec_time is not None:
             cusec=usec_time
