@@ -19,7 +19,11 @@ download from  www.sr-support.com once you are registered and includes the neces
 import sys
 import ioHub
 from ..... import Computer, EventConstants
-import pylink
+try:
+    import pylink
+except:
+    ioHub.print2err("warning: pylink module could not be found")
+
 from .... import RTN_CODES, DATA_STREAMS,DATA_FILTER,EyeTrackerInterface
 
 class EyeTracker(EyeTrackerInterface):
