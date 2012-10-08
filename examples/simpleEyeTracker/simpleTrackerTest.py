@@ -101,6 +101,11 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         kb=self.hub.devices.kb
         mouse=self.hub.devices.mouse
 
+        tracker.setConnectionState(True)
+        self.msecDelay(50)
+        self.clearEvents()
+
+        # not supported by EyeLink 'yet'
         tracker.runSetupProcedure()
         self.clearEvents()
         self.msecDelay(50)
@@ -127,7 +132,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False, screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
-        mouse.setSysCursorVisibility(False)
+        mouse.setSystemCursorVisibility(False)
 
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'

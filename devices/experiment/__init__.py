@@ -36,6 +36,7 @@ class ExperimentDevice(Device):
             'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.DEVICE_LABEL],
             'device_class':deviceConfig['device_class'],
             'name':deviceConfig['name'],
+            '_isReportingEvents':deviceConfig.get('auto_report_events',True),
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':deviceConfig['event_buffer_length']
             }          

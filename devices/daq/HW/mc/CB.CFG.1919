@@ -4,10 +4,10 @@ File Version Number: 4
 Maximum Number Of Boards: 200
 Maximum Number Of Expansion Boards: 128
 Current Board: 0
-Current Board Type: 82
+Current Board Type: 81
 
    Board #0
-   Board Type: USB-1208FS
+   Board Type: USB-1616FS
    Base Address (hex): ffff
    Number Of I/O Ports Used By Board: 0
    Interrupt Level: -1
@@ -15,37 +15,25 @@ Current Board Type: 82
    Clock Speed (MHz): 10
    A/D Range: NOT USED
    Wait States: DISABLED
-   Number Of A/D Channels: 8
-   Number Of D/A Channels: 2
-   Number Of Digital Devices: 2
+   Number Of A/D Channels: 16
+   Number Of D/A Channels: 0
+   Number Of Digital Devices: 1
    Number Of Counter Devices: 1
    Uses Expansion Boards: NO
-   Misc Option[10]: 12884
-   Misc Option[11]: 296
-   Misc Option[13]: 1
+   Misc Option[10]: 21256
+   Misc Option[11]: 301
    Misc Option[14]: 0
-   Misc Option[15]: 12884
-   Misc Option[16]: 118
-   Misc Option[17]: 114
-   Misc Option[18]: 114
+   Misc Option[15]: 21256
+   Misc Option[16]: 104
 
       Digital Device #0
-      Base Address (hex): ffff (hex)
-      Type Of Device: 1st Port A
+      Base Address (hex): 0 (hex)
+      Type Of Device: Aux Port
       Device Bit Mask: ff
-      Read Before Writing Required: NO
-      Device Is Configurable: INPUT & OUTPUT
+      Read Before Writing Required: YES
+      Device Is Configurable: INPUT
       Number Of I/O Bits For Device: 8
       End Digital Device #0
-
-      Digital Device #1
-      Base Address (hex): ffff (hex)
-      Type Of Device: 1st Port B
-      Device Bit Mask: ff
-      Read Before Writing Required: NO
-      Device Is Configurable: INPUT & OUTPUT
-      Number Of I/O Bits For Device: 8
-      End Digital Device #1
 
       Counter Device #0
       Base Address (hex): ffff (hex)

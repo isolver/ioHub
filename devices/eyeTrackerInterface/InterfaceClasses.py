@@ -11,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import numpy as N
 import ioHub
-from ioHub.devices import Device, Computer
+from ioHub.devices import Device, Computer, EventConstants
 from ioHub.devices.eyeTrackerInterface import RTN_CODES,DATA_TYPES,\
                                           ET_MODES,CALIBRATION_TYPES,CALIBRATION_MODES,DATA_STREAMS,\
                                           DATA_FILTER,USER_SETUP_STATES
@@ -133,21 +133,25 @@ can be provided with local time stamps when that is appropriate.
         """
         if self.__class__._INSTANCE is not None:
             raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
-        
-        # >>>> eye tracker config
-        self.__class__.eyeTrackerConfig=kwargs['dconfig']
-        #print " #### EyeTracker Configuration #### "
-        #print self.eyeTrackerConfig
-        #print ''
-        # <<<<
-        
-        # create Device level class setting dictionary and pass it Device constructor
-        deviceSettings= dict(instance_code=self.eyeTrackerConfig['instance_code'],
-            category_id=ioHub.devices.EventConstants.DEVICE_CATERGORIES['EYE_TRACKER'],
-            type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
-            name=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
-            max_event_buffer_length=self.eyeTrackerConfig['event_buffer_length'])
-        Device.__init__(self,*args,**deviceSettings)
+
+        if 'os_device_code' not in kwargs:
+            kwargs['name']='eyetracker'
+        if 'os_device_code' not in kwargs:
+            kwargs['os_device_code']='OS_DEV_CODE_NOT_SET'
+        if 'instance_code' not in kwargs:
+            kwargs['instance_code']='DEFAULT_ET_INSTANCE_CODE'
+        if 'category_id' not in kwargs:
+            kwargs['category_id']=EventConstants.DEVICE_CATERGORIES['EYE_TRACKER']
+        if 'type_id' not in kwargs:
+            kwargs['type_id']=EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'],
+        if 'device_class' not in kwargs:
+            kwargs['device_class']=self.__class__
+        if 'max_event_buffer_length' not in kwargs:
+            kwargs['max_event_buffer_length']=1024
+        if 'auto_report_events' not in kwargs:
+            kwargs['auto_report_events']=True
+
+        Device.__init__(self,*args,**kwargs)
         
         # set this instance as 'THE' instance of the eye tracker.
         self.__class__._INSTANCE=self

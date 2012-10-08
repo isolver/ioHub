@@ -15,7 +15,9 @@ import inspect
 import sys
 import platform
 import util
-from __version__ import iohub_version
+import os
+from util.validateVersionNumber import iohub_version
+
 
 #version info for ioHub
 __version__=iohub_version
@@ -26,6 +28,20 @@ __maintainer_email__='sol@isolver-software.com'
 __users_email__='sol@isolver-software.com'
 __url__='http://www.github.com/isolver/ioHub/wiki/'
 
+def module_path(local_function):
+    """ returns the module path without the use of __file__.  Requires a function defined
+   locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
+    return os.path.abspath(inspect.getsourcefile(local_function))
+
+def module_directory(local_function):
+    mp=module_path(local_function)
+    moduleDirectory,mname=os.path.split(mp)
+    return moduleDirectory
+
+import external_libs
+
+def isIterable(o):
+    return isinstance(o, Iterable)
 
 class ioObjectMetaClass(type):
     def __new__(meta, name, bases, dct):
@@ -94,7 +110,6 @@ class ioObject(object):
                 setattr(self,key,value)
                 self._attribute_values.append(value)
 
-
     def asDict(self):
         """
         Return the ioObject in dictionary format, with keys as the ioObject's
@@ -145,21 +160,9 @@ class ioObject(object):
                     rpcList.append(d)
         return rpcList
 
-class ioHubError(Exception):
-    def __init__(self, msg, *args, **kwargs):
-        Exception.__init__(self, *args, **kwargs)
-        self.msg = msg
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return "ioHubError:\nMsg: {0:>s}\n".format(self.msg)
-
 global highPrecisionTimer
 def highPrecisionTimer():
     raise ioHubError("highPrecisionTimer function must be overwritten by a platform specific implementation.")
-
 
 if platform.system() == 'Windows':
     global _fcounter, _ffreq, _winQueryPerformanceCounter, _winQueryPerformanceFrequency
@@ -178,7 +181,6 @@ elif platform.system() == 'Linux':
 else: # assume OS X?
     highPrecisionTimer = timeit.default_timer
 
-
 def print2err(*args):
     for a in args:
         sys.stderr.write(str(a))
@@ -186,19 +188,6 @@ def print2err(*args):
     sys.stderr.flush()
 
 from collections import Iterable,OrderedDict
-
-def isIterable(o):
-    return isinstance(o, Iterable)
-
-def module_path(local_function):
-    """ returns the module path without the use of __file__.  Requires a function defined
-   locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
-    return os.path.abspath(inspect.getsourcefile(local_function))
-
-def module_directory(local_function):
-    mp=module_path(local_function)
-    moduleDirectory,mname=os.path.split(mp)
-    return moduleDirectory
 
 def printExceptionDetailsToStdErr():
         """
@@ -225,6 +214,17 @@ def printExceptionDetailsToStdErr():
         print2err(repr(traceback.format_tb(exc_traceback)))
         print2err("*** tb_lineno:"+str( exc_traceback.tb_lineno))
 
+class ioHubError(Exception):
+    def __init__(self, msg, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return "ioHubError:\nMsg: {0:>s}\n".format(self.msg)
+
 class LastUpdatedOrderedDict(OrderedDict):
     """Store items in the order the keys were last added"""
 
@@ -234,6 +234,6 @@ class LastUpdatedOrderedDict(OrderedDict):
             del self[key]
         OrderedDict.__setitem__(self, key, value)
 
-import os
 global IO_HUB_DIRECTORY
 IO_HUB_DIRECTORY=module_directory(isIterable)
+

@@ -39,7 +39,8 @@ class Joystick(Device):
                         'device_class':deviceConfig['device_class'],
                         'name':deviceConfig['name'],
                         'os_device_code':'OS_DEV_CODE_NOT_SET',
-                        'max_event_buffer_length':deviceConfig['event_buffer_length']
+                        'max_event_buffer_length':deviceConfig['event_buffer_length'],
+                        '_isReportingEvents':deviceConfig.get('auto_report_events',True)
                         }
         Device.__init__(self,*args,**deviceSettings)
         #ioHub.print2stderr("kwargs: "+str(kwargs))

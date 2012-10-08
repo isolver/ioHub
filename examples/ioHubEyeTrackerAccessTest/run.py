@@ -114,9 +114,6 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                 print "Requested Delay / Actual Delay / Diff (msec):",d1,actualdelay,actualdelay-d1
                 print DIVIDER
 
-                print "EARs:", eyetracker.getEventArrayLengths()
-
-                print DIVIDER
                 print "getLatestGazePosition():",eyetracker.getLatestGazePosition()
                 print DIVIDER
 

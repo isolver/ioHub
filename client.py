@@ -247,7 +247,7 @@ class ioHubDeviceView(object):
     def __getattr__(self,name):
         if name in self._methods:
             return DeviceRPC(self.hubClient.sendToHubServer,self.device_class,name)
-
+        raise AttributeError(self,name)
     def getName(self):
         """
         Gets the name given to the device in the ioHub configuration file.

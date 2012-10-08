@@ -15,8 +15,9 @@ from gevent import Greenlet
 import os,sys
 from operator import itemgetter
 from collections import deque
+import inspect
 import ioHub
-from ioHub.devices import computer, DeviceEvent
+from ioHub.devices import computer, DeviceEvent, EventConstants
 
 currentSec= computer.currentSec
 currentMsec= computer.currentMsec
@@ -148,7 +149,7 @@ class udpServer(DatagramServer):
             try:
                 if args and kwargs:
                     result=method(*args, **kwargs)
-                if args:
+                elif args:
                     result=method(*args)
                 elif kwargs:
                     result=method(**kwargs)
@@ -179,7 +180,7 @@ class udpServer(DatagramServer):
             self.socket.sendto(packet_data,address)
         except:
             ioHub.print2err('Error trying to send data to experiment process:')
-            ioHub.print2err('data:',data)
+            ioHub.print2err('data length:',len(data))
             if packet_data:
                 ioHub.print2err('packet Data length: ',len(packet_data))
     def setExperimentInfo(self,experimentInfoList):
@@ -229,8 +230,8 @@ class udpServer(DatagramServer):
         self.iohub.closeDataStoreFile()
         self.disableHighPriority()
         while len(self.iohub.devices) > 0:
-            self.iohub.devices.pop(0)
-
+            d=self.iohub.devices.pop(0)
+            d._close()
         time.sleep(1)
         
         self.stop()
@@ -248,10 +249,13 @@ class DeviceMonitor(Greenlet):
         
     def _run(self):
         self.running = True
-        
+        ctime=computer.currentSec
         while self.running is True:
+            stime=ctime()
             self.device._poll()
-            gevent.sleep(self.sleep_interval)
+            i=self.sleep_interval-(ctime()-stime)
+            if i > 0.0:
+                gevent.sleep(i)
         
         self.device=None
         
@@ -285,13 +289,16 @@ class ioServer(object):
         for iodevice in config['monitor_devices']:
             for _key,deviceConfig in iodevice.iteritems():
                 try:
-                    # build devices to monitor
-                    self.log("Creating Device: %s"%deviceConfig['device_class'])
                     dclass=deviceConfig['device_class']
+                    # build devices to monitor
+
+                    self.log("Creating Device: %s"%deviceConfig['device_class'])
                     parentModule=devices
                     modulePathTokens=dclass.split('.')
                     for mt in modulePathTokens:
                         DeviceClass=getattr(parentModule,mt)
+                        if inspect.isfunction(DeviceClass):
+                            DeviceClass()
                         parentModule=DeviceClass
                     deviceInstance=DeviceClass(dconfig=deviceConfig)
                     self.devices.append(deviceInstance)
@@ -352,12 +359,18 @@ class ioServer(object):
     def processDeviceEvents(self,sleep_interval):
         while self._running:
             for device in self.devices:
-                events=device._getNativeEventBuffer()
-                while len(events)>0:
-                    evt=events.popleft()                    
-                    e=device._getIOHubEventObject(evt,device.instance_code)
-                    for l in device._getEventListeners():
-                        l._handleEvent(e) 
+                try:
+                    events=device._getNativeEventBuffer()
+                    while len(events)>0:
+                        evt=events.popleft()
+                        e=device._getIOHubEventObject(evt,device.instance_code)
+                        for l in device._getEventListeners():
+                            l._handleEvent(e)
+                except:
+                    ioHub.print2err("Error in processDeviceEvents: ", device, " : ", len(events), " : ", e)
+                    eclass=EventConstants.EVENT_CLASSES[e[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+                    ioHub.print2err("Event array length: ", len(e), " should be : ", len(eclass.NUMPY_DTYPE)," : ",eclass.NUMPY_DTYPE)
+                    ioHub.printExceptionDetailsToStdErr()
             gevent.sleep(sleep_interval)
 
     def closeDataStoreFile(self):

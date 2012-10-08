@@ -16,6 +16,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 # Current Revision Number */
+from ctypes import c_ushort
+
 CURRENTREVNUM = 6.10
 
 # System error code */

@@ -59,7 +59,8 @@ class Display(Device):
             'device_class':self._settings['device_class'],
             'name':self._settings['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':16
+            'max_event_buffer_length':16,
+            '_isReportingEvents':self._settings.get('auto_report_events',True)
             }
 
         self._determineDisplayCoordSpace()

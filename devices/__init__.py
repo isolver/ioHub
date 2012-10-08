@@ -16,7 +16,7 @@ import platform
 from collections import deque
 from operator import itemgetter
 import psutil
-from ioHub import ioObject
+from ioHub import ioObject, print2err, highPrecisionTimer
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg, *args, **kwargs):
@@ -191,6 +191,9 @@ class _EventConstantsBase(object):
     BUTTON_BOX_PRESS_EVENT=61
     BUTTON_BOX_RELEASE_EVENT=62
     TTL_INPUT_EVENT=71
+    ANALOG_INPUT_EVENT=80
+    DAQ_SINGLE_CHANNEL_INPUT_EVENT=90
+    DAQ_MULTI_CHANNEL_INPUT_EVENT=91
     EYE_SAMPLE_EVENT=101
     BINOC_EYE_SAMPLE_EVENT=102
     FIXATION_START_EVENT=106
@@ -268,6 +271,9 @@ class _EventConstantsBase(object):
         BUTTON_BOX_PRESS =61,
         BUTTON_BOX_RELEASE =62,
         TTL_INPUT =71,
+        ANALOG_INPUT=80,
+        DAQ_SINGLE_CHANNEL_INPUT=90,
+        DAQ_MULTI_CHANNEL_INPUT=91,
         EYE_SAMPLE =101,
         BINOC_EYE_SAMPLE =102,
         FIXATION_START =106,
@@ -323,6 +329,7 @@ class _EventConstantsBase(object):
         4:'VISUAL_STIMULUS_PRESENTER',
         8:'VIRTUAL',
         16:'DIGITAL_IO',
+        32:'DIGITAL_ANALOG_IO',
         #        32:'DA_CONVERTER',
         #        64:'AD_CONVERTER',
         #        128:'BUTTON_BOX',
@@ -446,8 +453,9 @@ class Device(ioObject):
                 ]
 
 
-    __slots__=[e[0] for e in _newDataTypes]+['_nativeEventBuffer','_eventListeners','_ioHubEventBuffer']
+    __slots__=[e[0] for e in _newDataTypes]+['_nativeEventBuffer','_eventListeners','_ioHubEventBuffer','_isReportingEvents']
     def __init__(self,*args,**kwargs):
+        self._isReportingEvents=True
         ioObject.__init__(self,*args,**kwargs)
         self._ioHubEventBuffer=deque(maxlen=self.max_event_buffer_length)
         self._nativeEventBuffer=deque(maxlen=self.max_event_buffer_length)
@@ -490,7 +498,31 @@ class Device(ioObject):
         Return: None
         """
         self._ioHubEventBuffer.clear()
-        
+
+    def enableEventReporting(self,enabled=True):
+        """
+        Sets whether a Device should report events and provide them to the Experiment process
+        / Save them to the ioDataStore or whether the device should ignore any events that occur.
+
+        Args:
+            enabled (bool): True (default): constantly monitor and report for device events.
+                            False: Do not report any events for the device until reporting is re-enabled.
+
+        Return (bool): current reporting state
+        """
+        self._isReportingEvents=enabled
+        return self._isReportingEvents
+
+    def isEventReporting(self):
+        """
+        Gets whether a Device is currently report events or whether the device is ignoring any events that occur.
+
+        Args: None
+
+        Return (bool): current reporting state
+        """
+        return self._isReportingEvents
+
     def _handleEvent(self,e):
         self._ioHubEventBuffer.append(e)
         
@@ -507,6 +539,9 @@ class Device(ioObject):
             
     def _getEventListeners(self):
         return self._eventListeners
+
+    def _close(self):
+        pass
 
 ########### Base Device Event that all other Device Events inherit from ##########
 
@@ -717,62 +752,115 @@ if computer.system == 'Windows':
         def GetKeyState(key_id):
             return pyHook.HookManager.GetKeyState(key_id)
 
+deviceModulesAvailable=[]
 
-import keyboard as keyboard_module
-from keyboard import Keyboard
-from keyboard import KeyboardEvent,KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
+try:
+    import keyboard
+    from keyboard import Keyboard
+    from keyboard import KeyboardEvent,KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
+    deviceModulesAvailable.append('keyboard')
+except:
+    print2err("Error occurred during keyboard device module import.")
 
-import mouse as mouse_module
-from mouse import Mouse
-from mouse import MouseEvent,MouseButtonEvent,MouseMoveEvent,MouseWheelEvent,MouseWheelUpEvent,MouseWheelDownEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
+try:
+    import mouse as mouse_module
+    from mouse import Mouse
+    from mouse import MouseEvent,MouseButtonEvent,MouseMoveEvent,MouseWheelEvent,MouseWheelUpEvent,MouseWheelDownEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
+    deviceModulesAvailable.append('mouse')
+except:
+    print2err("Error occurred during mouse device module import.")
 
-import parallelPort as parallelPort_module
-from parallelPort import ParallelPort
-from parallelPort import ParallelPortEvent
+try:
+    import parallelPort as parallelPort_module
+    from parallelPort import ParallelPort
+    from parallelPort import ParallelPortEvent
+    deviceModulesAvailable.append('parallelPort')
+except:
+    print2err("Error occurred during parallelPort device module import.")
 
-import joystick as joystick_module
-from joystick import Joystick
-from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
+# removed Joystick device for now to focus on core initial device set
+try:
+    import joystick as joystick_module
+    from joystick import Joystick
+    from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
+    deviceModulesAvailable.append('joystick')
+except:
+    print2err("Error occurred during joystick device module import.")
 
-import experiment
-from experiment import ExperimentDevice
-from experiment import MessageEvent #, CommandEvent
+try:
+    import experiment
+    from experiment import ExperimentDevice
+    from experiment import MessageEvent #, CommandEvent
+    deviceModulesAvailable.append('experiment')
+except:
+    print2err("Error occurred during experiment device module import.")
 
-import eyeTrackerInterface
-from eyeTrackerInterface.HW import *
-from eyeTrackerInterface.eye_events import *
+try:
+    import eyeTrackerInterface
+    from eyeTrackerInterface.HW import *
+    from eyeTrackerInterface.eye_events import *
+    deviceModulesAvailable.append('eyetracker')
+except:
+    print2err("Error occurred during eyetracker device module import.")
 
-import display
-from display import Display
-from ioHub import print2err, highPrecisionTimer
+try:
+    import display
+    from display import Display
+    from ioHub import print2err, highPrecisionTimer
+    deviceModulesAvailable.append('display')
+except:
+    print2err("Error occurred during display device module import.")
+
+try:
+    import daq
+    from daq import DAQDevice
+    from daq import DAQMultiChannelInputEvent,DAQSingleChannelInputEvent
+    deviceModulesAvailable.append('daq')
+except:
+    print2err("Error occurred during daq device module import.")
+
 
 if EventConstants._prepped is False:
     EventConstants._prepped=True
 
-    EventConstants.EVENT_CLASSES.update({EventConstants.EVENT_TYPES['KEYBOARD_KEY']:KeyboardKeyEvent,
-                                         EventConstants.EVENT_TYPES['KEYBOARD_PRESS']:KeyboardPressEvent,
-                                         EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']:KeyboardReleaseEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_MOVE']:MouseMoveEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL']:MouseWheelEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL_UP']:MouseWheelUpEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_WHEEL_DOWN']:MouseWheelDownEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_BUTTON']:MouseButtonEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_PRESS']:MouseButtonDownEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_RELEASE']:MouseButtonUpEvent,
-                                         EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']:MouseDoubleClickEvent,
-                                         EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']:JoystickButtonPressEvent,
-                                         EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']:JoystickButtonReleaseEvent,
-                                         EventConstants.EVENT_TYPES['TTL_INPUT']:ParallelPortEvent,
-                                         EventConstants.EVENT_TYPES['MESSAGE']:MessageEvent,
-                                         EventConstants.EVENT_TYPES['EYE_SAMPLE']:MonocularEyeSample,
-                                         EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']:BinocularEyeSample,
-                                         EventConstants.EVENT_TYPES['FIXATION_START']:FixationStartEvent,
-                                         EventConstants.EVENT_TYPES['FIXATION_END']:FixationEndEvent,
-                                         EventConstants.EVENT_TYPES['SACCADE_START']:SaccadeStartEvent,
-                                         EventConstants.EVENT_TYPES['SACCADE_END']:SaccadeEndEvent,
-                                         EventConstants.EVENT_TYPES['BLINK_START']:BlinkStartEvent,
-                                         EventConstants.EVENT_TYPES['BLINK_END']:BlinkEndEvent
-                                        })
+    if 'eyetracker' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['EYE_SAMPLE']]=MonocularEyeSample
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['BINOC_EYE_SAMPLE']]=BinocularEyeSample
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['FIXATION_START']]=FixationStartEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['FIXATION_END']]=FixationEndEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['SACCADE_START']]=SaccadeStartEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['SACCADE_END']]=SaccadeEndEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['BLINK_START']]=BlinkStartEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['BLINK_END']]=BlinkEndEvent
+
+    if 'experiment' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MESSAGE']]=MessageEvent
+
+    if 'mouse' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_MOVE']]=MouseMoveEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_WHEEL']]=MouseWheelEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_WHEEL_UP']]=MouseWheelUpEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_WHEEL_DOWN']]=MouseWheelDownEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_BUTTON']]=MouseButtonEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_PRESS']]=MouseButtonDownEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_RELEASE']]=MouseButtonUpEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['MOUSE_DOUBLE_CLICK']]=MouseDoubleClickEvent
+
+    if 'keyboard' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['KEYBOARD_KEY']]=KeyboardKeyEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['KEYBOARD_PRESS']]=KeyboardPressEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']]=KeyboardReleaseEvent
+
+    if 'joystick' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']]=JoystickButtonPressEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
+
+    if 'daq' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_MULTI_CHANNEL_INPUT']]=DAQMultiChannelInputEvent,
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_SINGLE_CHANNEL_INPUT']]=DAQSingleChannelInputEvent,
+
+    if 'parallelPort' in deviceModulesAvailable:
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['TTL_INPUT']]=ParallelPortEvent
 
     EventConstants.EVENT_TYPES.update(dict([(v,k) for k,v in EventConstants.EVENT_TYPES.items()]))
     EventConstants.DEVICE_TYPES.update(dict([(v,k) for k,v in EventConstants.DEVICE_TYPES.items()]))

@@ -163,8 +163,8 @@ monitor_devices:
         instance_code: et_serial_number
         saveEvents: True
         streamEvents: True
-#        device_timer:
-#            interval: 0.001
+        device_timer:
+            interval: 0.001
         event_buffer_length: 2048       
         #
         # display_settings: provides a copy of all the Display Device settings
@@ -298,7 +298,7 @@ monitor_devices:
 #
 ioDataStore:
     enable: True
-    filename: temp
+    filename: events
     filepath: .
     storage_type: pytables
     multiple_experiments: True

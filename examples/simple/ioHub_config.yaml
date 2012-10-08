@@ -101,16 +101,6 @@ monitor_devices:
         saveEvents: True
         streamEvents: True
         event_buffer_length: 256
-#    - device:
-#        device_class: Joystick
-#        name: joystick
-#        instance_code: ms_sidewinder
-#        joystick_index: 0
-#        saveEvents: True
-#        streamEvents: True
-#        event_buffer_length: 256
-#        device_timer:
-#            interval: 0.0001
     - device:
         device_class: ExperimentDevice
         name: experimentRuntime
@@ -183,7 +173,7 @@ monitor_devices:
 #
 ioDataStore:
     enable: True
-    filename: temp
+    filename: events
     filepath: .
     storage_type: pytables
     multiple_experiments: True

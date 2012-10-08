@@ -121,7 +121,6 @@ class MonocularEyeSample(DeviceEvent):
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, *args, **kwargs):
         DeviceEvent.__init__(self, *args, **kwargs)
-        
 class BinocularEyeSample(DeviceEvent):
     """
     The BinocularEyeSample event represents the eye position and eye attribute data collected from

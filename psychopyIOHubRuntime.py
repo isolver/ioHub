@@ -135,6 +135,11 @@ a command prompt at the ioHub/examples/simple folder and type:
         self.configFilePath=configFilePath
         self.configFileName=configFile
 
+        sysInfoFile=open(os.path.join(self.configFilePath,'systemInfo.txt'),'w')
+        from util.systemInfo import printSystemInfo
+        printSystemInfo(sysInfoFile)
+        sysInfoFile.close()
+
         self.fullPath= os.path.join(self.configFilePath,self.configFileName)
 
         # load the experiment config settings from the experiment_config.yaml file.

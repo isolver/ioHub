@@ -173,7 +173,7 @@ monitor_devices:
 #
 ioDataStore:
     enable: True
-    filename: temp
+    filename: events
     filepath: .
     storage_type: pytables
     multiple_experiments: True

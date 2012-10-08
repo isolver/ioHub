@@ -39,6 +39,7 @@ if computer.system == 'Windows':
                 'device_class':deviceConfig['device_class'],
                 'name':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
+                '_isReportingEvents':deviceConfig.get('auto_report_events',True),
                 'max_event_buffer_length':deviceConfig['event_buffer_length']
                 }          
             Device.__init__(self,*args,**deviceSettings)

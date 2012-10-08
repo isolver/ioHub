@@ -116,7 +116,7 @@ class EyeTracker(EyeTrackerInterface):
     _VALID_CALIBRATION_TYPES=dict(H3="H3",HV3="HV3",HV5="HV5",HV9="HV9",HV13="HV13")
     lastPollTime=0.0
     currentSampleRate=None
-    _eventArrayLengths=dict()
+    #_eventArrayLengths=dict()
     # <<<
 
     # >>> Overwritten class attributes
@@ -187,7 +187,9 @@ class EyeTracker(EyeTrackerInterface):
         #print runtimeSettings
         #print ''
         eyelink=self._eyelink
-        
+
+        eyelink.setOfflineMode();
+
         for pkey,v in runtimeSettings.iteritems():
             if pkey == 'auto_calibration':
                 if v is True or v == 1 or v == 'ON':
@@ -221,12 +223,47 @@ class EyeTracker(EyeTrackerInterface):
             else:
                 print "WARNING: UNHANDLED EYETRACKER CONFIG SETTING:",pkey,v
                 print ""
-        # <<<<
-        
+
+        #Gets the display surface and sends a mesage to EDF file;
+        width,height=ioHub.devices.Display.getScreenResolution()
+        bounds=dict(left=-width/2,top=height/2,right=width/2,bottom=-height/2)
+
+        ioHub.print2err('*display bounds: ',bounds)
+        eyelink.sendCommand("screen_pixel_coords %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
+        eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
+
+        tracker_software_ver = 0
+        eyelink_ver = eyelink.getTrackerVersion()
+        if eyelink_ver == 3:
+            tvstr = eyelink.getTrackerVersionString()
+            vindex = tvstr.find("EYELINK CL")
+            tracker_software_ver = int(float(tvstr[(vindex + len("EYELINK CL")):].strip()))
+
+        # set EDF file contents
+        eyelink.sendCommand("file_event_filter = LEFT, RIGHT, FIXATION, SACCADE, BLINK, MESSAGE, BUTTON, INPUT")
+
+        if tracker_software_ver>=4:
+            eyelink.sendCommand("file_sample_data = LEFT, RIGHT,GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT, HTARGET")
+        else:
+            eyelink.sendCommand("file_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT")
+
+        # set link data
+        eyelink.sendCommand("link_event_filter = LEFT, RIGHT, FIXATION, FIXUPDATE, SACCADE , BLINK, BUTTON, MESSAGE, INPUT")
+        eyelink.sendCommand("link_event_data = GAZE, GAZERES, HREF , FIXAVG , AREA, NOSTART")
+
+        if tracker_software_ver>=4:
+            eyelink.sendCommand("link_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT , HTARGET")
+        else:
+            eyelink.sendCommand("link_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT")
+
+        eyelink.sendCommand("button_function 5 'accept_target_fixation'");
+
+        pylink.flushGetkeyQueue()
+
         '''
-        'track_eyes': 'BINOC', 
-        'default_native_data_file_name': 'default',  
-        'vog_settings': {'pupil_illumination': 'dark', 'pupil_center_algorithm': 'centroid', 'tracking_mode': 'pupil-cr'}, 
+        'track_eyes': 'BINOC',
+        'default_native_data_file_name': 'default',
+        'vog_settings': {'pupil_illumination': 'dark', 'pupil_center_algorithm': 'centroid', 'tracking_mode': 'pupil-cr'},
         'save_native_data_file_to': 'C:\\Users\\isolver\\Desktop\\Dropbox\\EMDQ and EMRA\\EMRA\\EMRT\\DEV\\EMRTDISTRO\\emrt_lib\\emrt\\examples\\experiment\\',
         '''
 
@@ -244,45 +281,6 @@ class EyeTracker(EyeTrackerInterface):
                 recording_filename=args[0]
             else:
                 recording_filename=(self.eyeTrackerConfig['runtime_settings']['default_native_data_file_name'])+'.edf'
-
-            self._eyelink.setOfflineMode();
-
-
-            #Gets the display surface and sends a mesage to EDF file;
-            width,height=ioHub.devices.Display.getScreenResolution()
-            bounds=dict(left=-width/2,top=height/2,right=width/2,bottom=-height/2)
-
-            self._eyelink.sendCommand("screen_pixel_coords =  %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
-            self._eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
-
-            tracker_software_ver = 0
-            eyelink_ver = self._eyelink.getTrackerVersion()
-            if eyelink_ver == 3:
-                tvstr = self._eyelink.getTrackerVersionString()
-                vindex = tvstr.find("EYELINK CL")
-                tracker_software_ver = int(float(tvstr[(vindex + len("EYELINK CL")):].strip()))
-
-            # set EDF file contents
-            self._eyelink.sendCommand("file_event_filter = LEFT, RIGHT, FIXATION, SACCADE, BLINK, MESSAGE, BUTTON, INPUT")
-
-            if tracker_software_ver>=4:
-                self._eyelink.sendCommand("file_sample_data = LEFT, RIGHT,GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT, HTARGET")
-            else:
-                self._eyelink.sendCommand("file_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT")
-
-            # set link data
-            self._eyelink.sendCommand("link_event_filter = LEFT, RIGHT, FIXATION, FIXUPDATE, SACCADE , BLINK, BUTTON, MESSAGE, INPUT")
-            self._eyelink.sendCommand("link_event_data = GAZE, GAZERES, HREF , FIXAVG , AREA, NOSTART")
-
-            if tracker_software_ver>=4:
-                self._eyelink.sendCommand("link_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT , HTARGET")
-            else:
-                self._eyelink.sendCommand("link_sample_data = LEFT, RIGHT, GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT")
-
-            self._eyelink.sendCommand("button_function 5 'accept_target_fixation'");
-
-            self.setDataFilterLevel(DATA_FILTER.OFF,DATA_STREAMS.FILE)
-            self.setDataFilterLevel(DATA_FILTER.OFF,DATA_STREAMS.NET)
 
             if recording_filename:
                 self.createRecordingFile(recording_filename)
@@ -558,15 +556,16 @@ class EyeTracker(EyeTrackerInterface):
         The graphicsContext arguement should likely be the psychopy full screen window instance that has been created
         for the experiment.
         """
-        graphicsContext=None
-        if len(args)>0:
-            graphicsContext=args[0]
-        else:
-            return ['EYETRACKER_ERROR','runSetupProcedure requires graphicsContext==args[0]']
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+        #graphicsContext=None
+        #if len(args)>0:
+        #    graphicsContext=args[0]
+        #else:
+        #    return ['EYETRACKER_ERROR','runSetupProcedure requires graphicsContext==args[0]']
             
-        if self._setupGraphics is None:
-            self._setupGraphics=EyeTrackerSetupGraphics(graphicsContext=graphicsContext,**kwargs)
-        return self._setupGraphics.run()
+        #if self._setupGraphics is None:
+        #    self._setupGraphics=EyeTrackerSetupGraphics(graphicsContext=graphicsContext,**kwargs)
+        #return self._setupGraphics.run()
 
     def stopSetupProcedure(self):
         """
@@ -574,10 +573,11 @@ class EyeTracker(EyeTrackerInterface):
         call, the only way this will happen is if the user has another thread that makes the call, perhaps a watch dog type thread.
         So in practice, calling this method is not very likely I do not think.
         """
-        result=None
-        if self._setupGraphics is not None:
-            result = self._setupGraphics.stop()
-        return result
+        return RTN_CODES.ET_NOT_IMPLEMENTED
+        #result=None
+        #if self._setupGraphics is not None:
+        #    result = self._setupGraphics.stop()
+        #return result
                 
     def setRecordingState(self,*args,**kwargs):
         """
@@ -926,8 +926,8 @@ class EyeTracker(EyeTrackerInterface):
                                      leftGaze[0],
                                      leftGaze[1],
                                      -1.0,
-                                     -1,
-                                     -1,
+                                     -1.0,
+                                     -1.0,
                                      -1.0,
                                      leftHref[0],
                                      leftHref[1],
@@ -945,8 +945,8 @@ class EyeTracker(EyeTrackerInterface):
                                      rightGaze[0],
                                      rightGaze[1],
                                      -1.0,
-                                     -1,
-                                     -1,
+                                     -1.0,
+                                     -1.0,
                                      -1.0,
                                      rightHref[0],
                                      rightHref[1],
@@ -963,7 +963,7 @@ class EyeTracker(EyeTrackerInterface):
                                      vel_xy,
                                      0
                                      ]
-                        EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE']=len(binocSample)
+                        #EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE']=len(binocSample)
                         EyeTracker._latestSample=binocSample
                         EyeTracker._latestGazePosition=(leftGaze[0]+rightGaze[0])/2.0,(leftGaze[1]+rightGaze[1])/2.0
                         self._nativeEventBuffer.append(binocSample)
@@ -1015,8 +1015,8 @@ class EyeTracker(EyeTrackerInterface):
                                     gaze[0],
                                     gaze[1],
                                     -1.0,
-                                    -1,
-                                    -1,
+                                    -1.0,
+                                    -1.0,
                                     -1.0,
                                     href[0],
                                     href[1],
@@ -1033,7 +1033,7 @@ class EyeTracker(EyeTrackerInterface):
                                     vel_xy,
                                     0
                                     ]
-                        EyeTracker._eventArrayLengths['MONOC_EYE_SAMPLE']=len(monoSample)
+                       #EyeTracker._eventArrayLengths['MONOC_EYE_SAMPLE']=len(monoSample)
                         EyeTracker._latestGazePosition=gaze
                         EyeTracker._latestSample=monoSample
                         self._nativeEventBuffer.append(monoSample)
@@ -1111,6 +1111,8 @@ class EyeTracker(EyeTrackerInterface):
                         -1.0,
                         s_pupilsize,
                         EventConstants.AREA,
+                        -1,
+                        EventConstants.NOT_SUPPORTED_FIELD,
                         s_ppd[0],
                         s_ppd[1],
                         -1,
@@ -1126,6 +1128,7 @@ class EyeTracker(EyeTrackerInterface):
                         e_pupilsize,
                         EventConstants.AREA,
                         -1,
+                        EventConstants.NOT_SUPPORTED_FIELD,
                         e_ppd[0],
                         e_ppd[1],
                         -1,
@@ -1140,7 +1143,8 @@ class EyeTracker(EyeTrackerInterface):
                         -1.0,
                         a_pupilsize,
                         EventConstants.AREA,
-                        -1.0,
+                        -1,
+                        EventConstants.NOT_SUPPORTED_FIELD,
                         -1.0,
                         -1.0,
                         -1.0,
@@ -1151,7 +1155,7 @@ class EyeTracker(EyeTrackerInterface):
                         peak_vel,
                         estatus
                         ]
-                    EyeTracker._eventArrayLengths['FIXATION_END']=len(fee)
+                    #EyeTracker._eventArrayLengths['FIXATION_END']=len(fee)
                     self._nativeEventBuffer.append(fee)
 
                 elif isinstance(ne,pylink.EndSaccadeEvent):
@@ -1211,7 +1215,8 @@ class EyeTracker(EyeTrackerInterface):
                         -1.0,
                         s_pupilsize,
                         EventConstants.AREA,
-                        -1.0,
+                        -1,
+                        EventConstants.NOT_SUPPORTED_FIELD,
                         s_ppd[0],
                         s_ppd[1],
                         -1,
@@ -1227,6 +1232,7 @@ class EyeTracker(EyeTrackerInterface):
                         e_pupilsize,
                         EventConstants.AREA,
                         -1,
+                        EventConstants.NOT_SUPPORTED_FIELD,
                         e_ppd[0],
                         e_ppd[1],
                         -1,
@@ -1240,7 +1246,7 @@ class EyeTracker(EyeTrackerInterface):
                         peak_vel,
                         estatus
                         ]
-                    EyeTracker._eventArrayLengths['SACCADE_END']=len(see)
+                    #EyeTracker._eventArrayLengths['SACCADE_END']=len(see)
                     self._nativeEventBuffer.append(see)
                 elif isinstance(ne,pylink.EndBlinkEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_END']
@@ -1272,7 +1278,7 @@ class EyeTracker(EyeTrackerInterface):
                         event_duration,
                         estatus
                         ]
-                    EyeTracker._eventArrayLengths['BLINK_END']=len(bee)
+                    #EyeTracker._eventArrayLengths['BLINK_END']=len(bee)
                     self._nativeEventBuffer.append(bee)
 
                 elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):
@@ -1298,35 +1304,36 @@ class EyeTracker(EyeTrackerInterface):
                     estatus=ne.getStatus()
 
                     se=[
-                        0,
-                        0,
-                        Computer.getNextEventID(),
-                        etype,
-                        self.eyeTrackerConfig['instance_code'],
-                        event_timestamp,
-                        currentTime,
-                        hub_timestamp,
-                        confidenceInterval,
-                        event_delay,
-                        which_eye,
-                        gaze[0],
-                        gaze[1],
-                        -1,
-                        href[0],
-                        href[1],
-                        -1.0,
-                        -1.0,
-                        pupil_size,
-                        EventConstants.AREA,
-                        -1.0,
-                        ppd[0],
-                        ppd[1],
-                       -1.0,
-                       -1.0,
-                       velocity,
-                       estatus
+                        0,                                      # exp ID
+                        0,                                      # sess ID
+                        Computer.getNextEventID(),              # event ID
+                        etype,                                  # event type
+                        self.eyeTrackerConfig['instance_code'], # device_instance_code
+                        event_timestamp,                        # event time stamp
+                        currentTime,                            # logged time
+                        hub_timestamp,                          # hub time
+                        confidenceInterval,                     # ci
+                        event_delay,                            # delay
+                        which_eye,                              # eye
+                        gaze[0],                                # gaze x
+                        gaze[1],                                # gaze y
+                        -1,                                     # gaze z
+                        href[0],                                # angle x
+                        href[1],                                # angle y
+                        -1.0,                                   # raw x
+                        -1.0,                                   # raw y
+                        pupil_size,                             # pupil area
+                        EventConstants.AREA,                    # pupil measure type 1
+                        -1.0,                                   # pupil measure 2
+                        EventConstants.NOT_SUPPORTED_FIELD,     # pupil measure 2 type
+                        ppd[0],                                 # ppd x
+                        ppd[1],                                 # ppd y
+                       -1.0,                                    # velocity x
+                       -1.0,                                    # velocity y
+                       velocity,                                # velocity xy
+                       estatus                                  # status
                         ]
-                    EyeTracker._eventArrayLengths[ioHub.devices.EventConstants.EVENT_TYPES[etype]]=len(se)
+                    #EyeTracker._eventArrayLengths[ioHub.devices.EventConstants.EVENT_TYPES[etype]]=len(se)
                     self._nativeEventBuffer.append(se)
 
                 elif isinstance(ne,pylink.StartBlinkEvent):
@@ -1356,7 +1363,7 @@ class EyeTracker(EyeTrackerInterface):
                         which_eye,
                         estatus
                         ]
-                    EyeTracker._eventArrayLengths['BLINK_START']=len(bse)
+                    #EyeTracker._eventArrayLengths['BLINK_START']=len(bse)
                     self._nativeEventBuffer.append(bse)
 
             pollEndLocalTime=int(Computer.currentUsec())
@@ -1433,8 +1440,8 @@ class EyeTracker(EyeTrackerInterface):
         
         return gaze_x,gaze_y
 
-    def getEventArrayLengths(self,*args,**kwargs):
-        return (EyeTracker._eventArrayLengths,)
+    #def getEventArrayLengths(self,*args,**kwargs):
+    #    return (EyeTracker._eventArrayLengths,)
 
     def __del__(self):
         """
