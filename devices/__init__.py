@@ -782,7 +782,6 @@ try:
     deviceModulesAvailable.append('display')
 except:
     print2err("Warning: display device module could not be imported.")
-    printExceptionDetailsToStdErr()
 
 try:
     import daq

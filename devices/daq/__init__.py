@@ -13,6 +13,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from .. import Device, EventConstants, DeviceEvent
 import numpy as N
 
+
 class DAQDevice(Device):
     CATEGORY_LABEL='DIGITAL_ANALOG_IO'
     DEVICE_LABEL='GPIO_DEVICE'

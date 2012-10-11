@@ -18,10 +18,11 @@ download from  www.sr-support.com once you are registered and includes the neces
 
 import sys
 import ioHub
-import EyeLinkCoreGraphicsPyglet
-from EyeLinkCoreGraphicsPyglet import EyeLinkCoreGraphicsPyglet
+
 from ..... import Computer, EventConstants
 try:
+    import EyeLinkCoreGraphicsPyglet
+    from EyeLinkCoreGraphicsPyglet import EyeLinkCoreGraphicsPyglet
     import pylink
 except:
     ioHub.print2err("warning: pylink module could not be found")

@@ -193,7 +193,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         mywin.close()
 
         # save ioHubFile to xlsx format
-        print "Saving Sample Excel File ...."
+        print "Saving Sample Excel File ....This can take a while, please be patient ......"
         import ioHub.ioDataStore.util as dsUtil
         tstart=self.currentSec()*1000.0
         nrows=dsUtil.hubTableToExcel(os.getcwdu(),self.ioHubConfig['ioDataStore']['filename']+'.hdf5',tableName='MonocularEyeSample',experiment_id=0,session_id=0)

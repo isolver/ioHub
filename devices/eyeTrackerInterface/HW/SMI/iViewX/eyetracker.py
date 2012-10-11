@@ -83,7 +83,7 @@ class EyeTracker(EyeTrackerInterface):
     #  >>>> Class attributes used by parent Device class
     DEVICE_START_TIME = 0.0 # Time to subtract from future device time reads. 
                             # Init in Device init before any calls to getTime() 
-    DEVICE_TIMEBASE_TO_SEC = 0.00001
+    DEVICE_TIMEBASE_TO_SEC = .000001
 
     __slots__ = []
     # <<<<<
@@ -125,60 +125,62 @@ class EyeTracker(EyeTrackerInterface):
         **If an instance of EyeTracker has already been created, trying to create a second will raise an exception. Either destroy the first instance and then create the new instance, or use the class method EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
         """
         
-        
-        if EyeTracker._INSTANCE is not None:
-            raise "EyeTracker object has already been created; only one instance can exist.\n \
-            Delete existing instance before recreating EyeTracker object."
-            sys.exit(1)  
-        
-        # >>>> eye tracker config
-        EyeTracker.eyeTrackerConfig = kwargs['dconfig']
-        
-        # create Device level class setting dictionary and pass it Device constructor
-        deviceSettings = {'instance_code':self.eyeTrackerConfig['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
-            'device_class':self.eyeTrackerConfig['device_class'],
-            'user_label':self.eyeTrackerConfig['name'],
-            'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_length'],
-            }
-        EyeTrackerInterface.__init__(self, *args, **deviceSettings)
-        
-        # set this instance as 'THE' instance of the eye tracker.
-        EyeTracker._INSTANCE = self
-        
-        runtimeSettings = self.eyeTrackerConfig['runtime_settings']
-        EyeTracker.sample_rate = runtimeSettings['sampling_rate']
-        
-        cal_pts = int(runtimeSettings['default_calibration'][0])
-        EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
-        
-        screen_index = EyeTracker.displaySettings['display_index']
-        
-        # implementation specific SMI attributes
-        EyeTracker._iViewXAPI = windll.LoadLibrary("iViewXAPI.dll")
-        
-        #calibration settings
-        EyeTracker.calibration_struct = CCalibration(cal_pts, 1, screen_index, 0, 1, 20, 239, 1, 15, b"")
-        EyeTracker._iViewXAPI.iV_SetupCalibration(byref(EyeTracker.calibration_struct)) 
+        try:
+            if EyeTracker._INSTANCE is not None:
+                raise "EyeTracker object has already been created; only one instance can exist.\n \
+                Delete existing instance before recreating EyeTracker object."
+                sys.exit(1)  
+            
+            # >>>> eye tracker config
+            EyeTracker.eyeTrackerConfig = kwargs['dconfig']
+            
+            # create Device level class setting dictionary and pass it Device constructor
+            deviceSettings = {'instance_code':self.eyeTrackerConfig['instance_code'],
+                'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
+                'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
+                'device_class':self.eyeTrackerConfig['device_class'],
+                'name':self.eyeTrackerConfig['name'],
+                'os_device_code':'OS_DEV_CODE_NOT_SET',
+                'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_length'],
+                }
+            EyeTrackerInterface.__init__(self, *args, **deviceSettings)
+            
+            # set this instance as 'THE' instance of the eye tracker.
+            EyeTracker._INSTANCE = self
+            
+            runtimeSettings = self.eyeTrackerConfig['runtime_settings']
+            EyeTracker.sample_rate = runtimeSettings['sampling_rate']
+            
+            cal_pts = int(runtimeSettings['default_calibration'][0])
+            EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
+            
+            screen_index = EyeTracker.displaySettings['display_index']
+            
+            # implementation specific SMI attributes
+            EyeTracker._iViewXAPI = windll.LoadLibrary("iViewXAPI.dll")
+            
+            #calibration settings
+            EyeTracker.calibration_struct = CCalibration(cal_pts, 1, screen_index, 0, 1, 20, 239, 1, 15, b"")
+            EyeTracker._iViewXAPI.iV_SetupCalibration(byref(EyeTracker.calibration_struct)) 
 
-        #specific commands       
-        EyeTracker._COMMAND_TO_FUNCTION = {'Calibrate':EyeTracker._iViewXAPI.iV_Calibrate, 'Validate':EyeTracker._iViewXAPI.iV_Validate, 'Get_Accuracy':EyeTracker._iViewXAPI.iV_GetAccuracy, 'Show_Tracking_Monitor':EyeTracker._iViewXAPI.iV_ShowTrackingMonitor}
-        
-        #initialize callbacks for new events and samples
-        
-        #define output and input to the function
-        EyeTracker.EVENT_HANDLER = CFUNCTYPE(c_int, CEvent)
-        #convert the python function to a c-callback function
-        EyeTracker.handle_event = EyeTracker.EVENT_HANDLER(self._handleNativeEvent)
-        #and pass it over to the iViewX event callback function
-        EyeTracker._iViewXAPI.iV_SetEventCallback(EyeTracker.handle_event)
-        #and the same for samples
-        EyeTracker.SAMPLE_HANDLER = CFUNCTYPE(c_int, CSample)
-        EyeTracker.handle_sample = EyeTracker.SAMPLE_HANDLER(self._handleNativeEvent)        
-        EyeTracker._iViewXAPI.iV_SetSampleCallback(EyeTracker.handle_sample)
-        
+            #specific commands       
+            EyeTracker._COMMAND_TO_FUNCTION = {'Calibrate':EyeTracker._iViewXAPI.iV_Calibrate, 'Validate':EyeTracker._iViewXAPI.iV_Validate, 'Get_Accuracy':EyeTracker._iViewXAPI.iV_GetAccuracy, 'Show_Tracking_Monitor':EyeTracker._iViewXAPI.iV_ShowTrackingMonitor}
+            
+            #initialize callbacks for new events and samples
+            
+            #define output and input to the function
+            EyeTracker.EVENT_HANDLER = CFUNCTYPE(c_int, CEvent)
+            #convert the python function to a c-callback function
+            EyeTracker.handle_event = EyeTracker.EVENT_HANDLER(self._handleNativeEvent)
+            #and pass it over to the iViewX event callback function
+            EyeTracker._iViewXAPI.iV_SetEventCallback(EyeTracker.handle_event)
+            #and the same for samples
+            EyeTracker.SAMPLE_HANDLER = CFUNCTYPE(c_int, CSample)
+            EyeTracker.handle_sample = EyeTracker.SAMPLE_HANDLER(self._handleNativeEvent)        
+            EyeTracker._iViewXAPI.iV_SetSampleCallback(EyeTracker.handle_sample)
+        except:
+            ioHub.print2err("eyetracker init error **:")
+            ioHub.printExceptionDetailsToStdErr()
 
     def _EyeTrackerToDisplayCoords(self, *args, **kwargs):
         
@@ -281,11 +283,11 @@ class EyeTracker(EyeTrackerInterface):
         
     def trackerTime(self):
         """
-        Current eye tracker time ( in USEC since device interface was initialized)
+        Current eye tracker time ( in SEC since device interface was initialized)
         """
         time = c_ulonglong(1) #allocate memory
         EyeTracker._iViewXAPI.iV_GetCurrentTimestamp(byref(time))
-        return (time.value - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+        return time.value * self.DEVICE_TIMEBASE_TO_SEC - self.DEVICE_START_TIME
    
     def setConnectionState(self, *args, **kwargs):
         """
@@ -719,13 +721,13 @@ class EyeTracker(EyeTrackerInterface):
                 logged_time, event = args[0]
                 device_instance_code = args[1]
     
-            # CI in sec.msec-usec, should be = sampling rate /2
-            confidenceInterval = EyeTracker.sample_rate*0.00001 / 2.0
+            # (1sec in usec/samplerate) / 2 -> half the sampling rate is the confidence interval
+            confidenceInterval = EyeTracker.sample_rate * 0.0000005
             
             if isinstance(event, CSample):
                 
                 
-                event_timestamp = (event.timestamp - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+                event_timestamp = (event.timestamp - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_SEC
                 TT = self.trackerTime()
                 event_delay = TT - event_timestamp
                 hub_timestamp = currentTime - event_delay
@@ -776,23 +778,23 @@ class EyeTracker(EyeTrackerInterface):
                                     myeye,
                                     gazeX,
                                     gazeY,
-                                    -1.0,
+                                    - 1.0,
                                     eyePosX,
                                     eyePosY,
                                     eyePosZ,
                                     - 1.0,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
                                     pupilDiameter,
                                     EventConstants.DIAMETER,
-                                    -1,
+                                    - 1,
                                     EventConstants.NOT_SUPPORTED_FIELD,
-                                    -1,
-                                    -1,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
+                                    - 1,
+                                    - 1,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
                                     0
                                     ]
                     
@@ -835,42 +837,42 @@ class EyeTracker(EyeTrackerInterface):
                                    event_delay,
                                    leftGazeX,
                                    leftGazeY,
-                                   -1.0,
+                                   - 1.0,
                                    leftEyePosX,
                                    leftEyePosY,
                                    leftEyePosZ,
-                                   -1.0,
-                                   -1.0,
-                                   -1.0,
-                                   -1.0,
-                                   -1.0,
+                                   - 1.0,
+                                   - 1.0,
+                                   - 1.0,
+                                   - 1.0,
+                                   - 1.0,
                                     leftPupilDiameter,
                                     ioHub.devices.EventConstants.DIAMETER,
-                                    -1,
+                                    - 1,
                                     ioHub.devices.EventConstants.NOT_SUPPORTED_FIELD,
-                                    -1,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
+                                    - 1,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
                                     rightGazeX,
                                     rightGazeY,
-                                    -1.0,
+                                    - 1.0,
                                     rightEyePosX,
                                     rightEyePosY,
                                     rightEyePosZ,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
                                     rightPupilDiameter,
                                     ioHub.devices.EventConstants.DIAMETER,
-                                    -1,
+                                    - 1,
                                     ioHub.devices.EventConstants.NOT_SUPPORTED_FIELD,
-                                    -1,
-                                    -1,
-                                    -1.0,
-                                    -1.0,
-                                    -1.0,
+                                    - 1,
+                                    - 1,
+                                    - 1.0,
+                                    - 1.0,
+                                    - 1.0,
                                     0
                                     ]
     
@@ -893,8 +895,8 @@ class EyeTracker(EyeTrackerInterface):
                     which_eye = ioHub.devices.EventConstants.LEFT
                 
                 
-                start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
-                end_event_time = (event.endTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
+                start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_SEC
+                end_event_time = (event.endTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_SEC
                 event_duration = event.duration
                 
                 a_gazeX, a_gazeY = self._EyeTrackerToDisplayCoords(event.positionX, event.positionY)
@@ -921,20 +923,20 @@ class EyeTracker(EyeTrackerInterface):
                         which_eye,
                         a_gazeX,
                         a_gazeY,
-                        -1,
-                        -1.0,
-                        -1.0,
-                        -1.0,
-                        -1.0,
-                        -1.0,                                   # pupil measure 1
-                        EventConstants.NOT_SUPPORTED_FIELD,     # pupil measure 1 type
-                        -1.0,                                   # pupil measure 2
-                        EventConstants.NOT_SUPPORTED_FIELD,     # pupil measure 2 type
-                        -1.0,
-                        -1.0,
-                        -1.0,
-                        -1.0,
-                        -1.0,
+                        - 1,
+                        - 1.0,
+                        - 1.0,
+                        - 1.0,
+                        - 1.0,
+                        - 1.0, # pupil measure 1
+                        EventConstants.NOT_SUPPORTED_FIELD, # pupil measure 1 type
+                        - 1.0, # pupil measure 2
+                        EventConstants.NOT_SUPPORTED_FIELD, # pupil measure 2 type
+                        - 1.0,
+                        - 1.0,
+                        - 1.0,
+                        - 1.0,
+                        - 1.0,
                         event_status
                         ]
                     
@@ -962,57 +964,57 @@ class EyeTracker(EyeTrackerInterface):
                             event_delay,
                             which_eye,
                             event_duration,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
                             a_gazeX,
                             a_gazeY,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
+                            - 1.0,
                             EventConstants.NOT_SUPPORTED_FIELD,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
-                            -1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
+                            - 1.0,
                             event_status
                             ]
                     

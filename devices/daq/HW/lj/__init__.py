@@ -20,7 +20,7 @@ try:
                 _LJ_DAQS.append(ljd)
 except:
     ioHub.print2err("Warning: Error looking for LabJack Devices")
-    ioHub.printExceptionDetailsToStdErr()
+    #ioHub.printExceptionDetailsToStdErr()
 
 if len(_LJ_DAQS) > 0:
     ioHub.print2err("\n")
