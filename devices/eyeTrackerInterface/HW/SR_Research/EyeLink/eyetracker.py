@@ -18,6 +18,8 @@ download from  www.sr-support.com once you are registered and includes the neces
 
 import sys
 import ioHub
+import EyeLinkCoreGraphicsPyglet
+from EyeLinkCoreGraphicsPyglet import EyeLinkCoreGraphicsPyglet
 from ..... import Computer, EventConstants
 try:
     import pylink
@@ -549,7 +551,28 @@ class EyeTracker(EyeTrackerInterface):
         The graphicsContext arguement should likely be the psychopy full screen window instance that has been created
         for the experiment.
         """
-        return RTN_CODES.ET_NOT_IMPLEMENTED
+        try:
+            import pyglet
+
+
+
+
+            screen_resolution=ioHub.devices.display.Display.getScreenResolution()
+            screen_index=self.displaySettings['display_index']
+            import psychopy
+            win=psychopy.visual.Window(screen_resolution, monitor="testMonitor", units='pix', fullscr=True, allowGUI=False,screen=screen_index)
+
+            genv=EyeLinkCoreGraphicsPyglet(screen_resolution[0],screen_resolution[1],win.winHandle)
+
+            pylink.openGraphicsEx(genv)
+
+            genv.setup_event_handlers()
+            self._eyelink.doTrackerSetup()
+            genv.release_event_handlers()
+        except:
+            ioHub.print2err("Error during runSetupProcedure")
+            ioHub.printExceptionDetailsToStdErr()
+        return True
         #graphicsContext=None
         #if len(args)>0:
         #    graphicsContext=args[0]
@@ -830,10 +853,10 @@ class EyeTracker(EyeTrackerInterface):
         try:
             pollStartLocalTime=Computer.currentSec()
             eyelink=self._eyelink
-            pollStartHostTime = eyelink.trackerTimeUsec()/1000000.0
+            pollStartHostTime = eyelink.trackerTimeUsec()*0.000001
 
 
-            confidenceInterval=EyeTracker.currentSampleRate*0.000005
+            confidenceInterval=EyeTracker.currentSampleRate*0.0000005
 
             #get native events queued up
             while 1:
@@ -849,7 +872,7 @@ class EyeTracker(EyeTrackerInterface):
                 if ne is None:
                     break
 
-                event_timestamp=ne.getTime()*EyeTracker.DEVICE_TIMEBASE_TO_USEC
+                event_timestamp=ne.getTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
                 event_delay=pollStartHostTime-(event_timestamp)
 
                 hub_timestamp=currentTime-event_delay
@@ -1042,8 +1065,8 @@ class EyeTracker(EyeTrackerInterface):
                     else:
                         which_eye=EventConstants.LEFT
 
-                    start_event_time= ne.getStartTime()
-                    end_event_time = ne.getEndTime()
+                    start_event_time= ne.getStartTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
+                    end_event_time = ne.getEndTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
                     event_duration = end_event_time-start_event_time
 
                     s_gaze=ne.getStartGaze()
@@ -1162,8 +1185,8 @@ class EyeTracker(EyeTrackerInterface):
                     else:
                         which_eye=EventConstants.LEFT
 
-                    start_event_time= ne.getStartTime()
-                    end_event_time = ne.getEndTime()
+                    start_event_time= ne.getStartTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
+                    end_event_time = ne.getEndTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
                     event_duration = end_event_time-start_event_time
 
                     e_amp = ne.getAmplitude()
@@ -1252,8 +1275,8 @@ class EyeTracker(EyeTrackerInterface):
                     else:
                         which_eye=EventConstants.LEFT
 
-                    start_event_time= ne.getStartTime()
-                    end_event_time = ne.getEndTime()
+                    start_event_time= ne.getStartTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
+                    end_event_time = ne.getEndTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
                     event_duration = end_event_time-start_event_time
 
                     bee=[
@@ -1340,7 +1363,7 @@ class EyeTracker(EyeTrackerInterface):
                     else:
                         which_eye=EventConstants.LEFT
 
-                    start_event_time= ne.getStartTime()
+                    start_event_time= ne.getStartTime()*EyeTracker.DEVICE_TIMEBASE_TO_SEC
 
                     bse=[
                         0,

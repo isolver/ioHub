@@ -16,7 +16,7 @@ import platform
 from collections import deque
 from operator import itemgetter
 import psutil
-from ioHub import ioObject, print2err, highPrecisionTimer
+from ioHub import ioObject, print2err, highPrecisionTimer, printExceptionDetailsToStdErr
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg, *args, **kwargs):
@@ -782,6 +782,7 @@ try:
     deviceModulesAvailable.append('display')
 except:
     print2err("Warning: display device module could not be imported.")
+    printExceptionDetailsToStdErr()
 
 try:
     import daq

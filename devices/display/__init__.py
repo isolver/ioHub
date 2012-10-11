@@ -13,8 +13,20 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from .. import Device,Computer
 import ioHub
 currentSec=Computer.currentSec
+#from ctypes import *
 import ctypes
 import unit_conversions as ucs
+
+#class _win32_DISPLAY_DEVICE(Structure):
+#    __fields__=[("cb",c_uint32),("DeviceName",POINTER(c_char)),("DeviceString",POINTER(c_char)),("StateFlags",c_uint32),("DeviceID", POINTER(c_char)),("DeviceKey", POINTER(c_char))]#
+#
+#    def init(self):
+#        self.DeviceName=(c_char*32)()
+#        self.DeviceString=(c_char*128)()
+#        self.DeviceID=(c_char*128)()
+#        self.DeviceKey=(c_char*128)()
+#        self.StateFlags=c_uint32(0)
+
 
 vis_degrees,screen_res,ppd=None,None,None
 
@@ -23,6 +35,11 @@ class Display(Device):
     CATEGORY_LABEL='VISUAL_STIMULUS_PRESENTER'
     DEVICE_LABEL='DISPLAY_DEVICE'
     _user32=ctypes.windll.user32
+    SM_CMONITORS=80
+    SM_CXSCREEN=0
+    SM_CYSCREEN=1
+    DISPLAY_DEVICE_ATTACHED_TO_DESKTOP=1
+    EDD_GET_DEVICE_INTERFACE_NAME=0x00000001
     _settings=None
     ccordinateTypes={'pix':('pixels','pix','pixs','pixel'),     # - You can also specify the size and location of your stimulus in pixels. Obviously this has the disadvantage that
                                                                 # sizes are specific to your monitor (because all monitors differ in pixel size). Spatial frequency: `cycles per pixel`
@@ -152,9 +169,22 @@ class Display(Device):
         Return (list): (width,height) of the monitor based on it's current graphics mode.
         """
         #  >> WIN32_ONLY
-        r= cls._user32.GetSystemMetrics(0), cls._user32.GetSystemMetrics(1)
+        r= cls._user32.GetSystemMetrics(cls.SM_CXSCREEN), cls._user32.GetSystemMetrics(cls.SM_CYSCREEN)
         #  << WIN32_ONLY
         return r
+
+    #@classmethod
+    #def getDisplayInfo(cls):
+    #    for i in xrange(5):
+    #        dd=_win32_DISPLAY_DEVICE()
+    #        dd.init()
+    #        dd.cb=c_uint32(sizeof(dd))
+    #        r=cls._user32.EnumDisplayDevicesA(None,i,byref(dd),cls.EDD_GET_DEVICE_INTERFACE_NAME)
+    #        ioHub.print2err("Display %d "%(i,),r," : ",dd.DeviceID[0:127]," : ",dd.StateFlags.value)
+
+    @classmethod
+    def getMonitorCount(cls):
+        return cls._user32.GetSystemMetrics(cls.SM_CMONITORS)
 
     @staticmethod
     def getScreenIndex():

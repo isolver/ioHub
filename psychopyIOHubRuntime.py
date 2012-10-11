@@ -12,6 +12,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from __future__ import division
 import psychopy
 from psychopy import  core, gui, visual
+import pythoncom
 import os
 from collections import deque
 import time
@@ -639,7 +640,18 @@ a command prompt at the ioHub/examples/simple folder and type:
             else:
                 d=self.hub.deviceByLabel[deviceLabel]
                 d.clearEvents()
-    
+
+    @staticmethod
+    def pumpLocalMessageQueue():
+        """
+        Pumps the Experiment Process Windows Message Queue so the PsychoPy Window does not appear to be 'dead' to the
+        OS. If you are not flipping regularly (say because you do not need to and do not want to block frequently,
+        you can call this, which will not block waiting for messages, but only pump out what is in the que already.
+        On an i7 desktop, this call method taking between 10 and 90 usec.
+        """
+        if pythoncom.PumpWaitingMessages() == 1:
+            raise KeyboardInterrupt()
+
     @staticmethod
     def _eventListToObject(eventValueList):
         """
