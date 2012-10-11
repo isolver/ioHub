@@ -25,7 +25,9 @@ import struct
 import numpy as N
 from psychopyIOHubRuntime import SimpleIOHubRuntime
 
-currentMsec= Computer.currentMsec
+MAX_PACKET_SIZE=64*1024
+
+currentSec= Computer.currentSec
 
 class ioHubConnectionException(Exception):
     pass
@@ -97,24 +99,37 @@ class SocketConnection(object):
             self.lastAddress=address
             if self.feed: # using msgpack
                 self.feed(data[:-2])
-                return self.unpack(),address
+                result=self.unpack()
+                if result[0] == 'IOHUB_MULTIPACKET_RESPONSE':
+                    num_packets=result[1]
 
-            return self.unpack(data[:-2]),address
+                    for p in xrange(num_packets-1):
+                        data, address = self.sock.recvfrom(self._rcvBufferLength)
+                        self.feed(data)
+
+                    data, address = self.sock.recvfrom(self._rcvBufferLength)
+                    self.feed(data[:-2])
+                    result=self.unpack()
+                return result,address
+            else:   # using ujson
+                return self.unpack(data[:-2]),address
         except Exception as e:
-            ioHubConnectionException(("IO_HUB_ERROR", "ioHubConnection socket.receive ERROR",str(e)))
-            return ("IO_HUB_ERROR", "ioHubConnection socket.receive ERROR",str(e)),None
+            import ioHub
+            ioHub.printExceptionDetailsToStdErr()
+            raise ioHubConnectionException(" IO_HUB_ERROR ", " ioHubConnection socket.receive", e)
+
 
     def close(self):
         self.sock.close()
 
 
 class UDPClientConnection(SocketConnection):
-    def __init__(self,remote_host='127.0.0.1',remote_port=9000,rcvBufferLength=64*1024,broadcast=False,blocking=1, timeout=1, coder=None):
+    def __init__(self,remote_host='127.0.0.1',remote_port=9000,rcvBufferLength = MAX_PACKET_SIZE,broadcast=False,blocking=1, timeout=1, coder=None):
         SocketConnection.__init__(self,remote_host=remote_host,remote_port=remote_port,rcvBufferLength=rcvBufferLength,broadcast=broadcast,blocking=blocking, timeout=timeout,coder=coder)
     def initSocket(self,**kwargs):
         #print 'UDPClientConnection being used'
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64*1024)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, MAX_PACKET_SIZE)
 
 #
 # The ioHubDeviceView is the ioHub client side representation of an ioHub device.
@@ -334,6 +349,8 @@ class ioHubConnection(object):
     """
     _replyDictionary=dict()
     def __init__(self,config,configAbsPath):
+        self._initial_clock_offset=ioHub.highPrecisionTimer()
+        Computer.globalClock=ioHub.ioClock(self,self._initial_clock_offset,False)
 
         # A dictionary containing the ioHub configuration file settings
         self.ioHubConfig=config
@@ -370,8 +387,27 @@ class ioHubConnection(object):
         #       running, it can be killed before starting another instance of the ioHub server.
 
         # start up ioHub using subprocess module so we can have it run for duration of experiment only
+        #print "Client _initial_clock_offset: ",self._initial_clock_offset
         run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
-        subprocessArgList=[sys.executable, run_script,self.ioHubConfigAbsPath]
+        subprocessArgList=[sys.executable, run_script,self.ioHubConfigAbsPath,"%.6f"%(self._initial_clock_offset,)]
+
+        # check for existing ioHub Process based on process if saved to file
+        iopFileName=os.path.join(ioHub.IO_HUB_DIRECTORY,'.iohpid')
+        if os.path.exists(iopFileName):
+            try:
+                iopFile= open(iopFileName,'r')
+                line=iopFile.readline()
+                iopFile.close()
+                os.remove(iopFileName)
+                other,iohub_pid=line.split(':')
+                iohub_pid=int(iohub_pid.strip())
+                old_iohub_process=psutil.Process(iohub_pid)
+                if old_iohub_process.name == 'python.exe':
+                    old_iohub_process.kill()
+            except psutil.NoSuchProcess:
+                pass
+            except:
+                ioHub.printExceptionDetailsToStdErr()
 
         # start subprocess, get pid, and get psutil process object for affinity and process priority setting
         self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -382,12 +418,12 @@ class ioHubConnection(object):
         # and ready to receive network packets
         hubonline=False
         server_output='hi there'
-        while server_output:
+        ctime = Computer.globalClock.getTime
+        timeout_time=ctime()+10.0 # timeout if ioServer does not reply in 10 seconds
+        while server_output and ctime()<timeout_time:
             isDataAvail=self._serverStdOutHasData()
             if isDataAvail is True:
                 server_output=self._readServerStdOutLine().next()
-                #etime=currentMsec()
-                #print 'get ioHub line dur:',etime-stime,server_output
                 if server_output.rstrip() == 'IOHUB_READY':
                     hubonline=True
                     break
@@ -404,6 +440,16 @@ class ioHubConnection(object):
                 raise ioHubConnectionException(e)
             finally:
                 sys.exit(1)
+
+        # save ioHub ProcessID to file so next time it is started, it can be checked and killed if necessary
+
+        try:
+            iopFile= open(iopFileName,'w')
+            iopFile.write("ioHub PID: "+str(self.server_pid))
+            iopFile.flush()
+            iopFile.close()
+        except:
+            ioHub.printExceptionDetailsToStdErr()
 
     def _get_maxsize(self, maxsize):
         """
@@ -448,18 +494,18 @@ class ioHubConnection(object):
 
     def _calculateClientServerTimeOffset(self, sampleSize=100):
         """
-        Calculates 'sampleSize' experimentTime and ioHub Server time process offsets by calling currentMsec localally
+        Calculates 'sampleSize' experimentTime and ioHub Server time process offsets by calling currentSec locally
         and via IPC to the ioHub server process repeatedly, as ewell as calculating the round trip time it took to get the server process time in each case.
-        Puts the 'sampleSize' salculates in a 2D numpy array, index [i][0] = server_time - local_time offset, index [i][1]
+        Puts the 'sampleSize' calculates in a 2D numpy array, index [i][0] = server_time - local_time offset, index [i][1]
         = local_time after call to server_time - local_time before call to server_time.
 
         In Windows, since direct QPC implementation is used, offset should == delay to within 100 usec or so.
         """
         results=N.zeros((sampleSize,2),dtype='f4')
         for i in xrange(sampleSize):     # make multiple calles to local and ioHub times to calculate 'offset' and 'delay' in calling the ioHub server time
-            tc=Computer.currentMsec()    # get the local time 1
-            ts=self.currentMsec()        # get the ioHub server time (this results in a RPC call and response from the server)
-            tc2=Computer.currentMsec()   # get local time 2, to calculate e2e delay for the ioHub server time call
+            tc=Computer.currentSec()*1000.0   # get the local time 1
+            ts=self.currentSec()*1000.0        # get the ioHub server time (this results in a RPC call and response from the server)
+            tc2=Computer.currentSec()*1000.0   # get local time 2, to calculate e2e delay for the ioHub server time call
             results[i][0]=ts-tc          # calculate time difference between returned iohub server time, and 1 read local time (offset)
             results[i][1]=tc2-tc         # calculate delay / duration it took to make the call to the ioHub server and get reply
             time.sleep(0.001)            # sleep for a little before going next loop
@@ -560,6 +606,12 @@ class ioHubConnection(object):
         #Otherwise return the result
         return result
 
+
+    def updateGlobalHubTimeOffset(self,offset):
+        r=self.sendToHubServer(('RPC','updateGlobalTimeOffset',(offset,)))
+        print 'updateGlobalHubTimeOffset client got: ',r,' : ',r[2]
+        return r[2]
+
     @classmethod
     def _addResponseToHistory(cls,result,bytes_sent,address):
         """
@@ -647,7 +699,7 @@ class ioHubConnection(object):
         r=self.sendToHubServer(('EXP_DEVICE','EVENT_TX',eventList))
         return r
 
-    def sendMessageEvent(self,text,prefix='',offset=0.0,usec_time=None):
+    def sendMessageEvent(self,text,prefix='',offset=0.0,sec_time=None):
         """
         Create and send a MessageEvent to the ioHub Server Process for storage
         with the rest of the event data.
@@ -667,7 +719,7 @@ class ioHubConnection(object):
 
         Return (bool): True
         """
-        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent._createAsList(text,prefix=prefix,msg_offset=offset,usec_time=usec_time),]))
+        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent._createAsList(text,prefix=prefix,msg_offset=offset,sec_time=sec_time),]))
         return True
 
     def sendMessages(self,messageList):
@@ -716,7 +768,7 @@ class ioHubConnection(object):
 
     def currentSec(self):
         """
-        Returns the sec.msec time retrieved from the ioHub Server process. This method sends a message to
+        Returns the sec.msec-usec time retrieved from the ioHub Server process. This method sends a message to
         the ioHub Process asking for the currentSec time on that process, and returns the result.
 
         Therefore there will be a small delay in getting the current ioHub Process time, and this means
@@ -730,47 +782,20 @@ class ioHubConnection(object):
                It will be more accurate to call one of the following time methods, which gives you
                the current ioHub Process and PsychoPy Process time, as they are the same:
 
-               * ioHub.highPrecisionTimer() : returns sec.msec time
-               * ioHub.devices.Computer.getSec() : returns sec.msec time
-               * ioHub.devices.Computer.getMsec() : returns msec.usec time
-               * ioHub.devices.Computer.getUsec() : returns usec time
+               * ioHub.highPrecisionTimer() : returns sec.msec-usec time
+               * ioHub.devices.Computer.getSec() : returns sec.msec-usec time
+
 
                If running your experiment within the run() method of a class extended from
                ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime, you can also use:
 
                * self.currentSec()
-               * self.currentMsec()
-               * self.currentUsec()
 
         Args: None
-        Return (float/double): The ioHub Process sec.msec time when the request was processed
+        Return (float/double): The ioHub Process sec.msec-usec time when the request was processed
                                by the ioHub Server Process.
         """
         r=self.sendToHubServer(('RPC','currentSec'))
-        return r[2]
-
-    def currentMsec(self):
-        """
-        Same as the currentSec() method, but returns the time in msec.usec format.
-        (i.e. currentSec()*1000.0). See currentSec() API doc for more info please.
-
-        Args: None
-        Return (float/double): The ioHub Process msec.usec time when the request was processed
-                               by the ioHub Server Process.
-        """
-        r=self.sendToHubServer(('RPC','currentMsec'))
-        return r[2]
-
-    def currentUsec(self):
-        """
-        Same as the currentSec() method, but returns the time in msec.usec format.
-        (i.e. int(currentMsec()*1000.0)). See currentSec() API doc for more info please.
-
-        Args: None
-        Return (int/long): The ioHub Process usec time when the request was processed
-                               by the ioHub Server Process.
-        """
-        r=self.sendToHubServer(('RPC','currentUsec'))
         return r[2]
 
     def getIoHubServerProcessAffinity(self):

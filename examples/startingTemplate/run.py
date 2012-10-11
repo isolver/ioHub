@@ -78,7 +78,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
         is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
         #. If you need to pause the execution of your program for a period of time, but want events to be occasionally sent from the
-        ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
+        ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.delay(), which also
         has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
         #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
         the docs for the ioHubConnection class, which is what is at the end of self.hub.

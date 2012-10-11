@@ -35,7 +35,7 @@ class DAQDevice(Device):
 
 
     def _poll(self):
-        if self.isEventReporting():
+        if self.isReportingEvents():
             return True
         return False
 
@@ -49,14 +49,6 @@ class DAQMultiChannelInputEvent(DeviceEvent):
         ('AI_5',N.float32),
         ('AI_6',N.float32),
         ('AI_7',N.float32),
-        ('AI_8',N.float32),
-        ('AI_9',N.float32),
-        ('AI_10',N.float32),
-        ('AI_11',N.float32),
-        ('AI_12',N.float32),
-        ('AI_13',N.float32),
-        ('AI_14',N.float32),
-        ('AI_15',N.float32),
         ('DI_0',N.uint8),
         ('DI_1',N.uint8),
         ('DI_2',N.uint8),
@@ -65,21 +57,9 @@ class DAQMultiChannelInputEvent(DeviceEvent):
         ('DI_5',N.uint8),
         ('DI_6',N.uint8),
         ('DI_7',N.uint8),
-        ('DI_8',N.uint8),
-        ('DI_9',N.uint8),
-        ('DI_10',N.uint8),
-        ('DI_11',N.uint8),
-        ('DI_12',N.uint8),
-        ('DI_13',N.uint8),
-        ('DI_14',N.uint8),
-        ('DI_15',N.uint8),
         ('CT_0',N.uint32),
-        ('CT_1',N.uint32),
-        ('CT_2',N.uint32),
-        ('CT_3',N.uint32)
-
+        ('CT_1',N.uint32)
     ]
-
     EVENT_TYPE_STRING='DAQ_MULTI_CHANNEL_INPUT'
     EVENT_TYPE_ID=EventConstants.DAQ_MULTI_CHANNEL_INPUT_EVENT
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING

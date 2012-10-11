@@ -33,71 +33,55 @@ class ioDeviceError(Exception):
 
 
 class Computer(object):
-    _instance=None
     _nextEventID=1
     isIoHubProcess=False
-    _inHighPriorityMode=False
+    inHighPriorityMode=False
+    globalClock=None
+    system, node, release, version, machine, processor = platform.uname()
+    cpuCount=psutil.NUM_CPUS
+    currentProcessID=os.getpid()
+    currentProcess=psutil.Process(currentProcessID)
     def __init__(self):
-        if Computer._instance is not None:
-            raise "Error creating Computer object; instance already exists. \
-                   Use Computer.getInstance() to existing instance, or Computer. \
-                   deleteInstance() to delete the existing instance before creating a new one."
-        else:
-            system, node, release, version, machine, processor = platform.uname()
+        print2err("WARNING: Computer is a static class, no need to create an instance. just use Computer.xxxxxx")
 
-            self.system=system
-            self.node=node
-            self.release=release
-            self.version=version
-            self.machine=machine
-            self.processor=processor
-            self.cpuCount=psutil.NUM_CPUS
-            self.currentProcessID=os.getpid()
-            self.currentProcess=psutil.Process(self.currentProcessID)
+    @staticmethod
+    def getCurrentProcess():
+        return Computer.currentProcess
 
- 
-    # return time in sec.msec format
-    @classmethod
-    def getInstance(cls):
-        return cls._instance
-
-    # return time in sec.msec format
-    @classmethod
-    def deleteInstance(cls):
-        i=cls._instance
-        cls._instance=None
-        del i
-
-    def getCurrentProcess(self):
-        return self.currentProcess
-
-    def enableHighPriority(self,disable_gc=True):
-        if Computer._inHighPriorityMode is False:
+    @staticmethod
+    def enableHighPriority(disable_gc=True):
+        if Computer.inHighPriorityMode is False:
             if disable_gc:
                 gc.disable()
-            self.currentProcess.nice=psutil.HIGH_PRIORITY_CLASS
-            Computer._inHighPriorityMode=True
+            Computer.currentProcess.nice=psutil.HIGH_PRIORITY_CLASS
+            Computer.inHighPriorityMode=True
 
-    def disableHighPriority(self):
-        if Computer._inHighPriorityMode is True:
+    @staticmethod
+    def disableHighPriority():
+        if Computer.inHighPriorityMode is True:
             gc.enable()
-            self.currentProcess.nice=psutil.NORMAL_PRIORITY_CLASS
-            Computer._inHighPriorityMode=False
+            Computer.currentProcess.nice=psutil.NORMAL_PRIORITY_CLASS
+            Computer.inHighPriorityMode=False
 
-    def getCurrentProcessAffinity(self):
-        return self.currentProcess.get_cpu_affinity()
+    @staticmethod
+    def getCurrentProcessAffinity():
+        return Computer.currentProcess.get_cpu_affinity()
 
-    def setCurrentProcessAffinity(self,processorList):
-        return self.currentProcess.set_cpu_affinity(processorList)
+    @staticmethod
+    def setCurrentProcessAffinity(processorList):
+        return Computer.currentProcess.set_cpu_affinity(processorList)
 
+    @staticmethod
     def setProcessAffinityByID(self,processID,processorList):
         p=psutil.Process(processID)
         return p.set_cpu_affinity(processorList)
 
+    @staticmethod
     def getProcessAffinityByID(self,processID):
         p=psutil.Process(processID)
         return p.get_cpu_affinity()
 
+    @staticmethod
     def setAllOtherProcessesAffinity(self, processorList, excludeProcessByIDList=[]):
         """
 
@@ -106,24 +90,14 @@ class Computer(object):
             if p.pid not in excludeProcessByIDList:
                 try:
                     p.set_cpu_affinity(processorList)
-                    print2err('Set OK process affinity: '+str(p.name)+" : "+str(p.pid))
+                    print2err('Set OK process affinity: %s : %ld'%(p.name,p.pid))
                 except Exception:
-                    print2err('Error setting process affinity: '+str(p.name)+" : "+str(p.pid))
+                    print2err('ERROR setting process affinity: %s : %ld'%(p.name,p.pid))
 
-    # return time in sec.msec format
+    # return time in sec.msec-usec format
     @staticmethod
     def currentSec():
-        return highPrecisionTimer()
-
-    #return time in msec.usec format
-    @staticmethod
-    def currentMsec():
-        return highPrecisionTimer()*1000.0
-
-    #return time in usec format
-    @staticmethod
-    def currentUsec():
-        return int(highPrecisionTimer()*1000000.0)
+        return Computer.globalClock.getTime()
 
     @staticmethod
     def getNextEventID():
@@ -131,25 +105,18 @@ class Computer(object):
         Computer._nextEventID+=1
         return n
 
-    def getProcessInfoString(self):
-        tcount= self.currentProcess.get_num_threads()
-        pthreads=self.currentProcess.get_threads()
+    @staticmethod
+    def getProcessInfoString():
+        tcount= Computer.currentProcess.get_num_threads()
+        pthreads=Computer.currentProcess.get_threads()
         
         r='--------------------------------------\n'
-        r+='Process ( %d ):\n'%(self.currentProcessID,)
-        r+=str(self.currentProcess)
+        r+='Process ( %d ):\n'%(Computer.currentProcessID,)
+        r+=str(Computer.currentProcess)
         r+='Thread Count: %d\n'%(tcount,)
         r+='Thread Info:\n'
         for t in pthreads:
             r+=str(t)+'\n'
-            
-    def __del__(self):
-        self._instance=None
-        del self._instance
-            
-Computer._instance=Computer()
-computer=Computer.getInstance()
-
 
 ####################### Device & DeviceEvent Constants ########################
 
@@ -411,9 +378,9 @@ class Device(ioObject):
     DEVICE_BUFFER_LENGTH_INDEX=6
     DEVICE_MAX_ATTRIBUTE_INDEX=DEVICE_BUFFER_LENGTH_INDEX
 
-    # Multiplier to use to convert this devices event time stamps to usec format.
+    # Multiplier to use to convert this devices event time stamps to sec format.
     # This is set by the author of the device class or interface implementation.
-    DEVICE_TIMEBASE_TO_USEC=1.0
+    DEVICE_TIMEBASE_TO_SEC=1.0
 
     # The device category label. Should be one of the string keys in EventConstants.DEVICE_CATEGORIES,
     # the value of which is the category id. This is set by the author of the device class
@@ -513,7 +480,7 @@ class Device(ioObject):
         self._isReportingEvents=enabled
         return self._isReportingEvents
 
-    def isEventReporting(self):
+    def isReportingEvents(self):
         """
         Gets whether a Device is currently report events or whether the device is ignoring any events that occur.
 
@@ -528,7 +495,11 @@ class Device(ioObject):
         
     def _getNativeEventBuffer(self):
         return self._nativeEventBuffer
-    
+
+    def _addNativeEventToBuffer(self,e):
+        if self.isReportingEvents():
+            self._nativeEventBuffer.append(e)
+
     def _addEventListener(self,l):
         if l not in self._eventListeners:
             self._eventListeners.append(l)
@@ -599,23 +570,23 @@ class DeviceEvent(ioObject):
 
                 ('device_instance_code',N.str,48), # The instance_code of the device that generated the event.
 
-                ('device_time',N.uint64),   # If the device that generates the given device event type also time stamps
+                ('device_time',N.float64),   # If the device that generates the given device event type also time stamps
                                             # events, this field is the time of the event as given by the device,
-                                            # converted to usec for consistancy with all other ioHub device times.
+                                            # converted to sec.msec-usec for consistancy with all other ioHub device times.
                                             # If the device that generates the given event type does not time stamp
                                             # events, then the device_time is set to the logged_time for the event.
 
-                ('logged_time', N.uint64),  # The usec time that the event was 'received' by the ioHub Server Process.
-                                            # For devices that poll for events, this is the usec time that the poll
+                ('logged_time', N.float64),  # The sec time that the event was 'received' by the ioHub Server Process.
+                                            # For devices that poll for events, this is the sec time that the poll
                                             # method was called for the device and the event was retrieved. For
-                                            # devices that use the event callback, this is the usec time the callback
-                                            # executed and accept the event.
+                                            # devices that use the event callback, this is the sec time the callback
+                                            # executed and accept the event. Time is in sec.msec-usec
 
-                ('hub_time',N.uint64),      # The hub_time is in the normalized time base that all events share,
+                ('hub_time',N.float64),      # The hub_time is in the normalized time base that all events share,
                                             # regardless of device type. hub_time is calculated differently depending
                                             # on the device and perhaps event types.
                                             # The hub_time is what should be used when comparing times of events across
-                                            # different devices.
+                                            # different devices. Time is in sec.msec-usec.
 
                 ('confidence_interval', N.float32), # This property attempts to give a sense of the amount to which
                                                     # the event time may be off relative to the true time the event
@@ -625,15 +596,16 @@ class DeviceEvent(ioObject):
                                                     # calculated hub_time of the event is correct. For devices where
                                                     # a realistic confidence_interval can not be calculated,
                                                     # for example if the event device delay is unknown, then a value
-                                                    # of 0.0 should be used. Valid confidence_interval values are
-                                                    # in usec and will range from 1.0 usec and higher.
+                                                    # of -1.0 should be used. Valid confidence_interval values are
+                                                    # in sec.msec-usec and will range from 0.000000 sec.msec-usec
+                                                    # and higher.
 
                 ('delay',N.float32)         # The delay of an event is the known (or estimated) delay from when the
                                             # real world event occurred to when the ioHub received the event for
                                             # processing. This is often called the real-time end-to-end delay
                                             # of an event. If the delay for an event can not be reasonably estimated
-                                            # or is not known, a delay of 0.0 is set. Delays are in usec.nsec and valid
-                                            # values will range from 1.0 and higher.
+                                            # or is not known, a delay of -1.0 is set. Delays are in sec.msec-usec
+                                            # and valid values will range from 0.000000 sec.msec-usec and higher.
                 ]
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self,*args,**kwargs):
@@ -661,7 +633,7 @@ class DeviceEvent(ioObject):
 
 # Windows Version of Constants Class
 
-if computer.system == 'Windows':
+if Computer.system == 'Windows':
     import pyHook
     from pyHook.HookManager import HookConstants as _win32EventConstants
 
@@ -760,7 +732,7 @@ try:
     from keyboard import KeyboardEvent,KeyboardKeyEvent,KeyboardPressEvent,KeyboardReleaseEvent
     deviceModulesAvailable.append('keyboard')
 except:
-    print2err("Error occurred during keyboard device module import.")
+    print2err("Warning: keyboard device module could not be imported.")
 
 try:
     import mouse as mouse_module
@@ -768,7 +740,7 @@ try:
     from mouse import MouseEvent,MouseButtonEvent,MouseMoveEvent,MouseWheelEvent,MouseWheelUpEvent,MouseWheelDownEvent,MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent
     deviceModulesAvailable.append('mouse')
 except:
-    print2err("Error occurred during mouse device module import.")
+    print2err("Warning: mouse device module could not be imported.")
 
 try:
     import parallelPort as parallelPort_module
@@ -776,7 +748,7 @@ try:
     from parallelPort import ParallelPortEvent
     deviceModulesAvailable.append('parallelPort')
 except:
-    print2err("Error occurred during parallelPort device module import.")
+    print2err("Warning: parallelPort device module could not be imported.")
 
 # removed Joystick device for now to focus on core initial device set
 try:
@@ -785,7 +757,7 @@ try:
     from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
     deviceModulesAvailable.append('joystick')
 except:
-    print2err("Error occurred during joystick device module import.")
+    print2err("Warning: joystick device module could not be imported.")
 
 try:
     import experiment
@@ -793,7 +765,7 @@ try:
     from experiment import MessageEvent #, CommandEvent
     deviceModulesAvailable.append('experiment')
 except:
-    print2err("Error occurred during experiment device module import.")
+    print2err("Warning: experiment device module could not be imported.")
 
 try:
     import eyeTrackerInterface
@@ -801,7 +773,7 @@ try:
     from eyeTrackerInterface.eye_events import *
     deviceModulesAvailable.append('eyetracker')
 except:
-    print2err("Error occurred during eyetracker device module import.")
+    print2err("Warning: eyetrackerinterface device module could not be imported.")
 
 try:
     import display
@@ -809,7 +781,7 @@ try:
     from ioHub import print2err, highPrecisionTimer
     deviceModulesAvailable.append('display')
 except:
-    print2err("Error occurred during display device module import.")
+    print2err("Warning: display device module could not be imported.")
 
 try:
     import daq
@@ -817,7 +789,7 @@ try:
     from daq import DAQMultiChannelInputEvent,DAQSingleChannelInputEvent
     deviceModulesAvailable.append('daq')
 except:
-    print2err("Error occurred during daq device module import.")
+    print2err("Warning: daq device module could not be imported.")
 
 
 if EventConstants._prepped is False:
@@ -856,8 +828,8 @@ if EventConstants._prepped is False:
         EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
 
     if 'daq' in deviceModulesAvailable:
-        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_MULTI_CHANNEL_INPUT']]=DAQMultiChannelInputEvent,
-        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_SINGLE_CHANNEL_INPUT']]=DAQSingleChannelInputEvent,
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_MULTI_CHANNEL_INPUT']]=DAQMultiChannelInputEvent
+        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_SINGLE_CHANNEL_INPUT']]=DAQSingleChannelInputEvent
 
     if 'parallelPort' in deviceModulesAvailable:
         EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['TTL_INPUT']]=ParallelPortEvent

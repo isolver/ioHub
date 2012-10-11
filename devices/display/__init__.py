@@ -11,10 +11,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from .. import Device,Computer
-from __builtin__ import float, staticmethod, classmethod
 import ioHub
-currentUsec=Computer.currentUsec
-import numpy as N
+currentSec=Computer.currentSec
 import ctypes
 import unit_conversions as ucs
 

@@ -181,6 +181,66 @@ elif platform.system() == 'Linux':
 else: # assume OS X?
     highPrecisionTimer = timeit.default_timer
 
+class ioClock(object):
+    """
+    Modified from psychopy.core.Clock.
+    A convenient class to keep track of time in your experiments.
+    You can have as many independent clocks as you like (e.g. one
+    to time responses, one to keep track of stimuli...)
+    The clock is based on QueryPerformanceCounter() on Windows
+    and on python.timeit.default_timer() which is a sub-millisec
+    timer on other machines. i.e. the times reported will be more
+    accurate than you need!
+
+    ioHub modifications: when timeAtLastReset is set on the Experiment Process
+                         it is sent to the ioHub Process so that the ioHub Process
+                         uses the same time offset.
+    """
+    def __init__(self,hubConnection,offset=None,sendOffsetToHub=True):
+        if offset is None:
+            offset=highPrecisionTimer()
+        self.hubConnection=hubConnection
+        if hubConnection and sendOffsetToHub is True:
+            offset=hubConnection.updateGlobalHubTimeOffset(offset)
+        self.timeAtLastReset=offset
+
+    def getTime(self):
+        """Returns the current time on this clock in secs (sub-ms precision)
+        """
+        return highPrecisionTimer()-self.timeAtLastReset
+
+    def reset(self, newT=0.0):
+        """Reset the time on the clock. With no args time will be
+        set to zero. If a float is received this will be the new
+        time on the clock
+        """
+        offset=highPrecisionTimer()+newT
+        if self.hubConnection:
+            r=self.hubConnection.updateGlobalHubTimeOffset(offset)
+        self.timeAtLastReset=r
+
+    def setOffset(self,offset):
+        self.timeAtLastReset=offset
+
+    def add(self,t):
+        """Add more time to the clock's 'start' time (t0).
+
+        Note that, by adding time to t0, you make the current time appear less.
+        Can have the effect that getTime() returns a negative number that will
+        gradually count back up to zero.
+
+        e.g.::
+
+            timer = core.Clock()
+            timer.add(5)
+            while timer.getTime()<0:
+                #do something
+        """
+        offset= self.timeAtLastReset + t
+        if self.hubConnection:
+            r=self.hubConnection.updateGlobalHubTimeOffset(offset)
+        self.timeAtLastReset = r
+
 def print2err(*args):
     for a in args:
         sys.stderr.write(str(a))

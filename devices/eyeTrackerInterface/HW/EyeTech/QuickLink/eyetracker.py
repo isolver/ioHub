@@ -75,7 +75,7 @@ class EyeTracker(EyeTrackerInterface):
     # <<<
 
     # >>> Overwritten class attributes
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
+    DEVICE_TIMEBASE_TO_SEC=1.0 # the multiplier needed to convert dive times to sec times.
     __slots__=[]
     # <<<
     def __init__(self,*args,**kwargs):
@@ -515,7 +515,7 @@ class EyeTracker(EyeTrackerInterface):
         If your eye tracker supports an event based call-back approach, use _handleEvent(...) instead
         of _poll and remove the periodic timer from the ioHub_config.yaml file settings.
         """
-        loggedTime=int(Computer.currentUsec())
+        loggedTime=Computer.currentSec()
         currentHostTime = self.trackerTime()
         ioHub_time_offset= loggedTime-currentHostTime
 
@@ -540,7 +540,7 @@ class EyeTracker(EyeTrackerInterface):
             ioHubEvent = list()
             # put the ioHub eye tracker event IN ORDERED LIST FORM in devices buffer for pickup by the ioHub.
 
-            self._nativeEventBuffer.append(ioHubEvent)
+            self._addNativeEventToBuffer(ioHubEvent)
 
         EyeTracker.lastPollTime=loggedTime
     
@@ -550,7 +550,7 @@ class EyeTracker(EyeTrackerInterface):
         callback approach.
         One args is required, the device event to be handled, "event"
         """
-        loggedTime=int(Computer.currentUsec())
+        loggedTime=Computer.currentSec()
 
         event=None
         if len(args) > 0:
@@ -573,7 +573,7 @@ class EyeTracker(EyeTrackerInterface):
         # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
         #
-        self._nativeEventBuffer.append((loggedTime,event))
+        self._addNativeEventToBuffer((loggedTime,event))
     
     @staticmethod    
     def _getIOHubEventObject(*args,**kwargs):

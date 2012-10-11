@@ -16,7 +16,7 @@ import os
 from collections import deque
 import time
 import ioHub
-from ioHub.devices import computer,EventConstants, DeviceEvent
+from ioHub.devices import Computer,EventConstants, DeviceEvent
 
 try:
     from yaml import load
@@ -130,7 +130,7 @@ a command prompt at the ioHub/examples/simple folder and type:
             Return: None
         """
 
-        self.currentTime=computer.currentSec
+        self.currentTime=Computer.currentSec
 
         self.configFilePath=configFilePath
         self.configFileName=configFile
@@ -166,7 +166,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         # See enableHighPriority() and disableHighPriority()
         self._inHighPriorityMode=False
 
-        self.sysutil=ioHub.devices.computer
+        self.computer=ioHub.devices.Computer
 
         # initialize the experiment object based on the configuration settings.
         self._initalizeConfiguration()
@@ -189,7 +189,7 @@ a command prompt at the ioHub/examples/simple folder and type:
             self.hub=ioHubConnection(self.ioHubConfig,ioHubConfigAbsPath)
  
             self.hub._startServer()
-            self.hub._calculateClientServerTimeOffset(500)
+            #self.hub._calculateClientServerTimeOffset(500)
             # Is ioHub configured to be run in experiment?
             if self.hub:
             
@@ -239,7 +239,7 @@ a command prompt at the ioHub/examples/simple folder and type:
             print "** ioHub is Disabled (or should be). Why are you using this utility class then? ;) **"
 
         # set process affinities based on config file settings
-        cpus=range(computer.cpuCount)
+        cpus=range(Computer.cpuCount)
         experiment_process_affinity=cpus
         other_process_affinity=cpus
         iohub_process_affinity=cpus
@@ -261,10 +261,10 @@ a command prompt at the ioHub/examples/simple folder and type:
             self.setProcessAffinities(experiment_process_affinity,iohub_process_affinity)
 
         if len(other_process_affinity) < len(cpus):
-            ignore=[computer.currentProcessID,]
+            ignore=[Computer.currentProcessID,]
             if self.hub:
                 ignore.append(self.hub.server_pid)
-            computer.setAllOtherProcessesAffinity(other_process_affinity,ignore)
+            Computer.setAllOtherProcessesAffinity(other_process_affinity,ignore)
 
         return self.hub
 
@@ -284,7 +284,7 @@ a command prompt at the ioHub/examples/simple folder and type:
 
         Return: None
         """
-        self.sysutil.enableHighPriority(disable_gc)
+        self.computer.enableHighPriority(disable_gc)
         if self.hub and ioHubServerToo is True:
             self.hub.sendToHubServer(('RPC','enableHighPriority'))
 
@@ -301,7 +301,7 @@ a command prompt at the ioHub/examples/simple folder and type:
 
         Return: None
         """
-        self.sysutil.disableHighPriority()
+        self.computer.disableHighPriority()
         if self.hub and ioHubServerToo is True:
             self.hub.sendToHubServer(('RPC','disableHighPriority'))
 
@@ -327,7 +327,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         Return: (int) The number of processing units the current computer has.
 
         """
-        return self.sysutil.cpuCount
+        return self.computer.cpuCount
 
     def getProcessAffinities(self):
         """
@@ -374,8 +374,8 @@ a command prompt at the ioHub/examples/simple folder and type:
         Return (tuple,tuple): the current experiment Process Affinity list, ioHub Process Affinity list
         """
         if self.hub is None:
-            return self.sysutil.getCurrentProcessAffinity(),None
-        return self.sysutil.getCurrentProcessAffinity(),self.hub._psutil_server_process.get_cpu_affinity()
+            return self.computer.getCurrentProcessAffinity(),None
+        return self.computer.getCurrentProcessAffinity(),self.hub._psutil_server_process.get_cpu_affinity()
 
     def setProcessAffinities(self,experimentProcessorList, ioHubProcessorList=None):
         """
@@ -415,7 +415,7 @@ a command prompt at the ioHub/examples/simple folder and type:
 
         Return: None
         """
-        self.sysutil.setCurrentProcessAffinity(experimentProcessorList)
+        self.computer.setCurrentProcessAffinity(experimentProcessorList)
         if self.hub and ioHubProcessorList:
             self.hub._psutil_server_process.set_cpu_affinity(ioHubProcessorList)
 
@@ -444,7 +444,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         Args: None
         Return: None
         """
-        cpu_count=self.sysutil.cpuCount
+        cpu_count=self.computer.cpuCount
         print "System processor count:", cpu_count
         if cpu_count == 2 and self.hub:
             print 'Assigning experiment process to CPU 0, ioHubServer process to CPU 1'
@@ -455,13 +455,13 @@ a command prompt at the ioHub/examples/simple folder and type:
         elif cpu_count == 8 and self.hub:
             print 'Assigning experiment process to CPU 2,3, ioHubServer process to CPU 4,5, attempting to assign all others to 0,1,6,7'
             self.setProcessAffinities([2,3],[4,5])
-            self.sysutil.setAllOtherProcessesAffinity([0,1,6,7],[self.sysutil.currentProcessID,self.hub.server_pid])
+            self.computer.setAllOtherProcessesAffinity([0,1,6,7],[self.computer.currentProcessID,self.hub.server_pid])
         else:
             print "autoAssignAffinities does not support %d processors."%(cpu_count,)
 
-    def currentSec(self):
+    def getTime(self):
         """
-        Returns the current sec.msec time of the system. On Windows this is implemented by directly
+        Returns the current sec.msec-msec time of the system. On Windows this is implemented by directly
         calling the Windows QPC functions using ctypes (TODO: move to clib for max performance).
         This is done so that no offset is applied to the timebase based on when the first call to the
         python time function was called, which will differed between PsychoPy and ioHub Processes
@@ -474,31 +474,30 @@ a command prompt at the ioHub/examples/simple folder and type:
         correctly selects the best high resolution clock for the OS the interpreter is running on.
 
         Args: None
-        Returns (float/double): sec.msec time
+        Returns (float/double): sec.msec-usec time
         """
         return self.currentTime()
 
-    def currentMsec(self):
+    def currentSec(self):
         """
-        Returns the current msec.usec time. This is simply calling currentSec()*1000.0
-        as a convenience method.
+        Returns the current sec.msec-msec time of the system. On Windows this is implemented by directly
+        calling the Windows QPC functions using ctypes (TODO: move to clib for max performance).
+        This is done so that no offset is applied to the timebase based on when the first call to the
+        python time function was called, which will differed between PsychoPy and ioHub Processes
+        since they do not start at exactly the same time.
+        By having a 0 offset time-base, both interpreters have a totally common / shared time-base to use.
+        This means that either process knows the current time of the other process,
+        since they are the same. ;)
+
+        For other OS's, right now the timeit.base_timer function is used, which as of python 2.7
+        correctly selects the best high resolution clock for the OS the interpreter is running on.
 
         Args: None
-        Returns (float/double): msec.usec time
+        Returns (float/double): sec.msec-usec time
         """
-        return self.currentTime()*1000.0
+        return self.currentTime()
 
-    def currentUsec(self):
-        """
-        Returns the current usec.nsec time. This is simply calling currentSec()*1000000.0
-        as a convenience method.
-
-        Args: None
-        Returns (float/double): usec.nsec time
-        """
-        return self.currentTime()*1000000.0
-
-    def msecDelay(self,msecDelay,checkHubInterval=10.0):
+    def delay(self,delay,checkHubInterval=0.01):
         """
         Pause the experiment execution for msec.usec interval, while checking the ioHub for
         any new events and retrieving them every 'checkHubInterval' msec during the delay. Any events
@@ -519,43 +518,43 @@ a command prompt at the ioHub/examples/simple folder and type:
         will never occur.)
 
         Args:
-            msecDelay (float/double): the msec.usec period that the PsychoPy Process should wait
+            delay (float/double): the sec.msec_usec period that the PsychoPy Process should wait
                               before returning from the function call.
-            checkHubInterval (float/double): the msec.usec interval after which any ioHub
+            checkHubInterval (float/double): the sec.msec_usec interval after which any ioHub
                               events will be retrieved (by calling self.getEvents) and stored
-                              in a local buffer. This is repeated every checkHubInterval msec until
-                              the method completes. Default is every 10.0 msec.
+                              in a local buffer. This is repeated every checkHubInterval sec.msec_usec until
+                              the method completes. Default is every 0.01 sec ( 10.0 msec ).
 
-        Return(float/double): actual duration of delay in msec.usec format.
+        Return(float/double): actual duration of delay in sec.msec_usec format.
         """
-        stime=self.currentMsec()
-        targetEndTime=stime+msecDelay
+        stime=self.currentTime()
+        targetEndTime=stime+delay
 
         if checkHubInterval < 0:
-            raise SimpleIOHubRuntimeError("checkHubInterval parameter for msecDelay method must be a >= 0 msec.")
+            raise SimpleIOHubRuntimeError("checkHubInterval parameter for delay method must be a >= 0 sec.msec.")
         
         if self.hub and checkHubInterval > 0:
-            remainingMsec=targetEndTime-self.currentMsec()
-            while remainingMsec >= 1.0:
-                if remainingMsec < checkHubInterval:
-                    time.sleep((remainingMsec-1.0)/1000.0)
+            remainingSec=targetEndTime-self.currentTime()
+            while remainingSec >= 0.001:
+                if remainingSec < checkHubInterval+0.001:
+                    time.sleep(remainingSec)
                 else:
-                    time.sleep(checkHubInterval/1000.0)
+                    time.sleep(checkHubInterval)
                 
                 events=self.hub.getEvents()
                 if events:
                     self.allEvents.extend(events)
                 
-                remainingMsec=targetEndTime-self.currentMsec()
+                remainingSec=targetEndTime-self.currentTime()
             
-            while targetEndTime-self.currentMsec()>0.0:
+            while (targetEndTime-self.currentTime())>0.0:
                 pass
         else:
-            time.sleep((msecDelay-1.0)/1000.0)
-            while targetEndTime-self.currentMsec()>0.0:
+            time.sleep(delay-0.001)
+            while (targetEndTime-self.currentTime())>0.0:
                 pass
                 
-        return self.currentMsec()-stime
+        return self.currentTime()-stime
 
     def getEvents(self,deviceLabel=None,asType='dict'):
         """
@@ -658,10 +657,14 @@ a command prompt at the ioHub/examples/simple folder and type:
         Convert an ioHub event that is current represented as an ordered list of values, and return the event as a
         dictionary of attribute name, attribute values for the object.
         """
-        eclass=EventConstants.EVENT_CLASSES[eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
-        combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
-        return dict(combo)
-         
+        try:
+            eclass=EventConstants.EVENT_CLASSES[eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+            combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
+            return dict(combo)
+        except:
+            print '---------------'
+            print "ERROR: eventValueList: "+eventValueList
+            print '---------------'
     def run(self,*args,**kwargs):
         """
         The run method is what gets calls when the SimpleIOHubRuntime.start method is called. The run method is intended

@@ -15,11 +15,11 @@ import ioHub
 class ExperimentLog(IsDescription):
     experiment_id = UInt32Col() # Unique site experiment ID
     session_id = UInt32Col()    # Unique Experiment level session ID
-    usec_time = UInt64Col()     # Uusec time since timer init as start of experiment
+    sec_time = Float64Col()     # Sec time since timer init as start of experiment
     level = UInt8Col()          # log level
     caller = StringCol(32)      # name for method / function that log was called from
     text = StringCol(128)       # log line text
-    
+
 class BaseLogLevels(object):
     __slots__ = ('DATA','CODE','INFO','DEBUG','WARNING','EXCEPTION','ERROR')
 

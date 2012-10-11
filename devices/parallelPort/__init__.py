@@ -9,14 +9,14 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 
 import binascii
-from .. import computer,Device,EventConstants
+from .. import Computer,Device,EventConstants
 import numpy as N
 
-currentUsec=computer.currentUsec
+currentSec=Computer.currentSec
 
 #----------------------------
 
-if computer.system == 'Windows':
+if Computer.system == 'Windows':
     global ParallelPort
     from __win32__ import ParallelPortWin32
     

@@ -10,8 +10,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from .. import Device,Computer,DeviceEvent,EventConstants
-currentUsec=Computer.currentUsec
-import numpy as N
+currentSec=Computer.currentSec
 
 class ExperimentDevice(Device):
     """
@@ -43,14 +42,14 @@ class ExperimentDevice(Device):
         Device.__init__(self,**deviceSettings)
         
     def _nativeEventCallback(self,event):
-        event[DeviceEvent.EVENT_LOGGED_TIME_INDEX]=int(currentUsec()) # set logged time of event
+        event[DeviceEvent.EVENT_LOGGED_TIME_INDEX]=currentSec() # set logged time of event
 
         event[DeviceEvent.EVENT_DELAY_INDEX]=event[DeviceEvent.EVENT_LOGGED_TIME_INDEX]-event[DeviceEvent.EVENT_DEVICE_TIME_INDEX]
 
         # on windows ioHub and experiment process use same timebase, so device time == hub time
         event[DeviceEvent.EVENT_HUB_TIME_INDEX]=event[DeviceEvent.EVENT_DEVICE_TIME_INDEX]
 
-        self._nativeEventBuffer.append(event)
+        self._addNativeEventToBuffer(event)
         return True
     
     def _poll(self):
@@ -97,10 +96,10 @@ class MessageEvent(DeviceEvent):
         DeviceEvent.__init__(self, *args,**kwargs)
 
     @staticmethod
-    def _createAsList(text,prefix='',msg_offset=0.0, usec_time=None):
-        cusec=int(currentUsec())
-        if usec_time is not None:
-            cusec=usec_time
-        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,'psychopy',cusec,0,0,0.0,0.0,msg_offset,prefix,text)
+    def _createAsList(text,prefix='',msg_offset=0.0, sec_time=None):
+        csec=int(currentSec())
+        if sec_time is not None:
+            csec=sec_time
+        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,'psychopy',csec,0,0,0.0,0.0,msg_offset,prefix,text)
 
 

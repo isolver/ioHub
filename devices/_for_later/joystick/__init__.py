@@ -22,7 +22,7 @@ import glfw
 import numpy as N
 from ioHub.devices import Device, DeviceEvent, Computer, EventConstants,ioDeviceError
 
-currentUsec= Computer.currentUsec
+currentSec= Computer.currentSec
 
 class Joystick(Device):
 
@@ -76,7 +76,7 @@ class Joystick(Device):
         return self._detectedJoysticks
 
     def _poll(self):
-        sTime=int(currentUsec())
+        sTime=currentSec()
         try:
             ci=0
             if self._lastPollTime is not None:
@@ -94,7 +94,7 @@ class Joystick(Device):
                 #jpe= [0,0,Computer.getNextEventID(),ioHub.devices.EventConstants.EVENT_TYPES['JOYSTICK_POSITIONAL_EVENT'],
                 #      ioHub.DEVICE_TYPES['JOYSTICK_DEVICE'], self.instance_code, currentTime,
                 #      currentTime, currentTime, ci,ci/2.0,self.base_address,self.address_offset,currentValue,lrv]
-                #self._nativeEventBuffer.append(jbe)
+                #self._addNativeEventToBuffer(jbe)
                 pass
             if not N.array_equal(self._joystickButtonStates[1],self._joystickButtonStates[0]):
                 #ioHub.print2stderr("Joystick Button Event: "+str(self._jid)+' : '+str(self._joystickButtonStates[1]-self._joystickButtonStates[0]))
@@ -115,7 +115,7 @@ class Joystick(Device):
                         jbe= [0,0,Computer.getNextEventID(),etype, self.instance_code, sTime,
                               sTime, sTime, ci, ci/2.0, self._jid, is_pressed, button_id,multibuttonEventCount]
                         #ioHub.print2stderr("Joystick Button Event: "+str(jbe))
-                        self._nativeEventBuffer.append(jbe)
+                        self._addNativeEventToBuffer(jbe)
 
         except Exception as e:
             import ioHub

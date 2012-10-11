@@ -9,7 +9,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from .. import computer, Device, EventConstants
+from .. import Computer, Device, EventConstants
 import numpy as N
 
 # Mouse Device Instance Settings Data
@@ -17,7 +17,7 @@ import numpy as N
 
 # OS ' independent' view of the Mouse Device
 
-if computer.system == 'Windows':
+if Computer.system == 'Windows':
     global Mouse
     from _win32 import MouseWindows32
 
@@ -44,7 +44,7 @@ if computer.system == 'Windows':
                 }          
             Device.__init__(self,*args,**deviceSettings)
             MouseWindows32.__init__(self,*args,**deviceSettings)
-elif computer.system == 'Linux':
+elif Computer.system == 'Linux':
     import _linux
     print 'Mouse not implemented on Linux yet.'
 else: # assume OS X

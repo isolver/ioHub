@@ -93,14 +93,14 @@ monitor_devices:
         instance_code: kb_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_length: 256
+        event_buffer_length: 128
     - device:
         device_class: Mouse
         name: mouse
         instance_code: mouse_serial_number
         saveEvents: True
         streamEvents: True
-        event_buffer_length: 256
+        event_buffer_length: 128
     - device:
         device_class: ExperimentDevice
         name: experimentRuntime
@@ -108,6 +108,42 @@ monitor_devices:
         saveEvents: True
         streamEvents: True
         event_buffer_length: 64
+#    - device:
+#        device_class: daq.HW.mc.MC_DAC_UL
+#        name: daq
+#        event_buffer_length: 1024
+#        instance_code: daq_serial_num
+#        saveEvents: True
+#        streamEvents: True
+#        board_id: 0
+#        input_channels: [AI_0, AI_2, AI_4, AI_6]
+#        input_read_method: SCAN                        # Can be SCAN or POLL, or list of these values, length == to
+                                                       # length of input_channels. SCAN == DAQ will read channel(s) at
+                                                       # input_scan_frequency and dump values to memory for ioHub to
+                                                       # retrieve. POLL == ioHub will poll DAQ channel(s) as fast as
+                                                       # possible.
+                                                       # For MC implementation, input_read_method should be a
+                                                       # single value of SCAN or POLL.
+#        input_scan_frequency: 1000                     # frequency (times / sec) to tell DAQ to read
+                                                       # from channel in HW. Only used if input_read_method == SCAN
+                                                       # frequency value can be one number, applied to all channels
+                                                       # that accept a frequency, or a list of freequencies,length == to
+                                                       # length of input_channels.
+                                                       # For MC implementation, input_scan_frequency should be a
+                                                       # single int value.
+#        daq_model: MC-USB-1208FS                       # DAQ model number. Used to set some model specific settings.
+
+#        input_read_method: [POLL,POLL,POLL,POLL]
+#        input_poll_type: ALL   # ALL = get value from all channels on each call to poll
+                               # EACH = get value from only one channel on each call to poll,
+                               # going through input_channel list sequentially on each poll
+                               # only used if input_read_method == POLL
+
+#        gain: BIP10VOLTS
+#        offset: 0.0
+#        options: DEFAULTOPTION
+#        device_timer:
+#            interval: 0.001
     - device:
         device_class: Display 
         name: display

@@ -102,16 +102,16 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         mouse=self.hub.devices.mouse
 
         tracker.setConnectionState(True)
-        self.msecDelay(50)
+        self.delay(0.050)
         self.clearEvents()
 
         # not supported by EyeLink 'yet'
         tracker.runSetupProcedure()
         self.clearEvents()
-        self.msecDelay(50)
+        self.delay(0.050)
 
         tracker.setRecordingState(True)
-        self.msecDelay(50)
+        self.delay(0.050)
         self.clearEvents()
 
         current_gaze=tracker.getLatestGazePosition()
@@ -173,11 +173,11 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # time methods represent both experiment process and ioHub server process time.
             # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
             # as a timescale is appropriate.
-            flip_time=self.currentUsec()
+            flip_time=self.currentSec()
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
-            self.hub.sendMessageEvent("Flip %s"%(str(current_gaze),),usec_time=flip_time)
+            self.hub.sendMessageEvent("Flip %s"%(str(current_gaze),),sec_time=flip_time)
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
         self.clearEvents()
@@ -185,7 +185,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.msecDelay(250)
+        self.delay(0.250)
         self.clearEvents()
         tracker.setConnectionState(False)
 

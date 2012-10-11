@@ -11,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import numpy as N
 
-from .. import Device, computer, EventConstants
+from .. import Device, Computer, EventConstants
 
 ##### Modifier Keys #####
 
@@ -46,7 +46,7 @@ MODIFIER_ACTIVE=N.array((False,False,False,False,False,False,False),dtype=dt)
 
 ###### recast based on OS ##########
 
-if computer.system == 'Windows':
+if Computer.system == 'Windows':
     global Keyboard
     from  _win32 import  KeyboardWindows32
     
@@ -67,7 +67,7 @@ if computer.system == 'Windows':
                 }          
             Device.__init__(self,*args,**deviceSettings)
             KeyboardWindows32.__init__(self,*args,**deviceSettings)
-elif computer.system == 'Linux':
+elif Computer.system == 'Linux':
     import _linux
     print 'Keyboard not implemented on Linux yet.'
 else: # assume OS X

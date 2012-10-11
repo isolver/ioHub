@@ -11,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from .. import Device, Computer, EventConstants
 
 import ioHub
-currentUsec=Computer.currentUsec
+currentSec=Computer.currentSec
 
 from . import MODIFIER_ACTIVE,MODIFIER_KEYS
 
@@ -33,25 +33,26 @@ class KeyboardWindows32(object):
         self._modifierValue = 0;
         
     def _nativeEventCallback(self,event):
-        notifiedTime=currentUsec()
-        #
-        # Start Tracking Modifiers that are pressed
-        #
-        k=event.GetKey()
-        if k in ModifierKeyStrings:
-            v=ModifierKeyStrings[k]                  
-            if (KeyboardWindows32.WIN32_KEYBOARD_RELEASE==event.Message and MODIFIER_ACTIVE[v]) or (event.Message in KeyboardWindows32.WIN32_KEYBOARD_PRESS_EVENT_TYPES and not MODIFIER_ACTIVE[v]):
-                MODIFIER_ACTIVE[v] = not MODIFIER_ACTIVE[v]
-                i=MODIFIER_KEYS[v]
-                if MODIFIER_ACTIVE[v]:
-                    self._modifierValue+=i
-                else:
-                    self._modifierValue-=i
-        #
-        # End Tracking Modifiers that are pressed
-        #
-        event.Modifiers=self._modifierValue
-        self._nativeEventBuffer.append((notifiedTime,event))
+        if self.isReportingEvents():
+            notifiedTime=currentSec()
+            #
+            # Start Tracking Modifiers that are pressed
+            #
+            k=event.GetKey()
+            if k in ModifierKeyStrings:
+                v=ModifierKeyStrings[k]
+                if (KeyboardWindows32.WIN32_KEYBOARD_RELEASE==event.Message and MODIFIER_ACTIVE[v]) or (event.Message in KeyboardWindows32.WIN32_KEYBOARD_PRESS_EVENT_TYPES and not MODIFIER_ACTIVE[v]):
+                    MODIFIER_ACTIVE[v] = not MODIFIER_ACTIVE[v]
+                    i=MODIFIER_KEYS[v]
+                    if MODIFIER_ACTIVE[v]:
+                        self._modifierValue+=i
+                    else:
+                        self._modifierValue-=i
+            #
+            # End Tracking Modifiers that are pressed
+            #
+            event.Modifiers=self._modifierValue
+            self._addNativeEventToBuffer((notifiedTime,event))
         return True
 
     def _poll(self):
@@ -76,7 +77,7 @@ class KeyboardWindows32(object):
         # between subsequent messages, because the value wraps to zero if the timer count exceeds the maximum value for a long integer. To calculate time
         # delays between messages, verify that the time of the second message is greater than the time of the first message; then, subtract the time of the
         # first message from the time of the second message.
-        device_time = int(event.Time*1000) # convert to usec
+        device_time = event.Time/1000.0 # convert to sec
         #ioHub.print2err("dev_time,log_time, delta: "+ioHub.devices.EventConstants.EVENT_TYPES[etype]+" : "+str(device_time)+" : "+str(notifiedTime)+" : "+str(notifiedTime-device_time))
         hub_time = notifiedTime #TODO correct mouse times to factor in offset.
  

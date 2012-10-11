@@ -24,7 +24,7 @@ PortOut=io.Out32
 PortIn=io.Inp32
 
 from ... import Computer
-currentUsec=Computer.currentUsec
+currentSec=Computer.currentSec
 
 class ParallelPortWin32(object):
     def __init__(self,*args,**kwargs):
@@ -69,7 +69,7 @@ class ParallelPortWin32(object):
         
         :rtype : object
         """
-        currentTime=int(currentUsec())
+        currentTime=currentSec()
         currentValue=self.read()
         
         if currentValue == self.lastReadValue:
@@ -94,7 +94,7 @@ class ParallelPortWin32(object):
             ppe= [0,0,Computer.getNextEventID(),ParallelPortEvent.EVENT_TYPE_ID,self.instance_code,
                   device_time, logged_time, iohub_time, ci,pdelay,self.base_address,currentValue,lrv]
 
-            self._nativeEventBuffer.append(ppe)
+            self._addNativeEventToBuffer(ppe)
 
         self.lastReadTime=currentTime
         self.lastReadValue=currentValue

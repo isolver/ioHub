@@ -266,7 +266,7 @@ class EMRTpyTablesFile():
         
         logline['experiment_id']=experiment_id
         logline['session_id']=session_id
-        logline['usec_time']=time
+        logline['sec_time']=time
         logline['caller']=caller
         logline['level']=level
         logline['text']=text

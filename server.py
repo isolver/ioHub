@@ -17,11 +17,11 @@ from operator import itemgetter
 from collections import deque
 import inspect
 import ioHub
-from ioHub.devices import computer, DeviceEvent, EventConstants
+from ioHub import client
+from ioHub.devices import Computer, DeviceEvent, EventConstants
 
-currentSec= computer.currentSec
-currentMsec= computer.currentMsec
-currentUsec= computer.currentUsec
+currentSec= Computer.currentSec
+
 
 #noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
@@ -173,16 +173,26 @@ class udpServer(DatagramServer):
             edata=('IOHUB_ERROR','EXP_DEVICE',request_type,"The request type provided for EXP_DEVICE is not recognized.")
             self.sendResponse(edata,replyTo)
             
-    def sendResponse(self,data,address,printResponseInfo=False):
+    def sendResponse(self,data,address):
         packet_data=None
         try:
+            max_size=client.MAX_PACKET_SIZE/2-20
             packet_data=self.pack(data)+'\r\n'
-            self.socket.sendto(packet_data,address)
+            packet_data_length=len(packet_data)
+            if packet_data_length>= max_size:
+                num_packets=len(packet_data)/max_size+1
+                self.sendResponse(('IOHUB_MULTIPACKET_RESPONSE',num_packets),address)
+                for p in xrange(num_packets-1):
+                    self.socket.sendto(packet_data[p*max_size:(p+1)*max_size],address)
+                self.socket.sendto(packet_data[(p+1)*max_size:packet_data_length],address)
+            else:
+                self.socket.sendto(packet_data,address)
         except:
             ioHub.print2err('Error trying to send data to experiment process:')
             ioHub.print2err('data length:',len(data))
             if packet_data:
                 ioHub.print2err('packet Data length: ',len(packet_data))
+            ioHub.printExceptionDetailsToStdErr()
     def setExperimentInfo(self,experimentInfoList):
         if self.iohub.emrt_file:
             return self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList)           
@@ -201,23 +211,20 @@ class udpServer(DatagramServer):
     def currentSec(self):
         return currentSec()
 
-    def currentMsec(self):
-        return currentMsec()
+    def updateGlobalTimeOffset(self,offset):
+        Computer.globalClock.setOffset(offset)
 
-    def currentUsec(self):
-        return currentUsec()
-        
     def enableHighPriority(self,disable_gc=True):
-        ioHub.devices.computer.enableHighPriority(disable_gc)
+        Computer.enableHighPriority(disable_gc)
 
     def disableHighPriority(self):
-        ioHub.devices.computer.disableHighPriority()
+        Computer.disableHighPriority()
 
     def getProcessAffinity(self):
-        return ioHub.devices.computer.getCurrentProcessAffinity()
+        return Computer.getCurrentProcessAffinity()
 
     def setProcessAffinity(self, processorList):
-        return ioHub.devices.computer.setCurrentProcessAffinity(processorList)
+        return Computer.setCurrentProcessAffinity(processorList)
 
     def shutDown(self):
         import time
@@ -238,7 +245,7 @@ class udpServer(DatagramServer):
 
         
     def getProcessInfoString(self):
-        return computer.getProcessInfoString()
+        return Computer.getProcessInfoString()
 
 class DeviceMonitor(Greenlet):
     def __init__(self, device,sleep_interval):
@@ -249,7 +256,7 @@ class DeviceMonitor(Greenlet):
         
     def _run(self):
         self.running = True
-        ctime=computer.currentSec
+        ctime=Computer.currentSec
         while self.running is True:
             stime=ctime()
             self.device._poll()
@@ -262,7 +269,9 @@ class DeviceMonitor(Greenlet):
 class ioServer(object):
     eventBuffer=None 
     _logMessageBuffer=None
-    def __init__(self,configFilePath,config):
+    def __init__(self,configFilePath,config,initial_time_offset):
+        ioHub.devices.Computer.isIoHubProcess=True
+        ioHub.devices.Computer.globalClock=ioHub.ioClock(None,initial_time_offset)
         self._running=True
         self.config=config
         self.configFilePath=configFilePath
@@ -329,7 +338,7 @@ class ioServer(object):
                     self.log("Exception creating device %s: %s"%(deviceConfig['device_class'],str(e)))
         deviceDict=self.deviceDict
         iohub=self
-        if ('Mouse' in deviceDict or 'Keyboard' in deviceDict) and computer.system == 'Windows':
+        if ('Mouse' in deviceDict or 'Keyboard' in deviceDict) and Computer.system == 'Windows':
             class pyHookDevice(object):
                 def __init__(self):
                     import pyHook
@@ -360,17 +369,18 @@ class ioServer(object):
         while self._running:
             for device in self.devices:
                 try:
-                    events=device._getNativeEventBuffer()
-                    while len(events)>0:
+                     events=device._getNativeEventBuffer()
+                     while len(events)>0:
                         evt=events.popleft()
                         e=device._getIOHubEventObject(evt,device.instance_code)
                         for l in device._getEventListeners():
                             l._handleEvent(e)
                 except:
+                    ioHub.printExceptionDetailsToStdErr()
                     ioHub.print2err("Error in processDeviceEvents: ", device, " : ", len(events), " : ", e)
                     eclass=EventConstants.EVENT_CLASSES[e[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+                    ioHub.print2err("eclass: ",eclass)
                     ioHub.print2err("Event array length: ", len(e), " should be : ", len(eclass.NUMPY_DTYPE)," : ",eclass.NUMPY_DTYPE)
-                    ioHub.printExceptionDetailsToStdErr()
             gevent.sleep(sleep_interval)
 
     def closeDataStoreFile(self):
@@ -385,9 +395,9 @@ class ioServer(object):
             while len(self._logMessageBuffer)>0:
                 time,text,level=self._logMessageBuffer.popleft()
                 self.emrt_file.log(time,text,level)
-            self.emrt_file.log(currentUsec(),text,level)
+            self.emrt_file.log(currentSec(),text,level)
         else:
-            logMsg=(currentUsec(),text,level)
+            logMsg=(currentSec(),text,level)
             self._logMessageBuffer.append(logMsg)
 
     def createDataStoreFile(self,fileName,folderPath,fmode,ftype):        
@@ -418,7 +428,7 @@ class ioServer(object):
         for m in self.deviceMonitors:
             m.start()
         
-        gevent.spawn(self.processDeviceEvents,0.0009)
+        gevent.spawn(self.processDeviceEvents,0.001)
         
         sys.stdout.write("IOHUB_READY\n\r\n\r")
         sys.stdout.flush()
@@ -440,7 +450,7 @@ class ioServer(object):
 
 
 
-def run(configFilePath=None):
+def run(configFilePath=None,initial_time_offset=None):
     from yaml import load
     try:
         from yaml import CLoader as Loader, CDumper as Dumper
@@ -449,18 +459,21 @@ def run(configFilePath=None):
 
     ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
     
-    s = ioServer(configFilePath, ioHubConfig)
-
-    ioHub.devices.Computer.isIoHubProcess=True
+    s = ioServer(configFilePath, ioHubConfig,initial_time_offset)
 
     s.start()    
     
 if __name__ == '__main__':
     prog=sys.argv[0]
-    
+
     if len(sys.argv)==2:
         configFileName=sys.argv[1]
+    elif len(sys.argv)==3:
+        configFileName=sys.argv[1]
+        initial_offset=float(sys.argv[2])
+        #ioHub.print2err("ioServer initial_offset: ",initial_offset)
     else:
         configFileName=None
+        initial_offset=ioHub.highPrecisionTimer()
         
-    run(configFilePath=configFileName)
+    run(configFilePath=configFileName,initial_time_offset=initial_offset)

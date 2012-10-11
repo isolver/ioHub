@@ -11,14 +11,13 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from collections import deque
 
 
-import sys
+import sys, gc
+import numpy as N
 import ioHub
 from ..... import Device, Computer
 from ....eye_events import *
 
-from .... import RTN_CODES, DATA_TYPES, \
-              ET_MODES, CALIBRATION_TYPES, CALIBRATION_MODES, DATA_STREAMS, \
-              DATA_FILTER, USER_SETUP_STATES,EyeTrackerInterface
+from .... import RTN_CODES, EyeTrackerInterface
 
 from ctypes import *
 from iViewXAPI import  *            #iViewX library
@@ -57,11 +56,45 @@ class EyeTracker(EyeTrackerInterface):
     #. Accessing Eye Tracker Data During Recording
     #. Syncronizing the Local Experiment timebase with the Eye Tracker Timebase, so Eye Tracker events can be provided with local time stamps when that is appropriate.
     #. Experiment Flow Generics 
-    """
-    # >>> Custom class attributes
+    """        
+    
+    
+    _INSTANCE = None #: Holds the reference to the current instance of the EyeTracker object in use and ensures only one is created.
 
+    EXT = None  # IF Vendor specific extensioin of API must be done, create an extension of EyeTrackerVendorExtension class and add an instance of it here. 
+
+    _setupGraphics = None # instance of EyeTrackerSetupGraphics class, if supported
+
+    _latestSample = None # latest eye sample from tracker
+    _latestGazePosition = 0, 0 # latest gaze position from eye sample. If binocular, average valid eye positions
+
+    eyeTrackerConfig = None # holds the configuration / settings dict for the device
+    displaySettings = None
+    
+    #: Used by pyEyeTrackerInterface implentations to store relationships between an eye 
+    #: trackers command names supported for pyEyeTrackerInterface sendCommand method and  
+    #: a private python function to call for that command. This allows an implemetation 
+    #: of the interface to expose functions that are not in the core pyEyeTrackerInterface spec 
+    #: without have to use the EXT extension class.
+    #: Any arguements passed into the sendCommand function are assumed to map
+    #: directly to the native function 
+    _COMMAND_TO_FUNCTION = {}
+    
+    #  >>>> Class attributes used by parent Device class
+    DEVICE_START_TIME = 0.0 # Time to subtract from future device time reads. 
+                            # Init in Device init before any calls to getTime() 
+    DEVICE_TIMEBASE_TO_SEC = 0.00001
+
+    __slots__ = []
+    # <<<<<
+    
+    # used for simple lookup of device type and category number from strings
+    categoryTypeString = 'EYE_TRACKER'
+    deviceTypeString = 'EYE_TRACKER_DEVICE'
+    
+    # implementation specific SMI attributes
     _iViewXAPI = None
-    connected = False #connected to the tracker?
+    connected = False #connected to the tracker?                              
     recording = False #recording?
     saved_data = False #has data already been stored?
     recording_file = None
@@ -72,12 +105,10 @@ class EyeTracker(EyeTrackerInterface):
     handle_event = None
     handle_sample = None
     _eventArrayLengths = {}
-    # <<<
-
-    # >>> Overwritten class attributes
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
-    __slots__=[]
-    # <<<
+    calibration_struct = None
+    accuracy_struct = None
+     
+   
     def __init__(self, *args, **kwargs):
         """EyeTracker class. This class is to be extended by each eye tracker specific implemetation of the pyEyeTrackerInterface.
         
@@ -87,7 +118,7 @@ class EyeTracker(EyeTrackerInterface):
        
            eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
         
-        where hub is the instance of the ioHubConnection class that has been created for your experiment.
+        where hub is the instance of the ioHubClient class that has been created for your experiment.
         
         **kwargs are an optional set of named parameters.
         
@@ -105,14 +136,14 @@ class EyeTracker(EyeTrackerInterface):
         
         # create Device level class setting dictionary and pass it Device constructor
         deviceSettings = {'instance_code':self.eyeTrackerConfig['instance_code'],
-            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.CATEGORY_LABEL],
-            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.DEVICE_LABEL],
+            'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[EyeTracker.categoryTypeString],
+            'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[EyeTracker.deviceTypeString],
             'device_class':self.eyeTrackerConfig['device_class'],
-            'name':self.eyeTrackerConfig['name'],
+            'user_label':self.eyeTrackerConfig['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':self.eyeTrackerConfig['event_buffer_length'],
             }
-        EyeTrackerInterface.__init__(self, **deviceSettings)
+        EyeTrackerInterface.__init__(self, *args, **deviceSettings)
         
         # set this instance as 'THE' instance of the eye tracker.
         EyeTracker._INSTANCE = self
@@ -120,14 +151,20 @@ class EyeTracker(EyeTrackerInterface):
         runtimeSettings = self.eyeTrackerConfig['runtime_settings']
         EyeTracker.sample_rate = runtimeSettings['sampling_rate']
         
-        
+        cal_pts = int(runtimeSettings['default_calibration'][0])
         EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
-
+        
+        screen_index = EyeTracker.displaySettings['display_index']
+        
         # implementation specific SMI attributes
         EyeTracker._iViewXAPI = windll.LoadLibrary("iViewXAPI.dll")
-                                 
+        
+        #calibration settings
+        EyeTracker.calibration_struct = CCalibration(cal_pts, 1, screen_index, 0, 1, 20, 239, 1, 15, b"")
+        EyeTracker._iViewXAPI.iV_SetupCalibration(byref(EyeTracker.calibration_struct)) 
+
         #specific commands       
-        EyeTracker._COMMAND_TO_FUNCTION = {'Calibrate':EyeTracker._iViewXAPI.iV_Calibrate, 'Validate':EyeTracker._iViewXAPI.iV_Validate}
+        EyeTracker._COMMAND_TO_FUNCTION = {'Calibrate':EyeTracker._iViewXAPI.iV_Calibrate, 'Validate':EyeTracker._iViewXAPI.iV_Validate, 'Get_Accuracy':EyeTracker._iViewXAPI.iV_GetAccuracy, 'Show_Tracking_Monitor':EyeTracker._iViewXAPI.iV_ShowTrackingMonitor}
         
         #initialize callbacks for new events and samples
         
@@ -268,30 +305,35 @@ class EyeTracker(EyeTrackerInterface):
         enabled = args[0]
         
         if enabled is True:
-            SendIPAddress = kwargs.pop('SendIPAdress', "127.0.0.1")
-            SendPort = kwargs.pop('SendPort', 4444)
-            RecvIPAddress = kwargs.pop('RecvIPAdress', "127.0.0.1")
-            ReceivePort = kwargs.pop('ReceivePort', 5555)       
-            res = EyeTracker._iViewXAPI.iV_Connect(c_char_p(SendIPAddress), c_int(SendPort), c_char_p(RecvIPAddress), c_int(ReceivePort))
             
-            if res != 1: #if something did not work out
-                return ['EYETRACKER_ERROR', 'Return Code is ' + str(res) + '. Refer to the iView X SDK Manual for its meaning.']
-            
-            
-            if EyeTracker.DEVICE_START_TIME == 0.0:
-                EyeTracker.DEVICE_START_TIME = self.trackerTime()
-            
-            #Get Samplerate
-            #system_data is a system info data structure defined in the iViewXAPI
-            system_data = CSystem(0, 0, 0, 0, 0, 0, 0, 0)
-            res = EyeTracker._iViewXAPI.iV_GetSystemInfo(byref(system_data))
-            if EyeTracker.sample_rate != system_data.samplerate:
-                ioHub.print2err('Warning: Sample rate mismatch. User requested sample rate of %iHz, system now recording at %iHz.' % (EyeTracker.sample_rate, system_data.samplerate))
-                EyeTracker.sample_rate = system_data.samplerate
+            if EyeTracker.connected is False:
+                SendIPAddress = kwargs.pop('SendIPAdress', "127.0.0.1")
+                SendPort = kwargs.pop('SendPort', 4444)
+                RecvIPAddress = kwargs.pop('RecvIPAdress', "127.0.0.1")
+                ReceivePort = kwargs.pop('ReceivePort', 5555)       
+                res = EyeTracker._iViewXAPI.iV_Connect(c_char_p(SendIPAddress), c_int(SendPort), c_char_p(RecvIPAddress), c_int(ReceivePort))
                 
-            EyeTracker.connected = True                   
-            return True 
-                                  
+                if res != 1: #if something did not work out
+                    return ['EYETRACKER_ERROR', 'Return Code is ' + str(res) + '. Refer to the iView X SDK Manual for its meaning.']
+                
+                
+                if EyeTracker.DEVICE_START_TIME == 0.0:
+                    EyeTracker.DEVICE_START_TIME = self.trackerTime()
+                
+                #Get Samplerate
+                #system_data is a system info data structure defined in the iViewXAPI
+                system_data = CSystem(0, 0, 0, 0, 0, 0, 0, 0)
+                res = EyeTracker._iViewXAPI.iV_GetSystemInfo(byref(system_data))
+                if EyeTracker.sample_rate != system_data.samplerate:
+                    ioHub.print2err('Warning: Sample rate mismatch. User requested sample rate of %iHz, system now recording at %iHz.' % (EyeTracker.sample_rate, system_data.samplerate))
+                    EyeTracker.sample_rate = system_data.samplerate
+                    
+                EyeTracker.connected = True                   
+                return True 
+            else:
+                ioHub.print2err('Warning: Tracker is already connected. Disconnect before reconnecting. No action taken.')
+                return True
+                              
         elif enabled is False:
             res = EyeTracker._iViewXAPI.iV_Disconnect()        
             EyeTracker.connected = False   
@@ -320,6 +362,12 @@ class EyeTracker(EyeTrackerInterface):
            wait (bool or callable) *NOT CURRENTLY SUPPORTED; FUNCTIONS AS ALWAYS == TRUE*: if bool, True = do not return from function until result of command if known (if it can be known); False = return immediately after sending the command, ignoring any possible return value. If wait is a callable, then wait fould be a reference to the callback function you want called when the return value is available. If no return value is possible for the command, wait is ignorded and RTN_CODES.ET_RESULT_UNKNOWN is returned immediately..           
         
         Return: the result of the command call, or one of the ReturnCodes Constants ( ReturnCodes.ET_OK, ReturnCodes.ET_RESULT_UNKNOWN, ReturnCodes.ET_NOT_IMPLEMENTED ) 
+        
+        SMI: Supported predefined commands
+            Calibrate
+            Validate
+            Get_Accuracy  "0" or "1" for visualization of the Accuracy
+            Show_Tracking_Monitor
         """
         
         if len(args) >= 2:
@@ -333,9 +381,11 @@ class EyeTracker(EyeTrackerInterface):
             ioHub.print2err("Warning: iViewX_EyeTracker.sendCommand wait param not implemented")
         
         if command in EyeTracker._COMMAND_TO_FUNCTION:
-            if value:
-                res = EyeTracker._COMMAND_TO_FUNCTION[command](value)
-            else:
+            if command == 'Calibrate' or command == 'Validate':
+                res = EyeTracker._COMMAND_TO_FUNCTION[command](byref(EyeTracker.calibration_struct))
+            elif command == 'Get_Accuracy': #value indicates whether to visualize or not
+                res = EyeTracker._COMMAND_TO_FUNCTION[command](byref(EyeTracker.accuracy_struct), c_int(int(value)))
+            else: #Show_Tracking_Monitor
                 res = EyeTracker._COMMAND_TO_FUNCTION[command]()
             return RTN_CODES.ET_RESULT_UNKNOWN    
         else:
@@ -446,23 +496,25 @@ class EyeTracker(EyeTrackerInterface):
         return RTN_CODES.ET_OK 
     
     def runSetupProcedure(self, graphicsContext=None , **kwargs):
+        '''
+        SMI:
+        Connects using the provided IP settings, runs one calibration and one validation.
+        Does not repeat Calibration if results are bad. This must be implemented by the 
+        user separately.
         
-        self.setConnectionState(True)
+        SMI optional arguments:
+            SendIPAddress (string): IP address of iView X computer: default 127.0.0.1
+            SendPort (int): port being used by iView X SDK for sending data to iViewX default 4444
+            RecvIPAdress (string): IP address of local computer default 127.0.0.1
+            ReceivePort (int): port being used by iView X SDK for receiving data from iViewX default 5555
+        '''
         
-        runTimeSettings = self.eyeTrackerConfig['runtime_settings']
-
-        cal_pts = int(runTimeSettings['default_calibration'][0])
-        calibrationData = CCalibration(cal_pts, 1, 0, 0, 1, 20, 239, 1, 15, b"")
-        EyeTracker._iViewXAPI.iV_SetupCalibration(byref(calibrationData))
+        self.setConnectionState(True, kwargs)
+        
         res = EyeTracker._iViewXAPI.iV_Calibrate()
 
         EyeTracker._iViewXAPI.iV_Validate()
-        res = EyeTracker._iViewXAPI.iV_GetAccuracy(byref(accuracyData), 1)
-
-        ioHub.print2err("deviationXLeft ", str(accuracyData.deviationXLeft), " deviationYLeft ", str(accuracyData.deviationYLeft))
-        ioHub.print2err("deviationXRight ", str(accuracyData.deviationXRight), " deviationYRight ", str(accuracyData.deviationYRight))
-           
-        res = EyeTracker._iViewXAPI.iV_ShowTrackingMonitor()
+        res = EyeTracker._iViewXAPI.iV_GetAccuracy(byref(EyeTracker.accuracy_struct), 1) #1 for visualization in a window  
         
         #if self._setupGraphics is None:
         #    self._setupGraphics=EyeTrackerSetupGraphics(graphicsContext=graphicsContext,**kwargs)
@@ -602,14 +654,14 @@ class EyeTracker(EyeTrackerInterface):
         """
         if len(args) > 0:
             event = args[0]
-        currentTime = int(Computer.currentUsec())
+        currentTime = Computer.currentSec()
         EyeTracker.lastCallbackTime = currentTime
 
         # append the native event to the deque as a tuple of (current_time, event)
         # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
 
-        self._nativeEventBuffer.append((currentTime, event))
+        self._addNativeEventToBuffer((currentTime, event))
 
         # Debugging .......
         #if isinstance(event, CEvent):
@@ -661,14 +713,14 @@ class EyeTracker(EyeTrackerInterface):
             device_instance_code=args[1]
         '''
         try:
-            currentTime = int(Computer.currentUsec())
+            currentTime = Computer.currentSec()
     
             if len(args) == 2:
                 logged_time, event = args[0]
                 device_instance_code = args[1]
     
-            # (1sec in usec/samplerate) / 2 -> half the sampling rate is the confidence interval
-            confidenceInterval = (1000000.0 / EyeTracker.sample_rate) / 2.0 
+            # CI in sec.msec-usec, should be = sampling rate /2
+            confidenceInterval = EyeTracker.sample_rate*0.00001 / 2.0
             
             if isinstance(event, CSample):
                 
@@ -685,13 +737,13 @@ class EyeTracker(EyeTrackerInterface):
                 #case monocular sample
                 if EyeTracker._eyes != 'BINOCULAR':
                     
-                    event_type = EventConstants.EVENT_TYPES['EYE_SAMPLE']
+                    event_type = ioHub.devices.EventConstants.EVENT_TYPES['EYE_SAMPLE']
                     
                     if event.rightEye.gazeX == 0:
-                        myeye = EventConstants.LEFT
+                        myeye = ioHub.devices.EventConstants.LEFT
                         eye = event.leftEye
                     else:
-                        myeye = EventConstants.RIGHT
+                        myeye = ioHub.devices.EventConstants.RIGHT
                         eye = event.rightEye
                             
                     pupilDiameter = eye.diam
@@ -710,14 +762,39 @@ class EyeTracker(EyeTrackerInterface):
                     #                    pupil_measure1=pupilDiameter, pupil_measure2= -1, ppd_x= -1, ppd_y= -1,
                     #                    velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=0)
     
-                    monoSample = [0, 0, Computer.getNextEventID(), event_type, device_instance_code,
-                        event_timestamp, logged_time, hub_timestamp,
-                        confidenceInterval, event_delay,
-                        myeye, gazeX, gazeY, -1.0,
-                        eyePosX, eyePosY, eyePosZ,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        pupilDiameter, -1, -1, -1,
-                        - 1.0, -1.0, -1.0, 0]
+                    monoSample = [
+                                    0,
+                                    0,
+                                    Computer.getNextEventID(),
+                                    event_type,
+                                    device_instance_code,
+                                    event_timestamp,
+                                    logged_time,
+                                    hub_timestamp,
+                                    confidenceInterval,
+                                    event_delay,
+                                    myeye,
+                                    gazeX,
+                                    gazeY,
+                                    -1.0,
+                                    eyePosX,
+                                    eyePosY,
+                                    eyePosZ,
+                                    - 1.0,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    pupilDiameter,
+                                    EventConstants.DIAMETER,
+                                    -1,
+                                    EventConstants.NOT_SUPPORTED_FIELD,
+                                    -1,
+                                    -1,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    0
+                                    ]
                     
                     EyeTracker._latestSample = monoSample    
     
@@ -743,36 +820,59 @@ class EyeTracker(EyeTrackerInterface):
                     rightEyePosX = rightEye.eyePositionX
                     rightEyePosY = rightEye.eyePositionY
                     rightEyePosZ = rightEye.eyePositionZ
+
     
-                    #binocSample = BinocularEyeSample(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                    #    event_type=event_type, device_instance_code=device_instance_code,
-                    #    device_time=event_timestamp, logged_time=logged_time, hub_time=hub_timestamp,
-                    #    confidence_interval=confidenceInterval, delay=event_delay,
-                    #    eye=myeye, left_gaze_x=leftGazeX, left_gaze_y=leftGazeY, left_gaze_z= -1.0,
-                    #    left_eye_cam_x=leftEyePosX, left_eye_cam_y=leftEyePosY, left_eye_cam_z=leftEyePosZ,
-                    #    left_angle_x= -1.0, left_angle_y= -1.0, left_raw_x= -1.0, left_raw_y= -1.0,
-                    #    left_pupil_measure1=leftPupilDiameter, left_pupil_measure2= -1, left_ppd_x= -1, left_ppd_y= -1,
-                    #    left_velocity_x= -1.0, left_velocity_y= -1.0, left_velocity_xy= -1.0,
-                    #    right_gaze_x=rightGazeX, right_gaze_y=rightGazeY, right_gaze_z= -1.0,
-                    #    right_eye_cam_x=rightEyePosX, right_eye_cam_y=rightEyePosY, right_eye_cam_z=rightEyePosZ,
-                    #    right_angle_x= -1.0, right_angle_y= -1.0, right_raw_x= -1.0, right_raw_y= -1.0,
-                    #    right_pupil_measure1=rightPupilDiameter, right_pupil_measure2= -1, right_ppd_x= -1, right_ppd_y= -1,
-                    #    right_velocity_x= -1.0, right_velocity_y= -1.0, right_velocity_xy= -1.0, status=0)
-    
-                    binocSample = [0, 0, Computer.getNextEventID(),
-                        event_type, device_instance_code,
-                        event_timestamp, logged_time, hub_timestamp,
-                        confidenceInterval, event_delay,
-                        leftGazeX, leftGazeY, -1.0,
-                        leftEyePosX, leftEyePosY, leftEyePosZ,
-                         - 1.0, -1.0, -1.0, -1.0,
-                         leftPupilDiameter, -1, -1, -1,
-                          - 1.0, -1.0, -1.0,
-                         rightGazeX, rightGazeY, -1.0,
-                         rightEyePosX, rightEyePosY, rightEyePosZ,
-                          - 1.0, -1.0, -1.0, -1.0,
-                         rightPupilDiameter, -1, -1, -1,
-                          - 1.0, -1.0, -1.0, 0]
+                    binocSample = [
+                                   0,
+                                   0,
+                                   Computer.getNextEventID(),
+                                   event_type,
+                                   device_instance_code,
+                                   event_timestamp,
+                                   logged_time,
+                                   hub_timestamp,
+                                   confidenceInterval,
+                                   event_delay,
+                                   leftGazeX,
+                                   leftGazeY,
+                                   -1.0,
+                                   leftEyePosX,
+                                   leftEyePosY,
+                                   leftEyePosZ,
+                                   -1.0,
+                                   -1.0,
+                                   -1.0,
+                                   -1.0,
+                                   -1.0,
+                                    leftPupilDiameter,
+                                    ioHub.devices.EventConstants.DIAMETER,
+                                    -1,
+                                    ioHub.devices.EventConstants.NOT_SUPPORTED_FIELD,
+                                    -1,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    rightGazeX,
+                                    rightGazeY,
+                                    -1.0,
+                                    rightEyePosX,
+                                    rightEyePosY,
+                                    rightEyePosZ,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    rightPupilDiameter,
+                                    ioHub.devices.EventConstants.DIAMETER,
+                                    -1,
+                                    ioHub.devices.EventConstants.NOT_SUPPORTED_FIELD,
+                                    -1,
+                                    -1,
+                                    -1.0,
+                                    -1.0,
+                                    -1.0,
+                                    0
+                                    ]
     
                     EyeTracker._latestSample = binocSample
                     EyeTracker._latestGazePosition = (leftGazeX + rightGazeX) / 2.0, (leftGazeY + rightGazeY) / 2.0                
@@ -788,9 +888,9 @@ class EyeTracker(EyeTrackerInterface):
                 
                 which_eye = event.eye
                 if which_eye == 'r':
-                    which_eye = EventConstants.RIGHT
+                    which_eye = ioHub.devices.EventConstants.RIGHT
                 else:
-                    which_eye = EventConstants.LEFT
+                    which_eye = ioHub.devices.EventConstants.LEFT
                 
                 
                 start_event_time = (event.startTime - self.DEVICE_START_TIME) * self.DEVICE_TIMEBASE_TO_USEC
@@ -806,23 +906,37 @@ class EyeTracker(EyeTrackerInterface):
                     hub_timestamp = currentTime - event_delay
                 
                     event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
-    
-                    #fse = FixationStartEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                    #    event_type=event_type, device_instance_code=device_instance_code,
-                    #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                    #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                    #    gaze_x=a_gazeX, gaze_y=a_gazeY, gaze_z= -1,
-                    #    angle_x= -1.0, angle_y= -1.0, raw_x= -1.0, raw_y= -1.0,
-                    #    pupil_measure1= -1.0, pupil_measure2= -1.0,
-                    #    ppd_x= -1.0, ppd_y= -1.0, velocity_x= -1.0, velocity_y= -1.0, velocity_xy= -1.0, status=event_status)
-    
-                    fse = [0, 0, Computer.getNextEventID(),
-                        event_type, device_instance_code, event_timestamp, currentTime, hub_timestamp,
-                        confidenceInterval, event_delay, which_eye,
-                        a_gazeX, a_gazeY, -1,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0, -1.0, event_status]
+
+                    fse = [
+                        0,
+                        0,
+                        Computer.getNextEventID(),
+                        event_type,
+                        device_instance_code,
+                        event_timestamp,
+                        currentTime,
+                        hub_timestamp,
+                        confidenceInterval,
+                        event_delay,
+                        which_eye,
+                        a_gazeX,
+                        a_gazeY,
+                        -1,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,                                   # pupil measure 1
+                        EventConstants.NOT_SUPPORTED_FIELD,     # pupil measure 1 type
+                        -1.0,                                   # pupil measure 2
+                        EventConstants.NOT_SUPPORTED_FIELD,     # pupil measure 2 type
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        -1.0,
+                        event_status
+                        ]
                     
                     EyeTracker._eventArrayLengths['FIXATION_START'] = len(fse)
                     return fse
@@ -834,41 +948,73 @@ class EyeTracker(EyeTrackerInterface):
                     hub_timestamp = currentTime - event_delay
                         
                     event_type = ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
-    
-                    #fee = FixationEndEvent(experiment_id=0, session_id=0, event_id=Computer.getNextEventID(),
-                    #    event_type=event_type, device_instance_code=device_instance_code,
-                    #    device_time=event_timestamp, logged_time=currentTime, hub_time=hub_timestamp,
-                    #    confidence_interval=confidenceInterval, delay=event_delay, eye=which_eye,
-                    #    duration=event_duration, start_gaze_x= -1.0, start_gaze_y= -1.0, start_gaze_z= -1.0,
-                    #    start_angle_x= -1.0, start_angle_y= -1.0, start_raw_x= -1.0, start_raw_y= -1.0,
-                    #    start_pupil_measure1= -1.0, start_pupil_measure2= -1.0, start_ppd_x= -1.0, start_ppd_y= -1.0,
-                    #    start_velocity_x= -1.0, start_velocity_y= -1.0, start_velocity_xy= -1.0,
-                    #    end_gaze_x=a_gazeX, end_gaze_y=a_gazeY, end_gaze_z= -1.0,
-                    #    end_angle_x= -1.0, end_angle_y= -1.0, end_raw_x= -1.0, end_raw_y= -1.0,
-                    #    end_pupil_measure1= -1.0, end_pupil_measure2= -1.0, end_ppd_x= -1.0, end_ppd_y= -1.0,
-                    #    end_velocity_x= -1.0, end_velocity_y= -1.0, end_velocity_xy= -1.0,
-                    #    average_gaze_x= -1.0, average_gaze_y= -1.0, average_gaze_z= -1.0,
-                    #    average_angle_x= -1.0, average_angle_y= -1.0, average_raw_x= -1.0, average_raw_y= -1.0,
-                    #    average_pupil_measure1= -1.0, average_pupil_measure2= -1.0, average_ppd_x= -1.0, average_ppd_y= -1.0,
-                    #    average_velocity_x= -1.0, average_velocity_y= -1.0, average_velocity_xy= -1.0,
-                    #    peak_velocity_x= -1.0, peak_velocity_y= -1.0, peak_velocity_xy= -1.0, status=event_status)
-    
-                    fee = [0, 0, Computer.getNextEventID(),
-                        event_type, device_instance_code,
-                        event_timestamp, currentTime, hub_timestamp,
-                        confidenceInterval, event_delay, which_eye,
-                        event_duration, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0,
-                        a_gazeX, a_gazeY, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0,
-                        - 1.0, -1.0, -1.0, event_status]
+
+                    fee = [
+                            0,
+                            0,
+                            Computer.getNextEventID(),
+                            event_type,
+                            device_instance_code,
+                            event_timestamp,
+                            currentTime,
+                            hub_timestamp,
+                            confidenceInterval,
+                            event_delay,
+                            which_eye,
+                            event_duration,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            a_gazeX,
+                            a_gazeY,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            EventConstants.NOT_SUPPORTED_FIELD,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            -1.0,
+                            event_status
+                            ]
                     
                     EyeTracker._eventArrayLengths['FIXATION_END'] = len(fee)
                     return fee
@@ -946,117 +1092,14 @@ class EyeTracker(EyeTrackerInterface):
             return RTN_CODES.ET_ERROR
         EyeTracker.sample_rate = args[0]
         return RTN_CODES.ET_NOT_IMPLEMENTED    
-            
-    def getEventArrayLengths(self, *args, **kwargs):
-        return (EyeTracker._eventArrayLengths,)
-     
+
     def __del__(self):
         """
         Do any final cleanup of the eye tracker before the object is destroyed. Users should not call or change this method. It is for implemetaion by interface creators and is autoatically called when an object is destroyed by the interpreter.
         """
         EyeTracker._INSTANCE = None
 
-        
-class EyeTrackerSetupGraphics(object):
-    '''
-    EyeTrackerUserSetupGraphics provides a minimalistic standard 'public' interface
-    that can be used for taking control of the experiment runtime graphics environment
-    and keyboard / mouse by the eye tracker interface during 'black box' modes such as
-    camera setup, calibration, validation, etc. 
 
-    Developers of eye tracker interfaces for pyETI can extend this class and implement 
-    the specifics necessary to have the eye tracker perform whatever functionality is 
-    supported by the eye tracker in terms of user facing graphics for these types of tasks.
-    
-    * Users 'enter' the graphics mode provided by the EyeTrackerUserCalibrationGraphics class by 
-      calling a method of the eyetracker object from their experiment script:
-
-      runSetupProcedure(*args,**kwargs):
-
-      which in turn calls the run(....) method the this class.
-      
-    * This call blocks the user script, handing over control of the graphics state to the eye tracker interface. 
-      The user script will remain blocked until you call the objects returnToUserSpace() method, or the user
-      manages to call the eyetracker.stopSetupProcedure() method.
-      
-    * Devlopers can access keyboard and mouse events occurring on the experiment computer by calling:
-    
-      events = getKeyboardMouseEvents() # returns all keyboard and mouse events since 
-                                        # the last call or since the last time 
-                                        # clearKeyboardAndMouseEvents() was called.
-    '''
-    def __init__(self, graphicsContext, **kwargs):
-        '''
-        The EyeTrackerSetupGraphics instance is created the first time eyetracker.runSetupProcedure(graphicsContext)
-        is called. The class instance is then reused in future calls. 
-        graphicsContext object type is dependent on the graphics environment being used.
-        Since psychopy normalizes everything in this regard to psychopy.visual.Window (regardless of
-        whether pyglet or pygame backend is being used), then likely graphicsContext should be the instance of
-        Window that has been created for your psychopy experiment. For an eye tracking experiment
-        this would normally be a single 'full screen' window.
-        '''
-        self.graphicsContext = graphicsContext
-        
-    def run(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics.run is not implemented.")
-        return 'dummy'#_handleDefaultState(*args,**kwargs)   
-
-    def _handleDefaultState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleDefaultState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-
-    def _handleCameraSetupState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCameraSetupState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-
-    def _handleParticipantSetupState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleParticipantSetupState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCalibrateState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCalibrateState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleValidateState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleValidateState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleDCState(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleDCState is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_A_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_A_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_B_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_B_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_C_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_C_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_D_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_D_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_E_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_E_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
-    def _handleCM_F_State(self, *args, **kwargs):
-        ioHub.print2err("EyeTrackerSetupGraphics._handleCM_F_State is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-
-    def stop(self, returnMessage):
-        ioHub.print2err("EyeTrackerSetupGraphics.stop is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-
-    def getKeyboardMouseEvents(self):
-        ioHub.print2err("EyeTrackerSetupGraphics.getKeyboardMouseEvents is not implemented.")
-        return RTN_CODES.ET_NOT_IMPLEMENTED
-    
 class EyeTrackerVendorExtension(object):
     '''
     EyeTrackerVendorExtension is the base class used to add custom functionality to the pyEyeTrackerInterface

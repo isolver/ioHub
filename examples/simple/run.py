@@ -100,6 +100,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         display=self.hub.devices.display
         kb=self.hub.devices.kb
 
+        self.enableHighPriority()
         # Set the mouse position to 0,0, which means the 'center' of the screen.
         mouse.setPosition((0.0,0.0))
 
@@ -159,11 +160,11 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # time methods represent both experiment process and ioHub server process time.
             # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
             # as a timescale is appropriate.
-            flip_time=self.currentUsec()
+            flip_time=self.currentSec()
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
-            self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),),usec_time=flip_time)
+            self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),), sec_time=flip_time)
 
             # get any new keyboard events from the keyboard device
             kb_events=kb.getEvents()
@@ -185,10 +186,16 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                         QUIT_EXP=True
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
-        self.clearEvents()
+        #self.clearEvents()
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.msecDelay(250)
+        self.delay(0.250)
+
+        # for fun, test getting a bunch of events at once, likely causing a mutlipacket getEvents()
+        stime = self.currentSec()
+        events=self.getEvents()
+        etime=self.currentSec()
+        print 'event count: ', len(events),' delay (msec): ',(etime-stime)*1000.0
 
         # _close neccessary files / objects, 'disable high priority.
         psychoWindow.close()

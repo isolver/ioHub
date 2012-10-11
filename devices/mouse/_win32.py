@@ -12,7 +12,7 @@ import ioHub
 from .. import Device,Computer, EventConstants
 import ctypes
 
-currentUsec=Computer.currentUsec
+currentSec=Computer.currentSec
 
 class MouseWindows32(object):
     WM_MOUSEMOVE = int(0x0200)
@@ -174,28 +174,29 @@ class MouseWindows32(object):
         return self._isVisible >= 0
             
     def _nativeEventCallback(self,event):
-        logged_time=int(currentUsec())
+        if self.isReportingEvents():
+            logged_time=currentSec()
 
-        self._scrollPositionY+= event.Wheel
-        event.WheelAbsolute=self._scrollPositionY
+            self._scrollPositionY+= event.Wheel
+            event.WheelAbsolute=self._scrollPositionY
 
-        p=ioHub.devices.Display.pixel2DisplayCoord(event.Position[0],event.Position[1])
-        self.setPosition(p,updateSystemMousePosition=False)
-        event.Position=p
+            p=ioHub.devices.Display.pixel2DisplayCoord(event.Position[0],event.Position[1])
+            self.setPosition(p,updateSystemMousePosition=False)
+            event.Position=p
 
-        bstate,etype,bnum=MouseWindows32._mouse_event_mapper[event.Message]
-        if bnum is not EventConstants.MOUSE_BUTTON_ID_NONE:
-            self.activeButtons[bnum]= int(bstate==EventConstants.MOUSE_BUTTON_STATE_PRESSED)
+            bstate,etype,bnum=MouseWindows32._mouse_event_mapper[event.Message]
+            if bnum is not EventConstants.MOUSE_BUTTON_ID_NONE:
+                self.activeButtons[bnum]= int(bstate==EventConstants.MOUSE_BUTTON_STATE_PRESSED)
 
-        abuttonSum=0
-        for k,v in self.activeButtons.iteritems():
-            abuttonSum+=k*v
+            abuttonSum=0
+            for k,v in self.activeButtons.iteritems():
+                abuttonSum+=k*v
 
-        event.ActiveButtons=abuttonSum
+            event.ActiveButtons=abuttonSum
 
-        self._nativeEventBuffer.append((logged_time,event))
+            self._addNativeEventToBuffer((logged_time,event))
 
-        self._lastCallbackTime=logged_time
+            self._lastCallbackTime=logged_time
 
         return True
     
@@ -224,7 +225,7 @@ class MouseWindows32(object):
         # between subsequent messages, because the value wraps to zero if the timer count exceeds the maximum value for a long integer. To calculate time
         # delays between messages, verify that the time of the second message is greater than the time of the first message; then, subtract the time of the
         # first message from the time of the second message.
-        device_time = int(event.Time)*1000 # convert to usec
+        device_time = event.Time/1000.0 # convert to sec
         
         hubTime = logged_time #TODO correct mouse times to factor in offset.
 

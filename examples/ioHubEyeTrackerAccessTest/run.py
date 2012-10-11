@@ -108,8 +108,8 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                 print DIVIDER
                 print 'setRecordingState(True):',eyetracker.setRecordingState(True)
 
-                d1=5003.0
-                actualdelay=self.msecDelay(d1)
+                d1=5.0030
+                actualdelay=self.delay(d1)
                 print DIVIDER
                 print "Requested Delay / Actual Delay / Diff (msec):",d1,actualdelay,actualdelay-d1
                 print DIVIDER
@@ -121,15 +121,15 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                 self.clearEvents(deviceLabel='mouse')
                 self.clearEvents(deviceLabel='kb')
 
-                d2=20.0
-                actualdelay=self.msecDelay(d2)
+                d2=0.0200
+                actualdelay=self.delay(d2)
                 print DIVIDER
                 print "Requested Delay / Actual Delay / Diff (msec):",d2,actualdelay,actualdelay-d2
                 print DIVIDER
 
-                stime=self.currentMsec()
+                stime=self.currentSec()*1000.0
                 events=self.getEvents()
-                etime=self.currentMsec()
+                etime=self.currentSec()*1000.0
 
                 print 'Get All Events (msec):',etime-stime
                 print 'events:',events
@@ -137,16 +137,16 @@ class ExperimentRuntime(SimpleIOHubRuntime):
                     print 'Event Count:',len(events)
                 print DIVIDER
 
-                stime=self.currentMsec()
+                stime=self.currentSec()*1000.0
                 e=self.getEvents('kb')
-                etime=self.currentMsec()
+                etime=self.currentSec()*1000.0
                 print 'Get Keyboard Events (msec):',etime-stime
  
                 print DIVIDER
                 
-                stime=self.currentMsec()
+                stime=self.currentSec()*1000.0
                 e=self.getEvents('mouse')
-                etime=self.currentMsec()
+                etime=self.currentSec()*1000.0
                 print 'Get Mouse Events (msec):',etime-stime
                 
                 print DIVIDER
@@ -195,9 +195,9 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # save ioHubFile to xlsx format
         print "Saving Sample Excel File ...."
         import ioHub.ioDataStore.util as dsUtil
-        tstart=self.currentMsec()
+        tstart=self.currentSec()*1000.0
         nrows=dsUtil.hubTableToExcel(os.getcwdu(),self.ioHubConfig['ioDataStore']['filename']+'.hdf5',tableName='MonocularEyeSample',experiment_id=0,session_id=0)
-        tend=self.currentMsec()
+        tend=self.currentSec()*1000.0
         print "Saved %d rows to excel file in %.3f sec (%.3f msec / row)"%(nrows,(tend-tstart)/1000.0,(tend-tstart)/nrows)
 
 

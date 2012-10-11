@@ -99,7 +99,7 @@ class EyeTracker(EyeTrackerInterface):
     #  >>>> Class attributes used by parent Device class
     DEVICE_START_TIME = 0.0 # Time to subtract from future device time reads. 
                              # Init in Device init before any calls to getTime() 
-    DEVICE_TIMEBASE_TO_USEC=1000.0
+    DEVICE_TIMEBASE_TO_SEC=0.001
     
     # <<<<<
     
@@ -120,7 +120,6 @@ class EyeTracker(EyeTrackerInterface):
     # <<<
 
     # >>> Overwritten class attributes
-    DEVICE_TIMEBASE_TO_USEC=1.0 # the multiplier needed to convert dive times to usec times.
     __slots__=[]
     # <<<
     def __init__(self,*args,**kwargs):
@@ -355,13 +354,7 @@ class EyeTracker(EyeTrackerInterface):
         """
         Current eye tracker time (in msec for eyelink since host app was last started)
         """
-        return self._eyelink.trackerTime()
-   
-    def trackerUsec(self):
-        """
-        Current eye tracker time (in usec for since ioHub initialized Device)
-        """
-        return (self._eyelink.trackerTime()-EyeTracker.DEVICE_START_TIME)*self.DEVICE_TIMEBASE_TO_USEC
+        return (self._eyelink.trackerTime()-EyeTracker.DEVICE_START_TIME)*self.DEVICE_TIMEBASE_TO_SEC
    
     def setConnectionState(self,*args,**kwargs):
         """
@@ -835,16 +828,16 @@ class EyeTracker(EyeTrackerInterface):
         used instead of registering a timer with the device.
         """
         try:
-            pollStartLocalTime=int(Computer.currentUsec())
+            pollStartLocalTime=Computer.currentSec()
             eyelink=self._eyelink
-            pollStartHostTime = eyelink.trackerTimeUsec()
+            pollStartHostTime = eyelink.trackerTimeUsec()/1000000.0
 
 
-            confidenceInterval=1000.0/EyeTracker.currentSampleRate/2.0*1000.0
+            confidenceInterval=EyeTracker.currentSampleRate*0.000005
 
             #get native events queued up
             while 1:
-                currentTime=int(Computer.currentUsec())
+                currentTime=Computer.currentSec()
 
                 ne = eyelink.getNextData()
 
@@ -856,8 +849,8 @@ class EyeTracker(EyeTrackerInterface):
                 if ne is None:
                     break
 
-                event_timestamp=int(ne.getTime())
-                event_delay=pollStartHostTime-(event_timestamp*1000.0)
+                event_timestamp=ne.getTime()*EyeTracker.DEVICE_TIMEBASE_TO_USEC
+                event_delay=pollStartHostTime-(event_timestamp)
 
                 hub_timestamp=currentTime-event_delay
 
@@ -966,7 +959,7 @@ class EyeTracker(EyeTrackerInterface):
                         #EyeTracker._eventArrayLengths['BINOC_EYE_SAMPLE']=len(binocSample)
                         EyeTracker._latestSample=binocSample
                         EyeTracker._latestGazePosition=(leftGaze[0]+rightGaze[0])/2.0,(leftGaze[1]+rightGaze[1])/2.0
-                        self._nativeEventBuffer.append(binocSample)
+                        self._addNativeEventToBuffer(binocSample)
 
                     else:
                         # monocular sample
@@ -1036,7 +1029,7 @@ class EyeTracker(EyeTrackerInterface):
                        #EyeTracker._eventArrayLengths['MONOC_EYE_SAMPLE']=len(monoSample)
                         EyeTracker._latestGazePosition=gaze
                         EyeTracker._latestSample=monoSample
-                        self._nativeEventBuffer.append(monoSample)
+                        self._addNativeEventToBuffer(monoSample)
 
                 elif isinstance(ne,pylink.EndFixationEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_END']
@@ -1156,7 +1149,7 @@ class EyeTracker(EyeTrackerInterface):
                         estatus
                         ]
                     #EyeTracker._eventArrayLengths['FIXATION_END']=len(fee)
-                    self._nativeEventBuffer.append(fee)
+                    self._addNativeEventToBuffer(fee)
 
                 elif isinstance(ne,pylink.EndSaccadeEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['SACCADE_END']
@@ -1247,7 +1240,7 @@ class EyeTracker(EyeTrackerInterface):
                         estatus
                         ]
                     #EyeTracker._eventArrayLengths['SACCADE_END']=len(see)
-                    self._nativeEventBuffer.append(see)
+                    self._addNativeEventToBuffer(see)
                 elif isinstance(ne,pylink.EndBlinkEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_END']
 
@@ -1279,7 +1272,7 @@ class EyeTracker(EyeTrackerInterface):
                         estatus
                         ]
                     #EyeTracker._eventArrayLengths['BLINK_END']=len(bee)
-                    self._nativeEventBuffer.append(bee)
+                    self._addNativeEventToBuffer(bee)
 
                 elif isinstance(ne,pylink.StartFixationEvent) or isinstance(ne,pylink.StartSaccadeEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['FIXATION_START']
@@ -1334,7 +1327,7 @@ class EyeTracker(EyeTrackerInterface):
                        estatus                                  # status
                         ]
                     #EyeTracker._eventArrayLengths[ioHub.devices.EventConstants.EVENT_TYPES[etype]]=len(se)
-                    self._nativeEventBuffer.append(se)
+                    self._addNativeEventToBuffer(se)
 
                 elif isinstance(ne,pylink.StartBlinkEvent):
                     etype=ioHub.devices.EventConstants.EVENT_TYPES['BLINK_START']
@@ -1364,9 +1357,9 @@ class EyeTracker(EyeTrackerInterface):
                         estatus
                         ]
                     #EyeTracker._eventArrayLengths['BLINK_START']=len(bse)
-                    self._nativeEventBuffer.append(bse)
+                    self._addNativeEventToBuffer(bse)
 
-            pollEndLocalTime=int(Computer.currentUsec())
+            pollEndLocalTime=Computer.currentSec()
             EyeTracker.lastPollTime=pollEndLocalTime
         except Exception, e:
             ioHub.printExceptionDetailsToStdErr()

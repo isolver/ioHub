@@ -99,7 +99,7 @@ can be provided with local time stamps when that is appropriate.
     DEVICE_START_TIME = 0.0  # Time to subtract from future device time reads.
                              # Init in Device init before any calls to getTime() 
     
-    DEVICE_TIMEBASE_TO_USEC=1000.0 # the multiplier needed to convert device times to usec times.
+    DEVICE_TIMEBASE_TO_SEC=1.0 # the multiplier needed to convert device times to usec times.
 
     CATEGORY_LABEL = 'EYE_TRACKER'
     DEVICE_LABEL = 'EYE_TRACKER_DEVICE'
@@ -249,7 +249,7 @@ can be provided with local time stamps when that is appropriate.
    
     def trackerUsec(self):
         """
-        Current eye tracker time, normalized. (in usec for since ioHub initialized Device)
+        Current eye tracker time, normalized. (in sec for since ioHub initialized Device)
         """
         return RTN_CODES.ET_NOT_IMPLEMENTED
         
@@ -597,7 +597,7 @@ can be provided with local time stamps when that is appropriate.
         If your eye tracker supports an event based call-back approach, use _handleEvent(...) instead
         of _poll and remove the periodic timer from the ioHub_config.yaml file settings.
         """
-        loggedTime=int(Computer.currentUsec())
+        loggedTime=Computer.currentSec()
         currentHostTime = self.trackerTime()
         ioHub_time_offset= loggedTime-currentHostTime
 
@@ -622,7 +622,7 @@ can be provided with local time stamps when that is appropriate.
             ioHubEvent = list()
             # put the ioHub eye tracker event IN ORDERED LIST FORM in devices buffer for pickup by the ioHub.
 
-            self._nativeEventBuffer.append(ioHubEvent)
+            self._addNativeEventToBuffer(ioHubEvent)
 
         self.__class__.lastPollTime=loggedTime
     
@@ -632,7 +632,7 @@ can be provided with local time stamps when that is appropriate.
         callback approach.
         One args is required, the device event to be handled, "event"
         """
-        loggedTime=int(Computer.currentUsec())
+        loggedTime=Computer.currentSec()
 
         event=None
         if len(args) > 0:
@@ -655,7 +655,7 @@ can be provided with local time stamps when that is appropriate.
         # This can be unpacked in the _getIOHubEventObject and the current_time 
         # used as the logged_time field of the ioHub DeviceEvent object.
         #
-        self._nativeEventBuffer.append((loggedTime,event))
+        self._addNativeEventToBuffer((loggedTime,event))
     
     @staticmethod    
     def _getIOHubEventObject(*args,**kwargs):
