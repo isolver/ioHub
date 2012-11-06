@@ -41,28 +41,201 @@ class Computer(object):
     cpuCount=psutil.NUM_CPUS
     currentProcessID=os.getpid()
     currentProcess=psutil.Process(currentProcessID)
+    ioHubServerProcessID=None
+    ioHubServerProcess=None
     def __init__(self):
         print2err("WARNING: Computer is a static class, no need to create an instance. just use Computer.xxxxxx")
 
     @staticmethod
-    def getCurrentProcess():
-        return Computer.currentProcess
+    def getProcessorCount():
+        """
+        Returns the number of parallel processes the computer can carry out at once.
+        I say 'parallel processes' because this number includes cpu count, cores per cpu,
+        and hyper-threads per cpu (which is at most 2 I believe). So perhaps it would be better to
+        call this method *getSystemProcessingUnitCount*. For example, if you have an i5 dual core
+        system with hyper-threading enabled, this method will report 2x2=4 for the count. So
+        *getSystemProcessorCount* really = cpu_count * cores_per_cpu * hypertheads_per_core
+
+        If you have a dual CPU, quad core hyper-threaded system (first, can I be your friend)
+        and second, this method would report 2 x 4 x 2 = 16 for the count.
+
+        It is true that all of these levels of 'parallel processing' can not perform processing
+        in parallel at all times, particularly hyper-threads. Even multiple cores and cpu's can
+        blocked each other if a shared i/o resource is being used by one,
+        blocking the other. (Very simply put I am sure) ;)
+
+        Args: None
+
+        Return: (int) The number of processing units the current computer has.
+
+        """
+        return Computer.cpuCount
 
     @staticmethod
     def enableHighPriority(disable_gc=True):
+        """        
+        Sets the priority of the current process to high priority
+        and optionally (default is true) disable the python GC. This is very
+        useful for the duration of a trial, for example, where you enable at
+        start of trial and disable at end of trial. Improves Windows
+        sloppiness greatly in general.
+
+        Args:
+            disable_gc(bool): True = Turn of the Python Garbage Collector. 
+                              False = Leave the Garbage Collector running.
+                              Default: True
+        """
         if Computer.inHighPriorityMode is False:
             if disable_gc:
                 gc.disable()
             Computer.currentProcess.nice=psutil.HIGH_PRIORITY_CLASS
             Computer.inHighPriorityMode=True
 
+
     @staticmethod
     def disableHighPriority():
+        """
+        Sets the priority of the Current Process back to normal priority
+        and enables the python GC. In general you would call 
+        enableHighPriority() at start of trial and call 
+        disableHighPriority() at end of trial.
+
+        Return: None
+        """
         if Computer.inHighPriorityMode is True:
             gc.enable()
             Computer.currentProcess.nice=psutil.NORMAL_PRIORITY_CLASS
             Computer.inHighPriorityMode=False
 
+    @staticmethod
+    def getProcessAffinities():
+        """
+        Returns the experiment Process Affinity list, ioHub Process Affinity list. Each as a list of
+        'processor' id's (from 0 to getSystemProcessorCount()-1) that the relevant process is able to
+        run on.
+
+        For example, on a 2 core CPU with hyper-threading, the possible 'processor' list would be
+        [0,1,2,3], and by default both the experiment and ioHub processes can run on any of these
+        'processors', so:
+
+
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1,2,3], [0,1,2,3]
+
+
+        If setProcessAffinities was used to set the experiment process to core 1 (index 0 and 1)
+        and the ioHub server process to core 2 (index 2 and 3), with each using both hyper threads
+        of the given core, the set call would look like:
+
+
+            self.setProcessAffinities([0,1],[2,3])
+
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1], [2,3]
+
+
+        If the ioHub is not being used (i.e self.hub == None), then only the experiment
+        process affinity list will be returned and None will be returned for the
+        ioHub process affinity:
+
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1,2,3], None
+
+        But in this case, why are you using this utility class? ;)
+
+        Args: None
+        Return (tuple,tuple): the current experiment Process Affinity list, ioHub Process Affinity list
+        """
+        return Computer.currentProcess.get_cpu_affinity(),Computer.ioHubServerProcess.get_cpu_affinity()
+
+    @staticmethod
+    def setProcessAffinities(experimentProcessorList, ioHubProcessorList):
+        """
+        Sets the experimentProcessAffinity , ioHubProcessAffinity; each as a list of 'processor' id's
+        (from 0 to getSystemProcessorCount()-1) that the relevant process is able to run on.
+
+        For example, on a 2 core CPU with hyper-threading, the possible 'processor' list would be [0,1,2,3],
+        and by default both the experiment and ioHub server processes can run on any of these 'processors',
+        so to have both processes have all processors available (which is the default), you would call:
+
+            self.setProcessAffinities([0,1,2,3], [0,1,2,3])
+
+            # check the process affinities
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1,2,3], [0,1,2,3]
+
+        based on the above CPU example.
+
+        If setProcessAffinities was used to set the experiment process to core 1 (index 0,1) and the ioHub server
+        process to core 2 (index 2,3), with each using both hyper threads of the given core,
+        the set call would look like:
+
+            self.setProcessAffinities([0,1],[2,3])
+
+            # check the process affinities
+            psychoCPUs,ioHubCPUS=self.getProcessAffinities()
+            print psychoCPUs,ioHubCPUS
+
+            >> [0,1], [2,3]
+
+        Args:
+            experimentProcessorList(tuple): set the experiment process affinity based on processing unit indexes
+            ioHubProcessorList(tuple): set the ioHub process affinity based on processing unit indexes. Default for ioHubProcessorList
+                                       is None, which means do not set the ioHub process affinity.
+
+        Return: None
+        """
+        Computer.currentProcess.set_cpu_affinity(experimentProcessorList)
+        Computer.ioHubServerProcess.set_cpu_affinity(ioHubProcessorList)
+
+    def autoAssignAffinities(self):
+        """
+        Auto sets the experiment process and ioHub process processor affinities based on some
+        very simple logic.
+
+        It is not known at this time if the implementation of this method makes any sense in terms of
+        actually improving performance. Field tests and feedback will need to occur, based on which
+        the algorithm can be improved.
+
+        Currently, if the system is detected to have 1 processing unit, or greater than 8 processing units,
+        nothing is done by the method.
+
+        For a system that has two processing units, the PsychoPy Process is assigned to index 0,
+        ioHub Process assigned to 1.
+
+        For a system that has four processing units, the Experiment Process is assigned to index's 0,1
+        and the ioHub Process assigned to 2,3.
+
+        For a system that has eight processing units, the PsychoPy Process is assigned to index 2,3
+        ioHub Server assigned to 4,5. All other processes running on the OS are attempted to be
+        assigned to indexes 0,1,6,7.
+
+        Args: None
+        Return: None
+        """
+        cpu_count=Computer.cpuCount
+        print "System processor count:", cpu_count
+        if cpu_count == 2:
+            print 'Assigning experiment process to CPU 0, ioHubServer process to CPU 1'
+            Computer.setProcessAffinities([0,],[1,])
+        elif cpu_count == 4:
+            print 'Assigning experiment process to CPU 0,1, ioHubServer process to CPU 2,3'
+            Computer.setProcessAffinities([0,1],[2,3])
+        elif cpu_count == 8:
+            print 'Assigning experiment process to CPU 2,3, ioHubServer process to CPU 4,5, attempting to assign all others to 0,1,6,7'
+            Computer.setProcessAffinities([2,3],[4,5])
+            Computer.setAllOtherProcessesAffinity([0,1,6,7],[Computer.currentProcessID,Computer.ioHubServerProcessID])
+        else:
+            print "autoAssignAffinities does not support %d processors."%(cpu_count,)
+            
     @staticmethod
     def getCurrentProcessAffinity():
         return Computer.currentProcess.get_cpu_affinity()
@@ -72,17 +245,17 @@ class Computer(object):
         return Computer.currentProcess.set_cpu_affinity(processorList)
 
     @staticmethod
-    def setProcessAffinityByID(self,processID,processorList):
+    def setProcessAffinityByID(processID,processorList):
         p=psutil.Process(processID)
         return p.set_cpu_affinity(processorList)
 
     @staticmethod
-    def getProcessAffinityByID(self,processID):
+    def getProcessAffinityByID(processID):
         p=psutil.Process(processID)
         return p.get_cpu_affinity()
 
     @staticmethod
-    def setAllOtherProcessesAffinity(self, processorList, excludeProcessByIDList=[]):
+    def setAllOtherProcessesAffinity(processorList, excludeProcessByIDList=[]):
         """
 
         """
@@ -94,9 +267,50 @@ class Computer(object):
                 except Exception:
                     print2err('ERROR setting process affinity: %s : %ld'%(p.name,p.pid))
 
-    # return time in sec.msec-usec format
+    @staticmethod
+    def currentTime():
+        return Computer.globalClock.getTime()
+        
     @staticmethod
     def currentSec():
+        """
+        Returns the current sec.msec-msec time of the system. On Windows this is implemented by directly
+        calling the Windows QPC functions using ctypes (TODO: move to clib for max performance).
+        This is done so that no offset is applied to the timebase based on when the first call to the
+        python time function was called, which will differed between PsychoPy and ioHub Processes
+        since they do not start at exactly the same time.
+        By having a 0 offset time-base, both interpreters have a totally common / shared time-base to use.
+        This means that either process knows the current time of the other process,
+        since they are the same. ;)
+
+        For other OS's, right now the timeit.base_timer function is used, which as of python 2.7
+        correctly selects the best high resolution clock for the OS the interpreter is running on.
+
+        Args: None
+        Returns (float/double): sec.msec-usec time
+        """
+
+        return Computer.globalClock.getTime()
+
+    @staticmethod
+    def getTime():
+        """
+        Returns the current sec.msec-msec time of the system. On Windows this is implemented by directly
+        calling the Windows QPC functions using ctypes (TODO: move to clib for max performance).
+        This is done so that no offset is applied to the timebase based on when the first call to the
+        python time function was called, which will differed between PsychoPy and ioHub Processes
+        since they do not start at exactly the same time.
+        By having a 0 offset time-base, both interpreters have a totally common / shared time-base to use.
+        This means that either process knows the current time of the other process,
+        since they are the same. ;)
+
+        For other OS's, right now the timeit.base_timer function is used, which as of python 2.7
+        correctly selects the best high resolution clock for the OS the interpreter is running on.
+
+        Args: None
+        Returns (float/double): sec.msec-usec time
+        """
+
         return Computer.globalClock.getTime()
 
     @staticmethod
@@ -106,23 +320,100 @@ class Computer(object):
         return n
 
     @staticmethod
-    def getProcessInfoString():
-        tcount= Computer.currentProcess.get_num_threads()
-        pthreads=Computer.currentProcess.get_threads()
-        
-        r='--------------------------------------\n'
-        r+='Process ( %d ):\n'%(Computer.currentProcessID,)
-        r+=str(Computer.currentProcess)
-        r+='Thread Count: %d\n'%(tcount,)
-        r+='Thread Info:\n'
-        for t in pthreads:
-            r+=str(t)+'\n'
+    def getPhysicalSystemMemoryInfo():
+        """
+        Return a named tuple containing information about current memory usage.
+        """
+        m= psutil.virtual_memory()
+        return m
+
+    @staticmethod
+    def getCPUTimeInfo(percpu=False):
+        """
+        Return a named tuple containing information about the computers CPU usage. (user, system, idle).
+        If percpu is true, a named tuple is returned for each processing unit.
+        """
+        return psutil.cpu_times(percpu)
+
+    #
+    # Local / Current Process Related
+    #
+
+    @staticmethod
+    def getCurrentProcess():
+        """
+        Get the current / Local process (as a psutil process object).
+        The psutil process object has some nice methods you can access :
+            - as_dict(attrs=[], ad_value=None)
+                Utility method returning process information as a hashable dictionary.
+                If attrs is specified it must be a list of strings reflecting available
+                Process class's attribute names (e.g. ['get_cpu_times', 'name']) else all
+                public (read only) attributes are assumed. ad_value is the value which gets
+                assigned to a dict key in case AccessDenied exception is raised when retrieving
+                that particular process information.
+            - getcwd()
+                Return a string representing the process current working directory.
+            - get_io_counters()
+                Return process I/O statistics as a namedtuple including the number of read and write
+                operations performed by the process and the amount of bytes read and written.
+                For linux refer to /proc filesysem documentation. On BSD there's apparently no way to
+                retrieve bytes counters, hence -1 is returned for read_bytes and write_bytes fields.
+                OSX is not supported.
+                    >>> p.get_io_counters()
+                    io(read_count=454556, write_count=3456, read_bytes=110592, write_bytes=0)
+            - get_num_threads()
+                Return the number of threads used by this process.
+            - get_num_ctx_switches()
+                Return the number voluntary and involuntary context switches performed by this process.
+            - get_cpu_times()
+                Return a tuple whose values are process CPU user and system times which means the amount
+                of time expressed in seconds that a process has spent in user/system mode.
+            - get_cpu_percent(interval=0.1)
+                Return a float representing the process CPU utilization as a percentage.
+                When interval is > 0.0 compares process times to system CPU times elapsed before
+                and after the interval (blocking). When interval is 0.0 or None compares process
+                times to system CPU times elapsed since last call, returning immediately.
+                In this case is recommended for accuracy that this function be called with
+                at least 0.1 seconds between calls. Example:
+                    >>> p = psutil.Process(os.getpid())
+                    >>> # blocking
+                    >>> p.get_cpu_percent(interval=1)
+                    2.0
+                    >>> # non-blocking (percentage since last call)
+                    >>> p.get_cpu_percent(interval=0)
+                    2.9
+                    >>>
+            - get_ext_memory_info()
+                Return a namedtuple with variable fields depending on the platform representing extended memory
+                information about the process. All numbers are expressed in bytes.
+            - get_memory_percent()
+                Compare physical system memory to process resident memory (RSS) and calculate process
+                memory utilization as a percentage.
+        """
+        return Computer.currentProcess
 
 ####################### Device & DeviceEvent Constants ########################
 
 class _EventConstantsBase(object):
     NOT_SUPPORTED_FIELD=0
 
+    DEVICE_CATEGORY_ID_INDEX=0
+    DEVICE_TYPE_ID_INDEX=1
+    DEVICE_CLASS_NAME_INDEX=2
+    DEVICE_USER_LABEL_INDEX=3
+    DEVICE_BUFFER_LENGTH_INDEX=4
+
+    EVENT_EXPERIMENT_ID_INDEX=0
+    EVENT_SESSION_ID_INDEX=1
+    EVENT_ID_INDEX=2
+    EVENT_TYPE_ID_INDEX=3
+    EVENT_DEVICE_TIME_INDEX=4
+    EVENT_LOGGED_TIME_INDEX=5
+    EVENT_HUB_TIME_INDEX=6
+    EVENT_CONFIDENCE_INTERVAL_INDEX=7
+    EVENT_DELAY_INDEX=8
+
+    NONE=0
     LEFT=1
     RIGHT=2
     BINOCULAR=4
@@ -215,6 +506,232 @@ class _EventConstantsBase(object):
     MOUSE_BUTTON_ID_LEFT=1
     MOUSE_BUTTON_ID_RIGHT=2
     MOUSE_BUTTON_ID_MIDDLE=4
+
+#    # Modifier mask constants
+#    MOD_SHIFT       = 1 << 0
+#    MOD_CTRL        = 1 << 1
+#    MOD_ALT         = 1 << 2
+#    MOD_CAPSLOCK    = 1 << 3
+#    MOD_NUMLOCK     = 1 << 4
+#    MOD_WINDOWS     = 1 << 5
+#    MOD_COMMAND     = 1 << 6
+#    MOD_OPTION      = 1 << 7
+#    MOD_SCROLLLOCK  = 1 << 8
+#    
+#    #: Accelerator modifier.  On Windows and Linux, this is ``MOD_CTRL``, on
+#    #: Mac OS X it's ``MOD_COMMAND``.
+#    MOD_ACCEL       = MOD_CTRL
+#    import sys as _sys
+#    if _sys.platform == 'darwin':
+#        MOD_ACCEL   = MOD_COMMAND
+#    
+    
+    # Key symbol constants
+    
+    # ASCII commands
+    BACKSPACE     = 0xff08
+    TAB           = 0xff09
+    LINEFEED      = 0xff0a
+    CLEAR         = 0xff0b
+    RETURN        = 0xff0d
+    ENTER         = 0xff0d      # synonym
+    PAUSE         = 0xff13
+    SCROLLLOCK    = 0xff14
+    SYSREQ        = 0xff15
+    ESCAPE        = 0xff1b
+    SPACE         = 0xff20
+    
+    # Cursor control and motion
+    HOME          = 0xff50
+    LEFT          = 0xff51
+    UP            = 0xff52
+    RIGHT         = 0xff53
+    DOWN          = 0xff54
+    PAGEUP        = 0xff55
+    PAGEDOWN      = 0xff56
+    END           = 0xff57
+    BEGIN         = 0xff58
+    
+    # Misc functions
+    DELETE        = 0xffff
+    SELECT        = 0xff60
+    PRINT         = 0xff61
+    EXECUTE       = 0xff62
+    INSERT        = 0xff63
+    UNDO          = 0xff65
+    REDO          = 0xff66
+    MENU          = 0xff67
+    FIND          = 0xff68
+    CANCEL        = 0xff69
+    HELP          = 0xff6a
+    BREAK         = 0xff6b
+    MODESWITCH    = 0xff7e
+    SCRIPTSWITCH  = 0xff7e
+    
+    # Text motion constants: these are allowed to clash with key constants
+    MOTION_UP                = UP
+    MOTION_RIGHT             = RIGHT
+    MOTION_DOWN              = DOWN
+    MOTION_LEFT              = LEFT
+    MOTION_NEXT_WORD         = 1
+    MOTION_PREVIOUS_WORD     = 2
+    MOTION_BEGINNING_OF_LINE = 3
+    MOTION_END_OF_LINE       = 4
+    MOTION_NEXT_PAGE         = PAGEDOWN
+    MOTION_PREVIOUS_PAGE     = PAGEUP
+    MOTION_BEGINNING_OF_FILE = 5
+    MOTION_END_OF_FILE       = 6
+    MOTION_BACKSPACE         = BACKSPACE
+    MOTION_DELETE            = DELETE
+    
+    # Number pad
+    NUMLOCK       = 0xff7f
+    NUM_SPACE     = 0xff80
+    NUM_TAB       = 0xff89
+    NUM_ENTER     = 0xff8d
+    NUM_F1        = 0xff91
+    NUM_F2        = 0xff92
+    NUM_F3        = 0xff93
+    NUM_F4        = 0xff94
+    NUM_HOME      = 0xff95
+    NUM_LEFT      = 0xff96
+    NUM_UP        = 0xff97
+    NUM_RIGHT     = 0xff98
+    NUM_DOWN      = 0xff99
+    NUM_PRIOR     = 0xff9a
+    NUM_PAGE_UP   = 0xff9a
+    NUM_NEXT      = 0xff9b
+    NUM_PAGE_DOWN = 0xff9b
+    NUM_END       = 0xff9c
+    NUM_BEGIN     = 0xff9d
+    NUM_INSERT    = 0xff9e
+    NUM_DELETE    = 0xff9f
+    NUM_EQUAL     = 0xffbd
+    NUM_MULTIPLY  = 0xffaa
+    NUM_ADD       = 0xffab
+    NUM_SEPARATOR = 0xffac
+    NUM_SUBTRACT  = 0xffad
+    NUM_DECIMAL   = 0xffae
+    NUM_DIVIDE    = 0xffaf
+    
+    NUM_0         = 0xffb0
+    NUM_1         = 0xffb1
+    NUM_2         = 0xffb2
+    NUM_3         = 0xffb3
+    NUM_4         = 0xffb4
+    NUM_5         = 0xffb5
+    NUM_6         = 0xffb6
+    NUM_7         = 0xffb7
+    NUM_8         = 0xffb8
+    NUM_9         = 0xffb9
+    
+    # Function keys
+    F1            = 0xffbe
+    F2            = 0xffbf
+    F3            = 0xffc0
+    F4            = 0xffc1
+    F5            = 0xffc2
+    F6            = 0xffc3
+    F7            = 0xffc4
+    F8            = 0xffc5
+    F9            = 0xffc6
+    F10           = 0xffc7
+    F11           = 0xffc8
+    F12           = 0xffc9
+    F13           = 0xffca
+    F14           = 0xffcb
+    F15           = 0xffcc
+    F16           = 0xffcd
+    
+    # Modifiers
+    LSHIFT        = 0xffe1
+    RSHIFT        = 0xffe2
+    LCTRL         = 0xffe3
+    RCTRL         = 0xffe4
+    CAPSLOCK      = 0xffe5
+    LMETA         = 0xffe7
+    RMETA         = 0xffe8
+    LALT          = 0xffe9
+    RALT          = 0xffea
+    LWINDOWS      = 0xffeb
+    RWINDOWS      = 0xffec
+    LCOMMAND      = 0xffed
+    RCOMMAND      = 0xffee
+    LOPTION       = 0xffd0
+    ROPTION       = 0xffd1
+    
+    # Latin-1
+    SPACE         = 0x020
+    EXCLAMATION   = 0x021
+    DOUBLEQUOTE   = 0x022
+    HASH          = 0x023
+    POUND         = 0x023  # synonym
+    DOLLAR        = 0x024
+    PERCENT       = 0x025
+    AMPERSAND     = 0x026
+    APOSTROPHE    = 0x027
+    PARENLEFT     = 0x028
+    PARENRIGHT    = 0x029
+    ASTERISK      = 0x02a
+    PLUS          = 0x02b
+    COMMA         = 0x02c
+    MINUS         = 0x02d
+    PERIOD        = 0x02e
+    SLASH         = 0x02f
+    _0            = 0x030
+    _1            = 0x031
+    _2            = 0x032
+    _3            = 0x033
+    _4            = 0x034
+    _5            = 0x035
+    _6            = 0x036
+    _7            = 0x037
+    _8            = 0x038
+    _9            = 0x039
+    COLON         = 0x03a
+    SEMICOLON     = 0x03b
+    LESS          = 0x03c
+    EQUAL         = 0x03d
+    GREATER       = 0x03e
+    QUESTION      = 0x03f
+    AT            = 0x040
+    BRACKETLEFT   = 0x05b
+    BACKSLASH     = 0x05c
+    BRACKETRIGHT  = 0x05d
+    ASCIICIRCUM   = 0x05e
+    UNDERSCORE    = 0x05f
+    GRAVE         = 0x060
+    QUOTELEFT     = 0x060
+    A             = 0x061
+    B             = 0x062
+    C             = 0x063
+    D             = 0x064
+    E             = 0x065
+    F             = 0x066
+    G             = 0x067
+    H             = 0x068
+    I             = 0x069
+    J             = 0x06a
+    K             = 0x06b
+    L             = 0x06c
+    M             = 0x06d
+    N             = 0x06e
+    O             = 0x06f
+    P             = 0x070
+    Q             = 0x071
+    R             = 0x072
+    S             = 0x073
+    T             = 0x074
+    U             = 0x075
+    V             = 0x076
+    W             = 0x077
+    X             = 0x078
+    Y             = 0x079
+    Z             = 0x07a
+    BRACELEFT     = 0x07b
+    BAR           = 0x07c
+    BRACERIGHT    = 0x07d
+    ASCIITILDE    = 0x07e
 
     EVENT_TYPES = dict(UNDEFINED=0,
         MESSAGE =1,
@@ -369,13 +886,11 @@ class Device(ioObject):
     Any ioHub Device class (i.e Keyboard Device, Mouse Device, etc)
     also include the methods and attributes of this class.
     """
-    DEVICE_INSTANCE_CODE_INDEX=0
-    DEVICE_CATEGORY_ID_INDEX=1
-    DEVICE_TYPE_ID_INDEX=2
-    DEVICE_CLASS_NAME_INDEX=3
-    DEVICE_USER_LABEL_INDEX=4
-    DEVICE_OS_CODE_INDEX=5
-    DEVICE_BUFFER_LENGTH_INDEX=6
+    DEVICE_CATEGORY_ID_INDEX=EventConstants.DEVICE_CATEGORY_ID_INDEX
+    DEVICE_TYPE_ID_INDEX=EventConstants.DEVICE_TYPE_ID_INDEX
+    DEVICE_CLASS_NAME_INDEX=EventConstants.DEVICE_CLASS_NAME_INDEX
+    DEVICE_USER_LABEL_INDEX=EventConstants.DEVICE_USER_LABEL_INDEX
+    DEVICE_BUFFER_LENGTH_INDEX=EventConstants.DEVICE_BUFFER_LENGTH_INDEX
     DEVICE_MAX_ATTRIBUTE_INDEX=DEVICE_BUFFER_LENGTH_INDEX
 
     # Multiplier to use to convert this devices event time stamps to sec format.
@@ -393,11 +908,7 @@ class Device(ioObject):
     DEVICE_LABEL='UNKNOWN_DEVICE'
 
     _baseDataTypes=ioObject._baseDataTypes
-    _newDataTypes=[('instance_code',N.str,48),  # The instance code assigned to the device. User defined.
-                                                # The devices serial number is a good candidate for this. It
-                                                # must be unique within and between experiment sites.
-
-                   ('category_id',N.uint8),     # The id of the device category for the device type.
+    _newDataTypes=[('category_id',N.uint8),     # The id of the device category for the device type.
                                                 # = EventConstants.DEVICE_CATERGORIES[CATEGORY_LABEL]
 
                    ('type_id',N.uint8),         # The id of the device type = EventConstants.DEVICE_TYPES[DEVICE_LABEL]
@@ -407,12 +918,6 @@ class Device(ioObject):
 
                    ('name',N.str,24),           # The name given to this device instance. User Defined. Should be
                                                 # unique within all devices of the same type_id for a given experiment.
-
-                   ('os_device_code',N.str,64), # If the device can be associated with a unique OS level identifier
-                                                # the string rep. of that could be entered here. This would allow for
-                                                # consistent mappings between device names and physical devices if
-                                                # > 1 device of a given type_id is in use.
-                                                # CURRENTLY NOT USED
 
                    ('max_event_buffer_length',N.uint16) # The maximum size of the device level event buffer for this
                                                         # device instance. If the buffer becomes full, when a new event
@@ -501,8 +1006,11 @@ class Device(ioObject):
             self._nativeEventBuffer.append(e)
 
     def _addEventListener(self,l):
+        import ioHub
+        #ioHub.print2err("_addEventListener: ",l," : ", l not in self._eventListeners)
         if l not in self._eventListeners:
             self._eventListeners.append(l)
+            #ioHub.print2err("Adding listener to ",self)
     
     def _removeEventListener(self,l):
        if l in self._eventListeners:
@@ -524,16 +1032,15 @@ class DeviceEvent(ioObject):
     KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of
     the DeviceEvent class.
     """
-    EVENT_EXPERIMENT_ID_INDEX=0
-    EVENT_SESSION_ID_INDEX=1
-    EVENT_ID_INDEX=2
-    EVENT_TYPE_ID_INDEX=3
-    EVENT_DEVICE_INSTANCE_CODE_INDEX=4
-    EVENT_DEVICE_TIME_INDEX=5
-    EVENT_LOGGED_TIME_INDEX=6
-    EVENT_HUB_TIME_INDEX=7
-    EVENT_CONFIDENCE_INTERVAL_INDEX=8
-    EVENT_DELAY_INDEX=9
+    EVENT_EXPERIMENT_ID_INDEX=EventConstants.EVENT_EXPERIMENT_ID_INDEX
+    EVENT_SESSION_ID_INDEX=EventConstants.EVENT_SESSION_ID_INDEX
+    EVENT_ID_INDEX=EventConstants.EVENT_ID_INDEX
+    EVENT_TYPE_ID_INDEX=EventConstants.EVENT_TYPE_ID_INDEX
+    EVENT_DEVICE_TIME_INDEX=EventConstants.EVENT_DEVICE_TIME_INDEX
+    EVENT_LOGGED_TIME_INDEX=EventConstants.EVENT_LOGGED_TIME_INDEX
+    EVENT_HUB_TIME_INDEX=EventConstants.EVENT_HUB_TIME_INDEX
+    EVENT_CONFIDENCE_INTERVAL_INDEX=EventConstants.EVENT_CONFIDENCE_INTERVAL_INDEX
+    EVENT_DELAY_INDEX=EventConstants.EVENT_DELAY_INDEX
     BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_DELAY_INDEX
 
     # The string label for the given DeviceEvent type. Should be one of the string keys in
@@ -564,11 +1071,9 @@ class DeviceEvent(ioObject):
                                             # assigned a unique id, starting from 0 for each session, incrementing
                                             # by +1 for each new event.
 
-                ('event_type',N.uint8),     # The type id for the event. This is used to create DeviceEvent objects
+                ('type',N.uint8),     # The type id for the event. This is used to create DeviceEvent objects
                                             # or dictionary representations of an event based on the data from an
                                             # event value list.
-
-                ('device_instance_code',N.str,48), # The instance_code of the device that generated the event.
 
                 ('device_time',N.float64),   # If the device that generates the given device event type also time stamps
                                             # events, this field is the time of the event as given by the device,
@@ -623,14 +1128,15 @@ class DeviceEvent(ioObject):
             eventParamList (tuple): an ordered list of event attribute values, ordered based on how the
                                     DeviceEvent constructor specifies them.
         Return (DeviceEvent): a DeviceEvent instance of the correct DeviceEvent Class type based on the
-                              'event_type' element of the eventParamList, which is
+                              'type' element of the eventParamList, which is
                               eventParamList[DeviceEvent.EVENT_TYPE_ID_INDEX]
         """
         eclass=EventConstants.EVENT_CLASSES[eventParamList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
         return eclass.createObjectFromParamList(*eventParamList)
 
 
-
+#------------------------------------------------------------------------------
+#
 # Windows Version of Constants Class
 
 if Computer.system == 'Windows':
@@ -751,18 +1257,19 @@ except:
     print2err("Warning: parallelPort device module could not be imported.")
 
 # removed Joystick device for now to focus on core initial device set
-try:
-    import joystick as joystick_module
-    from joystick import Joystick
-    from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
-    deviceModulesAvailable.append('joystick')
-except:
-    print2err("Warning: joystick device module could not be imported.")
-
+#try:
+#    import joystick
+#    from joystick import Joystick
+#    from joystick import JoystickButtonEvent,JoystickButtonPressEvent, JoystickButtonReleaseEvent
+#    deviceModulesAvailable.append('joystick')
+#except:
+#    print2err("Warning: joystick device module could not be imported.")
+#    printExceptionDetailsToStdErr()
+    
 try:
     import experiment
     from experiment import ExperimentDevice
-    from experiment import MessageEvent #, CommandEvent
+    from experiment import MessageEvent
     deviceModulesAvailable.append('experiment')
 except:
     print2err("Warning: experiment device module could not be imported.")
@@ -774,7 +1281,8 @@ try:
     deviceModulesAvailable.append('eyetracker')
 except:
     print2err("Warning: eyetrackerinterface device module could not be imported.")
-
+    printExceptionDetailsToStdErr()
+    
 try:
     import display
     from display import Display
@@ -782,7 +1290,8 @@ try:
     deviceModulesAvailable.append('display')
 except:
     print2err("Warning: display device module could not be imported.")
-
+    printExceptionDetailsToStdErr()
+    
 try:
     import daq
     from daq import DAQDevice
@@ -823,9 +1332,9 @@ if EventConstants._prepped is False:
         EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['KEYBOARD_PRESS']]=KeyboardPressEvent
         EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['KEYBOARD_RELEASE']]=KeyboardReleaseEvent
 
-    if 'joystick' in deviceModulesAvailable:
-        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']]=JoystickButtonPressEvent
-        EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
+    #if 'joystick' in deviceModulesAvailable:
+    #    EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_PRESS']]=JoystickButtonPressEvent
+    #    EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['JOYSTICK_BUTTON_RELEASE']]=JoystickButtonReleaseEvent
 
     if 'daq' in deviceModulesAvailable:
         EventConstants.EVENT_CLASSES[EventConstants.EVENT_TYPES['DAQ_MULTI_CHANNEL_INPUT']]=DAQMultiChannelInputEvent

@@ -59,7 +59,7 @@ class KeyboardWindows32(object):
         pass
             
     @staticmethod
-    def _getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event):
         from . import KeyboardPressEvent,KeyboardReleaseEvent
 
         notifiedTime, event=event
@@ -83,14 +83,8 @@ class KeyboardWindows32(object):
  
         confidence_interval=0.0 # since this is a keyboard device using a callback method, confidence_interval is not applicable
         delay=0.0 # since this is a keyboard, we 'know' there is a delay, but until we support setting a delay in the device properties based on external testing for a given keyboard, we will leave at 0.
- 
-        #return (experiment_id=0,session_id=0,event_id=Computer.getNextEventID(),event_type=etype,device_type=ioHub.DEVICE_TYPES['KEYBOARD_DEVICE'],
-        #                        device_instance_code=device_instance_code,device_time=int(event.Time),logged_time=notifiedTime,hub_time=0,
-        #                        confidence_interval=0.0,delay=0.0,is_pressed=pressed,flags=event.flags,
-        #                        alt=event.IsAlt(),extended=event.IsExtended(),transition=event.IsTransition(),
-        #                        scan_code=event.ScanCode,ascii_code=event.Ascii,key_id=event.KeyID,
-        #                        key=unicode(event.GetKey()),char=unicode(chrv),modifiers=event.Modifiers,window_id=event.Window)  
+
         return [0,0,Computer.getNextEventID(),etype,
-                device_instance_code,device_time,notifiedTime,hub_time,confidence_interval,delay,pressed,event.flags,
+                device_time,notifiedTime,hub_time,confidence_interval,delay,pressed,event.flags,
                 event.IsAlt(),event.IsExtended(),event.IsTransition(),event.ScanCode,event.Ascii,event.KeyID,
                 str(event.GetKey()),str(chrv),event.Modifiers,event.Window]

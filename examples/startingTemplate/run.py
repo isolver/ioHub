@@ -16,7 +16,7 @@ startingTemplate
 Overview:
 ---------
 
-This script is implemnted by extending the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime class to a class
+This script is implemnted by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
 called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
 also launches the ioHub server process so the script has access to the ioHub service and associated devices.
 
@@ -47,46 +47,21 @@ Any issues or questions, please let me know.
 """
 
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime
+from ioHub.experiment import ioHubExperimentRuntime
 
-class ExperimentRuntime(SimpleIOHubRuntime):
+class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the SimpleIOHubRuntime class. At minimum
+    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
     all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    SimpleIOHubRuntime __init__ itself.
+    ioHubExperimentRuntime __init__ itself.
     """
     def __init__(self,configFileDirectory, configFile):
-        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
+        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
 
     def run(self,*args,**kwargs):
         """
         The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
         script.py file in a standard psychopy experiment setup. That is all there is too it really.
-
-        By running your script within an extension of the SimpleIOHubRuntime class's run method, you automatically
-        get access to some nice features:
-
-        #. The ioHub Client class is accessible by calling self.hub . So to get all currently available events from the
-         ioHub event buffer, simply call events = self.hub.getEvents(). There is also a shortcut method, so you can simply call self.getEvents()
-         to achieve the same thing, or self.getEvents('kb') to get keyboard events if you named your keyboard device 'kb'.
-        #. To clear an event buffer, call getEvents(), as it also clears the buffer, or call self.clearEvents() to clear the global
-        event buffer, or self.clearEvents('kb') to clear the keyboard devices event buffer only, assuming you named your keyboard 'kb'.
-        #. All devices that have been specified in the iohub .yaml config file are available via self.hub.devices.[device_name]
-        where [device_name] is the name of the device you specified in the config file. So to get all keyboard events since
-        the last call to the keyboard device event buffer, you can call kb_events=self.hub.devices.keyboard.getEvents(),
-        assuming you named the keyboard device 'keyboard'
-        #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
-        is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
-        #. If you need to pause the execution of your program for a period of time, but want events to be occasionally sent from the
-        ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.delay(), which also
-        has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
-        #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubConnection class, which is what is at the end of self.hub.
-
-        Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
-        improvement are very welcome too, please email me at sds-git@isolver-software.com .
-
-        Thank you. Sol
         """
 
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
@@ -107,7 +82,7 @@ def main(configurationDirectory):
     """
     import sys
     if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
+        configFile=sys.argv[1]
         runtime=ExperimentRuntime(configurationDirectory, configFile)
     else:
         runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")

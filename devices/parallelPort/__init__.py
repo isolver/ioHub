@@ -33,10 +33,10 @@ if Computer.system == 'Windows':
             :param kwargs: 
             """
             deviceConfig=kwargs['dconfig']
-            deviceSettings={'instance_code':deviceConfig['instance_code'],
+            deviceSettings={
                 'category_id':EventConstants.DEVICE_CATERGORIES[ParallelPort.CATEGORY_LABEL],
                 'type_id':EventConstants.DEVICE_TYPES[ParallelPort.DEVICE_LABEL],
-                'device_class':deviceConfig['device_class'],
+                'device_class':ParallelPort.__name__,
                 'name':deviceConfig['name'],
                 'base_address':deviceConfig['base_address'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',

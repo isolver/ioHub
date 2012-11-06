@@ -1,6 +1,6 @@
 """
 ioHub
-.. file: ioHub/examples/simple/simpleTest.py
+.. file: ioHub/examples/simple/simpleTrackerTest.py
 
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -10,13 +10,13 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 ------------------------------------------------------------------------------------------------------------------------
 
-simpleTest
+simpleTrackerTest
 ++++++++++
 
 Overview:
 ---------
 
-This script is implemnted by extending the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime class to a class
+This script is implemnted by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
 called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
 also launches the ioHub server process so the script has access to the ioHub service and associated devices.
 
@@ -31,7 +31,7 @@ that has been added to this file. When run() completes, the ioHubServer process 
 Desciption:
 -----------
 
-The main purpose for the simpleEyeTRackerTest is to isllustrate the overall structure of the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime
+The main purpose for the simpleEyeTRackerTest is to isllustrate the overall structure of the ioHub.experiment.ioHubExperimentRuntime
 utility class and how to extend it and use it to run a psychopy program with ioHub and pyEyeTrackerInterface fucntionality.
 
 To Run:
@@ -44,48 +44,24 @@ To Run:
 
 Any issues or questions, please let me know.
 """
-from __builtin__ import len, unicode
-import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime, visual
 
-class ExperimentRuntime(SimpleIOHubRuntime):
+import ioHub
+from ioHub.devices import Computer
+from ioHub.experiment import ioHubExperimentRuntime, psychopyVisual
+
+class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the SimpleIOHubRuntime class. At minimum
+    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
     all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    SimpleIOHubRuntime __init__ itself.
+    ioHubExperimentRuntime __init__ itself.
     """
     def __init__(self,configFileDirectory, configFile):
-        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
+        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
 
     def run(self,*args,**kwargs):
         """
         The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
         script.py file in a standard psychopy experiment setup. That is all there is too it really.
-
-        By running your script within an extension of the SimpleIOHubRuntime class's run method, you automatically
-        get access to some nice features:
-
-        #. The ioHub Client class is accessable by calling self.hub . So to get all currently available events from the
-         ioHub event buffer, simply call events = self.hub.getEvents(). There is also a shortcut method, so you can simply call self.getEvents()
-         to achieve the same thing, or self.getEvents('kb') to get keyboard events if you named your keyboard device 'kb'.
-        #. To clear an event buffer, call getEvents(), as it also clears the buffer, or call self.clearEvents() to clear the global
-        event buffer, or self.clearEvents('kb') to clear the keyboard devices event buffer only, assuming you named your keyboard 'kb'.
-        #. All devices that have been specified in the iohub .yaml config file are available via self.hub.devices.[device_name]
-        where [device_name] is the name of the device you sepified in the config file. So to get all keyboard events since
-        the last call to the keyboard device event buffer, you can call kb_events=self.hub.devices.keyboard.getEvents(),
-        assuming you named the keyboard device 'keyboard'
-        #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
-        is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
-        #. If you need to pause the execution of your program for a period of time, but want events to be occationally sent from the
-        ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
-        has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
-        #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubConnection class, which is what is at the end of self.hub.
-
-        Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
-        improvement are very welcome too, please email me at sds-git@isolver-software.com .
-
-        Thank you. Sol
         """
 
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
@@ -96,35 +72,35 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
 
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
+
+
         tracker=self.hub.devices.tracker
         display=self.hub.devices.display
         kb=self.hub.devices.kb
         mouse=self.hub.devices.mouse
 
+        
+
         tracker.runSetupProcedure()
-        self.clearEvents()
-        self.delay(0.050)
+        self.hub.clearEvents('all')
+        self.hub.delay(0.050)
 
-        tracker.setRecordingState(True)
-        self.delay(0.050)
-        self.clearEvents()
-
-        current_gaze=tracker.getLatestGazePosition()
-        current_gaze=int(current_gaze[0]),int(current_gaze[1])
-
-        # Read the current resolution of the monitors screen in pixels.
-        # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
-        screen_resolution= display.getScreenResolution()
+        current_gaze=[0,0]
 
         # get the index of the screen to create the PsychoPy window in.
-        screen_index=display.getScreenIndex()
+        screen_index=display.getStimulusScreenIndex()
 
-        # Read the coordinate space the script author specified in the config file (right now only pix are supported)
-        coord_type=display.getDisplayCoordinateType()
+        #if screen_index == 0:
+        #    screen_index=1
+        #else:
+        #    screen_index=0 
+
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False, screen=screen_index)
+        psychoWindow = psychopyVisual.Window(display.getStimulusScreenResolution(), monitor="testMonitor",
+                                                units=display.getDisplayCoordinateType(),
+                                                fullscr=True, allowGUI=False, screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
@@ -132,14 +108,22 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
         psychoStim=ioHub.LastUpdatedOrderedDict()
-        psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['gazePosText'] =visual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
-        psychoStim['gazePos'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
+        psychoStim['grating'] = psychopyVisual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        psychoStim['fixation'] =psychopyVisual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['gazePosText'] =psychopyVisual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
+        psychoStim['gazePos'] =psychopyVisual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
 
-        # Clear all events from the global event buffer, and from the keyboard event buffer.
-        self.clearEvents()
-        self.clearEvents('kb')
+        [psychoStim[stimName].draw() for stimName in psychoStim]
+
+        Computer.enableHighPriority(True)
+        #self.setProcessAffinities([0,1],[2,3])
+
+        tracker.setRecordingState(True)
+        self.hub.delay(0.050)
+
+        # Clear all events from the ioHub event buffers.
+        self.hub.clearEvents('all')
+
 
         # Loop until we get a keyboard event
         while len(kb.getEvents())==0:
@@ -148,9 +132,10 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
 
             # and update the gaze contingent gaussian based on the current gaze location
+
             current_gaze=tracker.getLatestGazePosition()
             current_gaze=int(current_gaze[0]),int(current_gaze[1])
-
+               
             psychoStim['gazePos'].setPos(current_gaze)
             psychoStim['gazePosText'].setText(str(current_gaze))
 
@@ -168,20 +153,19 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # time methods represent both experiment process and ioHub server process time.
             # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
             # as a timescale is appropriate.
-            flip_time=self.currentSec()
+            flip_time=Computer.currentSec()
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
             self.hub.sendMessageEvent("Flip %s"%(str(current_gaze),),sec_time=flip_time)
 
         # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
-        self.clearEvents()
+        self.hub.clearEvents('all')
+
         tracker.setRecordingState(False)
 
-
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.delay(0.250)
-        self.clearEvents()
+        self.hub.delay(0.250)
         tracker.setConnectionState(False)
 
         # _close neccessary files / objects, 'disable high priority.

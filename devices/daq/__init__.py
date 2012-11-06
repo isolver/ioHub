@@ -42,14 +42,14 @@ class DAQDevice(Device):
 
 class DAQMultiChannelInputEvent(DeviceEvent):
     _newDataTypes = [
-        ('AI_0',N.float32),
-        ('AI_1',N.float32),
-        ('AI_2',N.float32),
-        ('AI_3',N.float32),
-        ('AI_4',N.float32),
-        ('AI_5',N.float32),
-        ('AI_6',N.float32),
-        ('AI_7',N.float32),
+        ('AI_0',N.uint16),
+        ('AI_1',N.uint16),
+        ('AI_2',N.uint16),
+        ('AI_3',N.uint16),
+        ('AI_4',N.uint16),
+        ('AI_5',N.uint16),
+        ('AI_6',N.uint16),
+        ('AI_7',N.uint16),
         ('DI_0',N.uint8),
         ('DI_1',N.uint8),
         ('DI_2',N.uint8),
@@ -58,8 +58,8 @@ class DAQMultiChannelInputEvent(DeviceEvent):
         ('DI_5',N.uint8),
         ('DI_6',N.uint8),
         ('DI_7',N.uint8),
-        ('CT_0',N.uint32),
-        ('CT_1',N.uint32)
+        ('CT_0',N.uint64),
+        ('CT_1',N.uint64)
     ]
     EVENT_TYPE_STRING='DAQ_MULTI_CHANNEL_INPUT'
     EVENT_TYPE_ID=EventConstants.DAQ_MULTI_CHANNEL_INPUT_EVENT

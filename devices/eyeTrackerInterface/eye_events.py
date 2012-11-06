@@ -283,7 +283,7 @@ class FixationEndEvent(DeviceEvent):
     # 58 fields
     _newDataTypes = [
                     ('eye', 'u1'),
-                    ('duration','u4'),
+                    ('duration','f4'),
                     ('start_gaze_x','f4'),
                     ('start_gaze_y','f4'),
                     ('start_gaze_z','f4'),
@@ -360,7 +360,7 @@ class SaccadeStartEvent(FixationStartEvent):
 class SaccadeEndEvent(DeviceEvent):
     _newDataTypes = [
                     ('eye', 'u1'),
-                    ('duration','u4'),
+                    ('duration','f4'),
                     ('amplitude_x','f4'),
                     ('amplitude_y','f4'),
                     ('angle', 'f4'),
@@ -444,7 +444,7 @@ class BlinkEndEvent(DeviceEvent):
                                                  #   EventConstants.LEFT_RIGHT_AVERAGED=8
                                                  #   EventConstants.SIMULATED=16
 
-                        ('duration','u4'),  # The duration of the blink event.
+                        ('duration','f4'),  # The duration of the blink event.
 
                         ('status', 'u1')    # An available status byte for the eye tracker blink start event.
                                             # Meaning is completely tracker dependent.

@@ -1,8 +1,8 @@
 # From PsychoPy (www.PsycoPy.org) examples folder.
 # slightly modified to run also as a called func and to add the ioHub version and python path,
-from psychopy import visual
+
 from sys import stdout
-from pyglet.gl import *
+from pyglet import gl
 
 def printSystemInfo(fileLikeObj=None):
     if fileLikeObj is None:
@@ -53,7 +53,7 @@ def printSystemInfo(fileLikeObj=None):
     except:
         fileLikeObj.write('\n\tError with import pyo.')
     try:
-        from psychopy import __version__
+        from psychopy import __version__, visual
         fileLikeObj.write("\n\tPsychoPy"+str(__version__))
     except:
         fileLikeObj.write('\n\tError with import PsychoPy.')
@@ -67,19 +67,19 @@ def printSystemInfo(fileLikeObj=None):
     win = visual.Window([100,100])#some drivers want a window open first
     fileLikeObj.write('\n\tOpenGL info:')
     #get info about the graphics card and drivers
-    fileLikeObj.write('\n\tvendor:'+gl_info.get_vendor())
-    fileLikeObj.write('\n\trendering engine:'+gl_info.get_renderer())
-    fileLikeObj.write('\n\tOpenGL version:'+gl_info.get_version())
+    fileLikeObj.write('\n\tvendor:'+gl.gl_info.get_vendor())
+    fileLikeObj.write('\n\trendering engine:'+gl.gl_info.get_renderer())
+    fileLikeObj.write('\n\tOpenGL version:'+gl.gl_info.get_version())
     fileLikeObj.write('\n\t(Selected) Extensions:')
     extensionsOfInterest=['GL_ARB_multitexture', 
         'GL_EXT_framebuffer_object','GL_ARB_fragment_program',
         'GL_ARB_shader_objects','GL_ARB_vertex_shader',
         'GL_ARB_texture_non_power_of_two','GL_ARB_texture_float', 'GL_STEREO']
     for ext in extensionsOfInterest:
-        fileLikeObj.write('\n\t'+str(bool(gl_info.have_extension(ext)))+str(ext))
+        fileLikeObj.write('\n\t'+str(bool(gl.gl_info.have_extension(ext)))+str(ext))
     #also determine nVertices that can be used in vertex arrays
-    maxVerts=GLint()
-    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES,maxVerts)
+    maxVerts=gl.GLint()
+    gl.glGetIntegerv(gl.GL_MAX_ELEMENTS_VERTICES,maxVerts)
     fileLikeObj.write('\n\tmax vertices in vertex array:'+str(maxVerts.value))
 
     fileLikeObj.write('\n\nProcessor / Computer Info:')
@@ -90,6 +90,7 @@ def printSystemInfo(fileLikeObj=None):
     fileLikeObj.write('\n\tphymem_usage'+str(psutil.phymem_usage()))
 
     win.close()
+
     
 if __name__ == '__main__':
     printSystemInfo()

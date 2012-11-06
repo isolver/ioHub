@@ -12,9 +12,9 @@ if OS_NAME == 'Windows':
 
     external_lib_path=os.path.join(module_directory(getOS),'win32')
 elif OS_NAME == 'Linux':
-    external_lib_path=os.path.join(module_directory(_temp),'linux')
+    external_lib_path=os.path.join(module_directory(getOS),'linux')
 else: #assume osx?
-    external_lib_path=os.path.join(module_directory(_temp),'osx')
+    external_lib_path=os.path.join(module_directory(getOS),'osx')
 
 if external_lib_path:
     if external_lib_path not in sys.path:

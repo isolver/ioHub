@@ -100,9 +100,9 @@ class EyeTracker(EyeTrackerInterface):
             raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; only one instance can exist. Delete existing instance before recreating EyeTracker object.")
         
         # >>>> eye tracker config
-        EyeTracker.eyeTrackerConfig=kwargs['dconfig']
+        EyeTracker._eyeTrackerConfig=kwargs['dconfig']
         #print " #### EyeTracker Configuration #### "
-        #print self.eyeTrackerConfig
+        #print self._eyeTrackerConfig
         #print ''
         # <<<<
 		
@@ -111,11 +111,12 @@ class EyeTracker(EyeTrackerInterface):
         ioHub.print2err("DLL: ",EyeTracker._DLL)
         
         # create Device level class setting dictionary and pass it Device constructor
-        deviceSettings= dict(instance_code=self.eyeTrackerConfig['instance_code'],
+        deviceSettings= dict(
             category_id=ioHub.devices.EventConstants.DEVICE_CATERGORIES['EYE_TRACKER'],
-            type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'], device_class=self.eyeTrackerConfig['device_class'],
-            name=self.eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
-            max_event_buffer_length=self.eyeTrackerConfig['event_buffer_length'])
+            type_id=ioHub.devices.EventConstants.DEVICE_TYPES['EYE_TRACKER_DEVICE'],
+            device_class=EyeTracker.__name__,
+            name=self._eyeTrackerConfig['name'], os_device_code='OS_DEV_CODE_NOT_SET',
+            max_event_buffer_length=self._eyeTrackerConfig['event_buffer_length'])
         EyeTrackerInterface.__init__(self,**deviceSettings)
         
         # set this instance as 'THE' instance of the eye tracker.
@@ -123,10 +124,10 @@ class EyeTracker(EyeTrackerInterface):
         EyeTracker.DEVICE_START_TIME=0.0
         
         # >>>> eye tracker setting to config (if possible)
-        runtimeSettings=self.eyeTrackerConfig['runtime_settings']
+        runtimeSettings=self._eyeTrackerConfig['runtime_settings']
         
         # >>>> Display / Calibration related information to use for config if possible
-        EyeTracker.displaySettings = self.eyeTrackerConfig['display_settings']
+        EyeTracker._displaySettings = self._eyeTrackerConfig['display_settings']
 
 
         ioHub.print2err("Start createFrameTest")
@@ -145,7 +146,7 @@ class EyeTracker(EyeTrackerInterface):
         if 'filename' in kwargs:
             recording_filename=kwargs['filename']
         else:
-            recording_filename=(self.eyeTrackerConfig['runtime_settings']['default_native_data_file_name'])+'.edf'
+            recording_filename=(self._eyeTrackerConfig['runtime_settings']['default_native_data_file_name'])+'.edf'
             
         return RTN_CODES.ET_NOT_IMPLEMENTED
  
@@ -542,7 +543,7 @@ class EyeTracker(EyeTrackerInterface):
 
             self._addNativeEventToBuffer(ioHubEvent)
 
-        EyeTracker.lastPollTime=loggedTime
+        EyeTracker._lastPollTime=loggedTime
     
     def _handleNativeEvent(self,*args,**kwargs):
         """
@@ -558,7 +559,7 @@ class EyeTracker(EyeTrackerInterface):
         
         # do any manipulation to the native event object here before putting it in the devices
         # circular buffer. Remember to keep work done in the callback to a minimum. For example,
-        # the conversion to a native ioHub event is done in the _getIOHubEventObject(event,device_instance_code)
+        # the conversion to a native ioHub event is done in the _getIOHubEventObject(event)
         # method, so does not need to be done here.
         #
         # ......
@@ -587,18 +588,16 @@ class EyeTracker(EyeTrackerInterface):
         If an event driven callback method is used, then this method should be employed to do
         the conversion between object types, so a minimum of work is done in the callback itself.
 
-        The method expects two args:
+        The method expects arg:
             (logged_time,event)=args[0] (when the callback is used to register device events)
             event = args[0] (when polling is used to get device events)
-            device_instance_code=args[1] in either polling or callback modes
         """
         
         # CASE 1: Polling is being used to get events:
         #
         #event=None
-        #if len(args)==2:
+        #if len(args)==1:
         #    event=args[0]
-        #    device_instance_code=args[1]
         #return event
 
         # OR
@@ -608,7 +607,7 @@ class EyeTracker(EyeTrackerInterface):
         # if len(args)==2:
         #    logged_time,event=args[0]
         #
-        # Convert the native event type to the appropriate DeviceEvenet type for an EyeTracker.
+        # Convert the native event type to the appropriate DeviceEvent type for an EyeTracker.
         # See iohub.devices.eyeTrackerInterface.eye_events.py for the list of intended eye tracker 
         # event types (includes Samples).
         #

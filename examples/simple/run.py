@@ -16,7 +16,7 @@ simpleTest
 Overview:
 ---------
 
-This script is implemnted by extending the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime class to a class
+This script is implemented by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
 called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
 also launches the ioHub server process so the script has access to the ioHub service and associated devices.
 
@@ -28,10 +28,10 @@ The __main__ of this script file simply calls the start() method of the Experime
 that calls the run() method for the instance which is what contains the actual 'program / experiment execution code'
 that has been added to this file. When run() completes, the ioHubServer process is closed and the local program ends.
 
-Desciption:
+Description:
 -----------
 
-The main purpose for the simpleTest is to illustrate the overall structure of the ioHub.psychopyIOHubRuntime.SimpleIOHubRuntime
+The main purpose for the simpleTest is to illustrate the overall structure of the ioHub.experiment.ioHubExperimentRuntime
 utility class and how to extend it and use it to run a psycho py program with ioHub / and pyEyeTrackerInterface fucntionality if desired.
 
 To Run:
@@ -46,26 +46,27 @@ Any issues or questions, please let me know.
 """
 
 import ioHub
-from ioHub.psychopyIOHubRuntime import SimpleIOHubRuntime,EventConstants, visual
+from ioHub.devices import Computer
+from ioHub.experiment import ioHubExperimentRuntime, psychopyVisual
 
-class ExperimentRuntime(SimpleIOHubRuntime):
+class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the SimpleIOHubRuntime class. At minimum
+    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
     all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    SimpleIOHubRuntime __init__ itself.
+    ioHubExperimentRuntime __init__ itself.
     """
     def __init__(self,configFileDirectory, configFile):
-        SimpleIOHubRuntime.__init__(self,configFileDirectory,configFile)
+        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
 
     def run(self,*args,**kwargs):
         """
         The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
         script.py file in a standard psychopy experiment setup. That is all there is too it really.
 
-        By running your script within an extension of the SimpleIOHubRuntime class's run method, you automatically
+        By running your script within an extension of the ioHubExperimentRuntime class's run method, you automatically
         get access to some nice features:
 
-        #. The ioHub Client class is accessable by calling self.hub . So to get all currently available events from the
+        #. The ioHub Client class is accessible by calling self.hub . So to get all currently available events from the
          ioHub event buffer, simply call events = self.hub.getEvents(). There is also a shortcut method, so you can simply call self.getEvents()
          to achieve the same thing, or self.getEvents('kb') to get keyboard events if you named your keyboard device 'kb'.
         #. To clear an event buffer, call getEvents(), as it also clears the buffer, or call self.clearEvents() to clear the global
@@ -76,10 +77,10 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         assuming you named the keyboard device 'keyboard'
         #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
         is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
-        #. If you need to pause the execution of your program for a period of time, but want events to be occationally sent from the
+        #. If you need to pause the execution of your program for a period of time, but want events to be occasionally sent from the
         ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
         has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
-        #. There are lots of other goodies in the SimpleIOHubRuntime utility class, so check out that classes docs, as well as
+        #. There are lots of other goodies in the ioHubExperimentRuntime utility class, so check out that classes docs, as well as
         the docs for the ioHubConnection class, which is what is at the end of self.hub.
 
         Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
@@ -96,11 +97,12 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
-        mouse=self.hub.devices.mouse
-        display=self.hub.devices.display
-        kb=self.hub.devices.kb
+        mouse=self.devices.mouse
+        display=self.devices.display
+        kb=self.devices.kb
 
-        self.enableHighPriority()
+        Computer.enableHighPriority()
+
         # Set the mouse position to 0,0, which means the 'center' of the screen.
         mouse.setPosition((0.0,0.0))
 
@@ -109,17 +111,17 @@ class ExperimentRuntime(SimpleIOHubRuntime):
 
         # Read the current resolution of the monitors screen in pixels.
         # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
-        screen_resolution= display.getScreenResolution()
+        screen_resolution= display.getStimulusScreenResolution()
 
         # Read the coordinate space the script author specified in the config file (right now only pix are supported)
         coord_type=display.getDisplayCoordinateType()
 
         # get the index of the screen to create the PsychoPy window in.
-        screen_index=display.getScreenIndex()
+        screen_index=display.getStimulusScreenIndex()
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False,screen=screen_index)
+        psychoWindow = psychopyVisual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False,screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
@@ -127,13 +129,13 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
         psychoStim=ioHub.LastUpdatedOrderedDict()
-        psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
+        psychoStim['grating'] = psychopyVisual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        psychoStim['fixation'] =psychopyVisual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['mouseDot'] =psychopyVisual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
         # Clear all events from the global event buffer, and from the keyboard event buffer.
-        self.clearEvents()
-        self.clearEvents('kb')
+        self.hub.clearEvents()
+        self.hub.clearEvents('kb')
 
         QUIT_EXP=False
         # Loop until we get a keyboard event with the space, Enter (Return), or Escape key is pressed.
@@ -160,7 +162,7 @@ class ExperimentRuntime(SimpleIOHubRuntime):
             # time methods represent both experiment process and ioHub server process time.
             # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
             # as a timescale is appropriate.
-            flip_time=self.currentSec()
+            flip_time=Computer.currentSec()
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
@@ -189,12 +191,12 @@ class ExperimentRuntime(SimpleIOHubRuntime):
         #self.clearEvents()
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.delay(0.250)
-
+        actualDelay=self.hub.delay(0.250)
+        print "Delay requested %.6f, actual delay %.6f, Diff: %.6f"%(0.250,actualDelay,actualDelay-0.250)
         # for fun, test getting a bunch of events at once, likely causing a mutlipacket getEvents()
-        stime = self.currentSec()
-        events=self.getEvents()
-        etime=self.currentSec()
+        stime = Computer.currentSec()
+        events=self.hub.getEvents()
+        etime=Computer.currentSec()
         print 'event count: ', len(events),' delay (msec): ',(etime-stime)*1000.0
 
         # _close neccessary files / objects, 'disable high priority.

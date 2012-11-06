@@ -143,7 +143,15 @@ class udpServer(DatagramServer):
                 kwargs=request[1]
                 if len(kwargs)==0:
                     kwargs=None
-            dev=self.iohub.deviceDict[dclass]
+
+            dev=None
+            if dclass in ['EyeTracker',]:
+                for dname, dev in self.iohub.deviceDict.iteritems():
+                    if dname.endswith(dclass):
+                        dev=self.iohub.deviceDict[dname]
+                        break
+            else:
+                dev=self.iohub.deviceDict[dclass]
             method=getattr(dev,dmethod)
             result=[]
             try:
@@ -162,13 +170,24 @@ class udpServer(DatagramServer):
         elif request_type == 'GET_DEV_LIST':
             dev_list=[]
             for d in self.iohub.devices:
-                dev_list.append((d.name,d.instance_code,d.device_class))
+                dev_list.append((d.name,d.device_class))
             self.sendResponse(('GET_DEV_LIST_RESULT',len(dev_list),dev_list),replyTo)
         elif request_type == 'GET_DEV_INTERFACE':
             dclass=request.pop(0)
-            dev=self.iohub.deviceDict[dclass]
-            data=dev._getRPCInterface()
-            self.sendResponse(('GET_DEV_INTERFACE',data),replyTo)
+            data=None
+            if dclass in ['EyeTracker',]:
+                for dname, hdevice in self.iohub.deviceDict.iteritems():
+                    if dname.endswith(dclass):
+                        data=hdevice._getRPCInterface()
+                        break
+            else:
+                dev=self.iohub.deviceDict[dclass]
+                data=dev._getRPCInterface()
+            if data:
+                self.sendResponse(('GET_DEV_INTERFACE',data),replyTo)
+            else:
+                edata=('IOHUB_ERROR','GET_DEV_INTERFACE',dclass,"The requested class is not known.")
+                self.sendResponse(edata,replyTo)
         else:
             edata=('IOHUB_ERROR','EXP_DEVICE',request_type,"The request type provided for EXP_DEVICE is not recognized.")
             self.sendResponse(edata,replyTo)
@@ -193,16 +212,39 @@ class udpServer(DatagramServer):
             if packet_data:
                 ioHub.print2err('packet Data length: ',len(packet_data))
             ioHub.printExceptionDetailsToStdErr()
+
     def setExperimentInfo(self,experimentInfoList):
+        self.iohub.experimentInfoList=experimentInfoList
         if self.iohub.emrt_file:
             return self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList)           
-        return None
+        return False
         
     def createExperimentSessionEntry(self,sessionInfoDict):
+        self.iohub.sessionInfoDict=sessionInfoDict
         if self.iohub.emrt_file:
             return self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
-        return None
-        
+        return False
+
+    def initializeExperimentConditionVariableTable(self, experiment_id, session_id, numpy_dtype):
+        if self.iohub.emrt_file:
+            output=[('session_id','u4'),('index_id','u4')]
+            for a in numpy_dtype:
+                if isinstance(a[1],(str,unicode)):
+                    output.append(tuple(a))
+                else:
+                    temp=[a[0],[]]
+                    for i in a[1]:
+                        temp[1].append(tuple(i))
+                    output.append(tuple(temp))
+
+            return self.iohub.emrt_file._initializeExperimentConditionVariableTable(experiment_id,output)
+        return False
+
+    def addRowToExperimentConditionVariableTable(self,session_id,data):
+        if self.iohub.emrt_file:
+            return self.iohub.emrt_file._addRowToExperimentConditionVariableTable(session_id,data)
+        return False
+
     def clearEventBuffer(self):
         l= len(self.iohub.eventBuffer)
         self.iohub.eventBuffer.clear()
@@ -226,6 +268,12 @@ class udpServer(DatagramServer):
     def setProcessAffinity(self, processorList):
         return Computer.setCurrentProcessAffinity(processorList)
 
+    def flushIODataStoreFile(self):
+        if self.iohub.emrt_file:
+            self.iohub.emrt_file.emrtFile.flush()
+            return True
+        return False
+
     def shutDown(self):
         import time
         self._running=False
@@ -242,10 +290,6 @@ class udpServer(DatagramServer):
         time.sleep(1)
         
         self.stop()
-
-        
-    def getProcessInfoString(self):
-        return Computer.getProcessInfoString()
 
 class DeviceMonitor(Greenlet):
     def __init__(self, device,sleep_interval):
@@ -269,73 +313,51 @@ class DeviceMonitor(Greenlet):
 class ioServer(object):
     eventBuffer=None 
     _logMessageBuffer=None
-    def __init__(self,configFilePath,config,initial_time_offset):
+    def __init__(self, initial_time_offset, configFilePath=None, config=None):
         ioHub.devices.Computer.isIoHubProcess=True
         ioHub.devices.Computer.globalClock=ioHub.ioClock(None,initial_time_offset)
         self._running=True
+        self.emrt_file=None
         self.config=config
         self.configFilePath=configFilePath
-        ioServer.eventBuffer=deque(maxlen=config['global_event_buffer'])
+        ioServer.eventBuffer=deque(maxlen=config.get('global_event_buffer',2048))
         ioServer._logMessageBuffer=deque(maxlen=128)
-        self.emrt_file=None
+
         self.devices=[]
         self.deviceDict={}
         self.deviceMonitors=[]
+        self.sessionInfoDict=None
+        self.experimentInfoList=None
         # start UDP service
-        self.udpService=udpServer(self,':%d'%config['udpPort'])
+        self.udpService=udpServer(self,':%d'%config.get('udpPort',9000))
+
+        # read temp paths file
+        ioHub.data_paths=None
+        try:
+            expJsonPath=os.path.join(os.path.split(configFilePath)[0],'exp.paths')
+            f=open(expJsonPath,'r')
+            import ujson
+            ioHub.data_paths=ujson.loads(f.read())
+            f.flush()
+            f.close()
+            os.remove(expJsonPath)
+        except:
+            pass
 
         # dataStore setup
-        if 'ioDataStore' in config and config['ioDataStore']['enable'] is True:
+        if config.get('ioDataStore',False) and config.get('ioDataStore',False).get('enable',False):
             configFileDir,cfn=os.path.split(self.configFilePath)
-            resultsFilePath=os.path.join(configFileDir,config['ioDataStore']['filepath'])
-            self.createDataStoreFile(config['ioDataStore']['filename']+'.hdf5',resultsFilePath,'a',config['ioDataStore']['storage_type'])
-        
-        # device configuration
-        if len(config['monitor_devices']) > 0:
-            import ioHub.devices as devices
+            if ioHub.data_paths is None:
+                resultsFilePath=configFileDir
+            else:
+                resultsFilePath=ioHub.data_paths['IOHUB_DATA']
+            self.createDataStoreFile(config.get('ioDataStore').get('filename','events')+'.hdf5',resultsFilePath,'a',config.get('ioDataStore').get('storage_type','pytables'),config.get('ioDataStore'))
 
         #built device list and config from yaml config settings
-        for iodevice in config['monitor_devices']:
-            for _key,deviceConfig in iodevice.iteritems():
-                try:
-                    dclass=deviceConfig['device_class']
-                    # build devices to monitor
-
-                    self.log("Creating Device: %s"%deviceConfig['device_class'])
-                    parentModule=devices
-                    modulePathTokens=dclass.split('.')
-                    for mt in modulePathTokens:
-                        DeviceClass=getattr(parentModule,mt)
-                        if inspect.isfunction(DeviceClass):
-                            DeviceClass()
-                        parentModule=DeviceClass
-                    deviceInstance=DeviceClass(dconfig=deviceConfig)
-                    self.devices.append(deviceInstance)
-                    self.deviceDict[deviceConfig['device_class']]=deviceInstance
-
-                    if 'device_timer' in deviceConfig:
-                        interval = deviceConfig['device_timer']['interval']
-                        self.log("%s has requested a timer with period %.5f"%(deviceConfig['device_class'], interval))
-                        dPoller=DeviceMonitor(deviceInstance,interval)
-                        self.deviceMonitors.append(dPoller)
-
-                    # add event listeners for streaming events
-                    if 'streamEvents' in deviceConfig and deviceConfig['streamEvents'] is True:
-                        self.log("Online event access is being enabled for: %s"%deviceConfig['device_class'])
-                        # add listener for global event queue
-                        deviceInstance._addEventListener(self)
-                        # add listener for device event queue
-                        deviceInstance._addEventListener(deviceInstance)
-
-                    # add event listeners for saving events
-                    if (self.emrt_file is not None) and ('saveEvents' in deviceConfig) and (deviceConfig['saveEvents'] is True):
-                        self.log("Event saving is being enabled for: %s"%deviceConfig['device_class'])
-                        deviceInstance._addEventListener(self.emrt_file)
-                    self.log("==============================")
-                except Exception as e:
-                    ioHub.print2err("Exception creating device %s: %s. Is device connected?"%(deviceConfig['device_class'],str(e)))
-                    ioHub.printExceptionDetailsToStdErr()
-                    self.log("Exception creating device %s: %s"%(deviceConfig['device_class'],str(e)))
+        for iodevice in config.get('monitor_devices',()):
+            for device_class,deviceConfig in iodevice.iteritems():
+                self.addDeviceToMonitor(device_class,deviceConfig)
+                
         deviceDict=self.deviceDict
         iohub=self
         if ('Mouse' in deviceDict or 'Keyboard' in deviceDict) and Computer.system == 'Windows':
@@ -364,25 +386,71 @@ class ioServer(object):
             hookMonitor=DeviceMonitor(pyHookDevice(),0.00375)
             
             self.deviceMonitors.append(hookMonitor)
+            
+        self.log("Time Offset: {0}".format(initial_time_offset))
+
+    def addDeviceToMonitor(self,device_class,deviceConfig):
+        if deviceConfig.get('enable',True):
+            try:
+                self.log("Creating Device: %s"%(device_class,))
+                parentModule=ioHub.devices
+                modulePathTokens=device_class.split('.')
+                for mt in modulePathTokens:
+                    DeviceClass=getattr(parentModule,mt)
+                    if inspect.isfunction(DeviceClass):
+                        DeviceClass()
+                    parentModule=DeviceClass
+                deviceInstance=DeviceClass(dconfig=deviceConfig)
+                self.devices.append(deviceInstance)
+                self.deviceDict[device_class]=deviceInstance
+
+                if 'device_timer' in deviceConfig:
+                    interval = deviceConfig['device_timer']['interval']
+                    self.log("%s has requested a timer with period %.5f"%(device_class, interval))
+                    dPoller=DeviceMonitor(deviceInstance,interval)
+                    self.deviceMonitors.append(dPoller)
+
+                # add event listeners for streaming events
+                if deviceConfig.get('streamEvents',False) is True:
+                    self.log("Online event access is being enabled for: %s"%device_class)
+                    # add listener for global event queue
+                    deviceInstance._addEventListener(self)
+                    # add listener for device event queue
+                    deviceInstance._addEventListener(deviceInstance)
+
+                # add event listeners for saving events
+                if (self.emrt_file is not None) and (deviceConfig.get('saveEvents',False) is True):
+                    self.log("Event saving is being enabled for: %s"%device_class)
+                    deviceInstance._addEventListener(self.emrt_file)
+                self.log("==============================")
+            except Exception as e:
+                ioHub.print2err("Exception creating device %s: %s. Is device connected?"%(device_class,str(e)))
+                ioHub.printExceptionDetailsToStdErr()
+                self.log("Exception creating device %s: %s"%(device_class,str(e)))
+
+
 
     def processDeviceEvents(self,sleep_interval):
         while self._running:
-            for device in self.devices:
-                try:
-                     events=device._getNativeEventBuffer()
-                     while len(events)>0:
-                        evt=events.popleft()
-                        e=device._getIOHubEventObject(evt,device.instance_code)
-                        for l in device._getEventListeners():
-                            l._handleEvent(e)
-                except:
-                    ioHub.printExceptionDetailsToStdErr()
-                    ioHub.print2err("Error in processDeviceEvents: ", device, " : ", len(events), " : ", e)
-                    eclass=EventConstants.EVENT_CLASSES[e[DeviceEvent.EVENT_TYPE_ID_INDEX]]
-                    ioHub.print2err("eclass: ",eclass)
-                    ioHub.print2err("Event array length: ", len(e), " should be : ", len(eclass.NUMPY_DTYPE)," : ",eclass.NUMPY_DTYPE)
+            self._processDeviceEventIteration()
             gevent.sleep(sleep_interval)
 
+    def _processDeviceEventIteration(self):
+        for device in self.devices:
+            try:
+                 events=device._getNativeEventBuffer()
+                 while len(events)>0:
+                    evt=events.popleft()
+                    e=device._getIOHubEventObject(evt)
+                    for l in device._getEventListeners():
+                        l._handleEvent(e)
+            except:
+                ioHub.printExceptionDetailsToStdErr()
+                ioHub.print2err("Error in processDeviceEvents: ", device, " : ", len(events), " : ", e)
+                eclass=EventConstants.EVENT_CLASSES[e[DeviceEvent.EVENT_TYPE_ID_INDEX]]
+                ioHub.print2err("eclass: ",eclass)
+                ioHub.print2err("Event array length: ", len(e), " should be : ", len(eclass.NUMPY_DTYPE)," : ",eclass.NUMPY_DTYPE)
+        
     def closeDataStoreFile(self):
         if self.emrt_file:
             pytablesfile=self.emrt_file
@@ -400,17 +468,12 @@ class ioServer(object):
             logMsg=(currentSec(),text,level)
             self._logMessageBuffer.append(logMsg)
 
-    def createDataStoreFile(self,fileName,folderPath,fmode,ftype):        
-        from ioHub import ioDataStore
+    def createDataStoreFile(self,fileName,folderPath,fmode,ftype,ioHubsettings):
         try:
             if ftype == 'pytables':
                 from ioDataStore import EMRTpyTablesFile
-                self.closeDataStoreFile()
-                
-                self.emrt_file=EMRTpyTablesFile(fileName,folderPath,fmode)
-                
-                hfile=self.emrt_file
-                
+                self.closeDataStoreFile()                
+                self.emrt_file=EMRTpyTablesFile(fileName,folderPath,fmode,ioHubsettings)                
                 return True
             else:
                 return False #('RPC_ERROR','createDataStoreFile','Only DataStore File Type "pytables" is currently Supported, not %s'%str(ftype)) 
@@ -450,7 +513,7 @@ class ioServer(object):
 
 
 
-def run(configFilePath=None,initial_time_offset=None):
+def run(initial_time_offset=None,configFilePath=None):
     from yaml import load
     try:
         from yaml import CLoader as Loader, CDumper as Dumper
@@ -459,7 +522,7 @@ def run(configFilePath=None,initial_time_offset=None):
 
     ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
     
-    s = ioServer(configFilePath, ioHubConfig,initial_time_offset)
+    s = ioServer(initial_time_offset, configFilePath, ioHubConfig)
 
     s.start()    
     
@@ -467,13 +530,13 @@ if __name__ == '__main__':
     prog=sys.argv[0]
 
     if len(sys.argv)==2:
-        configFileName=sys.argv[1]
+        initial_offset=float(sys.argv[1])
     elif len(sys.argv)==3:
-        configFileName=sys.argv[1]
-        initial_offset=float(sys.argv[2])
+        configFileName=sys.argv[2]
+        initial_offset=float(sys.argv[1])
         #ioHub.print2err("ioServer initial_offset: ",initial_offset)
     else:
         configFileName=None
         initial_offset=ioHub.highPrecisionTimer()
         
-    run(configFilePath=configFileName,initial_time_offset=initial_offset)
+    run(initial_time_offset=initial_offset, configFilePath=configFileName)

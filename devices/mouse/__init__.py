@@ -33,10 +33,9 @@ if Computer.system == 'Windows':
         def __init__(self,*args,**kwargs):
             deviceConfig=kwargs['dconfig']
             deviceSettings={
-                'instance_code':deviceConfig['instance_code'],
                 'category_id':EventConstants.DEVICE_CATERGORIES[Mouse.CATEGORY_LABEL],
                 'type_id':EventConstants.DEVICE_TYPES[Mouse.DEVICE_LABEL],
-                'device_class':deviceConfig['device_class'],
+                'device_class':Mouse.__name__,
                 'name':deviceConfig['name'],
                 'os_device_code':'OS_DEV_CODE_NOT_SET',
                 '_isReportingEvents':deviceConfig.get('auto_report_events',True),

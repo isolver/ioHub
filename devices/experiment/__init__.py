@@ -30,10 +30,10 @@ class ExperimentDevice(Device):
         :param kwargs:
         """
         deviceConfig=kwargs['dconfig']
-        deviceSettings={'instance_code':deviceConfig['instance_code'],
+        deviceSettings={
             'category_id':EventConstants.DEVICE_CATERGORIES[ExperimentDevice.CATEGORY_LABEL],
             'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.DEVICE_LABEL],
-            'device_class':deviceConfig['device_class'],
+            'device_class':ExperimentDevice.__name__,
             'name':deviceConfig['name'],
             '_isReportingEvents':deviceConfig.get('auto_report_events',True),
             'os_device_code':'OS_DEV_CODE_NOT_SET',
@@ -56,7 +56,7 @@ class ExperimentDevice(Device):
         pass
  
     @staticmethod
-    def _getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event):
         return event
 
             
@@ -100,6 +100,6 @@ class MessageEvent(DeviceEvent):
         csec=int(currentSec())
         if sec_time is not None:
             csec=sec_time
-        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,'psychopy',csec,0,0,0.0,0.0,msg_offset,prefix,text)
+        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,csec,0,0,0.0,0.0,msg_offset,prefix,text)
 
 

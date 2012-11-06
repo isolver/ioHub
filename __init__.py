@@ -2,11 +2,12 @@
 ioHub Python Module
 .. file: ioHub/__init__.py
 
+fileauthor: Sol Simpson <sol@isolver-software.com>
+
 Copyright (C) 2012 Sol Simpson
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
-.. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 from __future__ import division
 import timeit
@@ -16,11 +17,10 @@ import sys
 import platform
 import util
 import os
-from util.validateVersionNumber import iohub_version
 
 
 #version info for ioHub
-__version__=iohub_version
+__version__=util.validate_version("0.2a1")
 __license__='GNU GPLv3 (or more recent equivalent)'
 __author__='Sol Simpson'
 __author_email__='sol@isolver-software.com'
@@ -155,7 +155,7 @@ class ioObject(object):
         rpcList=[]
         dlist = dir(self)
         for d in dlist:
-            if d[0] is not '_':
+            if d[0] is not '_' and d not in ['asNumpyArray','createObjectFromParamList']:
                 if callable(getattr(self,d)):
                     rpcList.append(d)
         return rpcList
@@ -165,17 +165,17 @@ def highPrecisionTimer():
     raise ioHubError("highPrecisionTimer function must be overwritten by a platform specific implementation.")
 
 if platform.system() == 'Windows':
-    global _fcounter, _ffreq, _winQueryPerformanceCounter, _winQueryPerformanceFrequency
+    global _fcounter, _qpfreq, _winQueryPerformanceCounter
     from ctypes import byref, c_int64, windll
     _Kernel32=windll.Kernel32
     _fcounter = c_int64()
-    _ffreq = c_int64()
+    _qpfreq = c_int64()
+    _Kernel32.QueryPerformanceFrequency(byref(_qpfreq))
     _winQueryPerformanceCounter=_Kernel32.QueryPerformanceCounter
-    _winQueryPerformanceFrequency=_Kernel32.QueryPerformanceFrequency
+
     def highPrecisionTimer():
         _winQueryPerformanceCounter(byref(_fcounter))
-        _winQueryPerformanceFrequency(byref(_ffreq))
-        return  _fcounter.value/_ffreq.value
+        return  _fcounter.value/_qpfreq.value
 elif platform.system() == 'Linux':
     highPrecisionTimer = timeit.default_timer
 else: # assume OS X?
@@ -250,26 +250,10 @@ def print2err(*args):
 from collections import Iterable,OrderedDict
 
 def printExceptionDetailsToStdErr():
-        """
-        No idea if all of this is needed, infact I know it is not. But for now why not.
-        Taken straight from the python manual on Exceptions.
-        """
         import sys, traceback
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        print2err("*** print_tb:")
-        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
-        print2err("*** print_exception:")
-        traceback.print_exception(exc_type, exc_value, exc_traceback,limit=2, file=sys.stdout)
-        print2err("*** print_exc:")
-        traceback.print_exc()
-        print2err("*** format_exc, first and last line:")
-        formatted_lines = traceback.format_exc().splitlines()
-        print2err(str(formatted_lines[0]))
-        print2err((formatted_lines[-1]))
         print2err("*** format_exception:")
         print2err(repr(traceback.format_exception(exc_type, exc_value,exc_traceback)))
-        print2err("*** extract_tb:")
-        print2err(repr(traceback.extract_tb(exc_traceback)))
         print2err("*** format_tb:")
         print2err(repr(traceback.format_tb(exc_traceback)))
         print2err("*** tb_lineno:"+str( exc_traceback.tb_lineno))

@@ -204,7 +204,7 @@ class MouseWindows32(object):
         pass
  
     @staticmethod
-    def _getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event):
         logged_time, event=event
         p = event.Position
         px=p[0]
@@ -229,7 +229,7 @@ class MouseWindows32(object):
         
         hubTime = logged_time #TODO correct mouse times to factor in offset.
 
-        r= [0,0,Computer.getNextEventID(),etype,device_instance_code,device_time,logged_time,hubTime,
+        r= [0,0,Computer.getNextEventID(),etype,device_time,logged_time,hubTime,
                     confidence_interval, delay, bstate, bnum,event.ActiveButtons, px, py,event.Wheel,event.WheelAbsolute, event.Window]
             
         return r

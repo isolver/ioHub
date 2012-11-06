@@ -10,23 +10,11 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
+
 from .. import Device,Computer
 import ioHub
 currentSec=Computer.currentSec
-#from ctypes import *
-import ctypes
 import unit_conversions as ucs
-
-#class _win32_DISPLAY_DEVICE(Structure):
-#    __fields__=[("cb",c_uint32),("DeviceName",POINTER(c_char)),("DeviceString",POINTER(c_char)),("StateFlags",c_uint32),("DeviceID", POINTER(c_char)),("DeviceKey", POINTER(c_char))]#
-#
-#    def init(self):
-#        self.DeviceName=(c_char*32)()
-#        self.DeviceString=(c_char*128)()
-#        self.DeviceID=(c_char*128)()
-#        self.DeviceKey=(c_char*128)()
-#        self.StateFlags=c_uint32(0)
-
 
 vis_degrees,screen_res,ppd=None,None,None
 
@@ -34,12 +22,12 @@ class Display(Device):
     _displayCoordinateType=None
     CATEGORY_LABEL='VISUAL_STIMULUS_PRESENTER'
     DEVICE_LABEL='DISPLAY_DEVICE'
-    _user32=ctypes.windll.user32
-    SM_CMONITORS=80
-    SM_CXSCREEN=0
-    SM_CYSCREEN=1
-    DISPLAY_DEVICE_ATTACHED_TO_DESKTOP=1
-    EDD_GET_DEVICE_INTERFACE_NAME=0x00000001
+    SCREEN_COUNT=1
+    
+    stimulus_screen_index=0
+    stimulus_screen_info=None
+    _screenInfoList=None
+    _ppd=None
     _settings=None
     ccordinateTypes={'pix':('pixels','pix','pixs','pixel'),     # - You can also specify the size and location of your stimulus in pixels. Obviously this has the disadvantage that
                                                                 # sizes are specific to your monitor (because all monitors differ in pixel size). Spatial frequency: `cycles per pixel`
@@ -65,32 +53,138 @@ class Display(Device):
                                                                 # Requires : information about the screen width in cm and size in pixels Assumes : pixels are square. Can be verified by drawing
                                                                 # a stimulus with matching width and height and verifying that it is in fact square. For a CRT this can be controlled by setting
                                                                 # the size of the viewable screen (settings on the monitor itself). Requires : No monitor information
-    __slots__=[]
+    __slots__=['stimulus_screen_index']
     def __init__(self,*args,**kwargs):
         Display._settings=kwargs['dconfig']
-        deviceSettings={'instance_code':self._settings['instance_code'],
+        deviceSettings={
             'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Display.CATEGORY_LABEL],
             'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Display.DEVICE_LABEL],
-            'device_class':self._settings['device_class'],
+            'device_class':Display.__name__,
             'name':self._settings['name'],
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':16,
             '_isReportingEvents':self._settings.get('auto_report_events',True)
             }
-
+        
+        Display.stimulus_screen_index=Display._settings.get('display_index',0)
+        
+        self._detectDisplayCountandResolutions()
         self._determineDisplayCoordSpace()
         self._createPsychopyCalibrationFile()
         Device.__init__(self,*args,**deviceSettings)
 
-    def _createPsychopyCalibrationFile(self):
-        from psychopy import monitors
-        psychoMonitor=monitors.Monitor(self._settings['name'], width=self._settings['calibration_surface_dimensions']['width'],
-            distance=self._settings['default_eye_to_calibration_surface_distance']['plane_center'], gamma=1.0,
-            notes=self._settings['comments'])
-        psychoMonitor.setCalibDate()
-        psychoMonitor.setSizePix(self.getScreenResolution())
-        psychoMonitor.saveMon()
-        psychoMonitor.setCurrent(0)
+    @classmethod
+    def _detectDisplayCountandResolutions(cls):
+        if Display._screenInfoList is None:
+            import wx
+            wxapp=wx.PySimpleApp()             
+
+            from collections import OrderedDict
+
+            Display._screenInfoList=[]
+            Display.SCREEN_COUNT=wx.Display.GetCount()
+
+            for i in range(Display.SCREEN_COUNT):
+                d=wx.Display(i)
+                mode=d.GetCurrentMode()
+                mode.w,mode.h,mode.bpp,mode.refresh
+                x,y,w,h=d.GetGeometry()
+                primary=d.IsPrimary()
+                ok=d.IsOk()
+                
+                amonitor=OrderedDict()
+                amonitor['width']=w
+                amonitor['height']=h
+                amonitor['mode']=(mode.w,mode.h,mode.bpp,mode.refresh)
+                amonitor['index']=i
+                amonitor['primary']=primary
+                amonitor['resolution']=w,h
+                amonitor['region']=(x,y,w,h)
+                
+                Display._screenInfoList.append(amonitor)
+            
+            if Display.stimulus_screen_index >= Display.SCREEN_COUNT:
+               Display.stimulus_screen_index=0
+            
+            wxapp.Exit()
+
+    @staticmethod
+    def getStimulusScreenInfo():
+        """
+        Get the stimuus monitor's information as an OrderedDict.
+
+        Args: None
+        Return (OrderedDict): key,value pais for various scrren attributes
+        """
+        return Display._screenInfoList[Display.stimulus_screen_index]
+
+    @staticmethod
+    def getMonitorCount():
+        return Display.SCREEN_COUNT
+
+    @staticmethod
+    def getStimulusScreenIndex():
+        """
+        Get the index of display to use when creating the full screen window in multi display physical setups.
+
+        Args: None
+        Return (int): index of display in multi display psychical setups
+        """
+        return Display.stimulus_screen_index
+
+    @staticmethod
+    def setStimulusScreenIndex(i):
+        """
+        Get the index of display to use when creating the full screen window in multi display physical setups.
+
+        Args: None
+        Return (int): index of display in multi display psychical setups
+        """
+        if i < Display.SCREEN_COUNT:
+            Display.stimulus_screen_index=i
+            Display._ppd=None
+        
+        
+    @staticmethod
+    def getPPD(alg='simple'):
+        if alg == 'simple':
+             if Display._ppd is None:
+                 import math
+
+                 phys_width=Display._settings.get('physical_stimulus_area')['width']
+                 phys_height=Display._settings.get('physical_stimulus_area')['height']
+                 viewing_distance=float(Display._settings.get('default_eye_to_surface_distance')['surface_center'])
+
+                 rx,ry=Display.getStimulusScreenResolution()
+                 degree_width=57.2958 * math.atan(phys_width/viewing_distance)
+                 degree_height=57.2958 * math.atan(phys_height/viewing_distance)
+                 ppd_x=rx/degree_width
+                 ppd_y=ry/degree_height
+
+                 Display._ppd=ppd_x,ppd_y
+             return Display._ppd
+        else:
+            return None
+
+    @staticmethod
+    def getStimulusScreenResolution():
+        """
+        Get the stimulus monitor's pixel resolution based on the current graphics mode.
+
+        Args: None
+        Return (list): (width,height) of the monitor based on it's current graphics mode.
+        """
+        return Display.getStimulusScreenInfo()['resolution']
+
+    @staticmethod
+    def getStimulusScreenReportedRetraceInterval():
+        """
+        Get the stimulus monitor's reported retrace 'interval' (1000.0/retrace_rate) based on the current graphics mode.
+
+        Args: None
+        Return (list): (width,height) of the monitor based on it's current graphics mode.
+        """
+        return 1000.0/Display.getStimulusScreenInfo()['mode'][-1]
 
     def _determineDisplayCoordSpace(self):
         dispCoordType=self._settings['reporting_unit_type']
@@ -113,7 +207,7 @@ class Display(Device):
     @classmethod
     def pixel2DisplayCoord(cls,px,py):
         try:
-            dw,dh=cls.getScreenResolution()
+            dw,dh=cls.getStimulusScreenResolution()
             coordSpace=cls.getDisplayCoordinateType()
 
             dx= px-dw/2
@@ -124,7 +218,7 @@ class Display(Device):
 
             elif coordSpace == 'deg':
                 #distH,distV=cls.pixelToDist(swidth/float(pixHres),sheight/float(pixVres),swidth,sheight,px,py)
-                #eyeDist=cls._settings['default_eye_to_calibration_surface_distance']['plane_center']
+                #eyeDist=cls._settings['default_eye_to_calibration_surface_distance']['surface_center']
                 #r=cls.convertDistToNd(eyeDist,distH,distV)
                 #ioHub.print2stderr(">>>> Pixels x,y to Angle h,v: "+str((px,py))+" : "+str(r))
                 ioHub.print2err(">>>> UNIMPLEMENTED dispCoordType: "+coordSpace)
@@ -141,7 +235,7 @@ class Display(Device):
     @classmethod
     def displayCoord2Pixel(cls,dx,dy,):
         try:
-            dw,dh=cls.getScreenResolution()
+            dw,dh=cls.getStimulusScreenResolution()
             coordSpace=cls.getDisplayCoordinateType()
 
             if coordSpace == 'pix':
@@ -160,41 +254,13 @@ class Display(Device):
             ioHub.printExceptionDetailsToStdErr()
             return 0.0,0.0
 
-    @classmethod
-    def getScreenResolution(cls):
-        """
-        Get the monitor's current pixel resolution based on the current graphics mode.
-
-        Args: None
-        Return (list): (width,height) of the monitor based on it's current graphics mode.
-        """
-        #  >> WIN32_ONLY
-        r= cls._user32.GetSystemMetrics(cls.SM_CXSCREEN), cls._user32.GetSystemMetrics(cls.SM_CYSCREEN)
-        #  << WIN32_ONLY
-        return r
-
-    #@classmethod
-    #def getDisplayInfo(cls):
-    #    for i in xrange(5):
-    #        dd=_win32_DISPLAY_DEVICE()
-    #        dd.init()
-    #        dd.cb=c_uint32(sizeof(dd))
-    #        r=cls._user32.EnumDisplayDevicesA(None,i,byref(dd),cls.EDD_GET_DEVICE_INTERFACE_NAME)
-    #        ioHub.print2err("Display %d "%(i,),r," : ",dd.DeviceID[0:127]," : ",dd.StateFlags.value)
-
-    @classmethod
-    def getMonitorCount(cls):
-        return cls._user32.GetSystemMetrics(cls.SM_CMONITORS)
-
-    @staticmethod
-    def getScreenIndex():
-        """
-        Get the index of display to use when creating the full screen window in multi display physical setups.
-
-        Args: None
-        Return (int): index of display in multi display psychical setups
-        """
-        return Display._settings.get('display_index',0)
+    def _createPsychopyCalibrationFile(self):
+        from psychopy import monitors
+        psychoMonitor=monitors.Monitor(self._settings['psychopy_config_file'], width=self._settings['physical_stimulus_area']['width'],
+            distance=self._settings['default_eye_to_surface_distance']['surface_center'], gamma=1.0)
+        psychoMonitor.setSizePix(self.getStimulusScreenResolution())
+        psychoMonitor.saveMon()
+        psychoMonitor.setCurrent(0)
 
     def _poll(self):
         pass

@@ -15,6 +15,11 @@ from ctypes import *
 #===========================
 #		Struct Definition
 #===========================
+RET_SUCCESS = 1
+RET_NO_VALID_DATA = 2
+ERR_NOT_CONNECTED = 101
+
+
 
 class CSystem(Structure):
 	_fields_ = [("samplerate", c_int),

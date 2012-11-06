@@ -69,7 +69,7 @@ class MC_DAC_UL(DAQDevice):
 
     DAQ_BLOCK_TRANSFER_SIZE=dict()
     DAQ_BLOCK_TRANSFER_SIZE['MC-USB-1208FS']=31
-    DAQ_BLOCK_TRANSFER_SIZE['MC-USB-1616FS']=64
+    DAQ_BLOCK_TRANSFER_SIZE['MC-USB-1616FS']=62
 
     # <<<<<
     lastPollTime=0.0
@@ -81,7 +81,7 @@ class MC_DAC_UL(DAQDevice):
     _newDataTypes=[('board_id','i4'),('input_channels','a128'),('gain','i4'),('offset','f4'),('options','i4')]
     __slots__=[e[0] for e in _newDataTypes]+['_MemHandle','_daqStatus','_HighResolution_A2D','_A2D_Resolution','_A2DData','_revision','_lastChannelReadValueDict',
                                              '_input_read_method','_input_scan_frequency',"_input_sample_count","_input_poll_type","_currentIndex","_currentCount","_lastSampleCount","_lastIndex",
-                                             '_AI_function','_A2DChannels','_A2DSamples','_eventsCreated','_wrapCount','_lastStartRecordingTimePre','_lastStartRecordingTimePost',
+                                             '_AI_function','_A2DSamples','_eventsCreated','_wrapCount','_lastStartRecordingTimePre','_lastStartRecordingTimePost',
                                              '_lowChannelAI','_highChannelAI','_daq_model']
     def __init__(self,*args,**kwargs):
         """
@@ -89,10 +89,9 @@ class MC_DAC_UL(DAQDevice):
         deviceConfig=kwargs['dconfig']
 
         deviceSettings=dict()
-        deviceSettings['device_class']=deviceConfig['device_class']
+        deviceSettings['device_class']=DAQDevice.__name__
         deviceSettings['name']=deviceConfig['name']
         deviceSettings['max_event_buffer_length']=deviceConfig['event_buffer_length']
-        deviceSettings['instance_code']=deviceConfig['instance_code']
         deviceSettings['category_id']=EventConstants.DEVICE_CATERGORIES[MC_DAC_UL.CATEGORY_LABEL]
         deviceSettings['type_id']=EventConstants.DEVICE_TYPES[MC_DAC_UL.DEVICE_LABEL]
         deviceSettings['os_device_code']='OS_DEV_CODE_NOT_SET'
@@ -137,11 +136,11 @@ class MC_DAC_UL(DAQDevice):
             _DLL = windll.LoadLibrary("cbw32.dll")
             MC_DAC_UL._DLL = _DLL
 
-            ioHub.print2err("DLL: ",MC_DAC_UL._DLL)
+            #ioHub.print2err("DLL: ",MC_DAC_UL._DLL)
 
             self._revision=c_float(CURRENTREVNUM)
             ULStat = _DLL.cbDeclareRevision(byref(self._revision))
-            ioHub.print2err('ULStat cbDeclareRevision: ',self._revision,' : ',ULStat)
+            #ioHub.print2err('ULStat cbDeclareRevision: ',self._revision,' : ',ULStat)
 
             # Initiate error handling
             # Parameters:
@@ -154,39 +153,43 @@ class MC_DAC_UL(DAQDevice):
             self._A2D_Resolution=c_int(0)
 
             board=c_int32(self.board_id)
-            ioHub.print2err('board: ', board)
+            #ioHub.print2err('board: ', board)
 
-            self.options = NOCONVERTDATA + BACKGROUND + CONTINUOUS + CALIBRATEDATA
-            ioHub.print2err('self.options: ', self.options)
+            #1208FS
+            #self.options = NOCONVERTDATA + BACKGROUND + CONTINUOUS + CALIBRATEDATA
+
+            #1616FS
+            self.options = BACKGROUND + CONTINUOUS
+            #ioHub.print2err('self.options: ', self.options)
 
 
             # /* Get the resolution of A/D */
             _DLL.cbGetConfig(c_int(BOARDINFO), board, 0, c_int(BIADRES), byref(self._A2D_Resolution))
 
-            ioHub.print2err('A2D_Resolution: ',self._A2D_Resolution)
+            #ioHub.print2err('A2D_Resolution: ',self._A2D_Resolution)
 
             self._HighResolution_A2D=False
             if self._A2D_Resolution.value > 12:
                 self._HighResolution_A2D=True
-            ioHub.print2err('_HighResolution_A2D: ',self._HighResolution_A2D)
+            #ioHub.print2err('_HighResolution_A2D: ',self._HighResolution_A2D)
 
             if self._input_read_method == 'SCAN':
                 count=c_int(self._input_sample_count)
-                ioHub.print2err('count: ', count)
+                #ioHub.print2err('count: ', count)
 
                 if self._HighResolution_A2D:
-                    self._MemHandle=_DLL.cbWinBufAlloc32(count)
-                    self._A2DData = cast(self._MemHandle,POINTER(c_uint32))
+                    #ioHub.print2err("** Using cbWinBufAlloc for 16 bit card **")
+                    self._MemHandle=_DLL.cbWinBufAlloc(count)
+                    self._A2DData = cast(self._MemHandle,POINTER(c_uint16))
                 else:
                     self._MemHandle=_DLL.cbWinBufAlloc(count)
                     self._A2DData = cast(self._MemHandle,POINTER(c_uint16))
 
-                ChannelArray=c_uint16 * count.value
-                self._A2DChannels = ChannelArray()
 
-                ioHub.print2err('_MemHandle ', self._MemHandle)
-                ioHub.print2err('_A2DData ', self._A2DData)
-                ioHub.print2err('_A2DChannels ', self._A2DChannels)
+
+                #ioHub.print2err('_MemHandle ', self._MemHandle)
+                #ioHub.print2err('_A2DData ', self._A2DData)
+
 
                 if self._MemHandle == 0:   # Make sure it is a valid pointer
                     ioHub.print2err("\nERROR ALLOCATING DAQ MEMORY: out of memory\n")
@@ -211,36 +214,36 @@ class MC_DAC_UL(DAQDevice):
 
                 self._lowChannelAI=c_int(lowChan)
                 self._highChannelAI=c_int(highChan)
-                ioHub.print2err('_lowChannelAI: ', self._lowChannelAI)
-                ioHub.print2err('_highChannelAI: ', self._highChannelAI)
+                #ioHub.print2err('_lowChannelAI: ', self._lowChannelAI)
+                #ioHub.print2err('_highChannelAI: ', self._highChannelAI)
 
                 self._currentIndex=c_long(0)
                 self._currentCount=c_long(0)
-                ioHub.print2err('_currentIndex: ', self._currentIndex)
-                ioHub.print2err('_currentCount: ', self._currentCount)
+                #ioHub.print2err('_currentIndex: ', self._currentIndex)
+                #ioHub.print2err('_currentCount: ', self._currentCount)
 
                 self._lastSampleCount=c_long(0)
                 self._lastIndex=c_long(0)
                 self._eventsCreated=0
                 self._AI_function=c_uint16(AIFUNCTION)
-                ioHub.print2err('_lastSampleCount: ', self._lastSampleCount)
-                ioHub.print2err('_lastIndex: ', self._lastIndex)
-                ioHub.print2err('_eventsCreated: ', self._eventsCreated)
-                ioHub.print2err('_AI_function: ', self._AI_function)
+                #ioHub.print2err('_lastSampleCount: ', self._lastSampleCount)
+                #ioHub.print2err('_lastIndex: ', self._lastIndex)
+                #ioHub.print2err('_eventsCreated: ', self._eventsCreated)
+                #ioHub.print2err('_AI_function: ', self._AI_function)
 
                 self._wrapCount=0
-                ioHub.print2err('_wrapCount: ', self._wrapCount)
+                #ioHub.print2err('_wrapCount: ', self._wrapCount)
 
 
 
                 class DAQSampleArray(Structure):
-                    _fields_ = [('low_channel', c_int),('high_channel', c_int),('save_channels', POINTER(c_int)),("readChannelsCount", c_int),("saveChannelsCount", c_int),("count", c_int), ("indexes", POINTER(c_uint)),("values", POINTER(c_int)),("channels", POINTER(c_ushort))]
+                    _fields_ = [('low_channel', c_int),('high_channel', c_int),('save_channels', POINTER(c_int)),("readChannelsCount", c_int),("saveChannelsCount", c_int),("count", c_int), ("indexes", POINTER(c_uint)),("values", POINTER(c_uint16)),("channels", POINTER(c_ushort))]
 
                     @staticmethod
                     def create(low,high,saveChannels,asize):
                         dsb = DAQSampleArray()
                         dsb.indexes=(c_uint * asize)()
-                        dsb.values=(c_int * asize)()
+                        dsb.values=(c_uint16 * asize)()
                         dsb.channels=(c_ushort * asize)()
                         dsb.count=asize
                         dsb.low_channel=low
@@ -258,15 +261,17 @@ class MC_DAC_UL(DAQDevice):
 
 
                 self._A2DSamples=DAQSampleArray.create(self._lowChannelAI,self._highChannelAI,saveChannels,self._input_sample_count)
-                ioHub.print2err('_A2DSamples: ', self._A2DSamples)
-                ioHub.print2err('_A2DSamples.count: ', self._A2DSamples.count)
-                ioHub.print2err('_A2DSamples.low_channel: ', self._A2DSamples.low_channel)
-                ioHub.print2err('_A2DSamples.high_channel: ', self._A2DSamples.high_channel)
-                ioHub.print2err('_A2DSamples.readChannelsCount: ', self._A2DSamples.readChannelsCount)
-                ioHub.print2err('_A2DSamples.saveChannelsCount: ', self._A2DSamples.saveChannelsCount)
+                #ioHub.print2err('_A2DSamples: ', self._A2DSamples)
+                #ioHub.print2err('_A2DSamples.count: ', self._A2DSamples.count)
+                #ioHub.print2err('_A2DSamples.low_channel: ', self._A2DSamples.low_channel)
+                #ioHub.print2err('_A2DSamples.high_channel: ', self._A2DSamples.high_channel)
+                #ioHub.print2err('_A2DSamples.readChannelsCount: ', self._A2DSamples.readChannelsCount)
+                #ioHub.print2err('_A2DSamples.saveChannelsCount: ', self._A2DSamples.saveChannelsCount)
+
 
                 self.enableEventReporting(False)
-                self.enableEventReporting(True)
+                if self.isReportingEvents():
+                    self.enableEventReporting(True)
 
     def enableEventReporting(self,enable):
         current=self.isReportingEvents()
@@ -274,18 +279,18 @@ class MC_DAC_UL(DAQDevice):
             return current
 
         if DAQDevice.enableEventReporting(self,enable) is True:
-            ioHub.print2err('self.options: ', self.options)
+            #ioHub.print2err('self.options: ', self.options)
 
             board=c_int32(self.board_id)
-            ioHub.print2err('board: ', board)
+            #ioHub.print2err('board: ', board)
 
-            ioHub.print2err('rate: ', self._input_scan_frequency)
+            #ioHub.print2err('rate: ', self._input_scan_frequency)
 
             gain = c_int(self.gain)
-            ioHub.print2err('gain: ', gain)
+            #ioHub.print2err('gain: ', gain)
 
             self._daqStatus=c_short(RUNNING)
-            ioHub.print2err('_daqStatus: ', self._daqStatus)
+            #ioHub.print2err('_daqStatus: ', self._daqStatus)
 
             self._lastStartRecordingTimePre=Computer.currentSec()
             ulStat = self._DLL.cbAInScan(board, 0, 7, c_int(self._input_sample_count), byref(self._input_scan_frequency), gain, self._MemHandle, self.options)
@@ -293,21 +298,21 @@ class MC_DAC_UL(DAQDevice):
 
 
 
-            ioHub.print2err('ulStat: ', ulStat)
-            ioHub.print2err('rate after: ', self._input_scan_frequency)
+            #ioHub.print2err('ulStat: ', ulStat)
+            #ioHub.print2err('rate after: ', self._input_scan_frequency)
         else:
             board=c_int32(self.board_id)
 
             ulStat = self._DLL.cbStopBackground (board)  # this should be taking board ID and AIFUNCTION
                                                          # but when ever I give it second param ctypes throws
                                                          # a `4 bytes too much`error
-            ioHub.print2err("cbStopBackground: ",ulStat)
+            #ioHub.print2err("cbStopBackground: ",ulStat)
             self._daqStatus=c_short(IDLE)
-            ioHub.print2err('_daqStatus: ', self._daqStatus)
+            #ioHub.print2err('_daqStatus: ', self._daqStatus)
             self._A2DSamples.zero()
             self._lastStartRecordingTimePre=0.0
             self._lastStartRecordingTimePost=0.0
-            ioHub.print2err('_A2DSamples cleared')
+            #ioHub.print2err('_A2DSamples cleared')
 
 
     def _localPoll(self):
@@ -329,10 +334,10 @@ class MC_DAC_UL(DAQDevice):
         ulStat = self._DLL.cbStopBackground (board)  # this should be taking board ID and AIFUNCTION
                                                  # but when ever I give it second param ctypes throws
                                                  # a `4 bytes too much`error
-        ioHub.print2err("cbStopBackground: ",ulStat)
+        #ioHub.print2err("cbStopBackground: ",ulStat)
 
         ulStat=self._DLL.cbWinBufFree(cast(self._MemHandle,POINTER(c_void_p)))
-        ioHub.print2err("cbWinBufFree _MemHandle: ",ulStat)
+        #ioHub.print2err("cbWinBufFree _MemHandle: ",ulStat)
 
     def __del__(self):
         try:
@@ -358,9 +363,12 @@ class MC_DAC_UL(DAQDevice):
                 lastIndex=self._lastIndex.value
                 samples=self._A2DSamples
 
+                #ioHub.print2err("cc: %ld\tec: %ld"%(self._currentCount.value,self._eventsCreated))
+                #ioHub.print2err("c_index: %ld, l_index: %ld,  c_count: %ld, l_count %ld"%(currentIndex,lastIndex,currentSampleCount,self._lastSampleCount.value))
                 if lastIndex != currentIndex:
 
-                        ulStat = self._DLL.cbAConvertData (board, self._currentIndex, self._A2DData,self._A2DChannels)#self._A2DChannels)
+                        # only for 1208FS
+                        #ulStat = self._DLL.cbAConvertData (board, self._currentIndex, self._A2DData,None)
 
                         self._lastIndex=c_long(currentIndex)
                         self._lastSampleCount=c_long(currentSampleCount)
@@ -369,11 +377,13 @@ class MC_DAC_UL(DAQDevice):
                             self._wrapCount+=1
 
                             for v in xrange(lastIndex,self._input_sample_count):
+                                #ioHub.print2err("v: %d\t%d"%(v,self._A2DData[v]))
                                 self._saveScannedEvent(logged_time,samples,v)
 
                             lastIndex=0
 
                         for v in xrange(lastIndex,currentIndex):
+                                #ioHub.print2err("v: %d\t%d"%(v,self._A2DData[v]))
                                 self._saveScannedEvent(logged_time,samples,v)
         else:
            ioHub.print2err("Warning: MC DAQ not running")
@@ -386,17 +396,22 @@ class MC_DAC_UL(DAQDevice):
         #    asamples.values[aindex]=self._A2DData[aindex]
         #else:
         #    asamples.values[aindex]=0
-
+        
+        
         asamples.indexes[aindex]=self._eventsCreated/asamples.readChannelsCount
         asamples.channels[aindex]=achannel
 
-        if achannel == asamples.readChannelsCount-1:
-            mce=self._createMultiChannelEventList(logged_time,asamples,aindex-achannel)
+        if achannel == asamples.readChannelsCount-1 and self.isReportingEvents():
+            mce=self._createMultiChannelEventList(logged_time,asamples,aindex-achannel,c1=self._currentCount.value-self._lastSampleCount.value)
             self._addNativeEventToBuffer(mce)
         self._eventsCreated+=1
 
 
     def _createMultiChannelEventList(self,logged_time,samples,index,c1=0,c2=0):
+
+        #for i in xrange(index,index+8):
+        #    ioHub.print2err ("%d\t%d\t%d"%(samples.indexes[i],samples.channels[i],samples.values[i]))
+ 
 
         hub_time=(float(samples.indexes[index])/float(self._input_scan_frequency.value))+self._lastStartRecordingTimePost
 
@@ -404,7 +419,6 @@ class MC_DAC_UL(DAQDevice):
             0,              # session id
             Computer.getNextEventID(),  # event id
             DAQMultiChannelInputEvent.EVENT_TYPE_ID,    # event type
-            self.instance_code,         # device instance code
             0,   # device time
             logged_time,  # logged time
             hub_time,       # hub time
@@ -490,7 +504,6 @@ class MC_DAC_UL(DAQDevice):
                   0,              # session id
                   Computer.getNextEventID(),  # event id
                   DAQSingleChannelInputEvent.EVENT_TYPE_ID,    # event type
-                  self.instance_code,   # device instance code
                   device_time,          # device time
                   logged_time,          # logged time
                   hub_time,             # hub time
@@ -503,5 +516,5 @@ class MC_DAC_UL(DAQDevice):
         return daqEvent
 
     @staticmethod
-    def _getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event):
         return event # already a DAQ Event

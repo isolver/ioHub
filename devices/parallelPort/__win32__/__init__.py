@@ -91,7 +91,7 @@ class ParallelPortWin32(object):
             logged_time=currentTime
             iohub_time=currentTime-int(pdelay)
 
-            ppe= [0,0,Computer.getNextEventID(),ParallelPortEvent.EVENT_TYPE_ID,self.instance_code,
+            ppe= [0,0,Computer.getNextEventID(),ParallelPortEvent.EVENT_TYPE_ID,
                   device_time, logged_time, iohub_time, ci,pdelay,self.base_address,currentValue,lrv]
 
             self._addNativeEventToBuffer(ppe)
@@ -100,5 +100,5 @@ class ParallelPortWin32(object):
         self.lastReadValue=currentValue
 
     @staticmethod    
-    def _getIOHubEventObject(event,device_instance_code):
+    def _getIOHubEventObject(event):
         return event # already a ParallelPort Event
