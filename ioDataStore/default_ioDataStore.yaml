@@ -1,0 +1,6 @@
+ioDataStore:
+    enable: True
+    filename: events
+    storage_type: pytables
+    multiple_experiments: True
+    flush_interval: 32

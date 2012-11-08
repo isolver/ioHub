@@ -20,8 +20,17 @@ import ioHub
 from ioHub import client
 from ioHub.devices import Computer, DeviceEvent, EventConstants
 
+from yaml import load
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+        
 currentSec= Computer.currentSec
 
+import msgpack
+msgpk_unpacker=msgpack.Unpacker(use_list=True)
+msgpk_unpack=msgpk_unpacker.unpack
 
 #noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
@@ -37,13 +46,12 @@ class udpServer(DatagramServer):
             self.unpack=ujson.decode
         elif coder == 'msgpack':
             self.iohub.log("ioHub Server configuring msgpack...")
-            import msgpack
             self.coder=msgpack
             self.packer=msgpack.Packer()
-            self.unpacker=msgpack.Unpacker(use_list=True)
+            self.unpacker=msgpk_unpacker
             self.pack=self.packer.pack
-            self.feed=self.unpacker.feed
-            self.unpack=self.unpacker.unpack
+            self.feed=msgpk_unpacker.feed
+            self.unpack=msgpk_unpack
 
         
         DatagramServer.__init__(self,address)
@@ -225,7 +233,7 @@ class udpServer(DatagramServer):
             return self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
         return False
 
-    def initializeExperimentConditionVariableTable(self, experiment_id, session_id, numpy_dtype):
+    def initializeConditionVariableTable(self, experiment_id, session_id, numpy_dtype):
         if self.iohub.emrt_file:
             output=[('session_id','u4'),('index_id','u4')]
             for a in numpy_dtype:
@@ -237,12 +245,12 @@ class udpServer(DatagramServer):
                         temp[1].append(tuple(i))
                     output.append(tuple(temp))
 
-            return self.iohub.emrt_file._initializeExperimentConditionVariableTable(experiment_id,output)
+            return self.iohub.emrt_file._initializeConditionVariableTable(experiment_id,output)
         return False
 
-    def addRowToExperimentConditionVariableTable(self,session_id,data):
+    def addRowToConditionVariableTable(self,session_id,data):
         if self.iohub.emrt_file:
-            return self.iohub.emrt_file._addRowToExperimentConditionVariableTable(session_id,data)
+            return self.iohub.emrt_file._addRowToConditionVariableTable(session_id,data)
         return False
 
     def clearEventBuffer(self):
@@ -313,13 +321,12 @@ class DeviceMonitor(Greenlet):
 class ioServer(object):
     eventBuffer=None 
     _logMessageBuffer=None
-    def __init__(self, initial_time_offset, configFilePath=None, config=None):
+    def __init__(self, initial_time_offset, rootScriptPathDir, config=None):
         ioHub.devices.Computer.isIoHubProcess=True
         ioHub.devices.Computer.globalClock=ioHub.ioClock(None,initial_time_offset)
         self._running=True
         self.emrt_file=None
         self.config=config
-        self.configFilePath=configFilePath
         ioServer.eventBuffer=deque(maxlen=config.get('global_event_buffer',2048))
         ioServer._logMessageBuffer=deque(maxlen=128)
 
@@ -334,7 +341,7 @@ class ioServer(object):
         # read temp paths file
         ioHub.data_paths=None
         try:
-            expJsonPath=os.path.join(os.path.split(configFilePath)[0],'exp.paths')
+            expJsonPath=os.path.join(rootScriptPathDir,'exp.paths')
             f=open(expJsonPath,'r')
             import ujson
             ioHub.data_paths=ujson.loads(f.read())
@@ -345,14 +352,19 @@ class ioServer(object):
             pass
 
         # dataStore setup
-        if config.get('ioDataStore',False) and config.get('ioDataStore',False).get('enable',False):
-            configFileDir,cfn=os.path.split(self.configFilePath)
-            if ioHub.data_paths is None:
-                resultsFilePath=configFileDir
-            else:
-                resultsFilePath=ioHub.data_paths['IOHUB_DATA']
-            self.createDataStoreFile(config.get('ioDataStore').get('filename','events')+'.hdf5',resultsFilePath,'a',config.get('ioDataStore').get('storage_type','pytables'),config.get('ioDataStore'))
-
+        if 'ioDataStore' in config:
+            dataStoreConfig=config.get('ioDataStore')
+                
+            if len(dataStoreConfig)==0:
+                dsconfigPath=os.path.join(ioHub.IO_HUB_DIRECTORY,'ioDataStore','default_ioDataStore.yaml')              
+                dslabel,dataStoreConfig=load(file(dsconfigPath,'r'), Loader=Loader).popitem()                
+            
+            if dataStoreConfig.get('enable', True):            
+                if ioHub.data_paths is None:
+                    resultsFilePath=rootScriptPathDir
+                else:
+                    resultsFilePath=ioHub.data_paths['IOHUB_DATA']
+                self.createDataStoreFile(dataStoreConfig.get('filename','events')+'.hdf5',resultsFilePath,'a',dataStoreConfig.get('storage_type','pytables'),dataStoreConfig)
         #built device list and config from yaml config settings
         for iodevice in config.get('monitor_devices',()):
             for device_class,deviceConfig in iodevice.iteritems():
@@ -390,6 +402,10 @@ class ioServer(object):
         self.log("Time Offset: {0}".format(initial_time_offset))
 
     def addDeviceToMonitor(self,device_class,deviceConfig):
+        if len(deviceConfig)==0:
+            dconfigPath=os.path.join(ioHub.IO_HUB_DIRECTORY,'devices',device_class,"default_%s.yaml"%(device_class))              
+            dclass,deviceConfig=load(file(dconfigPath,'r'), Loader=Loader).popitem()
+            
         if deviceConfig.get('enable',True):
             try:
                 self.log("Creating Device: %s"%(device_class,))
@@ -513,30 +529,38 @@ class ioServer(object):
 
 
 
-def run(initial_time_offset=None,configFilePath=None):
-    from yaml import load
-    try:
-        from yaml import CLoader as Loader, CDumper as Dumper
-    except ImportError:
-        from yaml import Loader, Dumper
+def run(initial_time_offset,rootScriptPathDir,configFilePath):
 
-    ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
-    
-    s = ioServer(initial_time_offset, configFilePath, ioHubConfig)
+    import tempfile
+    tdir=tempfile.gettempdir()
+    cdir,cfile=os.path.split(configFilePath)
+
+    if tdir==cdir:
+        tf=open(configFilePath)
+        msgpk_unpacker.feed(tf.read())
+        ioHubConfig=msgpk_unpack()
+        tf.close()
+        os.remove(configFilePath)
+    else:
+        ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
+
+    s = ioServer(initial_time_offset, rootScriptPathDir, ioHubConfig)
 
     s.start()    
     
 if __name__ == '__main__':
     prog=sys.argv[0]
 
-    if len(sys.argv)==2:
+    if len(sys.argv)>=2:
         initial_offset=float(sys.argv[1])
-    elif len(sys.argv)==3:
-        configFileName=sys.argv[2]
-        initial_offset=float(sys.argv[1])
+    if len(sys.argv)>=3:
+        rootScriptPathDir=sys.argv[2]
+    if len(sys.argv)>=4:        
+        configFileName=sys.argv[3]        
         #ioHub.print2err("ioServer initial_offset: ",initial_offset)
-    else:
+    if len(sys.argv)<2:
         configFileName=None
+        rootScriptPathDir=None
         initial_offset=ioHub.highPrecisionTimer()
         
-    run(initial_time_offset=initial_offset, configFilePath=configFileName)
+    run(initial_time_offset=initial_offset, rootScriptPathDir=rootScriptPathDir, configFilePath=configFileName)

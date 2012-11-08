@@ -10,8 +10,6 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 
-import mc
-
-import lj
+import MC
 
 

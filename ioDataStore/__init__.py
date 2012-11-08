@@ -350,7 +350,7 @@ class EMRTpyTablesFile():
 
         return self.active_session_id
 
-    def _initializeExperimentConditionVariableTable(self,experiment_id,np_dtype):
+    def _initializeConditionVariableTable(self,experiment_id,np_dtype):
         experimentConditionVariableTable=None
         self._EXP_COND_DTYPE=N.dtype(np_dtype)
         try:
@@ -372,7 +372,7 @@ class EMRTpyTablesFile():
         self._activeRunTimeConditionVariableTable=experimentConditionVariableTable
         return True
 
-    def _addRowToExperimentConditionVariableTable(self,session_id,data):
+    def _addRowToConditionVariableTable(self,session_id,data):
         if self.emrtFile and 'EXP_CV' in self.TABLES and self._EXP_COND_DTYPE is not None:
             try:
                 etable=self.TABLES['EXP_CV']

@@ -35,8 +35,8 @@ monitor_devices:
             unit_type: mm
         psychopy_config_file: default
     - eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
-        #device_class: eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
-        enable: True
+        #eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
+        enable: False
         name: tracker
         saveEvents: True
         streamEvents: True

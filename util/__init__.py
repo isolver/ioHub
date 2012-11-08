@@ -17,6 +17,22 @@ def validate_version(version):
     return NormalizedVersion(rversion)
 
 
+#  331     public boolean contains(double x, double y) {
+#  332         // Normalize the coordinates compared to the ellipse
+#  333         // having a center at 0,0 and a radius of 0.5.
+#  334         double ellw = getWidth();
+#  335         if (ellw <= 0.0) {
+#  336             return false;
+#  337         }
+#  338         double normx = (x - getX()) / ellw - 0.5;
+#  339         double ellh = getHeight();
+#  340         if (ellh <= 0.0) {
+#  341             return false;
+#  342         }
+#  343         double normy = (y - getY()) / ellh - 0.5;
+#  344         return (normx * normx + normy * normy) < 0.25;
+#  345     }
+
 try:
     import describeModule
 except:

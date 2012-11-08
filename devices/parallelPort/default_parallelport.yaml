@@ -1,0 +1,10 @@
+ParallelPort:
+  name: pport
+  enable: True
+  base_address: 0x378
+  saveEvents: True
+  streamEvents: True
+  auto_report_events: True
+  event_buffer_length: 256
+  device_timer:
+    interval: 0.001

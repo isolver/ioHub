@@ -209,9 +209,8 @@ a command prompt at the ioHub/examples/simple folder and type:
 
             ioHubConfigFileName=unicode(ioHubInfo.get('config','iohub_config.yaml'))
             ioHubConfigAbsPath=os.path.join(self.configFilePath,unicode(ioHubConfigFileName))
-            ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
             
-            self.hub=ioHubConnection(ioHubConfig,ioHubConfigAbsPath)
+            self.hub=ioHubConnection(None,ioHubConfigAbsPath)
 
             # A circular buffer used to hold events retrieved from self.getEvents() during 
             # self.delay() calls. self.getEvents() appends any events in the allEvents

@@ -55,14 +55,16 @@ class Display(Device):
                                                                 # the size of the viewable screen (settings on the monitor itself). Requires : No monitor information
     __slots__=['stimulus_screen_index']
     def __init__(self,*args,**kwargs):
-        Display._settings=kwargs['dconfig']
+        Display._settings=kwargs.get('dconfig',{})
         deviceSettings={
             'category_id':ioHub.devices.EventConstants.DEVICE_CATERGORIES[Display.CATEGORY_LABEL],
             'type_id':ioHub.devices.EventConstants.DEVICE_TYPES[Display.DEVICE_LABEL],
             'device_class':Display.__name__,
-            'name':self._settings['name'],
+            'name':self._settings.get('name','display'),
             'os_device_code':'OS_DEV_CODE_NOT_SET',
             'max_event_buffer_length':16,
+            'stimulus_screen_index':self._settings.get('display_index',0),
+            'psychopy_config_file':self._settings.get('psychopy_config_file','ioHubDefault'),
             '_isReportingEvents':self._settings.get('auto_report_events',True)
             }
         
@@ -116,10 +118,14 @@ class Display(Device):
         Args: None
         Return (OrderedDict): key,value pais for various scrren attributes
         """
+        if Display._screenInfoList is None:
+            Display._detectDisplayCountandResolutions()
         return Display._screenInfoList[Display.stimulus_screen_index]
 
     @staticmethod
     def getMonitorCount():
+        if Display._screenInfoList is None:
+            Display._detectDisplayCountandResolutions()
         return Display.SCREEN_COUNT
 
     @staticmethod
@@ -140,6 +146,8 @@ class Display(Device):
         Args: None
         Return (int): index of display in multi display psychical setups
         """
+        if Display._screenInfoList is None:
+            Display._detectDisplayCountandResolutions()
         if i < Display.SCREEN_COUNT:
             Display.stimulus_screen_index=i
             Display._ppd=None
@@ -147,6 +155,8 @@ class Display(Device):
         
     @staticmethod
     def getPPD(alg='simple'):
+        if Display._screenInfoList is None:
+            Display._detectDisplayCountandResolutions()
         if alg == 'simple':
              if Display._ppd is None:
                  import math
@@ -187,16 +197,17 @@ class Display(Device):
         return 1000.0/Display.getStimulusScreenInfo()['mode'][-1]
 
     def _determineDisplayCoordSpace(self):
-        dispCoordType=self._settings['reporting_unit_type']
+        dispCoordType=self._settings.get('reporting_unit_type',None)
 
-        for ctype,cvalues in self.ccordinateTypes.iteritems():
-            if dispCoordType in cvalues:
-                Display._displayCoordinateType=ctype
-                break
+        if dispCoordType:
+            for ctype,cvalues in self.ccordinateTypes.iteritems():
+                if dispCoordType in cvalues:
+                    Display._displayCoordinateType=ctype
+                    break
 
         if Display._displayCoordinateType is None:
             Display._displayCoordinateType='pix'
-            ioHub.print2err("ERROR: Display._determineDIsplayCoordSpace: Unknown coord space parameter setting; using 'pix': "+dispCoordType)
+            ioHub.print2err("ERROR: Display._determineDIsplayCoordSpace: Unknown coord space parameter setting; using 'pix': "+str(dispCoordType))
 
         return Display._displayCoordinateType
 
@@ -204,6 +215,9 @@ class Display(Device):
     def getDisplayCoordinateType(cls):
         return cls._displayCoordinateType
 
+    def getPsychoPyMonitorSettingsName(self):
+        return self._settings.get('psychopy_config_file','ioHubDefault')
+        
     @classmethod
     def pixel2DisplayCoord(cls,px,py):
         try:
@@ -256,8 +270,25 @@ class Display(Device):
 
     def _createPsychopyCalibrationFile(self):
         from psychopy import monitors
-        psychoMonitor=monitors.Monitor(self._settings['psychopy_config_file'], width=self._settings['physical_stimulus_area']['width'],
-            distance=self._settings['default_eye_to_surface_distance']['surface_center'], gamma=1.0)
+
+        #TODO: TRY TO BETTER INTEGRATE Display classs with PsychoPy Monitor file
+        
+        stim_area=self._settings.get('physical_stimulus_area',None)
+        if stim_area is None:
+            ioHub.print2err("WARNING: USING DEFAULT DISPLAY DIMENSION SETTINGS !!")
+            dwidth=500.0
+        else:
+            dwidth=self._settings['physical_stimulus_area']['width']
+
+        sdist_info=self._settings.get('default_eye_to_surface_distance',None)
+        if sdist_info is None:
+            ioHub.print2err("WARNING: USING DEFAULT DISPLAY DISTANCE SETTINGS !!")
+            ddist=500.0
+        else:
+            ddist= self._settings['default_eye_to_surface_distance']['surface_center']
+       
+        psychoMonitor=monitors.Monitor(self._settings.get('psychopy_config_file','ioHubDefault'), 
+                                       width=dwidth, distance=ddist, gamma=1.0)
         psychoMonitor.setSizePix(self.getStimulusScreenResolution())
         psychoMonitor.saveMon()
         psychoMonitor.setCurrent(0)

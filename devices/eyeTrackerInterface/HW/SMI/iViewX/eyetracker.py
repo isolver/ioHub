@@ -294,6 +294,10 @@ class EyeTracker(EyeTrackerInterface):
         Current eye tracker time (in sec.msec)
         """
         #TODO: Does not currently seem to be working, trackerTime always returns a 0
+
+        trackerIsRunningLocalHost=True
+        if trackerIsRunningLocalHost:
+            return ioHub.highPrecisionTimer()
         return self.trackerTime()*self.DEVICE_TIMEBASE_TO_SEC
         
     def trackerTime(self):
@@ -301,10 +305,14 @@ class EyeTracker(EyeTrackerInterface):
         Current eye tracker time (in SMI native time - usec)
         """
         #TODO: Does not currently seem to be working, trackerTime always returns a 0
-        smitime = c_longlong(0) #allocate memory
-        EyeTracker._iViewXAPI.iV_GetCurrentTimestamp(byref(smitime))
-        #ioHub.print2err('time: %ld'%(smitime.value))
-        return smitime.value
+        trackerIsRunningLocalHost=True
+        if trackerIsRunningLocalHost:
+            return ioHub.highPrecisionTimer()/self.DEVICE_TIMEBASE_TO_SEC
+        else:
+            smitime = c_longlong(0) #allocate memory
+            EyeTracker._iViewXAPI.iV_GetCurrentTimestamp(byref(smitime))
+            #ioHub.print2err('time: %ld'%(smitime.value))
+            return smitime.value
 
 
     def setConnectionState(self, *args, **kwargs):
@@ -738,7 +746,8 @@ class EyeTracker(EyeTrackerInterface):
             # therefore, getTime for smi, 'when on single PC setup' can just use Computer.getTime()
             # right now have it fixed at sampling_interval_in_sec*0.5+0.001
             # which would be a best case average delay.
-            event_delay = ((1000.0/EyeTracker.sample_rate)/2000.0)+0.001 #(self.trackerTime() - event.timestamp) * self.DEVICE_TIMEBASE_TO_SEC
+
+            event_delay = self.trackerSec()-event_timestamp#((1000.0/EyeTracker.sample_rate)/2000.0)+0.001 #(self.trackerTime() - event.timestamp) * self.DEVICE_TIMEBASE_TO_SEC
 
             # so hub time is simple currentTime - device event delay
             hub_timestamp = logged_time - event_delay

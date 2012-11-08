@@ -38,6 +38,8 @@ currentSec= Computer.currentSec
 class ioHubConnectionException(Exception):
     pass
 
+pack = None
+
 class SocketConnection(object):
     def __init__(self,local_host=None,local_port=None,remote_host=None,remote_port=None,rcvBufferLength=1492, broadcast=False, blocking=0, timeout=0,coder=None):
         self._local_port= local_port
@@ -68,12 +70,14 @@ class SocketConnection(object):
 
     #noinspection PyArgumentList
     def configCoder(self,coder):
+        global pack
         #print "** In configCoder...", coder
         if coder:
             if coder == 'ujson':
                 import ujson
                 self.coder=ujson
                 self.pack=ujson.encode
+                pack=ujson.encode
                 self.unpack=ujson.decode
                 #print 'ujson:', self.pack
             elif coder =='msgpack':
@@ -82,6 +86,7 @@ class SocketConnection(object):
                 self.packer=msgpack.Packer()
                 self.unpacker=msgpack.Unpacker(use_list=True)
                 self.pack=self.packer.pack
+                pack=self.packer.pack
                 self.feed=self.unpacker.feed
                 self.unpack=self.unpacker.unpack
                 #print 'msgpack:', self.pack
@@ -356,16 +361,16 @@ class ioHubConnection(object):
 
     """
     _replyDictionary=dict()
-    def __init__(self,ioHubConfig={},ioHubConfigAbsPath=None):
+    def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):
         self._initial_clock_offset=ioHub.highPrecisionTimer()
         Computer.globalClock=ioHub.ioClock(self,self._initial_clock_offset,False)
 
-        if ioHubConfigAbsPath is not None and (ioHubConfig is None or len(ioHubConfig) == 0):
-            ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
-
+        if ioHubConfig:
+            if not isinstance(ioHubConfig,dict):
+                raise ioHub.ioHubError("The provided ioHub Configuration is not a dictionary.", ioHubConfig)
             
         # udp port setup
-        self.udp_client = UDPClientConnection(coder=ioHubConfig.get('ipcCoder','msgpack'))
+        self.udp_client = None
 
         # the dynamically generated object that contains an attribute for
         # each device registed for monitoring with the ioHub server so
@@ -400,21 +405,56 @@ class ioHubConnection(object):
         Starts the ioHub Server Process, storing it's process id, and creating the experiment side device representation
         for IPC access to public device methods.
         """
+        experiment_info=None
+        session_info=None
         
-        if ioHubConfigAbsPath is None and (ioHubConfig is None or len(ioHubConfig) == 0):
-            ioHubConfigAbsPath=os.path.join(ioHub.IO_HUB_DIRECTORY,'default_config.yaml')
-        elif (ioHubConfig is not None and len(ioHubConfig)>0) and ioHubConfigAbsPath is None:
-            ioHub.print2err("ERROR: ioHubConnection does not yet support configuring server via python dictionary. Only .yaml file configuration is supported at this time.")
+        rootScriptPath = os.path.dirname(sys.argv[0])
+        
+        if ioHubConfigAbsPath is None and ioHubConfig is None:
+            ioHubConfig=dict(monitor_devices=[dict(Keyboard={}),dict(Display={}),dict(Mouse={})])
+        elif ioHubConfig is not None and ioHubConfigAbsPath is None:
+            if 'monitor_devices' not in ioHubConfig:
+                ioHub.print2err("ERROR: ioHubConfig must be provided with 'monitor_devices' key.")
+                sys.exit(1)
+            if 'ioDataStore' in ioHubConfig:
+                iods=ioHubConfig['ioDataStore']
+                if 'experiment_info' in iods and 'session_info' in iods:
+                    experiment_info=iods['experiment_info']
+                    session_info=iods['session_info']
+                    del ioHubConfig['ioDataStore']['experiment_info']
+                    del ioHubConfig['ioDataStore']['session_info']
+                    
+                else:
+                    ioHub.print2err("ERROR: ioHubConfig:ioDataStore must contain both a 'experiment_info' and a 'session_info' key with a dict value each.")
+                    sys.exit(1)   
+                    
+        elif ioHubConfigAbsPath  is not None and ioHubConfig is None:
+            ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
+            self.udp_client=UDPClientConnection(coder=ioHubConfig.get('ipcCoder','msgpack'))
+        else:        
+            ioHub.print2err("ERROR: Both a ioHubConfig dict object AND a path to an ioHubConfig file can not be provided.")
             sys.exit(1)
         
-        #print 'ioHubConfig:', ioHubConfig
-        #print 'ioHubConfigAbsPath: ', ioHubConfigAbsPath
-        
-        run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
-        subprocessArgList=[sys.executable, run_script,"%.6f"%(self._initial_clock_offset,),ioHubConfigAbsPath]
+        if ioHubConfig and ioHubConfigAbsPath is None:
+                if self.udp_client is None:                
+                    self.udp_client=UDPClientConnection(coder=ioHubConfig.get('ipcCoder','msgpack'))
+                
+                if isinstance(ioHubConfig.get('monitor_devices'),dict):
+                    #short hand device spec is being used. Convert dict of 
+                    #devices in a list of device dicts.
+                    devs=ioHubConfig.get('monitor_devices')
+                    devsList=[{dname:dc} for dname,dc in devs.iteritems()]
+                    ioHubConfig['monitor_devices']=devsList
+                        
+                import tempfile
+                tfile=tempfile.NamedTemporaryFile(mode='w',suffix='iohub',delete=False)
+                tfile.write(pack(ioHubConfig))
+                ioHubConfigAbsPath=os.path.abspath(tfile.name)               
+                tfile.close()
 
-        #print 'run_script:', run_script
-        #print 'subprocessArgList: ', subprocessArgList
+        run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
+        subprocessArgList=[sys.executable, run_script,"%.6f"%(self._initial_clock_offset,),rootScriptPath,ioHubConfigAbsPath]
+
 
         # check for existing ioHub Process based on process if saved to file
         iopFileName=os.path.join(ioHub.IO_HUB_DIRECTORY,'.iohpid')
@@ -477,7 +517,10 @@ class ioHubConnection(object):
         except:
             ioHub.printExceptionDetailsToStdErr()
 
-
+        if experiment_info:
+            self._sendExperimentInfo(experiment_info)
+        if session_info:
+            self._sendSessionInfo(session_info)
         # create a local 'thin' representation of the registered ioHub devices,
         # allowing such things as device level event access (if supported) 
         # and transparent IPC calls of public device methods and return value access.
@@ -706,12 +749,12 @@ class ioHubConnection(object):
         self.experimentSessionID=r[2]
         return r[2]
 
-    def initializeExperimentConditionVariableTable(self, conditionVariablesProvider):
-        r=self.sendToHubServer(('RPC','initializeExperimentConditionVariableTable',(self.experimentID,self.experimentSessionID,conditionVariablesProvider._numpyConditionVariableDescriptor)))
+    def initializeConditionVariableTable(self, conditionVariablesProvider):
+        r=self.sendToHubServer(('RPC','initializeConditionVariableTable',(self.experimentID,self.experimentSessionID,conditionVariablesProvider._numpyConditionVariableDescriptor)))
         return r[2]
 
-    def addRowToExperimentConditionVariableTable(self,data):
-        r=self.sendToHubServer(('RPC','addRowToExperimentConditionVariableTable',(self.experimentSessionID,data)))
+    def addRowToConditionVariableTable(self,data):
+        r=self.sendToHubServer(('RPC','addRowToConditionVariableTable',(self.experimentSessionID,data)))
         return r[2]
 
     def getDevice(self,deviceName):

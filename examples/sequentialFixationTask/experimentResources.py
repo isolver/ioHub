@@ -17,11 +17,14 @@ import json
 from collections import OrderedDict
 import numpy as np
 
+from shapely.geometry import Point
+
 class TargetScreen(ScreenState):
     TARGET_OUTER_RADIUS=15
     TARGET_INNER_RADIUS=5
     TARGET_OUTER_COLOR=[255,255,255]
     TARGET_INNER_COLOR=[255,255,255]
+    WITHIN_AOI_SAMPLE_COUNT_THRESHOLD=5
     def __init__(self,experimentRuntime, deviceEventTriggers=None, timeout=None):
         ScreenState.__init__(self,experimentRuntime, deviceEventTriggers, timeout)
         self.stim['OUTER_POINT']=psychopyVisual.Circle(self.window(),radius=(self.TARGET_OUTER_RADIUS,self.TARGET_OUTER_RADIUS),lineWidth=0, lineColor=None, lineColorSpace='rgb255', name='FP_OUTER', opacity=1.0, interpolate=False, units='pix',pos=(0,0))
@@ -36,6 +39,10 @@ class TargetScreen(ScreenState):
         self.dynamicStimPositionFuncPtr=None
         self.stim['DYNAMIC_STIM']=psychopyVisual.GratingStim(self.window(),tex=None, mask="gauss", pos=[0,0],size=experimentRuntime.devices.display.getPPD(),color='purple',opacity=0.0)
         self.stimNames.append('DYNAMIC_STIM')
+        
+        self.nextAreaOfInterest=None
+        self.aoiTriggeredTime=None
+        self.aoiTriggeredID=None
 
     def setTargetOuterColor(self,rgbColor):
         self.stim['OUTER_POINT'].setFillColor(rgbColor,'rgb255')
@@ -57,8 +64,13 @@ class TargetScreen(ScreenState):
         self.stim['OUTER_POINT'].setPos(pos)
         self.stim['INNER_POINT'].setPos(pos)
         self.dirty=True
-
-    def toggleDynamicStimVisibility(self,event):
+        self.aoiTriggeredTime=None
+        self.aoiTriggeredID=None
+        self.withinAOIcount=0
+        self.aoiBestGaze=None
+        self._mindist=100000.0
+        
+    def toggleDynamicStimVisibility(self,flipTime,stateDuration,event):
         self._showDynamicStim=not self._showDynamicStim
         if self._showDynamicStim is True:
             self.stim['DYNAMIC_STIM'].setOpacity(1.0)
@@ -68,11 +80,28 @@ class TargetScreen(ScreenState):
         self.dirty=True
         return False
 
-    def setDynamicStimPosition(self,event):
+    def setDynamicStimPosition(self,flipTime,stateDuration,event):
         if self.dynamicStimPositionFuncPtr:
             x,y=self.dynamicStimPositionFuncPtr()
-            self.stim['DYNAMIC_STIM'].setPos((x,y))
+            
+            if self.nextAreaOfInterest:
+                p=Point(x,y)
+                if self.nextAreaOfInterest.contains(p):                         
+                    self.withinAOIcount+=1
+                    if self.withinAOIcount>=self.WITHIN_AOI_SAMPLE_COUNT_THRESHOLD:
+                        if self.aoiTriggeredID is None:                        
+                            self.aoiTriggeredTime=event['hub_time']
+                            self.aoiTriggeredID=event['event_id']
+                            cdist=self.nextAreaOfInterest.centroid.distance(p)
+                            if cdist<self._mindist:
+                                self._mindist=cdist
+                                self.aoiBestGaze=x,y
+                else:
+                    self.withinAOIcount=0
+                del p
+                    
             if self._showDynamicStim is True:
+                self.stim['DYNAMIC_STIM'].setPos((x,y))
                 self.dirty=True
                 self.flip()
         return False
@@ -83,32 +112,87 @@ class TargetScreen(ScreenState):
         return ScreenState.flip(self,text)
 
 #### Experiment Variable (IV and DV) Condition Management
+class ConditionSetProvider(object):
+    def __init__(self, conditionSetArray, randomize=False):
+        self._conditionSets=conditionSetArray
+        self.conditionSetCount=len(conditionSetArray)
+        self.currentConditionSet=None
+        self.currentConditionSetIndex=-1
+        self.currentConditionSetIteration=0
+        self.randomize=randomize
+        
+        self._provideInOrder=range(self.conditionSetCount)
+        if self.randomize is True:
+            np.random.shuffle(self._provideInOrder)
+  
+    def getNextConditionSet(self):
+        for i in self._provideInOrder:
+            self.currentConditionSetIndex=i
+            self.currentConditionSetIteration+=1
+            conditionSet=self._conditionSets[i]
+            self.currentConditionSet=conditionSet
+            yield conditionSet
+    
+    def getCurrentConditionSet(self):
+        return self.currentConditionSet
+        
+    def getConditionSetCount(self):
+        return self.conditionSetCount
 
+    def getCurrentConditionSetIndex(self):
+        return self.currentConditionSetIndex
+
+    def getCurrentConditionSetIteration(self):
+        return self.currentConditionSetIteration
+
+    def getRandomize(self):
+        return self.randomize
+ 
+    def getIterationOrder(self):
+        return self._provideInOrder
+        
+class BlockSetProvider(ConditionSetProvider):
+    def __init__(self, blockSetArray, randomize):
+        ConditionSetProvider.__init__(self, blockSetArray, randomize)
+
+class TrialSetProvider(ConditionSetProvider):
+    def __init__(self, trialSetArray, randomize):
+        ConditionSetProvider.__init__(self, trialSetArray, randomize)
+       
 class ExperimentVariableProvider(object):
-    def __init__(self,fileNameWithPath,blockingVariableLabel,practiceBlockValues=None,randomizeBlocks=False,randomizeTrials=True,randomizeVariables=[]):
+    _randomGeneratorSeed=None
+    def __init__(self,fileNameWithPath,blockingVariableLabel,practiceBlockValues=None,randomizeBlocks=False,randomizeTrials=True,randSeed=None):
         self.fileNameWithPath=fileNameWithPath
         self.blockingVariableLabel=blockingVariableLabel
         self.practiceBlockValues=practiceBlockValues
 
         self.randomizeBlocks=randomizeBlocks
         self.randomizeTrials=randomizeTrials
-        self.randomizeVariables=randomizeVariables
-
+   
+        if ExperimentVariableProvider._randomGeneratorSeed is None:
+            if randSeed is None:
+                randSeed=int(ioHub.highPrecisionTimer()*1000.0)
+            ExperimentVariableProvider._randomGeneratorSeed = randSeed
+            np.random.seed(ExperimentVariableProvider._randomGeneratorSeed)
+            
         self.variableNames=[]
         self.totalColumnCount=None
         self.totalRowCount=None
         self._numpyConditionVariableDescriptor=None
         self.data=None
 
-        self.practiceBlocks=[]
-        self.experimentBlocks=[]
+        self.practiceBlocks=BlockSetProvider([TrialSetProvider([],self.randomizeTrials),],self.randomizeBlocks)
+        self.experimentBlocks=BlockSetProvider([TrialSetProvider([],self.randomizeTrials),],self.randomizeBlocks)
 
         self._readConditionVariableFile()
 
 
         # not implemented yet
         #self.recycleCount={} # dict of trialID: recyledTimes
-
+        
+    def getData(self):
+        return self.data
+        
     def getExperimentBlocks(self):
         """
         Blocks are simply returned as a numpy ndarray of ndarrays. Blocks are grouped based on the
@@ -208,15 +292,20 @@ class ExperimentVariableProvider(object):
             if isinstance(self.practiceBlockValues,(str,unicode)):
                 self.practiceBlockValues=[self.practiceBlockValues,]
 
-
+            
+            blockList=[]
             for pbn in self.practiceBlockValues:
                 if pbn in tempBlockDict.keys():
-                    self.practiceBlocks.append(tempBlockDict[pbn])
+                    blockList.append(TrialSetProvider(tempBlockDict[pbn],self.randomizeTrials))
                     del tempBlockDict[pbn]
-
-            for pbv in tempBlockDict.values():
-                self.experimentBlocks.append(pbv)
-
+            self.practiceBlocks=BlockSetProvider(blockList, False)
+            
+            
+        blockList=[]
+        for pbv in tempBlockDict.values():
+            blockList.append(TrialSetProvider(pbv,self.randomizeTrials))
+        self.experimentBlocks=BlockSetProvider(blockList,self.randomizeBlocks)
+            
         tempBlockDict.clear()
         del tempBlockDict
 
@@ -225,17 +314,14 @@ class ExperimentVariableProvider(object):
         pass
 
 
-def getAutoGeneratedTargetPositions(pixel_width,pixel_height,width_scalar=1.0, height_scalar=1.0, horiz_points=7, vert_points=7):
+def getAutoGeneratedTargetPositions(pixel_width,pixel_height,width_scalar=1.0, 
+                                    height_scalar=1.0, horiz_points=7, vert_points=7):
     swidth=int(pixel_width*width_scalar)
     sheight=int(pixel_height*height_scalar)
-    print 'swidth / sheight:',swidth,sheight
-    print 'horiz_points, vert_points : ',horiz_points, vert_points
     hstep=int(swidth/(horiz_points+1))
     vstep=int(sheight/(vert_points+1))
-    print 'hstep / vstep:',hstep,vstep
     hsteps=np.arange(hstep,swidth-hstep+1,hstep)
     vsteps=np.arange(vstep,sheight-vstep+1,vstep)
-    print 'hsteps / vsteps:',hsteps,vsteps
     # center 0 on screen center
     hpoints = hsteps-int(swidth/2)
     vpoints = vsteps-int(sheight/2)
@@ -245,12 +331,9 @@ def getAutoGeneratedTargetPositions(pixel_width,pixel_height,width_scalar=1.0, h
     X, Y = np.meshgrid(hpoints, vpoints)
     XY=np.vstack(([X.T], [Y.T])).T
 
-    print "XY shape: ", XY.shape
-    print "POINTS to be:", horiz_points*vert_points,2    
     # convert it to a 2D array, horiz_points*vert_points,2
     POINTS=XY.reshape(horiz_points*vert_points,2)
     
-    print 'POINTS shape: ', POINTS.shape
     return POINTS
 
 

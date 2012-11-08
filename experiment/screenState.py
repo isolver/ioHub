@@ -23,7 +23,7 @@ class DeviceEventTrigger(object):
     """
     _lastEventsByDevice=dict()
     __slots__=['device','event_type','event_attribute_conditions','triggerFunction','_triggeringEvent']
-    def __init__(self, device, event_type, event_attribute_conditions, triggerFunction = lambda a: True==True):
+    def __init__(self, device, event_type, event_attribute_conditions, triggerFunction = lambda a,b,c: True==True):
         self.device=device
         self.event_type=event_type
         self.event_attribute_conditions=event_attribute_conditions
@@ -94,15 +94,12 @@ class DeviceEventTrigger(object):
 class ScreenState(object):
     _currentState=None
     DEFAULT_BACKGROUND_COLOR=(255,255,255)
-    def __init__(self,experimentRuntime,  deviceEventTriggers=None, timeout=None):
-                                     
+    def __init__(self,experimentRuntime,  deviceEventTriggers=None, timeout=None):                                 
         self.experimentRuntime=weakref.ref(experimentRuntime)
         self.window=weakref.ref(experimentRuntime.window)
-
+        w,h=self.experimentRuntime().devices.display.getStimulusScreenResolution()
         screenbackground=psychopyVisual.Rect(self.window(), 
-                                     self.experimentRuntime().SCREEN_WIDTH, 
-                                     self.experimentRuntime().SCREEN_HEIGHT,
-                                     units='pix',name='BACKGROUND', 
+                                     w,h, units='pix',name='BACKGROUND', 
                                      opacity=1.0, interpolate=False)
         screenbackground.setFillColor(self.DEFAULT_BACKGROUND_COLOR,'rgb255')
         screenbackground.setLineColor(self.DEFAULT_BACKGROUND_COLOR,'rgb255')
@@ -216,7 +213,7 @@ class ScreenState(object):
                         trigger.reset()
 
                         if functionToCall:
-                            exitState=functionToCall(event)
+                            exitState=functionToCall(stime, currentSec()-stime, event)
                             if exitState is True:
                                 localClearEvents('all')
                                 DeviceEventTrigger.clearEventHistory()
@@ -297,7 +294,8 @@ class InstructionScreen(ScreenState):
     TEXT_HEIGHT=48
     def __init__(self,experimentRuntime, text, deviceEventTriggers=None, timeout=None):
         ScreenState.__init__(self,experimentRuntime, deviceEventTriggers, timeout)
-        self.stim['TEXTLINE']=psychopyVisual.TextStim(self.window(), text=text, pos = self.TEXT_POS, height=self.TEXT_HEIGHT, color=self.TEXT_COLOR, colorSpace='rgb255',alignHoriz='center',alignVert='center',wrapWidth=self.experimentRuntime().SCREEN_WIDTH/2)
+        w,h=self.experimentRuntime().devices.display.getStimulusScreenResolution()
+        self.stim['TEXTLINE']=psychopyVisual.TextStim(self.window(), text=text, pos = self.TEXT_POS, height=self.TEXT_HEIGHT, color=self.TEXT_COLOR, colorSpace='rgb255',alignHoriz='center',alignVert='center',wrapWidth=w/2.0)
         self.stimNames.append('TEXTLINE')
 
     def setText(self,text):

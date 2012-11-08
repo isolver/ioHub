@@ -1,0 +1,7 @@
+Keyboard:
+    name: keyboard
+    enable: True
+    saveEvents: True
+    streamEvents: True
+    auto_report_events: True
+    event_buffer_length: 256
