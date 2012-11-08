@@ -12,7 +12,7 @@ Overview:
 
 This script is implemented using psychopy and the core ioHubConnection class 
 only. It shows how to integrate the ioHub into a PsychoPy script in a minimal
-was, without using any of the ioHub's extra features such as automatic 
+way, without the need to use any of the ioHub's extra features such as automatic 
 event storage.
 
 To Run:
