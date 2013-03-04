@@ -501,7 +501,7 @@ class ioHubConnection(object):
         session_info=None
         
         rootScriptPath = os.path.dirname(sys.argv[0])
-        
+
         if ioHubConfigAbsPath is None and ioHubConfig is None:
             ioHubConfig=dict(monitor_devices=[dict(Keyboard={}),dict(Display={}),dict(Mouse={})])
         elif ioHubConfig is not None and ioHubConfigAbsPath is None:
@@ -549,7 +549,7 @@ class ioHubConnection(object):
 
 
         # check for existing ioHub Process based on process if saved to file
-        iopFileName=os.path.join(ioHub.IO_HUB_DIRECTORY,'.iohpid')
+        iopFileName=os.path.join(rootScriptPath,'.iohpid')
         if os.path.exists(iopFileName):
             try:
                 iopFile= open(iopFileName,'r')
