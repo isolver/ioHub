@@ -35,8 +35,7 @@ monitor_devices:
             unit_type: mm
         psychopy_config_file: default
     - eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
-        #eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
-        enable: False
+        enable: True
         name: tracker
         saveEvents: True
         streamEvents: True
@@ -59,5 +58,19 @@ monitor_devices:
                 pupil_measure_types: DIAMETER
                 tracking_mode: PUPIL-CR
                 pupil_center_algorithm: CENTROID
+    - daq.HW.LabJack.DAQ:
+        name: daq
+        enable: True
+        saveEvents: True
+        streamEvents: True
+        auto_report_events: False
+        event_buffer_length: 1024
+        board_id: 0
+        resolution_index: 1
+        settling_factor: 0
+        channel_sample_rate: 8000
+        daq_model: U6
+        device_timer:
+            interval: 0.001
 ioDataStore:
     enable: True

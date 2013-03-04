@@ -1,8 +1,8 @@
 """
 ioHub
-.. file: ioHub/devices/eyeTrackerInterface/HW/devices/daq/__init__.py
+.. file: ioHub/devices/daq/__init__.py
 
-Copyright (C)  Sol Simpson
+Copyright (C)  2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
@@ -12,16 +12,14 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import sys
 import ioHub
-from ... import DAQDevice, DAQMultiChannelInputEvent, DAQSingleChannelInputEvent
-from .... import Computer, EventConstants, ioDeviceError
+from ... import DAQDevice, DAMultiChannelInputEvent#, DASingleChannelInputEvent
+from .... import Computer, EventConstants, DeviceConstants, ioDeviceError
 from ctypes import *
 from constants import *
 
-class MC_DAC_UL(DAQDevice):
+class DAQ(DAQDevice):
     """
     """
-    CATEGORY_LABEL='DIGITAL_ANALOG_IO'
-    DEVICE_LABEL='GPIO_DEVICE'
 
     DAQ_CHANNEL_MAPPING=dict()
     DAQ_CHANNEL_MAPPING['AI_0']=0
@@ -71,6 +69,7 @@ class MC_DAC_UL(DAQDevice):
     DAQ_BLOCK_TRANSFER_SIZE['MC-USB-1208FS']=31
     DAQ_BLOCK_TRANSFER_SIZE['MC-USB-1616FS']=62
 
+    ALL_EVENT_CLASSES=[]
     # <<<<<
     lastPollTime=0.0
 
@@ -78,36 +77,45 @@ class MC_DAC_UL(DAQDevice):
     _DLL=None
     # <<<
 
+    DEVICE_MODEL_ID=1
+    DEVICE_TYPE_ID=DeviceConstants.DAQ
+    DEVICE_TYPE_STRING=DeviceConstants.getName(DEVICE_TYPE_ID)
+
     _newDataTypes=[('board_id','i4'),('input_channels','a128'),('gain','i4'),('offset','f4'),('options','i4')]
     __slots__=[e[0] for e in _newDataTypes]+['_MemHandle','_daqStatus','_HighResolution_A2D','_A2D_Resolution','_A2DData','_revision','_lastChannelReadValueDict',
                                              '_input_read_method','_input_scan_frequency',"_input_sample_count","_input_poll_type","_currentIndex","_currentCount","_lastSampleCount","_lastIndex",
                                              '_AI_function','_A2DSamples','_eventsCreated','_wrapCount','_lastStartRecordingTimePre','_lastStartRecordingTimePost',
                                              '_lowChannelAI','_highChannelAI','_daq_model']
+
     def __init__(self,*args,**kwargs):
         """
         """
         deviceConfig=kwargs['dconfig']
 
-        deviceSettings=dict()
-        deviceSettings['device_class']=DAQDevice.__name__
-        deviceSettings['name']=deviceConfig['name']
-        deviceSettings['max_event_buffer_length']=deviceConfig['event_buffer_length']
-        deviceSettings['category_id']=EventConstants.DEVICE_CATERGORIES[MC_DAC_UL.CATEGORY_LABEL]
-        deviceSettings['type_id']=EventConstants.DEVICE_TYPES[MC_DAC_UL.DEVICE_LABEL]
-        deviceSettings['os_device_code']='OS_DEV_CODE_NOT_SET'
-        deviceSettings['board_id']=deviceConfig['board_id']
+        self._startupConfiguration = deviceConfig
 
-        deviceSettings['input_channels']=tuple(deviceConfig['input_channels'])
-        ioHub.print2err("Going to monitor input channels:",deviceSettings['input_channels'])
 
-        deviceSettings['gain']=self.DAQ_GAIN_OPTIONS[deviceConfig['gain']]
-        deviceSettings['offset']=deviceConfig['offset']
-        deviceSettings['options']=self.DAQ_CONFIG_OPTIONS[deviceConfig['options']]
-        deviceSettings['_isReportingEvents']=deviceConfig.get('auto_report_events',True)
+        DAQ.ALL_EVENT_CLASSES=[DAMultiChannelInputEvent,]
 
-        DAQDevice.__init__(self,*args,**deviceSettings)
+        deviceConfig['monitor_event_types']=deviceConfig.get('monitor_event_types',DAQ.ALL_EVENT_CLASSES)
+        deviceConfig['device_class']=DAQ.__name__
+        deviceConfig['name']=deviceConfig.get('name','daq')
+        deviceConfig['max_event_buffer_length']=deviceConfig.get('event_buffer_length',1024)
+        deviceConfig['type_id']=self.DEVICE_TYPE_ID
+        deviceConfig['os_device_code']='OS_DEV_CODE_NOT_SET'
+        deviceConfig['board_id']=deviceConfig.get('board_id',0)
 
-        self._input_read_method=deviceConfig['input_read_method']
+        deviceConfig['input_channels']=tuple(deviceConfig.get('input_channels',tuple()))
+        ioHub.print2err("Going to monitor input channels:",deviceConfig['input_channels'])
+
+        deviceConfig['gain']=self.DAQ_GAIN_OPTIONS[deviceConfig.get('gain','BIP10VOLTS')]
+        deviceConfig['offset']=deviceConfig.get('offset',0.0)
+        deviceConfig['options']=self.DAQ_CONFIG_OPTIONS[deviceConfig.get('options',DEFAULTOPTION)]
+        deviceConfig['_isReportingEvents']=deviceConfig.get('auto_report_events',False)
+
+        DAQDevice.__init__(self,*args,**deviceConfig)
+        
+        self._input_read_method=deviceConfig.get('input_read_method','SCAN')
         self._input_scan_frequency=c_int(deviceConfig.get('input_scan_frequency',1000))
         self._daq_model=deviceConfig.get('daq_model','UNKNOWN')
         if self._daq_model in self.DAQ_BLOCK_TRANSFER_SIZE:
@@ -118,9 +126,9 @@ class MC_DAC_UL(DAQDevice):
         self._input_poll_type=deviceConfig.get('input_poll_type','ALL')
 
         if self._input_read_method == 'POLL':
-            MC_DAC_UL._localPoll=MC_DAC_UL._pollSequential
+            DAQ._localPoll=DAQ._pollSequential
         elif self._input_read_method == 'SCAN':
-            MC_DAC_UL._localPoll=MC_DAC_UL._scanningPoll
+            DAQ._localPoll=DAQ._scanningPoll
 
 
         self._lastChannelReadValueDict=dict()
@@ -134,9 +142,9 @@ class MC_DAC_UL(DAQDevice):
 
         if inputChannelCount > 0:
             _DLL = windll.LoadLibrary("cbw32.dll")
-            MC_DAC_UL._DLL = _DLL
+            DAQ._DLL = _DLL
 
-            #ioHub.print2err("DLL: ",MC_DAC_UL._DLL)
+            #ioHub.print2err("DLL: ",DAQ._DLL)
 
             self._revision=c_float(CURRENTREVNUM)
             ULStat = _DLL.cbDeclareRevision(byref(self._revision))
@@ -261,19 +269,16 @@ class MC_DAC_UL(DAQDevice):
 
 
                 self._A2DSamples=DAQSampleArray.create(self._lowChannelAI,self._highChannelAI,saveChannels,self._input_sample_count)
-                #ioHub.print2err('_A2DSamples: ', self._A2DSamples)
-                #ioHub.print2err('_A2DSamples.count: ', self._A2DSamples.count)
-                #ioHub.print2err('_A2DSamples.low_channel: ', self._A2DSamples.low_channel)
-                #ioHub.print2err('_A2DSamples.high_channel: ', self._A2DSamples.high_channel)
-                #ioHub.print2err('_A2DSamples.readChannelsCount: ', self._A2DSamples.readChannelsCount)
-                #ioHub.print2err('_A2DSamples.saveChannelsCount: ', self._A2DSamples.saveChannelsCount)
 
 
                 self.enableEventReporting(False)
                 if self.isReportingEvents():
                     self.enableEventReporting(True)
 
+
     def enableEventReporting(self,enable):
+        ioHub.print2err("---------------------------------------------")
+        ioHub.print2err("DAQ.enableEventReporting: ",enable)
         current=self.isReportingEvents()
         if current == enable:
             return current
@@ -282,38 +287,38 @@ class MC_DAC_UL(DAQDevice):
             #ioHub.print2err('self.options: ', self.options)
 
             board=c_int32(self.board_id)
-            #ioHub.print2err('board: ', board)
+            ioHub.print2err('board: ', board)
 
-            #ioHub.print2err('rate: ', self._input_scan_frequency)
+            ioHub.print2err('rate: ', self._input_scan_frequency)
 
             gain = c_int(self.gain)
-            #ioHub.print2err('gain: ', gain)
+            ioHub.print2err('gain: ', gain)
 
             self._daqStatus=c_short(RUNNING)
-            #ioHub.print2err('_daqStatus: ', self._daqStatus)
+            ioHub.print2err('_daqStatus: ', self._daqStatus)
 
             self._lastStartRecordingTimePre=Computer.currentSec()
             ulStat = self._DLL.cbAInScan(board, 0, 7, c_int(self._input_sample_count), byref(self._input_scan_frequency), gain, self._MemHandle, self.options)
             self._lastStartRecordingTimePost=Computer.currentSec()
+            ioHub.print2err('*** self._lastStartRecordingTimePost: ',self._lastStartRecordingTimePost)
 
 
-
-            #ioHub.print2err('ulStat: ', ulStat)
-            #ioHub.print2err('rate after: ', self._input_scan_frequency)
+            ioHub.print2err('ulStat: ', ulStat)
+            ioHub.print2err('rate after: ', self._input_scan_frequency)
         else:
             board=c_int32(self.board_id)
 
             ulStat = self._DLL.cbStopBackground (board)  # this should be taking board ID and AIFUNCTION
                                                          # but when ever I give it second param ctypes throws
                                                          # a `4 bytes too much`error
-            #ioHub.print2err("cbStopBackground: ",ulStat)
+            ioHub.print2err("cbStopBackground: ",ulStat)
             self._daqStatus=c_short(IDLE)
-            #ioHub.print2err('_daqStatus: ', self._daqStatus)
+            ioHub.print2err('_daqStatus: ', self._daqStatus)
             self._A2DSamples.zero()
             self._lastStartRecordingTimePre=0.0
             self._lastStartRecordingTimePost=0.0
-            #ioHub.print2err('_A2DSamples cleared')
-
+            ioHub.print2err('_A2DSamples cleared')
+        ioHub.print2err("---------------------------------------------")
 
     def _localPoll(self):
         ioHub.print2err("ERROR: INVALID INPUT READING TYPE SPECIFIED: ",self._input_read_method)
@@ -402,46 +407,33 @@ class MC_DAC_UL(DAQDevice):
         asamples.channels[aindex]=achannel
 
         if achannel == asamples.readChannelsCount-1 and self.isReportingEvents():
-            mce=self._createMultiChannelEventList(logged_time,asamples,aindex-achannel,c1=self._currentCount.value-self._lastSampleCount.value)
+            mce=self._createMultiChannelEventList(logged_time,asamples,aindex-achannel)
             self._addNativeEventToBuffer(mce)
         self._eventsCreated+=1
 
 
-    def _createMultiChannelEventList(self,logged_time,samples,index,c1=0,c2=0):
-
-        #for i in xrange(index,index+8):
-        #    ioHub.print2err ("%d\t%d\t%d"%(samples.indexes[i],samples.channels[i],samples.values[i]))
- 
-
-        hub_time=(float(samples.indexes[index])/float(self._input_scan_frequency.value))+self._lastStartRecordingTimePost
+    def _createMultiChannelEventList(self,logged_time,samples,index):
+        time=(float(samples.indexes[index])/float(self._input_scan_frequency.value))+self._lastStartRecordingTimePost
 
         daqEvent=[0,    # exp id
             0,              # session id
-            Computer.getNextEventID(),  # event id
-            DAQMultiChannelInputEvent.EVENT_TYPE_ID,    # event type
+            Computer._getNextEventID(),  # event id
+            DAMultiChannelInputEvent.EVENT_TYPE_ID,    # event type
             0,   # device time
             logged_time,  # logged time
-            hub_time,       # hub time
+            time,       # hub time
             self._lastStartRecordingTimePost-self._lastStartRecordingTimePre, # confidence interval
-            logged_time-hub_time,        # delay
-            samples.values[index],         # analog input 0
-            samples.values[index+1],       # analog input 1
-            samples.values[index+2],       # analog input 2
-            samples.values[index+3],       # analog input 3
-            samples.values[index+4],       # analog input 4
-            samples.values[index+5],       # analog input 5
-            samples.values[index+6],       # analog input 6
-            samples.values[index+7],       # analog input 7
-            0,       # digital input 0
-            0,       # digital input 1
-            0,       # digital input 2
-            0,
-            0,
-            0,
-            0,
-            0,       # digital input 7
-            c1,           # counter value 0
-            c2           # counter value 1
+            logged_time-time,        # delay
+            0,                       # filter_id
+            self.DEVICE_MODEL_ID,
+            float(samples.values[index]),         # analog input 0
+            float(samples.values[index+1]),       # analog input 1
+            float(samples.values[index+2]),       # analog input 2
+            float(samples.values[index+3]),       # analog input 3
+            float(samples.values[index+4]),       # analog input 4
+            float(samples.values[index+5]),       # analog input 5
+            float(samples.values[index+6]),       # analog input 6
+            float(samples.values[index+7])       # analog input 7
             ]
         return daqEvent
 
@@ -498,15 +490,15 @@ class MC_DAC_UL(DAQDevice):
             if 'int_value' in kwargs:
                 int_value=kwargs['int_value']
 
-        hub_time=logged_time-delay
+        time=logged_time-delay
 
         daqEvent=[0,    # exp id
                   0,              # session id
-                  Computer.getNextEventID(),  # event id
-                  DAQSingleChannelInputEvent.EVENT_TYPE_ID,    # event type
+                  Computer._getNextEventID(),  # event id
+                  DASingleChannelInputEvent.EVENT_TYPE_ID,    # event type
                   device_time,          # device time
                   logged_time,          # logged time
-                  hub_time,             # hub time
+                  time,             # hub time
                   confidence_interval, # confidence interval
                   delay,                # delay
                   channel_name,         # name of channel
@@ -515,6 +507,6 @@ class MC_DAC_UL(DAQDevice):
                   ]
         return daqEvent
 
-    @staticmethod
-    def _getIOHubEventObject(event):
+
+    def _getIOHubEventObject(self,event):
         return event # already a DAQ Event

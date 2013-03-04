@@ -2,25 +2,31 @@
 ioHub
 .. file: ioHub/devices/experiment/__init__.py
 
-Copyright (C) 2012 Sol Simpson
+Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from .. import Device,Computer,DeviceEvent,EventConstants
+from .. import Device,Computer,DeviceEvent
+from ioHub.constants import DeviceConstants, EventConstants
+
 currentSec=Computer.currentSec
 
 class ExperimentDevice(Device):
     """
-    The ExperimentRuntimeDevice class represents a virtual device, being the Experiment / PsychoPy Process
-    that is running the experiment script and has created the ioHub ioServer Process.
-    A ExperimentRuntimeDevice device can generate experiment software related events that are sent to
-    the ioHub to be saved in the ioDataStore along with all other device events being saved.
+    The ExperimentDevice class represents a virtual device, being the 
+    Experiment / PsychoPy Process that is running the experiment script and 
+    has created the ioHub ioServer Process.
+    A ExperimentDevice device can generate experiment software related events 
+    that are sent to the ioHub to be saved in the ioDataStore along with all 
+    other device events being saved.
     """
-    CATEGORY_LABEL='VIRTUAL'
-    DEVICE_LABEL='EXPERIMENT_DEVICE'
+    ALL_EVENT_CLASSES=[]
+    
+    DEVICE_TYPE_ID=DeviceConstants.EXPERIMENT
+    DEVICE_TYPE_STRING=DeviceConstants.getName(DEVICE_TYPE_ID)
     __slots__=[]
     def __init__(self,*args,**kwargs):
         """
@@ -29,17 +35,20 @@ class ExperimentDevice(Device):
         :param args:
         :param kwargs:
         """
-        deviceConfig=kwargs['dconfig']
+        ExperimentDevice.ALL_EVENT_CLASSES=[MessageEvent,]
+        self._startupConfiguration=kwargs['dconfig']
         deviceSettings={
-            'category_id':EventConstants.DEVICE_CATERGORIES[ExperimentDevice.CATEGORY_LABEL],
-            'type_id':EventConstants.DEVICE_TYPES[ExperimentDevice.DEVICE_LABEL],
+            'type_id':self.DEVICE_TYPE_ID,
             'device_class':ExperimentDevice.__name__,
-            'name':deviceConfig['name'],
-            '_isReportingEvents':deviceConfig.get('auto_report_events',True),
+            'name':self._startupConfiguration['name'],
+            'monitor_event_types':self._startupConfiguration.get('monitor_event_types',self.ALL_EVENT_CLASSES),
+            '_isReportingEvents':self._startupConfiguration.get('auto_report_events',True),
             'os_device_code':'OS_DEV_CODE_NOT_SET',
-            'max_event_buffer_length':deviceConfig['event_buffer_length']
+            'max_event_buffer_length':self._startupConfiguration['event_buffer_length']
             }          
         Device.__init__(self,**deviceSettings)
+
+
         
     def _nativeEventCallback(self,event):
         event[DeviceEvent.EVENT_LOGGED_TIME_INDEX]=currentSec() # set logged time of event
@@ -55,8 +64,8 @@ class ExperimentDevice(Device):
     def _poll(self):
         pass
  
-    @staticmethod
-    def _getIOHubEventObject(event):
+
+    def _getIOHubEventObject(self,event):
         return event
 
             
@@ -64,19 +73,26 @@ class ExperimentDevice(Device):
 
 class MessageEvent(DeviceEvent):
     """
-    A MessageEvent can be created and sent to the ioHub to record important marker times during
-    the experiment; for example, when key display changes occur, when events related to devices
-    not supported by the ioHub have happened, or simply information about the experiment you want
+    A MessageEvent can be created and sent to the ioHub to record important 
+    marker times during the experiment; for example, when key display changes 
+    occur, when events related to devices not supported by the ioHub have happened, 
+    or simply information about the experiment you want
     to store in the ioDataStore along with all the other event data.
 
-    Since the PsychoPy Process can access the same time base that is used by the ioHub Process,
-    when you create a Message Event you can time stamp it at the time of MessageEvent creation, or with
-    the result of a previous call to one of the ioHub time related methods. This makes experiment messages
-    extremely accurate temporally when related to other events times saved to the ioDataSore.
+    Since the PsychoPy Process can access the same time base that is used by 
+    the ioHub Process, when you create a Message Event you can time stamp it 
+    at the time of MessageEvent creation, or with the result of a previous call
+    to one of the ioHub time related methods. This makes experiment messages
+    extremely accurate temporally when related to other events times saved to
+    the ioDataSore.
+    
+    Event Type ID: EventConstants.MESSAGE
+    Event Type String: 'MESSAGE'      
     """
-    EVENT_TYPE_STRING='MESSAGE'
-    EVENT_TYPE_ID=EventConstants.EVENT_TYPES[EVENT_TYPE_STRING]
-    IOHUB_DATA_TABLE='MESSAGE'
+    PARENT_DEVICE=ExperimentDevice
+    EVENT_TYPE_ID=EventConstants.MESSAGE
+    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     _newDataTypes=[
                 ('msg_offset','i2'), # if you want to send the Experiment *before* or *after* the event time occurred
@@ -92,14 +108,14 @@ class MessageEvent(DeviceEvent):
                                  # up to 128 characters in length.
                 ]
     __slots__=[e[0] for e in _newDataTypes]
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         DeviceEvent.__init__(self, *args,**kwargs)
 
     @staticmethod
     def _createAsList(text,prefix='',msg_offset=0.0, sec_time=None):
-        csec=int(currentSec())
+        csec=currentSec()
         if sec_time is not None:
             csec=sec_time
-        return (0,0,Computer.getNextEventID(),MessageEvent.EVENT_TYPE_ID,csec,0,0,0.0,0.0,msg_offset,prefix,text)
+        return (0,0,Computer._getNextEventID(),MessageEvent.EVENT_TYPE_ID,csec,0,0,0.0,0.0,0,msg_offset,prefix,text)
 
 

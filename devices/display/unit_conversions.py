@@ -5,7 +5,7 @@ ioHub
 Sudo code provided by Josh Borah
 Converted to Python by Sol Simpson
 
-This file Copyright (C) 2012 Josh Borah, Sol Simpson
+This file Copyright (C) 2012 Josh Borah, 2012-2013 iSolver Software Solutions
 
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 

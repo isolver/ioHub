@@ -1,53 +1,11 @@
 """
 ioHub
 .. file: ioHub/examples/eyeTrackerFixationCounter/run.py
-
-Copyright (C) 2012 Sol Simpson
-Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
-
-.. fileauthor:: Sol Simpson <sol@isolver-software.com>
-
-------------------------------------------------------------------------------------------------------------------------
-
-eyeTrackerFixationCounter
-+++++++++++++++++++++++++
-
-Overview:
----------
-
-This script is implemnted by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
-called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
-also launches the ioHub server process so the script has access to the ioHub service and associated devices.
-
-The program loads many configuration values for the experiment process by using the experiment_Config.yaml file that
-is located in the same directory as this script. Configuration settings for the ioHub server process are defined in
-the ioHub_configuration.yaml file.
-
-The __main__ of this script file simply calls the start() method of the ExperimentRuntime object,
-that calls the run() method for the instance which is what contains the actual 'program / experiment execution code'
-that has been added to this file. When run() completes, the ioHubServer process is closed and the local program ends.
-
-Desciption:
------------
-
-The main purpose for the eyeTrackerFixationCounter is to illustrate how to monitor for a specific eye event type
- (FixationEndEvents), and gather some stats about the events being monitored.
-
-To Run:
--------
-
-1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub/wiki
-2. Open a command prompt to the directory containing this file.
-3. Start the test program by running:
-   python.exe run.py
-
-Any issues or questions, please let me know.
 """
 
-
-import ioHub
-from ioHub.devices import Computer
-from ioHub.experiment import ioHubExperimentRuntime, EventConstants, psychopyVisual, pumpLocalMessageQueue
+from psychopy import visual
+from ioHub.devices import Computer,EventConstants
+from ioHub.util.experiment import ioHubExperimentRuntime, pumpLocalMessageQueue
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
@@ -92,7 +50,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = psychopyVisual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False, screen=screen_index)
+        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False, screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
@@ -100,7 +58,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
         image_name='./images/party.png'
-        imageStim = psychopyVisual.ImageStim(psychoWindow, image=image_name, name='image_stim')
+        imageStim = visual.ImageStim(psychoWindow, image=image_name, name='image_stim')
 
         imageStim.draw()
 
@@ -125,12 +83,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         while len(kb.getEvents())==0:
             eye_events=tracker.getEvents()
             for ee in eye_events:
-                if ee['type']==EventConstants.FIXATION_END_EVENT:
-                    etime=ee['hub_time']
-                    eeye=ee['eye']
-                    ex=ee['average_gaze_x']
-                    ey=ee['average_gaze_y']
-                    edur=ee['duration']
+                if EventConstants.FIXATION_END == ee.type:
+                    etime=ee.time
+                    eeye=ee.eye
+                    ex=ee.average_gaze_x
+                    ey=ee.average_gaze_y
+                    edur=ee.duration
                     ert=etime-flip_time
                     print 'FIX %.3f\t%d\t%.3f\t%.3f\t%.3f\t%.3f'%(etime,eeye,ex,ey,edur,ert)
                     fixationCount+=1
@@ -164,12 +122,18 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 ##################################################################
 
-def main(configurationDirectory):
+def main():
     """
     Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
     command line, and launches the experiment logic.
     """
     import sys
+    import ioHub
+
+    # The module_directory function determines what the current directory is of the function that is passed to it. It is
+    # (supposedly) more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+    configurationDirectory=ioHub.module_directory(main)
+
     if len(sys.argv)>1:
         configFile=unicode(sys.argv[1])
         runtime=ExperimentRuntime(configurationDirectory, configFile)
@@ -180,11 +144,7 @@ def main(configurationDirectory):
 
 if __name__ == "__main__":
     # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
-    #
-    # The module_directory function determines what the current directory is of the function that is passed to it. It is
-    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
-    configurationDirectory=ioHub.module_directory(main)
 
     # run the main function, which starts the experiment runtime
-    main(configurationDirectory)
+    main()
 

@@ -25,13 +25,9 @@ To Run:
    python.exe run.py
 
 """
-
-from collections import OrderedDict
-
 from psychopy import visual, core
-
-import ioHub
-from ioHub.client import ioHubConnection, Computer, EventConstants
+from ioHub.client import Computer, EventConstants
+from ioHub import OrderedDict,quickStartHubServer
 
 # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
 # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
@@ -40,35 +36,14 @@ from ioHub.client import ioHubConnection, Computer, EventConstants
 #
 # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
-# create the ioHub Config
-
-# each device you want enabled is a key, value pair in a dict, where 
-# the key is the Class name of the device you want enabled, and the value
-# is a dict of configuration properties for that device. If you provide 
-# an empty dict() as a device key's value, the default properties for that
-# device will be loaded.
-# This will enable streaming of data for each device to the experiment 
-# process, but will not enable saving of device events by the ioHub in 
-# the ioDataStore.
-devices=dict(Keyboard={},Display={},Mouse={})
-
-# The dict of devices is assigned to the ioConfigs 'monitor_devices' key
-ioConfig=dict(monitor_devices=devices)
-
-# 'If' you want to enable the ioDataStore, and simply use default parameter
-# settings, then just add a'ioDataStore' key to your ioConfig with dict 
-# containing the experiment_code and session_code to associate all events
-# with. Experiment codes are unique within an ioDataStore file, for using
-# the same experiment_code multiple times, adds multiple sessions to the 
-# experiment. Session_codes are 'not' unique, so if you provide the same
-# session code across different runs of your experiment script, each run
-# will use a different 'session_id' to tag events with.
-
-#ioConfig['ioDataStore']=dict(experiment_info=dict(code="IOR_V1.1"),session_info=dict(code="S101-F-R"))
-
-# This creates an ioHub server process and a connection interface for it. 
-# using the ioConfig defined above. 
-io=ioHubConnection(ioConfig)
+# create and start the ioHub Server Process, enabling the 
+# the default ioHub devices: Keyboard, Mouse, and Display.
+# The first arg is the experiment code to use for the ioDataStore Event storage,
+# the second arg is the session code to give to the current session of the 
+# experiment. Session codes must be unique for a given experiment code within an
+# ioDataStore hdf5 event file.
+import random
+io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
         
 # By default, keyboard, mouse, and display devices are created if you 
 # do not pass any config info to the ioHubConnection class above.        
@@ -109,7 +84,7 @@ psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle",
 
 psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, 
                                         pos=[0,0], sf=0,  
-                                        color=[-1,-1,-1], 
+                                        color=[-1,-1,-1],
                                         colorSpace='rgb')
                                         
 psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None,
@@ -150,7 +125,7 @@ while QUIT_EXP is False:
     # time methods represent both experiment process and ioHub server
     # process time. NOTE: Integration between the ioHub times and 
     # psychopy clock times needs to be done, so for now when using ioHub
-    # you should use the ioHub times so that the event hub_time fields
+    # you should use the ioHub times so that the event time fields
     # can be related to Computer.getTime() current time readings.
     flip_time=Computer.currentSec()
 
@@ -159,33 +134,16 @@ while QUIT_EXP is False:
     # no way to get events on only 1 type from a device, you have to filter
     # them 
     kb_events=keyboard.getEvents()
-    if len(kb_events)>0:
-        # for each new keyboard event, check if it matches one 
-        # of the end example keys.
-        for k in kb_events:
-            # key: the string representation of the key pressed, 
-            #      A-Z if a-zA-Z pressed, 0-9 if 0-9 pressed ect.
-            #      To get the mapping from a key_id to a key string, use
-            #
-            #      key=EventConstants.IDToName(key_event['key_id']) BTW
-            #
-            # char: the ascii char for the key pressed. This field factors
-            #       in if shift was also pressed or not
-            #       when the char was typed, so typing a 's' == char 
-            #       field of 's', while typing SHIFT+s == char
-            #       field of 'S'. This is in contrast to the key field, 
-            #       which always returns upper case values
-            #       regardless of shift value. If the character pressed 
-            #       is not an ascii printable character,
-            #       this field will print junk, hex, or who knows what 
-            #       else at this point.
-            if k['type'] == EventConstants.KEYBOARD_PRESS_EVENT \
-            and k['key'] in ['Space','Return','Escape']:
-                print 'Quit key pressed: ',k['key']
-                QUIT_EXP=True
+    # for each new keyboard event, check if it matches one
+    # of the end example keys.
+    for k in kb_events:
+        if EventConstants.KEYBOARD_PRESS == k.type\
+        and k.key in ['SPACE','RETURN','ESCAPE']:
+            print 'Quit key pressed: ',k.key
+            QUIT_EXP=True
 
 print "You played around with the mouse cursor for {0} seconds.".format(
-                                            k['hub_time']-first_flip_time)
+                                            k.time-first_flip_time)
 print ''
 
 # wait 250 msec before ending the experiment 
@@ -210,7 +168,7 @@ Computer.disableHighPriority()
 psychoWindow.close()
 
 # be sure to shutdown your ioHub server!
-io.shutdown()
+io.quit()
 core.quit()
 ### End of experiment logic
 

@@ -1,0 +1,9 @@
+GamePad:
+    user_id: -1
+    name: gamepad
+    enable: True
+    saveEvents: True
+    streamEvents: True
+    auto_report_events: True
+    device_timer:
+        interval: 0.0025

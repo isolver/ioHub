@@ -1,0 +1,76 @@
+﻿#ioHub config File
+monitor_devices:
+    - Keyboard:
+        name: kb
+        saveEvents: True
+        streamEvents: True
+    - Mouse:
+        name: mouse
+        saveEvents: True
+        streamEvents: True
+    - ExperimentDevice:
+        name: experimentRuntime
+        saveEvents: True
+        streamEvents: True
+    - Display: &DisplaySettings
+        name: display
+        reporting_unit_type: pixels
+        display_index: 1
+        physical_stimulus_area:
+            width: 500
+            height: 281
+            unit_type: mm
+        default_eye_to_surface_distance:
+            surface_center: 500
+            unit_type: mm
+        psychopy_config_file: ioDefault
+    - eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
+        #device_class: eyeTrackerInterface.HW.SMI.iViewX.EyeTracker
+        enable: True
+        name: tracker
+        saveEvents: True
+        streamEvents: True
+        device_timer:
+            interval: 0.001
+        event_buffer_length: 1024
+        display_settings: *DisplaySettings
+        runtime_settings:
+            sampling_rate: 1000
+            track_eyes: LEFT
+            default_calibration: HV9
+            auto_calibration: True
+            auto_calibration_speed: 1.5
+            runtime_filtering:
+                ALL: OFF
+            enable_api_without_connection: False
+            network_settings: 100.1.1.1
+            default_native_data_file_name: et_data
+            vog_settings:
+                pupil_measure_types: DIAMETER
+                tracking_mode: PUPIL-CR
+                pupil_center_algorithm: CENTROID
+filters:
+  # Filters are basically a virtual device. They take events from other devices (including other filters)
+  # as inputs (settings.input_events) and they apply a filtering alg to the events, and then the filter
+  # generates output events [setting.output_events] that can be monitored by the experiment process or saved
+  # to the ioDataStore as normal device events are.
+   - StampeFilter:
+        name: stampeFilter
+        enable: True
+        saveEvents: True # can only save pre existing event types at this time.
+        streamEvents: True
+        auto_report_events: True
+        event_buffer_length: 256
+        filter_level:  2
+        input_events:
+          - MonocularEyeSample:
+              window_size: 5
+          - BinocularEyeSample:
+              window_size: 5
+        output_events:
+          - MonocularEyeSample:
+              filter_id: 128
+          - BinocularEyeSample:
+              filter_id: 256
+ioDataStore:
+   enable: True

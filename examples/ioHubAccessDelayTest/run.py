@@ -2,82 +2,15 @@
 ioHub
 .. file: ioHub/examples/ioHubAccessDelayTest/run.py
 
-Copyright (C) 2012 Sol Simpson
-Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
-
-.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
-.. fileauthor:: Sol Simpson <sol@isolver-software.com>
-
-------------------------------------------------------------------------------------------------------------------------
-
-ioHubAccessDelayTest
-++++++++++++++++++++
-
-Overview:
----------
-
-This script is implemnted by extending the ioHub.experiment.ioHubExperimentRuntime class to a  class
-called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
-also launches the ioHub server process so the script has access to the ioHub service and associated devices.
-
-The program loads many configuration values for the experiment process by using the experiment_Config.yaml file that
-is located in the same directory as this script. Configuration settings for the ioHub server process are defined in
-the ioHub_configuration.yaml file.
-
-The __main__ of this script file simply calls the start() function, which creates the ExperimentRuntime class instance,
-calls the run() method for the instance which is what contains the actual 'program / experiment execution code' ,
-and then when run() completes, closes the ioHubServer process and ends the local program.
-
-Desciption:
------------
-
-The main purpose for the ioHubAccessDelayTest is to test the round trip time it takes for the experiment process
-to request and receive events from the ioHub Process running the ioServer. Retrace intervals are also calculated
-and stored to monitor for skipped retraces.
-
-A full screen Window is opened that shows some graphics, including a moving grating as well as a small gaussian
-that is controlled by mouse events from the ioHub. At the top of the screen is an area that will display the last key
-pressed on the keyboard.
-
-The script runs for until 1000 getEvent() requests to the ioHub have returned with >= 1 event. A number near the
-bottom of the screen displays the number of remaining successful getEvent calls before the experiment will end.
-By default the script also sends an Experiment MessageEvent to the ioHub on each retrace. This message is stored
-in the ioDataStore file, but is also sent back as an ioHub MessageEvent to the experiment process.
-Therefore, the getEvent() request counter shown on the screen will decrease even if you do not move your mouse or keyboard,
-as the MessageEvents are retrieved from the ioHub Server.
-
-At the end of the test, plots are displayed showing the getEvent() round trip delays in a histogram,
-the retrace intervals as a fucntion of time, and the retrace intervals in a histogram. All times in the plots are
-in msec.
-
-To Run:
--------
-
-1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub
-2. Edit the experiment_config.yaml file that is in the same directory as the run.py script you will be starting. See the
-comments at the top of each config file regarding any paramemters that 'must' be changed for the program to run.
-In this example, nothing 'must' be changed.
-3. Open a command prompt to the directory containing this file.
-4. Start the test program by running:
-   python.exe run.py
-
-Any issues or questions, please let me know.
-
-Notes:
-------
-
-If you get high MAX delays, turn off cloud drive apps, especially Google Drive; that fixes it for me.
-
-If you are getting dropped frames, try commenting out the text stim that changes based on the number of getEvents()
-left to call. It seems that resetting text on a text stim is a 'very' expensive operation.
-
 """
 
 
-import ioHub
-from ioHub.devices import Computer
-from ioHub.experiment import ioHubExperimentRuntime, EventConstants, psychopyVisual
+from psychopy import visual
+from ioHub.devices import Computer, EventConstants
+from ioHub.util.experiment import ioHubExperimentRuntime
+from ioHub import OrderedDict
 from numpy import zeros
+
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     def __init__(self,configFileDirectory, configFile):
@@ -88,7 +21,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         """
 
         """
-        self.psychoStim = ioHub.LastUpdatedOrderedDict()
+        self.psychoStim = OrderedDict()
         self.totalEventRequestsForTest=1000
         self.numEventRequests=0
         self.psychoWindow=None
@@ -111,16 +44,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
         # let's print out the public method names for each device type for fun.
-        print "ExperimentPCkeyboard methods:",self.kb.getDeviceInterface()
-        print "ExperimentPCmouse methods:",self.mouse.getDeviceInterface()
-        print "ExperimentRuntime methods:",self.expRuntime.getDeviceInterface()
-        print "Display methods:",self.display.getDeviceInterface()
+        #print "ExperimentPCkeyboard methods:",self.kb.getDeviceInterface()
+        #print "ExperimentPCmouse methods:",self.mouse.getDeviceInterface()
+        #print "ExperimentRuntime methods:",self.expRuntime.getDeviceInterface()
+        #print "Display methods:",self.display.getDeviceInterface()
 
         # create fullscreen pyglet window at current resolution, as well as required resources / drawings
         self.createPsychoGraphicsWindow()
 
         # create stats numpy arrays, set experiment process to high priority.
         self.initStats()
+
+        # enable high priority mode for the experiment process
+        Computer.enableHighPriority()
 
         #draw and flip to the updated graphics state.
         ifi=self.drawAndFlipPsychoWindow()
@@ -143,7 +79,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # END TEST LOOP <<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        # close neccessary files / objects, disable high priority.
+        # close necessary files / objects, disable high priority.
         self.spinDownTest()
 
         # plot collected delay and retrace detection results.
@@ -154,7 +90,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         screen_res=self.display.getStimulusScreenResolution()
         screen_index=self.display.getStimulusScreenIndex()
-        self.psychoWindow = psychopyVisual.Window(screen_res,monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False,screen=screen_index)
+        self.psychoWindow = visual.Window(screen_res,monitor="testMonitor", units=self.display.getDisplayCoordinateType(), fullscr=True, allowGUI=False,screen=screen_index)
 
         currentPosition=self.mouse.setPosition((0,0))
 
@@ -162,13 +98,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         self.instructionText2Pattern='%d'
 
-        self.psychoStim['grating'] = psychopyVisual.PatchStim(self.psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        self.psychoStim['fixation'] =psychopyVisual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        self.psychoStim['title'] =psychopyVisual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,125], height=36, color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['instructions'] =psychopyVisual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-125], height=32, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['instructions2'] =psychopyVisual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-250],  color=[-1,-1,-1], height=32, colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['keytext'] =psychopyVisual.TextStim(win=self.psychoWindow, text='key', pos = [0,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=800.0)
-        self.psychoStim['mouseDot'] =psychopyVisual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
+        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        self.psychoStim['fixation'] = visual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        self.psychoStim['title'] = visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,125], height=36, color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['instructions'] = visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-125], height=32, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['instructions2'] = visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-250],  color=[-1,-1,-1], height=32, colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
+        self.psychoStim['keytext'] = visual.TextStim(win=self.psychoWindow, text='key', pos = [0,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=800.0)
+        self.psychoStim['mouseDot'] = visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
 
     def drawAndFlipPsychoWindow(self):
@@ -182,8 +118,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             self.psychoStim['instructions2'].setText(self.instructionText2Pattern%(self.totalEventRequestsForTest-self.numEventRequests,))
 
             for r in self.events:
-                if r['type'] is EventConstants.KEYBOARD_PRESS_EVENT: #keypress code
-                    self.psychoStim['keytext'].setText(r['key'])
+                if r.type is EventConstants.KEYBOARD_PRESS: #keypress code
+                    self.psychoStim['keytext'].setText(r.key)
 
             self.events=None
 
@@ -217,9 +153,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.numEventRequests=0
         self.flipTime=0.0
         self.lastFlipTime=0.0
-
-        # enable high priority mode for the experiment process and optionally the ioHub server process.
-        Computer.enableHighPriority()
 
         # clear the ioHub event Buffer before starting the test.
         # This is VERY IMPORTANT, given an existing bug in ioHub.
@@ -264,7 +197,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         pylab.figure(figsize=[30,10])
         pylab.subplot(1,3,1)
 
-
         # the histogram of the delay data
         n, bins, patches = hist(durations, 50, normed=True, facecolor='blue', alpha=0.75)
         # add a 'best fit' line
@@ -272,8 +204,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         plot(bins, y, 'r--', linewidth=1)
         xlabel('ioHub getEvents Delay')
         ylabel('Percentage')
-        title(
-            r'$\mathrm{{Histogram\ of\ Delay:}}\ \min={0:.3f},\ \max={1:.3f},\ \mu={2:.3f},\ \sigma={3:.4f}$'.format(
+        title('$\mathrm{{Histogram\ of\ Delay:}}\ \min={0},\ \max={1},\ \mu={2},\ \sigma={3}$'.format(
                 dmin, dmax, dmean, dstd))
         axis([0, dmax+1.0, 0, 25.0])
         grid(True)
@@ -286,7 +217,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         distString= "Mean={0:.1f}ms,    s.d.={1:.1f},    99%CI={2:.1f}-{3:.1f}".format(m, sd, m - 3 * sd, m + 3 * sd)
         nTotal=len(intervalsMS)
         nDropped=sum(intervalsMS>(1.5*m))
-        droppedString = "Dropped/Frames = {0:d}/{1:d} = {2:.3f}%".format(nDropped, nTotal, int(nDropped) / float(nTotal))
+        droppedString = "Dropped/Frames = {0:d}/{1:d} = {2}%".format(nDropped, nTotal, int(nDropped) / float(nTotal))
 
         pylab.subplot(1,3,2)
 
@@ -317,6 +248,7 @@ def main(configurationDirectory):
     runtime.start()
 
 if __name__ == "__main__":
+    import ioHub
     configurationDirectory=ioHub.module_directory(main)
     main(configurationDirectory)
 

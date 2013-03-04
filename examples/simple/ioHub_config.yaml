@@ -6,20 +6,14 @@ monitor_devices:
         name: kb
         saveEvents: True
         streamEvents: True
-        auto_report_events: True
-        event_buffer_length: 256
     - Mouse:
         name: mouse
         saveEvents: True
         streamEvents: True
-        auto_report_events: True
-        event_buffer_length: 256
     - ExperimentDevice:
         name: experimentRuntime
         saveEvents: True
         streamEvents: True
-        auto_report_events: True
-        event_buffer_length: 64
     - Display: &DisplaySettings
         name: display
         reporting_unit_type: pixels
@@ -31,6 +25,6 @@ monitor_devices:
         default_eye_to_surface_distance:
             surface_center: 500
             unit_type: mm
-        psychopy_config_file: default
+        psychopy_config_file: ioDefault
 ioDataStore:
     enable: True

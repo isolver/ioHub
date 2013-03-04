@@ -9,4 +9,5 @@ Display: &DisplaySettings
     default_eye_to_surface_distance:
         surface_center: 500
         unit_type: mm
+    display_pixel_origin: [0.5,0.5]
     psychopy_config_file: ioHubDefault

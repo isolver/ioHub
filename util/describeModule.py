@@ -28,10 +28,14 @@ def dedent():
     global INDENT
     INDENT -= 4
 
-def describe_builtin(obj):
+def describe_builtin(obj,isInherited=False):
     """ Describe a builtin function """
+    if isInherited is True:
+        isInherited='~'
+    else:
+        isInherited=''
 
-    wi('+Built-in Function: %s' % obj.__name__)
+    wi('%s+Built-in Function: %s' %(isInherited, obj.__name__))
     # Built-in functions cannot be inspected by
     # inspect.getargspec. We have to try and parse
     # the __doc__ attribute of the function.
@@ -54,15 +58,19 @@ def describe_builtin(obj):
 
     print
 
-def describe_func(obj, method=False):
+def describe_func(obj, method=False,isInherited=False):
     """ Describe the function object passed as argument.
 If this is a method object, the second argument will
 be passed as True """
+    if isInherited is True:
+        isInherited='~'
+    else:
+        isInherited=''
 
     if method:
-        wi('+Method: %s' % obj.__name__)
+        wi('%s+Method: %s' %(isInherited, obj.__name__))
     else:
-        wi('+Function: %s' % obj.__name__)
+        wi('%s+Function: %s' %(isInherited, obj.__name__))
 
     try:
         arginfo = inspect.getargspec(obj)
@@ -93,7 +101,7 @@ be passed as True """
 
     print
 
-def describe_klass(obj):
+def describe_klass(obj,isInherited=False):
     """ Describe the class object passed as argument,
  including its methods """
 
@@ -107,6 +115,7 @@ def describe_klass(obj):
         item = getattr(obj, name)
         if inspect.ismethod(item):
             count += 1;describe_func(item, True)
+        else: print "<< ",name,": ",item," >>  skipped"
 
     if count==0:
         wi('(No members)')
@@ -114,29 +123,93 @@ def describe_klass(obj):
     dedent()
     print
 
-def describe(module):
-    """ Describe the module object passed as argument
-including its classes and functions """
+def describe_attribute(name,obj,isInherited=False):
+    """ Describe the attribute object passed as argument,
+ including its methods """
+    if isInherited is True:
+        isInherited='~'
+    else:
+        isInherited=''
+    wi('{2}.Attribute: {0} : {1}'.format(name,obj,isInherited))
 
-    wi('[Module: %s]\n' % module.__name__)
 
-    indent()
+def describe(kclass,includeMro=False):
+    """ Describe the class attribute object passed as argument
+        including its classes and functions """
 
-    count = 0
 
-    for name in dir(module):
-        obj = getattr(module, name)
-        if inspect.isclass(obj):
-            count += 1; describe_klass(obj)
-        elif (inspect.ismethod(obj) or inspect.isfunction(obj)):
-            count +=1 ; describe_func(obj)
-        elif inspect.isbuiltin(obj):
-            count += 1; describe_builtin(obj)
+    klsList=[kclass,]
+    if includeMro:
+        klsList=inspect.getmro(kclass)
 
-    if count==0:
-        wi('(No members)')
+    for i,kls in enumerate(klsList):
+        count = 0
+        klasses={}
+        methods={}
+        builtins={}
+        attributes={}
+        nextkls=None
+        if i+1 < len(klsList):
+            nextkls=klsList[i+1]
+        for name in dir(kls):
 
-    dedent()
+            if not name.startswith('__'):
+                obj = getattr(kls, name)
+                isInherited=False
+                if hasattr(nextkls,name):
+                    isInherited=True
+                if inspect.isclass(obj):
+                    klasses[name]=obj,isInherited
+                    count+=1
+                elif (inspect.ismethod(obj) or inspect.isfunction(obj)):
+                    methods[name]=obj,isInherited
+                    count+=1
+                elif inspect.isbuiltin(obj):
+                    builtins[name]=obj,isInherited
+                    count+=1
+                else:
+                    attributes[name]=obj,isInherited
+                    count+=1
+
+        if count==0:
+            wi('(No members)')
+        else:
+            if i==0:
+                result=(attributes,methods,builtins,klasses)
+            wi('[Class: %s]\n' % kls.__name__)
+
+            indent()
+
+            keys=attributes.keys()
+            keys.sort()
+            for atn in keys:
+                describe_attribute(atn,attributes[atn][0],attributes[atn][1])
+
+            print
+
+            keys=methods.keys()
+            keys.sort()
+            for atn in methods.keys():
+                describe_func( methods[atn][0],True,methods[atn][1])
+
+            print
+
+            keys=builtins.keys()
+            keys.sort()
+            for atn in builtins.keys():
+                describe_builtin(builtins[atn][0],builtins[atn][1])
+
+            print
+
+            keys=klasses.keys()
+            keys.sort()
+            for atn in klasses.keys():
+                describe_klass(klasses[atn][0],klasses[atn][1])
+
+
+            dedent()
+            return result
+        return None
 
 if __name__ == "__main__":
     import sys

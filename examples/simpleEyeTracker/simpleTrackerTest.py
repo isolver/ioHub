@@ -1,53 +1,14 @@
 """
 ioHub
 .. file: ioHub/examples/simple/simpleTrackerTest.py
-
-Copyright (C) 2012 Sol Simpson
-Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
-
-.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
-.. fileauthor:: Sol Simpson <sol@isolver-software.com>
-
-------------------------------------------------------------------------------------------------------------------------
-
-simpleTrackerTest
-++++++++++
-
-Overview:
----------
-
-This script is implemnted by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
-called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
-also launches the ioHub server process so the script has access to the ioHub service and associated devices.
-
-The program loads many configuration values for the experiment process by using the experiment_Config.yaml file that
-is located in the same directory as this script. Configuration settings for the ioHub server process are defined in
-the ioHub_configuration.yaml file.
-
-The __main__ of this script file simply calls the start() method of the ExperimentRuntime object,
-that calls the run() method for the instance which is what contains the actual 'program / experiment execution code'
-that has been added to this file. When run() completes, the ioHubServer process is closed and the local program ends.
-
-Desciption:
------------
-
-The main purpose for the simpleEyeTRackerTest is to isllustrate the overall structure of the ioHub.experiment.ioHubExperimentRuntime
-utility class and how to extend it and use it to run a psychopy program with ioHub and pyEyeTrackerInterface fucntionality.
-
-To Run:
--------
-
-1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub/wiki
-2. Open a command prompt to the directory containing this file.
-3. Start the test program by running:
-   python.exe simpleTrackerTest.py
-
-Any issues or questions, please let me know.
 """
 
+from psychopy import visual
+
 import ioHub
+from ioHub import OrderedDict
 from ioHub.devices import Computer
-from ioHub.experiment import ioHubExperimentRuntime, psychopyVisual
+from ioHub.util.experiment import ioHubExperimentRuntime
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
@@ -80,7 +41,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         mouse=self.hub.devices.mouse
 
         
-
         tracker.runSetupProcedure()
         self.hub.clearEvents('all')
         self.hub.delay(0.050)
@@ -98,7 +58,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = psychopyVisual.Window(display.getStimulusScreenResolution(), monitor="testMonitor",
+        psychoWindow = visual.Window(display.getStimulusScreenResolution(), monitor="testMonitor",
                                                 units=display.getDisplayCoordinateType(),
                                                 fullscr=True, allowGUI=False, screen=screen_index)
 
@@ -107,11 +67,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
-        psychoStim=ioHub.LastUpdatedOrderedDict()
-        psychoStim['grating'] = psychopyVisual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        psychoStim['fixation'] =psychopyVisual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['gazePosText'] =psychopyVisual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
-        psychoStim['gazePos'] =psychopyVisual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
+        psychoStim=OrderedDict()
+        psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['gazePosText'] =visual.TextStim(psychoWindow, text=str(current_gaze), pos = [100,0], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=300)
+        psychoStim['gazePos'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=current_gaze,size=(50,50),color='purple')
 
         [psychoStim[stimName].draw() for stimName in psychoStim]
 

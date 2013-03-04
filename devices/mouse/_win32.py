@@ -2,43 +2,52 @@
 ioHub
 .. file: ioHub/devices/mouse/_win32.py
 
-Copyright (C) 2012 Sol Simpson
+Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 import ioHub
-from .. import Device,Computer, EventConstants
+from .. import Computer
+from ioHub.constants import EventConstants, MouseConstants
 import ctypes
 
 currentSec=Computer.currentSec
 
 class MouseWindows32(object):
-    WM_MOUSEMOVE = int(0x0200)
-    WM_RBUTTONDOWN = int(0x0204)
-    WM_MBUTTONDOWN = int(0x0207)
-    WM_LBUTTONDOWN = int(0x0201)
-    WM_RBUTTONUP = int(0x0205)
-    WM_MBUTTONUP = int(0x0208)
-    WM_LBUTTONUP = int(0x0202)
-    WM_RBUTTONDBLCLK = int(0x0206)
-    WM_MBUTTONDBLCLK = int(0x0209)
-    WM_LBUTTONDBLCLK = int(0x0203)
-    WM_MOUSEWHEEL = int(0x020A)
+    WM_MOUSEFIRST = 0x0200
+    WM_MOUSEMOVE = 0x0200
+    WM_LBUTTONDOWN = 0x0201
+    WM_LBUTTONUP = 0x0202
+    WM_LBUTTONDBLCLK = 0x0203
+    WM_RBUTTONDOWN =0x0204
+    WM_RBUTTONUP = 0x0205
+    WM_RBUTTONDBLCLK = 0x0206
+    WM_MBUTTONDOWN = 0x0207
+    WM_MBUTTONUP = 0x0208
+    WM_MBUTTONDBLCLK = 0x0209
+    WM_MOUSEWHEEL = 0x020A
+    WM_MOUSELAST = 0x020A
+
+    WH_MOUSE = 7
+    WH_MOUSE_LL = 14
+    WH_MAX = 15
+
+
 
     _mouse_event_mapper={
-        WM_MOUSEMOVE : [0, EventConstants.MOUSE_MOVE_EVENT, EventConstants.MOUSE_BUTTON_ID_NONE],
-        WM_RBUTTONDOWN : [EventConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS_EVENT, EventConstants.MOUSE_BUTTON_ID_RIGHT],
-        WM_MBUTTONDOWN : [EventConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS_EVENT, EventConstants.MOUSE_BUTTON_ID_MIDDLE],
-        WM_LBUTTONDOWN : [EventConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS_EVENT, EventConstants.MOUSE_BUTTON_ID_LEFT],
-        WM_RBUTTONUP : [EventConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE_EVENT, EventConstants.MOUSE_BUTTON_ID_RIGHT],
-        WM_MBUTTONUP : [EventConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE_EVENT, EventConstants.MOUSE_BUTTON_ID_MIDDLE],
-        WM_LBUTTONUP : [EventConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE_EVENT, EventConstants.MOUSE_BUTTON_ID_LEFT],
-        WM_RBUTTONDBLCLK : [EventConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK_EVENT, EventConstants.MOUSE_BUTTON_ID_RIGHT],
-        WM_MBUTTONDBLCLK : [EventConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK_EVENT, EventConstants.MOUSE_BUTTON_ID_MIDDLE],
-        WM_LBUTTONDBLCLK : [EventConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK_EVENT, EventConstants.MOUSE_BUTTON_ID_LEFT],
-        WM_MOUSEWHEEL : [0, EventConstants.MOUSE_WHEEL_DOWN_EVENT, EventConstants.MOUSE_BUTTON_ID_NONE]
+        WM_MOUSEMOVE : [0, EventConstants.MOUSE_MOVE, MouseConstants.MOUSE_BUTTON_NONE],
+        WM_RBUTTONDOWN : [MouseConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS, MouseConstants.MOUSE_BUTTON_RIGHT],
+        WM_MBUTTONDOWN : [MouseConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS, MouseConstants.MOUSE_BUTTON_MIDDLE],
+        WM_LBUTTONDOWN : [MouseConstants.MOUSE_BUTTON_STATE_PRESSED, EventConstants.MOUSE_PRESS, MouseConstants.MOUSE_BUTTON_LEFT],
+        WM_RBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE, MouseConstants.MOUSE_BUTTON_RIGHT],
+        WM_MBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE, MouseConstants.MOUSE_BUTTON_MIDDLE],
+        WM_LBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_RELEASE, MouseConstants.MOUSE_BUTTON_LEFT],
+        WM_RBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_RIGHT],
+        WM_MBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_MIDDLE],
+        WM_LBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_LEFT],
+        WM_MOUSEWHEEL : [0, EventConstants.MOUSE_WHEEL_DOWN, MouseConstants.MOUSE_BUTTON_NONE]
     }
 
 
@@ -50,9 +59,9 @@ class MouseWindows32(object):
         self._lastPosition=0,0
         self._isVisible=0
         self.activeButtons={
-                            EventConstants.MOUSE_BUTTON_ID_LEFT:0,
-                            EventConstants.MOUSE_BUTTON_ID_RIGHT:0,
-                            EventConstants.MOUSE_BUTTON_ID_MIDDLE:0,
+            MouseConstants.MOUSE_BUTTON_LEFT:0,
+            MouseConstants.MOUSE_BUTTON_RIGHT:0,
+            MouseConstants.MOUSE_BUTTON_MIDDLE:0,
                             }
         self._user32=ctypes.windll.user32
 
@@ -60,17 +69,35 @@ class MouseWindows32(object):
         
         self._display = ioHub.devices.Display
 
-
+    def getCurrentButtonStates(self):
+        """
+        Retrieve a list of three bool values, indicating if the left, middle, 
+        or right mouse buttons are currently pressed. True indicates that
+        mouse button is pressed; False means the mouse button is not presssed.
+        
+        Args:
+            None
+            
+        Result:
+            list: list of three boolean values.
+        """
+        
+        return (self.activeButtons[MouseConstants.MOUSE_BUTTON_LEFT]!=0,
+                self.activeButtons[MouseConstants.MOUSE_BUTTON_MIDDLE]!=0,
+                self.activeButtons[MouseConstants.MOUSE_BUTTON_RIGHT]!=0)
+                
     def getPosition(self):
         """
         Returns the current position of the ioHub Mouse Device. Mouse Position is in display
         coordinate units, with 0,0 being the center of the screen.
 
         Args: None
-        Return (tuple): (x,y) position of mouse in Display coordinate space.
+        
+        Return:
+            tuple: (x,y) position of mouse in Display coordinate space.
         """
-        if self._display is None:
-            self._display = ioHub.devices.Display
+#        if self._display is None:
+#            self._display = ioHub.devices.Display
         return tuple(self._position)
 
     def setPosition(self,pos, updateSystemMousePosition=True):
@@ -82,10 +109,12 @@ class MouseWindows32(object):
         to the associated screen pixel position expected by the OS.
 
         Args:
-             pos: The position, in Display coordinate space, to set the mouse position too.
-             updateSystemMousePosition: True = the OS mouse position will also be updated,
-                                        False = it will not.
-        Return (tuple): new (x,y) position of mouse in Display coordinate space.
+             pos ( (x,y) list or tuple ): The position, in Display coordinate space, to set the mouse position too.
+             
+             updateSystemMousePosition (bool): True = the OS mouse position will also be updated, False = it will not.
+        
+        Return:
+            tuple: new (x,y) position of mouse in Display coordinate space.
         """
         if isinstance(pos[0], (int, long, float, complex)) and isinstance(pos[1], (int, long, float, complex)):
             if self._display is None:
@@ -93,10 +122,19 @@ class MouseWindows32(object):
             self._lastPosition=self._position
             self._position=pos[0],pos[1]
             if updateSystemMousePosition is True:
-                pixLocation=self._display.displayCoord2Pixel(pos[0],pos[1])
-                #ioHub.print2stderr('pixLocation:'+str(pixLocation))
+                px,py=self._display.displayCoord2Pixel(pos[0],pos[1])
+                l,t,r,b=self._display.getStimulusScreenBounds()
+                if px<l:
+                    px=l
+                elif px>r:
+                    px=r
+                    
+                if py<t:
+                    py=t
+                elif py>b:
+                    py=b
                 #  >> WIN32_ONLY
-                self._user32.SetCursorPos(*pixLocation)
+                self._user32.SetCursorPos(px,py)
                 #  << WIN32_ONLY
         return self._position
 
@@ -106,9 +144,11 @@ class MouseWindows32(object):
         and the amount the mouse position changed the last time it was updated (dx,dy).
         Mouse Position and Delta are in display coordinate units.
 
-        Args: None
-        Return (tuple): ( (x,y), (dx,dy) ) position of mouse, change in mouse position,
-                                           both in Display coordinate space.
+        Args: 
+            None
+            
+        Return:
+            list: ( (x,y), (dx,dy) ) position of mouse, change in mouse position,both in Display coordinate space.
         """
         try:
             cpos=self._position
@@ -117,7 +157,7 @@ class MouseWindows32(object):
             change_y=cpos[1]-lpos[1]
             if change_x or change_y:
                 return cpos, (change_x,change_y)
-            return cpos, None
+            return cpos, (0.0,0.0)
         except Exception, e:
             ioHub.print2err(">>ERROR getPositionAndDelta: "+str(e))
             ioHub.printExceptionDetailsToStdErr()
@@ -128,8 +168,11 @@ class MouseWindows32(object):
         Returns the current vertical scroll value for the mouse. The vertical scroll value changes when the
         scroll wheel on a mouse is moved up or down. The vertical scroll value is in an arbitrary value space
         ranging for -32648 to +32648. Scroll position is initialize to 0 when the experiment starts.
-        Args: None
-        Returns (int): current vertical scroll value.
+        
+        Args: 
+            None
+        Returns: 
+            (int): current vertical scroll value.
         """
         return self._scrollPositionY
 
@@ -140,9 +183,11 @@ class MouseWindows32(object):
         arbitrary value space ranging for -32648 to +32648. Scroll position is initialize to 0 when
         the experiment starts. This method allows you to change the scroll value to anywhere in the
         valid value range.
-        Args (int): The scroll position you want to set the vertical scroll to. Should be a number
-                    between -32648 to +32648.
-        Returns (int): current vertical scroll value.
+        Args: 
+            s (int): The scroll position you want to set the vertical scroll to. Should be a number between -32648 to +32648.
+
+        Returns:
+            (int): current vertical scroll value.
         """
         if isinstance(s, (int, long, float, complex)):
             self._scrollPositionY=s
@@ -151,8 +196,12 @@ class MouseWindows32(object):
     def getSystemCursorVisibility(self):
         """
         Returns whether the system cursor is visible on the currently active Window.
-        Args: None
-        Returns (bool): True if system cursor is visible on currently active Window. False otherwise.
+        
+        Args: 
+            None
+            
+        Returns: 
+            bool: True if system cursor is visible on currently active Window. False otherwise.
         """
         #  >> WIN32_ONLY
         v=self._user32.ShowCursor(False)    
@@ -163,9 +212,12 @@ class MouseWindows32(object):
     def setSystemCursorVisibility(self,v):
         """
         Set whether the system cursor is visible on the currently active Window.
+        
         Args:
             v (bool): True = make system cursor visible. False = Hide system cursor
-        Returns (bool): True if system cursor is visible on currently active Window. False otherwise.
+        
+        Returns:
+            (bool): True if system cursor is visible on currently active Window. False otherwise.
 
         """
         #  >> WIN32_ONLY
@@ -185,8 +237,8 @@ class MouseWindows32(object):
             event.Position=p
 
             bstate,etype,bnum=MouseWindows32._mouse_event_mapper[event.Message]
-            if bnum is not EventConstants.MOUSE_BUTTON_ID_NONE:
-                self.activeButtons[bnum]= int(bstate==EventConstants.MOUSE_BUTTON_STATE_PRESSED)
+            if bnum is not MouseConstants.MOUSE_BUTTON_NONE:
+                self.activeButtons[bnum]= int(bstate==MouseConstants.MOUSE_BUTTON_STATE_PRESSED)
 
             abuttonSum=0
             for k,v in self.activeButtons.iteritems():
@@ -203,8 +255,8 @@ class MouseWindows32(object):
     def _poll(self):
         pass
  
-    @staticmethod
-    def _getIOHubEventObject(event):
+
+    def _getIOHubEventObject(self,event):
         logged_time, event=event
         p = event.Position
         px=p[0]
@@ -214,7 +266,7 @@ class MouseWindows32(object):
 
         if event.Message == MouseWindows32.WM_MOUSEWHEEL:
             if event.Wheel > 0:
-                etype=EventConstants.MOUSE_WHEEL_UP_EVENT
+                etype=EventConstants.MOUSE_WHEEL_UP
 
         confidence_interval=0.0
         delay=0.0
@@ -229,7 +281,7 @@ class MouseWindows32(object):
         
         hubTime = logged_time #TODO correct mouse times to factor in offset.
 
-        r= [0,0,Computer.getNextEventID(),etype,device_time,logged_time,hubTime,
-                    confidence_interval, delay, bstate, bnum,event.ActiveButtons, px, py,event.Wheel,event.WheelAbsolute, event.Window]
+        r= [0,0,Computer._getNextEventID(),etype,device_time,logged_time,hubTime,
+                    confidence_interval, delay,0, bstate, bnum,event.ActiveButtons, px, py,event.Wheel,event.WheelAbsolute, event.Window]
             
         return r

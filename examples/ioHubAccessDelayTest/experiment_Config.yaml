@@ -5,7 +5,7 @@
 title: ioHubAccessDelayTest
 code: ioHubDT
 version: '0.5'
-description: Test getting keyboard and mouse events, updates psychopy display with event data, and calculates stats graphed at end.
+description: Test getting device events, updating psychopy display with event data, and calculating delay stats.
 total_sessions_to_run: 50
 session_defaults:
     name: Session Name
@@ -18,16 +18,13 @@ session_defaults:
         contacts: [Select, Yes, No ]
         eye_color: Unknown
 session_variable_order: [ name, code, comments, participant_age, participant_gender, glasses, contacts, eye_color ]
-authors:
-- name: Sol Simpson
-  email: N/A
 event_buffer_length: 2048
 process_affinity: []
 remaining_processes_affinity: []
 ioHub:
     enable: True
     process_affinity: []
-    config: ioHub_config.yaml
+    config: iohub_config.yaml
 events:
 - event_class: MessageEvent
   prefix: 0

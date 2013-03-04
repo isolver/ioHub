@@ -1,53 +1,15 @@
 """
 ioHub
 .. file: ioHub/examples/simple/run.py
-
-Copyright (C) 2012 Sol Simpson
-Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
-
-.. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
-.. fileauthor:: Sol Simpson <sol@isolver-software.com>
-
-------------------------------------------------------------------------------------------------------------------------
-
-simpleTest
-++++++++++
-
-Overview:
----------
-
-This script is implemented by extending the ioHub.experiment.ioHubExperimentRuntime class to a class
-called ExperimentRuntime. The ExperimentRuntime class provides a utility object to run a psychopy script and
-also launches the ioHub server process so the script has access to the ioHub service and associated devices.
-
-The program loads many configuration values for the experiment process by using the experiment_Config.yaml file that
-is located in the same directory as this script. Configuration settings for the ioHub server process are defined in
-the ioHub_configuration.yaml file.
-
-The __main__ of this script file simply calls the start() method of the ExperimentRuntime object,
-that calls the run() method for the instance which is what contains the actual 'program / experiment execution code'
-that has been added to this file. When run() completes, the ioHubServer process is closed and the local program ends.
-
-Description:
------------
-
-The main purpose for the simpleTest is to illustrate the overall structure of the ioHub.experiment.ioHubExperimentRuntime
-utility class and how to extend it and use it to run a psycho py program with ioHub / and pyEyeTrackerInterface fucntionality if desired.
-
-To Run:
--------
-
-1. Ensure you have followed the ioHub installation instructions at http://www.github.com/isolver/iohub/wiki
-2. Open a command prompt to the directory containing this file.
-3. Start the test program by running:
-   python.exe run.py
-
-Any issues or questions, please let me know.
 """
 
+from psychopy import visual
+
 import ioHub
-from ioHub.devices import Computer
-from ioHub.experiment import ioHubExperimentRuntime, psychopyVisual
+from ioHub import OrderedDict
+from ioHub.devices import Computer,Keyboard
+from ioHub.constants import KeyboardConstants, EventConstants
+from ioHub.util.experiment import ioHubExperimentRuntime
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
@@ -101,7 +63,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         display=self.devices.display
         kb=self.devices.kb
 
-        Computer.enableHighPriority()
+        #Computer.enableHighPriority()
 
         # Set the mouse position to 0,0, which means the 'center' of the screen.
         mouse.setPosition((0.0,0.0))
@@ -121,17 +83,17 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Create a psychopy window, full screen resolution, full screen mode, pix units, with no boarder, using the monitor
         # profile name 'test monitor, which is created on the fly right now by the script
-        psychoWindow = psychopyVisual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False,screen=screen_index)
+        psychoWindow = visual.Window(screen_resolution, monitor="testMonitor", units=coord_type, fullscr=True, allowGUI=False,screen=screen_index)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
 
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
-        psychoStim=ioHub.LastUpdatedOrderedDict()
-        psychoStim['grating'] = psychopyVisual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        psychoStim['fixation'] =psychopyVisual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['mouseDot'] =psychopyVisual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
+        psychoStim=OrderedDict()
+        psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
+        psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
         # Clear all events from the global event buffer, and from the keyboard event buffer.
         self.hub.clearEvents()
@@ -148,51 +110,35 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             currentPosition=mouse.getPosition()
             psychoStim['mouseDot'].setPos(currentPosition)
 
-            # this is short hand for looping through the psychopy stim list and redrawing each one
-            # it is also efficient, may not be as user friendly as:
-            # for stimName, stim in psychoStim.itervalues():
-            #    stim.draw()
-            # which does the same thing if you like and is probably just as efficent.
+
+            # redraw the stim
             [psychoStim[stimName].draw() for stimName in psychoStim]
 
             # flip the psychopy window buffers, so the stim changes you just made get displayed.
             psychoWindow.flip()
             # it is on this side of the call that you know the changes have been displayed, so you can
-            # make a call to one of the built-in time methods and get the event time of the flip, as the built in
+            # make a call to the ioHub time method and get the time of the flip, as the built in
             # time methods represent both experiment process and ioHub server process time.
-            # Most times in ioHub are represented as unsigned 64 bit integers when they are saved, so using usec
-            # as a timescale is appropriate.
+            # Most times in ioHub are represented sec.msec format to match that of Psychopy.
             flip_time=Computer.currentSec()
 
             # send a message to the iohub with the message text that a flip occurred and what the mouse position was.
             # since we know the ioHub server time the flip occurred on, we can set that directly in the event.
             self.hub.sendMessageEvent("Flip %s"%(str(currentPosition),), sec_time=flip_time)
 
-            # get any new keyboard events from the keyboard device
-            kb_events=kb.getEvents()
-            if len(kb_events)>0:
-                # for each new keyboard event, check if it matches one of the end example keys.
-                for k in kb_events:
-                    # key: the string representation of the key pressed, A-Z if a-zA-Z pressed, 0-9 if 0-9 pressed ect.
-                    #      To get the mapping from a key_id to a key string, use
-                    #
-                    #      key_string=EventConstants.IDToName(key_event['key_id'])
-                    #
-                    # char: the ascii char for the key pressed. This field factors in if shift was also pressed or not
-                    #       when the char was typed, so typing a 's' == char field of 's', while typing SHIFT+s == char
-                    #       field of 'S'. This is in contrast to the key field, which always returns upper case values
-                    #       regardless of shift value. If the character pressed is not an ascii printable character,
-                    #       this filed will print junk, hex, or who knows what else at this point.
-                    if k['key'] in ['Space','Return','Escape']:
-                        print 'Quit key pressed: ',k['key']
-                        QUIT_EXP=True
+            # get any new keyboard char events from the keyboard device
 
-        # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
-        #self.clearEvents()
+
+            # for each new keyboard character event, check if it matches one of the end example keys.
+            for k in kb.getEvents(EventConstants.KEYBOARD_CHAR):
+                if k.key in ['ESCAPE', ]:
+                    print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
+                    QUIT_EXP=True
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
         actualDelay=self.hub.delay(0.250)
         print "Delay requested %.6f, actual delay %.6f, Diff: %.6f"%(0.250,actualDelay,actualDelay-0.250)
+
         # for fun, test getting a bunch of events at once, likely causing a mutlipacket getEvents()
         stime = Computer.currentSec()
         events=self.hub.getEvents()

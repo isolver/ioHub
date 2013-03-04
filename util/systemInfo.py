@@ -1,10 +1,11 @@
 # From PsychoPy (www.PsycoPy.org) examples folder.
 # slightly modified to run also as a called func and to add the ioHub version and python path,
-
+import os
 from sys import stdout
-from pyglet import gl
-
+    
 def printSystemInfo(fileLikeObj=None):
+    from pyglet import gl
+
     if fileLikeObj is None:
         fileLikeObj=stdout
     import sys, platform, psutil
@@ -91,6 +92,11 @@ def printSystemInfo(fileLikeObj=None):
 
     win.close()
 
-    
+def saveSystemInformationFile(fpath='.'):
+    # save current system info file session data dir
+    sysInfoFile=open(os.path.join(fpath,'systemInfo.txt'),'w')
+    printSystemInfo(sysInfoFile)
+    sysInfoFile.close()
+
 if __name__ == '__main__':
     printSystemInfo()

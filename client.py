@@ -2,7 +2,7 @@
 ioHub
 .. file: ioHub/client.py
 
-Copyright (C) 2012 Sol Simpson
+Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
@@ -27,9 +27,12 @@ except ImportError:
     from yaml import Loader, Dumper
 
 import ioHub
-from ioHub.devices import Computer, EventConstants, DeviceEvent
+from ioHub import EventConstants
+from ioHub.devices import Computer, DeviceEvent
 from ioHub.devices.experiment import MessageEvent
-from experiment import pumpLocalMessageQueue
+
+if Computer.system=="Windows":
+    from util.experiment import pumpLocalMessageQueue
 
 MAX_PACKET_SIZE=64*1024
 
@@ -161,7 +164,7 @@ class DeviceRPC(object):
             r=r[0]
 
         if r and self.method_name == 'getEvents':
-            asType='dict'
+            asType='namedtuple'
             if 'asType' in kwargs:
                 asType=kwargs['asType']
 
@@ -173,12 +176,11 @@ class DeviceRPC(object):
                     conversionMethod=ioHubConnection._eventListToDict
                 elif asType == 'object':
                     conversionMethod=ioHubConnection._eventListToObject
+                elif asType == 'namedtuple':
+                    conversionMethod=ioHubConnection._eventListToNamedTuple
 
                 if conversionMethod:
-                    events=[]
-                    for el in r:
-                        events.append(conversionMethod(el))
-                    return events
+                    return [conversionMethod(el) for el in r]
 
         return r
 
@@ -338,27 +340,117 @@ class ioHubDevices(object):
 
 class ioHubConnection(object):
     """
-    ioHubConnection is the main experiment process side class that is responsible to communicating
-    with the ioHub Process.
+    ioHubConnection is the Experiment Process side class that is responsible for 
+    communicating with the ioHub Process. ioHubConnection is responsible for for creating
+    the ioHub Server Process, sending requests to the ioHub Server Process, and reading
+    the ioHub Server Process reply. This class can also tell the ioHub server when to
+    close down and disconnect.
+    
+    The ioHubConnection class is also used to access ioHub devices from the PsychoPy
+    experiment runtime script. These device objects can be accessed via the ioHubConnection's
+    *deviceByLabel* dictionary attribute. For example, to print the available methods for each device registered with the ioHub Server,
+    assuming *hub* refers to the ioHubConnection instance *or* an instance of the ioHubExperimentRuntime
+    class (in which case *hub* would likely be replaced with *self.hub*):
+        
+        >>> for device_name,device_access in hub.deviceByLabel.iteritems():
+        >>>    print 'Device Name: ',device_name
+        >>>    print 'Device Interface:'
+        >>>    for method in device_access.getDeviceInterface():
+        >>>        print '\t',method
+        >>>    print "--------------"              
+        Device Name:  kb
+        Device Interface:
+            DeviceConstants
+            clearEvents
+            enableEventReporting
+            getEvents
+            getStartupConfiguration
+            isReportingEvents
+        --------------
+        Device Name:  mouse
+        Device Interface:
+            DeviceConstants
+            clearEvents
+            enableEventReporting
+            getCurrentButtonStates
+            getEvents
+            getPosition
+            getPositionAndDelta
+            getStartupConfiguration
+            getSystemCursorVisibility
+            getVerticalScroll
+            isReportingEvents
+            setPosition
+            setSystemCursorVisibility
+            setVerticalScroll
+        --------------
+        Device Name:  display
+        Device Interface:
+            DeviceConstants
+            clearEvents
+            displayCoord2Pixel
+            enableEventReporting
+            getConfigFileDistance
+            getConfigFileHeight
+            getConfigFileWidth
+            getDisplayCoordinateType
+            getEvents
+            getMonitorCount
+            getPPD
+            getPsychoPyMonitorSettingsName
+            getScreenInfoList
+            getStartupConfiguration
+            getStimulusScreenBounds
+            getStimulusScreenIndex
+            getStimulusScreenInfo
+            getStimulusScreenOrigin
+            getStimulusScreenReportedRetraceInterval
+            getStimulusScreenResolution
+            isReportingEvents
+            pixel2DisplayCoord
+            setStimulusScreenIndex
+        --------------
+        Device Name:  experimentRuntime
+        Device Interface:
+            DeviceConstants
+            clearEvents
+            enableEventReporting
+            getEvents
+            getStartupConfiguration
+            isReportingEvents
+        --------------
+    
+    If you know the name of the device that you want to access (it is the *name* 
+    specified for the device in the iohub_config.yaml settings file) then the device can
+    simply be accesed via the *devices* attribute of either the ioHubConnection or 
+    ioHubExperimentRuntime classes:
+    
+        >>> # get the Mouse device, named mouse
+        >>> mouse=hub.devices.mouse
+        >>> current_mouse_position = mouse.getPosition()
+        >>> print 'current mouse position: ', current_mouse_position        
+        current mouse position:  [-211.0, 371.0]
+        
+        >>> # get any keyboard events from the keyboard device
+        >>> kb=hub.devices.keyboard
+        >>> # wait 1 second. While waiting, gets events from ioHub Server and buffers 
+        >>> #    them locally at an interval that can be set using the checkHubInterval
+        >>> #    kwarg, which is set to 0.02 seconds (20 msec) by default.
 
-    ioHubConnection is responsible for for creating the ioHub Server Process, sending message requests to the
-    ioHub Server, and reading the ioHub Server process reply. This class can also tell the ioHub server when to
-    close down and disconnect. The ioHubConnection class also has an experiment side representation of the devices
-    that have been registered with the ioHub Process for monitoring. These device objects can be accessed via the
-    ioHubConnection's devices attribute. For example, to print the available methods for each device:
-
-        for d in self.devices:
-            print d, d.getDeviceInterface()
-            print '--------------'
-
-    If using the ioHubExperimentRuntime utility class to create your experiment, an instance of ioHubConnection
-    is created for you automatically and is accessible via self.hub. So to perform the same task as above,
-    but from within the ioHubExperimentRuntime.run() method:
-
-        for d in self.hub.devices:
-            print d, d.getDeviceInterface()
-            print '--------------'
-
+        >>> hub.delay(1.0)
+        >>> events = kb.getEvents()
+        >>> for kb_event in events:
+        >>>    print 'kb_event: ', kb_event        
+        kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=71, type=21, device_time=423231.18, logged_time=3.2645300622680224, time=3.2645300622680224, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key='z', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=72, type=22, device_time=423231.242, logged_time=3.3285222236299887, time=3.3285222236299887, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key='z', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=73, type=23, device_time=423231.242, logged_time=3.3285222236299887, time=3.3285222236299887, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key='z', modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=71, type=21, device_time=423231.18, logged_time=3.2645300622680224, time=3.2645300622680224, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key='z', modifiers=None, window_id=5310920), duration=0.06399216136196628)        
+        kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=86, type=21, device_time=423231.866, logged_time=3.9525340902619064, time=3.9525340902619064, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key='x', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=87, type=22, device_time=423231.944, logged_time=4.032557043596171, time=4.032557043596171, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key='x', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=88, type=23, device_time=423231.944, logged_time=4.032557043596171, time=4.032557043596171, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key='x', modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=86, type=21, device_time=423231.866, logged_time=3.9525340902619064, time=3.9525340902619064, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key='x', modifiers=None, window_id=5310920), duration=0.08002295333426446)        
+        kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=92, type=21, device_time=423232.272, logged_time=4.352586070308462, time=4.352586070308462, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key='d', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=93, type=22, device_time=423232.35, logged_time=4.432587591640186, time=4.432587591640186, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key='d', modifiers=None, window_id=5310920)        
+        kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=94, type=23, device_time=423232.35, logged_time=4.432587591640186, time=4.432587591640186, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key='d', modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=92, type=21, device_time=423232.272, logged_time=4.352586070308462, time=4.352586070308462, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key='d', modifiers=None, window_id=5310920), duration=0.08000152133172378)
+        ioHub Server Process Completed With Code:  0
     """
     _replyDictionary=dict()
     def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):
@@ -540,30 +632,34 @@ class ioHubConnection(object):
             maxsize = 1
         return maxsize
 
+
     def _serverStdOutHasData(self, maxsize=256):
         """
         Used by _startServer pipe reader code. Allows for async check for data on pipe in windows.
         """
-        #  >> WIN32_ONLY
-        import msvcrt
-        from win32pipe import PeekNamedPipe
-
-        maxsize = self._get_maxsize(maxsize)
-        conn=self._server_process.stdout
-
-        if conn is None:
-            return False
-        try:
-            x = msvcrt.get_osfhandle(conn.fileno())
-            (read, nAvail, nMessage) = PeekNamedPipe(x, 0)
-            if maxsize < nAvail:
-                nAvail = maxsize
-            if nAvail > 0:
-                return True
-        # << WIN32_ONLY
-        except Exception as e:
-            raise ioHubConnectionException(e)
-
+        if Computer.system == 'Windows':        
+            #  >> WIN32_ONLY
+            import msvcrt
+            from win32pipe import PeekNamedPipe
+    
+            maxsize = self._get_maxsize(maxsize)
+            conn=self._server_process.stdout
+    
+            if conn is None:
+                return False
+            try:
+                x = msvcrt.get_osfhandle(conn.fileno())
+                (read, nAvail, nMessage) = PeekNamedPipe(x, 0)
+                if maxsize < nAvail:
+                    nAvail = maxsize
+                if nAvail > 0:
+                    return True
+            # << WIN32_ONLY
+            except Exception as e:
+                raise ioHubConnectionException(e)
+        if Computer.system == 'Linux':
+            return True
+            
     def _readServerStdOutLine(self):
         """
         Used by _startServer pipe reader code. Reads a line from the ioHub server stdout. This is blocking.
@@ -795,7 +891,7 @@ class ioHubConnection(object):
         r = self.sendToHubServer(('GET_EVENTS',))
         return r[1]
 
-    def getEvents(self,deviceLabel=None,asType='dict'):
+    def getEvents(self,deviceLabel=None,asType='namedtuple'):
         """
         Retrieve any events that have been collected by the ioHub server from monitored devices
         since the last call to getEvents() or since the last call to clearEvents().
@@ -850,13 +946,12 @@ class ioHubConnection(object):
                     conversionMethod=self._eventListToDict
                 elif asType == 'object':
                     conversionMethod=self._eventListToObject
-                
-                if conversionMethod:                    
-                    events=[]
-                    for el in r:
-                        events.append(conversionMethod(el))
-                    return events
-                
+                elif asType =='namedtuple':
+                    conversionMethod=self._eventListToNamedTuple
+
+                if conversionMethod:
+                    return [conversionMethod(el) for el in r]
+
                 return r
 
     def clearEvents(self,deviceLabel=None):
@@ -884,7 +979,7 @@ class ioHubConnection(object):
                 return True
             return False
 
-    def delay(self,delay,checkHubInterval=0.01):
+    def delay(self,delay,checkHubInterval=0.02):
         """
         Pause the experiment execution for msec.usec interval, while checking the ioHub for
         any new events and retrieving them every 'checkHubInterval' msec during the delay. Any events
@@ -950,13 +1045,13 @@ class ioHubConnection(object):
     @staticmethod
     def _eventListToObject(eventValueList):
         """
-        Convert an ioHub event that is current represented as an orderded list of values, and return the correct
+        Convert an ioHub event that is current represented as an ordered list of values, and return the correct
         ioHub.devices.DeviceEvent subclass for the given event type.
         """
-        eclass=EventConstants.EVENT_CLASSES[eventValueList[3]]
+        eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
         combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
         kwargs = dict(combo)
-        return eclass(**kwargs)
+        return eclass.createEventAsClass(eventValueList)
 
     @staticmethod
     def _eventListToDict(eventValueList):
@@ -967,15 +1062,29 @@ class ioHubConnection(object):
         try:
             if isinstance(eventValueList,dict):
                 return eventValueList
-            eclass=EventConstants.EVENT_CLASSES[eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX]]
-            combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
-            return dict(combo)
+            eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
+            return eclass.createEventAsDict(eventValueList)
         except:
             print '---------------'
             print "ERROR: eventValueList: "+str(eventValueList)
             print '---------------'
 
-
+    @staticmethod
+    def _eventListToNamedTuple(eventValueList):
+        """
+        Convert an ioHub event that is currently represented as an ordered list of values, and return the event as a
+        namedtuple.
+        """
+        try:
+            if not isinstance(eventValueList,list):
+                return eventValueList
+            eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
+            return eclass.createEventAsNamedTuple(eventValueList)
+        except:
+            print '---------------'
+            print "ERROR: eventValueList: "+str(eventValueList)
+            ioHub.printExceptionDetailsToStdErr()
+            print '---------------'
 
     def sendEvents(self,events):
         """
@@ -989,7 +1098,7 @@ class ioHubConnection(object):
         """
         eventList=[]
         for e in events:
-            eventList.append(e.asList())
+            eventList.append(e._asList())
         r=self.sendToHubServer(('EXP_DEVICE','EVENT_TX',eventList))
         return r
 
@@ -1040,7 +1149,12 @@ class ioHubConnection(object):
 
     def shutdown(self):
         self._shutDownServer()
-        
+    def quit(self):
+        '''
+        Same as shutdown, but has same name as psychopy core.quit() so maybe easier for psychopy users to remember.
+        '''
+        self._shutDownServer()
+
     def _shutDownServer(self):
         """
 

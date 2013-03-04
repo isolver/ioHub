@@ -1,5 +1,5 @@
 ExperimentDevice:
-        name: experimentRuntime
+        name: exp
         enable: True
         saveEvents: True
         streamEvents: True

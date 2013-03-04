@@ -3,7 +3,7 @@ from __future__ import division
 ioHub
 .. file: ioHub/ioDataStore/__init__.py
 
-Copyright (C) 2012 Sol Simpson
+Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
@@ -59,17 +59,18 @@ PyTables Definition
 +++++++++++++++++++
 
 """
+import os, atexit
 
 import tables
 from tables import *
 from tables import parameters
-import os, atexit
+
+import numpy as N
+
 import ioHub
 import ioHub.devices as D
-from ioHub.devices import EventConstants, deviceModulesAvailable
+from ioHub.devices import EventConstants, deviceModulesAvailable,DeviceEvent
 from log import ExperimentLog,BaseLogLevels
-import util
-import numpy as N
 
 loggingLevels=BaseLogLevels()
 
@@ -132,20 +133,25 @@ class EMRTpyTablesFile():
         
         # create event tables
         if 'keyboard' in deviceModulesAvailable:
-            self.TABLES['KEYBOARD_KEY']=self.emrtFile.root.data_collection.events.keyboard.KeyboardKeyEvent
+            self.TABLES['KEYBOARD_INPUT']=self.emrtFile.root.data_collection.events.keyboard.KeyboardKeyEvent
+            self.TABLES['KEYBOARD_CHAR']=self.emrtFile.root.data_collection.events.keyboard.KeyboardCharEvent
+
+        if 'filter' in deviceModulesAvailable:
+            self.TABLES['FILTER_EVENT']=self.emrtFile.root.data_collection.events.filters.GenericFilterEvent
 
         if 'mouse' in deviceModulesAvailable:
-            self.TABLES['MOUSE']=self.emrtFile.root.data_collection.events.mouse.MouseEvent
+            self.TABLES['MOUSE_INPUT']=self.emrtFile.root.data_collection.events.mouse.MouseEvent
 
-        #if 'joystick' in deviceModulesAvailable:
-        #    self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.root.data_collection.events.joystick.JoystickButtonEvent
+        if 'gamepad' in deviceModulesAvailable:
+            self.TABLES['GAMEPAD_EVENT']=self.emrtFile.root.data_collection.events.gamepad.GamePadStateChangeEvent
+
 
         if 'parallelPort' in deviceModulesAvailable:
-            self.TABLES['TTL_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent
+            self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.root.data_collection.events.parallel_port.ParallelPortEvent
 
         if 'daq' in deviceModulesAvailable:
-            self.TABLES['DAQ_SINGLE_CHANNEL_INPUT']=self.emrtFile.root.data_collection.events.DAQ.DAQSingleChannelInputEvent
-            self.TABLES['DAQ_MULTI_CHANNEL_INPUT']=self.emrtFile.root.data_collection.events.DAQ.DAQMultiChannelInputEvent
+            #self.TABLES['DA_SINGLE_CHANNEL_INPUT']=self.emrtFile.root.data_collection.events.DA.DASingleChannelInputEvent
+            self.TABLES['DA_MULTI_CHANNEL_INPUT']=self.emrtFile.root.data_collection.events.DA.DAMultiChannelInputEvent
 
         if 'experiment' in deviceModulesAvailable:
             self.TABLES['MESSAGE']=self.emrtFile.root.data_collection.events.experiment.Message
@@ -163,30 +169,11 @@ class EMRTpyTablesFile():
     
     def buildOutTemplate(self): 
         self.emrtFile.title="EMRT ioDataHub File"
-        self.emrtFile.root.EMRT_FILE_VER=EMRT_FILE_VERSION
-        self.emrtFile.root.SCHEMA_DESIGNER=EMRT_SCHEMA_AUTHORS
-        self.emrtFile.root.SCHEMA_MODIFIED=EMRT_SCHEMA_MODIFIED_DATE
+        self.emrtFile.EMRT_FILE_VER=EMRT_FILE_VERSION
+        self.emrtFile.SCHEMA_DESIGNER=EMRT_SCHEMA_AUTHORS
+        self.emrtFile.SCHEMA_MODIFIED=EMRT_SCHEMA_MODIFIED_DATE
         
         #CREATE GROUPS
-        #self.emrtFile.createGroup(self.emrtFile.root, 'documentation', title='Documents related to how to use the EMRT system and user documents about experiments held within this file')
-        #self.emrtFile.createGroup(self.emrtFile.root, 'implementation', title='Experiment Source Files and Resources needed to Run Experiments')
-        #self.emrtFile.createGroup(self.emrtFile.root, 'logistics', title='Information on the members and sires involved in the experiments represented in this file.')
- 
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation, 'scripts', title='Source Experiment Script Files')
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation, 'resources', title='Resource Files Used within the Experiment')
-
-        #self.emrtFile.flush()
-        
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'images', title='Images used in the Experiments')
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'audio', title='Audio files used in the Experiments')
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'video', title='Video files used in the Experiments')
-        #self.emrtFile.createGroup(self.emrtFile.root.implementation.resources, 'condition_files', title='Condition Files used in thee experiments.images')
-        
-        #self.emrtFile.flush()
-        
-        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'experiments', title='Information about each experiment saved in this file.')
-        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'sessions', title='Information about each experiment session run and saved in this file.')
-        #self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'participants', title='Information about each participant that was employed in atleast on session in this file.')
 
         self.emrtFile.createGroup(self.emrtFile.root, 'analysis', title='Data Analysis Files, notebooks, scripts and saved results tables.')
         self.emrtFile.createGroup(self.emrtFile.root, 'data_collection', title='Data Collected from Experiment Sessions')
@@ -196,11 +183,11 @@ class EMRTpyTablesFile():
 
         self.emrtFile.createGroup(self.emrtFile.root.data_collection, 'condition_variables', title='Experiment DV and IVs used during and experiment session, or calculated and stored. In general, each row represents one trial of an experiment session.')
         self.flush()
-        #self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'monitor', title='Computer Monitor Created Events')
 
         # CREATE TABLES
 
         dfilter = Filters(complevel=0, complib='zlib', shuffle=False, fletcher32=False)
+        #  filters = Filters(complevel=1, complib='blosc', shuffle=True, fletcher32=False)
         # create meta-data tables
         self.TABLES['CLASS_TABLE_MAPPINGS']=self.emrtFile.createTable(self.emrtFile.root,'class_table_mapping', ClassTableMappings, title='Mapping of ioObjects Classes to ioHub tables')
         
@@ -213,47 +200,62 @@ class EMRTpyTablesFile():
         self.flush()
         self.TABLES['LOG_TABLE']=self.emrtFile.createTable(self.emrtFile.root.logs,'ExperimentLog', ExperimentLog, title='Experiment Logging Data')
 
+        if 'filter' in deviceModulesAvailable:
+            self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'filters', title='Events created from Filter Devices')
+            self.flush()
+            self.TABLES['FILTER_EVENT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.filters,'GenericFilterEvent', D.GenericFilterEvent.NUMPY_DTYPE, title='Generic Filter Event Logging.', filters=dfilter.copy())
+            self.TABLES['FILTER_EVENT_PAYLOAD'] = self.emrtFile.createVLArray(self.emrtFile.root.data_collection.events.filters, 'GenericFilterEventData', VLUnicodeAtom(),"Variable Length Unicode Filter Event Payload")
+            self.flush()
+            self.addClassMapping(D.GenericFilterEvent,self.TABLES['FILTER_EVENT'])
 
         if 'keyboard' in deviceModulesAvailable:
             # create event tables
             self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'keyboard', title='Keyboard Created Events')
             self.flush()
-            self.TABLES['KEYBOARD_KEY']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardKeyEvent', D.KeyboardKeyEvent.NUMPY_DTYPE, title='Keyboard Key Event Logging.', filters=dfilter.copy())                   
+            self.TABLES['KEYBOARD_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardKeyEvent', D.KeyboardKeyEvent.NUMPY_DTYPE, title='Keyboard Key Event Logging.', filters=dfilter.copy())
+            self.TABLES['KEYBOARD_CHAR']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.keyboard,'KeyboardCharEvent', D.KeyboardCharEvent.NUMPY_DTYPE, title='Keyboard Char Event Logging.', filters=dfilter.copy())
             self.flush()
-            self.addClassMapping(D.KeyboardPressEvent,self.TABLES['KEYBOARD_KEY']) 
-            self.addClassMapping(D.KeyboardReleaseEvent,self.TABLES['KEYBOARD_KEY']) 
+            self.addClassMapping(D.KeyboardPressEvent,self.TABLES['KEYBOARD_INPUT'])
+            self.addClassMapping(D.KeyboardReleaseEvent,self.TABLES['KEYBOARD_INPUT'])
+            self.addClassMapping(D.KeyboardCharEvent,self.TABLES['KEYBOARD_CHAR'])
             
         if 'mouse' in deviceModulesAvailable:
             self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'mouse', title='Mouse Device Created Events')
             self.flush()
-            self.TABLES['MOUSE']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseEvent', D.MouseEvent.NUMPY_DTYPE, title='Mouse Event Logging.', filters=dfilter.copy())
-            self.addClassMapping(D.MouseMoveEvent,self.TABLES['MOUSE']) 
-            self.addClassMapping(D.MouseWheelUpEvent,self.TABLES['MOUSE']) 
-            self.addClassMapping(D.MouseWheelDownEvent,self.TABLES['MOUSE']) 
-            self.addClassMapping(D.MouseButtonUpEvent,self.TABLES['MOUSE']) 
-            self.addClassMapping(D.MouseButtonDownEvent,self.TABLES['MOUSE']) 
-            self.addClassMapping(D.MouseDoubleClickEvent,self.TABLES['MOUSE']) 
+            self.TABLES['MOUSE_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseEvent', D.MouseEvent.NUMPY_DTYPE, title='Mouse Event Logging.', filters=dfilter.copy())
+            self.addClassMapping(D.MouseMoveEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseWheelUpEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseWheelDownEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseButtonUpEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseButtonDownEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseDoubleClickEvent,self.TABLES['MOUSE_INPUT'])
         
-        #if 'joystick' in deviceModulesAvailable:
-        #    self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'joystick', title='Joystick Created Events')
-        #    self.flush()
-        #    self.TABLES['JOYSTICK_BUTTON']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.joystick,'JoystickButtonEvent', D.JoystickButtonEvent.NUMPY_DTYPE, title='Joystick Button Event Logging.')
-            
+        if 'gamepad' in deviceModulesAvailable:
+            self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'gamepad', title='GamePad Created Events')
+            self.flush()
+
+            self.TABLES['GAMEPAD_EVENT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.gamepad,'GamePadStateChangeEvent', D.GamePadStateChangeEvent.NUMPY_DTYPE, title='GamePad Multi-State Change Event Logging.')
+            self.addClassMapping(D.GamePadStateChangeEvent,self.TABLES['GAMEPAD_EVENT'])
+            self.addClassMapping(D.GamePadDisconnectEvent,self.TABLES['GAMEPAD_EVENT'])
+            self.addClassMapping(D.GamePadButtonEvent,self.TABLES['GAMEPAD_EVENT'])
+            self.addClassMapping(D.GamePadThumbStickEvent,self.TABLES['GAMEPAD_EVENT'])
+            self.addClassMapping(D.GamePadTriggerEvent,self.TABLES['GAMEPAD_EVENT'])
+
+
         if 'parallelPort' in deviceModulesAvailable:
             self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'parallel_port', title='Parallel Port Created Events')
             self.flush()
-            self.TABLES['TTL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.NUMPY_DTYPE, title='Parallel Port Event Logging.', filters=dfilter.copy())
-            self.addClassMapping(D.ParallelPortEvent,self.TABLES['TTL_INPUT']) 
+            self.TABLES['PARALLEL_PORT_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.parallel_port,'ParallelPortEvent', D.ParallelPortEvent.NUMPY_DTYPE, title='Parallel Port Event Logging.', filters=dfilter.copy())
+            self.addClassMapping(D.ParallelPortEvent,self.TABLES['PARALLEL_PORT_INPUT'])
 
         if 'daq' in deviceModulesAvailable:
-            filters = Filters(complevel=1, complib='blosc', shuffle=True, fletcher32=False)
-            self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'DAQ', title='DAQ Created Events')
+            self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'DA', title='DA Created Events')
             self.flush()
-            self.TABLES['DAQ_SINGLE_CHANNEL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.DAQ,'DAQSingleChannelInputEvent', D.DAQSingleChannelInputEvent.NUMPY_DTYPE, title='DAQ Single Channel Event Logging.',expectedrows=3637200000, filters=dfilter.copy()) # 20 hours of 1000 Hz samples
-            self.TABLES['DAQ_MULTI_CHANNEL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.DAQ,'DAQMultiChannelInputEvent', D.DAQMultiChannelInputEvent.NUMPY_DTYPE, title='DAQ Multiple Channel Event Logging.',expectedrows=3637200000, filters=dfilter.copy()) # 20 hours of 1000 Hz samples
+            #self.TABLES['DA_SINGLE_CHANNEL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.DA,'DASingleChannelInputEvent', D.DASingleChannelInputEvent.NUMPY_DTYPE, title='DA Single Channel Event Logging.',expectedrows=3637200000, filters=dfilter.copy()) # 20 hours of 1000 Hz samples
+            self.TABLES['DA_MULTI_CHANNEL_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.DA,'DAMultiChannelInputEvent', D.DAMultiChannelInputEvent.NUMPY_DTYPE, title='DA Multiple Channel Event Logging.',expectedrows=3637200000, filters=dfilter.copy()) # 20 hours of 1000 Hz samples
             self.flush()
-            self.addClassMapping(D.DAQSingleChannelInputEvent,self.TABLES['DAQ_SINGLE_CHANNEL_INPUT']) 
-            self.addClassMapping(D.DAQMultiChannelInputEvent,self.TABLES['DAQ_MULTI_CHANNEL_INPUT']) 
+            #self.addClassMapping(D.DASingleChannelInputEvent,self.TABLES['DA_SINGLE_CHANNEL_INPUT'])
+            self.addClassMapping(D.DAMultiChannelInputEvent,self.TABLES['DA_MULTI_CHANNEL_INPUT'])
             
         if 'experiment' in deviceModulesAvailable:
             self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'experiment', title='Experiment Generated Events')
@@ -382,7 +384,6 @@ class EMRTpyTablesFile():
                         data[i]=tuple(d)
 
                 np_array= N.array([tuple(data),],dtype=self._EXP_COND_DTYPE)
-                #[tuple(data),]
                 etable.append(np_array)
 
                 self.bufferedFlush()
@@ -407,25 +408,30 @@ class EMRTpyTablesFile():
             self.log(int(ioHub.devices.Computer.globalClock.getTime()),"Experiment or Session ID is None, event not being saved: "+str(event),loggingLevels.WARNING,exp_id, sess_id)
             return False
         return True
-
+        
+    def checkIfSessionCodeExists(self,sessionCode):
+        if self.emrtFile:
+            sessionsForExperiment=self.emrtFile.root.data_collection.session_meta_data.where("experiment_id == %d"%(self.active_experiment_id,))
+            sessionCodeMatch=[sess for sess in sessionsForExperiment if sess['code'] == sessionCode]
+            if len(sessionCodeMatch)>0:
+                return True
+            return False
+            
     def _handleEvent(self, event):
         try:
-            #ioHub.print2err("_handleEvent: ",self.active_experiment_id,self.active_session_id)
+            #ioHub.print2err("ioDS  Handle event: ",event)
 
             if self.checkForExperimentAndSessionIDs(event) is False:
                 return False
 
-            etype=event[3]
-            #ioHub.print2err("etype: ",etype)
-            eventClass=EventConstants.EVENT_CLASSES[etype]
+            etype=event[DeviceEvent.EVENT_TYPE_ID_INDEX]
+
+            eventClass=EventConstants.getClass(etype)
             etable=self.TABLES[eventClass.IOHUB_DATA_TABLE]
-            #ioHub.print2err("eventClass: etable",eventClass,etable)
-            event[0]=self.active_experiment_id
-            event[1]=self.active_session_id
+            event[DeviceEvent.EVENT_EXPERIMENT_ID_INDEX]=self.active_experiment_id
+            event[DeviceEvent.EVENT_SESSION_ID_INDEX]=self.active_session_id
 
             np_array= N.array([tuple(event),],dtype=eventClass.NUMPY_DTYPE)
-            #ioHub.print2err('np_array:',np_array)
-            #ioHub.print2err('eventClass.NUMPY_DTYPE:',eventClass.NUMPY_DTYPE)
             etable.append(np_array)
 
             self.bufferedFlush()
@@ -444,16 +450,16 @@ class EMRTpyTablesFile():
 
             event=events[0]
 
-            etype=event[3]
+            etype=event[DeviceEvent.EVENT_TYPE_ID_INDEX]
             #ioHub.print2err("etype: ",etype)
-            eventClass=EventConstants.EVENT_CLASSES[etype]
+            eventClass=EventConstants.getClass(etype)
             etable=self.TABLES[eventClass.IOHUB_DATA_TABLE]
             #ioHub.print2err("eventClass: etable",eventClass,etable)
 
             np_events=[]
             for event in events:
-                event[0]=self.active_experiment_id
-                event[1]=self.active_session_id
+                event[DeviceEvent.EVENT_EXPERIMENT_ID_INDEX]=self.active_experiment_id
+                event[DeviceEvent.EVENT_SESSION_ID_INDEX]=self.active_session_id
                 np_events.append(tuple(event))
 
             np_array= N.array(np_events,dtype=eventClass.NUMPY_DTYPE)

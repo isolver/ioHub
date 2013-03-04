@@ -27,7 +27,7 @@ remaining_processes_affinity: []
 ioHub:
     enable: True
     process_affinity: []
-    config: ioHub_config.yaml
+    config: iohub_config.yaml
 events:
 - event_class: MessageEvent
   prefix: 0

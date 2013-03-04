@@ -24,116 +24,121 @@ To Run:
 
 Any issues or questions, please let me know.
 """
+from psychopy import visual, core
+from ioHub.client import ioHubConnection, Computer, EventConstants
 
-import ioHub
-from ioHub.devices import Computer
-from ioHub.experiment import ioHubExperimentRuntime, psychopyVisual
+DOT_COUNT=2000
 
-class ExperimentRuntime(ioHubExperimentRuntime):
-    """
-    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
-    all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    ioHubExperimentRuntime __init__ itself.
-    """
-    DOT_COUNT=2000
-    def __init__(self,configFileDirectory, configFile):
-        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
+# Example where ioHub does not use yaml config files specified by user.
+# Each device you want enabled is a key, value pair in a dict, where
+# the key is the Class name of the device you want enabled, and the value
+# is a dict of configuration properties for that device. If you provide
+# an empty dict() as a device key's value, the default properties for that
+# device will be loaded.
+# This will enable streaming of data for each device to the experiment
+# process, but will not enable saving of device events by the ioHub in
+# the ioDataStore.
 
-    def run(self,*args,**kwargs):
-        keyboard = self.devices.kb
-        display = self.devices.display
+devices=dict(Keyboard={},Display={},Mouse={})
 
-        #create a window to draw in
-        myWin =psychopyVisual.Window(display.getStimulusScreenResolution(),
-                             screen=display.getStimulusScreenIndex(),
-                             allowGUI=False, 
-                             bitsMode=None,
-                             units='norm',
-                             winType='pyglet', 
-                             fullscr=True)
+# The dict of devices is assigned to the ioConfigs 'monitor_devices' key
+ioConfig=dict(monitor_devices=devices)
 
-        myWin.setRecordFrameIntervals(True)
+# If you want to enable the ioDataStore, and simply use default parameter
+# settings, then just add a'ioDataStore' key to your ioConfig with dict
+# containing the experiment_code and session_code to associate all events
+# with. Experiment codes are unique within an ioDataStore file, for using
+# the same experiment_code multiple times, adds multiple sessions to the
+# experiment. Session_codes are 'not' unique, so if you provide the same
+# session code across different runs of your experiment script, each run
+# will use a different 'session_id' to tag events with.
 
-        #INITIALISE SOME STIMULI
-        dotPatch =psychopyVisual.DotStim(myWin, 
-                                color=(1.0,1.0,1.0), 
-                                dir=270,
-                                nDots=self.DOT_COUNT, 
-                                fieldShape='circle', 
-                                fieldPos=(0.0,0.0),
-                                fieldSize=2,
-                                dotLife=5, #number of frames for each dot to be drawn
-                                signalDots='same', #are the signal dots the 'same' on each frame? (see Scase et al)
-                                noiseDots='direction', #do the noise dots follow random- 'walk', 'direction', or 'position'
-                                speed=0.01, 
-                                coherence=0.9
-                                )
-                                
-        message =psychopyVisual.TextStim(myWin,
-                                 text='Hit Q to quit',
-                                 pos=(0,-0.5)
-                                 )
+ioConfig['ioDataStore']=dict(experiment_info=dict(code="IOR_V1.1"),session_info=dict(code="S101-F-R"))
 
-        Computer.enableHighPriority(disable_gc=False)
+# This creates an ioHub server process and a connection interface for it.
+# using the ioConfig defined above.
+io=ioHubConnection(ioConfig)
 
-        dur=5*60
-        endTime=Computer.currentTime()+dur
-        fcounter=0
-        reportedRefreshInterval=display.getStimulusScreenReportedRetraceInterval()*0.001 # convert to sec.msec
-        print 'Screen has a reported refresh interval of ',reportedRefreshInterval
-        keyboard.clearEvents()
+# By default, keyboard, mouse, and display devices are created if you
+# do not pass any config info to the ioHubConnection class above.
+display=io.devices.display
+keyboard=io.devices.keyboard
 
-        dotPatch.draw()
-        message.draw()
-        [myWin.flip() for i in range(10)]
-        lastFlipTime=Computer.getTime()
-        myWin.fps()
-        exit=False
+# set the Screen to use for stimulus presentation (if > one screen is available)
+display.setStimulusScreenIndex(0)
 
-        while not exit and endTime>Computer.currentTime():
-            dotPatch.draw()
-            message.draw()
-            myWin.flip()#redraw the buffer
-            flipTime=Computer.getTime()
-            IFI=flipTime-lastFlipTime
-            lastFlipTime=flipTime
-            fcounter+=1
+# Lets switch to high priority on the experiment process.
+Computer.enableHighPriority()
 
-            if IFI > reportedRefreshInterval*1.5:
-                print "Frame {0} dropped: IFI of {1}".format(fcounter,IFI)
-            
-            #handle key presses each frame
-            for event in keyboard.getEvents():
-                if event['key'] in ['Escape','Q']:
-                    myWin.close()
-                    exit=True
-                    break
-            
-            keyboard.clearEvents()
-            Computer.disableHighPriority()
-            ### End of experiment logic
+# Create a psychopy window, full screen resolution, full screen mode, pix units,
+# with no boarder, using the monitor default profile name used by ioHub,
+# which is created on the fly right now by the script. (ioHubDefault)
+myWin = visual.Window(display.getStimulusScreenResolution(),
+                        monitor=display.getPsychoPyMonitorSettingsName(),
+                        units=display.getDisplayCoordinateType(),
+                        fullscr=True,
+                        allowGUI=False,
+                        screen=display.getStimulusScreenIndex())
 
-def main(configurationDirectory):
-    """
-    Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
-    command line, and launches the experiment logic.
-    """
-    import sys
-    if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
-        runtime=ExperimentRuntime(configurationDirectory, configFile)
-    else:
-        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+myWin.setRecordFrameIntervals(True)
 
-    runtime.start()
+#INITIALISE SOME STIMULI
+dotPatch =visual.DotStim(myWin,
+                        color=(1.0,1.0,1.0),
+                        dir=270,
+                        nDots=DOT_COUNT,
+                        fieldShape='circle',
+                        fieldPos=(0.0,0.0),
+                        fieldSize=display.getStimulusScreenResolution(),
+                        dotLife=5, #number of frames for each dot to be drawn
+                        signalDots='same', #are the signal dots the 'same' on each frame? (see Scase et al)
+                        noiseDots='direction', #do the noise dots follow random- 'walk', 'direction', or 'position'
+                        speed=3.0,
+                        coherence=90.0
+                        )
 
-if __name__ == "__main__":
-    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
-    #
-    # The module_directory function determines what the current directory is of the function that is passed to it. It is
-    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
-    configurationDirectory=ioHub.module_directory(main)
+message =visual.TextStim(myWin,
+                         text='Hit Q to quit',
+                         pos=(0,-0.5)
+                         )
 
-    # run the main function, which starts the experiment runtime
-    main(configurationDirectory)
+Computer.enableHighPriority(disable_gc=False)
+
+io.clearEvents('all')
+
+dur=5*60
+endTime=Computer.currentTime()+dur
+fcounter=0
+reportedRefreshInterval=display.getStimulusScreenReportedRetraceInterval()*0.001 # convert to sec.msec
+print 'Screen has a reported refresh interval of ',reportedRefreshInterval
+
+dotPatch.draw()
+message.draw()
+[myWin.flip() for i in range(10)]
+lastFlipTime=Computer.getTime()
+myWin.fps()
+exit=False
+
+while not exit and endTime>Computer.currentTime():
+    dotPatch.draw()
+    message.draw()
+    myWin.flip()#redraw the buffer
+    flipTime=Computer.getTime()
+    IFI=flipTime-lastFlipTime
+    lastFlipTime=flipTime
+    fcounter+=1
+
+    if IFI > reportedRefreshInterval*1.5:
+        print "Frame {0} dropped: IFI of {1}".format(fcounter,IFI)
+
+    #handle key presses each frame
+    for event in keyboard.getEvents():
+        if event.key in ['ESCAPE','Q','q']:
+            exit=True
+            break
+
+Computer.disableHighPriority()
+myWin.close()
+core.quit()
+io.quit()### End of experiment logic
 
