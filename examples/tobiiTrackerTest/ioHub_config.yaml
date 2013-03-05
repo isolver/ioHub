@@ -30,7 +30,7 @@ monitor_devices:
             unit_type: mm
         display_pixel_origin: [0.5,0.5]
         psychopy_config_file: default
-    - eyeTrackerInterface.HW.Tobii.EyeTracker:
+    - eyeTracker.HW.Tobii.EyeTracker:
         enable: True
         name: tracker
         model: Tobii T120

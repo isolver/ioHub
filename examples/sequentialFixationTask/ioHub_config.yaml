@@ -34,7 +34,7 @@ monitor_devices:
             surface_center: 500
             unit_type: mm
         psychopy_config_file: default
-    - eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
+    - eyeTracker.HW.SR_Research.EyeLink.EyeTracker:
         enable: True
         name: tracker
         saveEvents: True

@@ -1,4 +1,4 @@
-eyeTrackerInterface.HW.SMI.iViewX.EyeTracker:
+eyeTracker.HW.SMI.iViewX.EyeTracker:
     enable: True
     name: tracker
     saveEvents: True

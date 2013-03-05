@@ -1,4 +1,4 @@
-eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
+eyeTracker.HW.SR_Research.EyeLink.EyeTracker:
     enable: True
     name: tracker
     saveEvents: True
