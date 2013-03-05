@@ -140,14 +140,11 @@ class EventConstants(Constants):
                 cls._classes[cls.KEYBOARD_CHAR]=KeyboardCharEvent
 
             if 'gamepad' in deviceModulesAvailable:
-                from ioHub.devices import (GamePadStateChangeEvent,GamePadDisconnectEvent,GamePadButtonEvent,
-                                           GamePadThumbStickEvent,GamePadTriggerEvent)
+                from ioHub.devices import GamePadStateChangeEvent,GamePadDisconnectEvent#,GamePadButtonEvent,
+#                                           GamePadThumbStickEvent,GamePadTriggerEvent)
                 cls._classes[cls.GAMEPAD_EVENT]=GamePadStateChangeEvent
                 cls._classes[cls.GAMEPAD_DISCONNECT_EVENT]=GamePadDisconnectEvent
-                cls._classes[cls.GAMEPAD_BUTTON_EVENT]=GamePadButtonEvent
-                cls._classes[cls.GAMEPAD_THUMBSTICK_EVENT]=GamePadThumbStickEvent
-                cls._classes[cls.GAMEPAD_TRIGGER_EVENT]=GamePadTriggerEvent
-
+ 
             if 'daq' in deviceModulesAvailable:
                 from ioHub.devices import DAMultiChannelInputEvent
                 cls._classes[cls.DA_MULTI_CHANNEL_INPUT]=DAMultiChannelInputEvent
@@ -526,29 +523,7 @@ class KeyboardConstants(Constants):
     _virtualKeyCodes=VirtualKeyCodes()
     _asciiKeyCodes=AsciiConstants()
     _modifierCodes=ModifierKeyCodes()
-
-    @classmethod
-    def initialize(cls):
-        Constants.initialize(cls)
-        ascii_names=KeyboardConstants._asciiKeyCodes._names
-        vk_names=KeyboardConstants._virtualKeyCodes._names
-        
-        key_names=dict()
-        for k in [k for k in ascii_names.keys() if not isinstance(k,int)]:
-            if k[-1] == '_':
-                k=k[1:-1]
-            
-            key_names[k]=k
-
-        for k in [k for k in vk_names.keys() if not isinstance(k,int)]:
-            if k.startswith('VK_'):
-                k=k[3:]
-            
-            key_names[k]=k
-        
-        cls.key_names=key_names.keys()
-        
-        
+      
     @classmethod
     def getName(cls,id):
         return cls._names.get(id,None)
@@ -696,7 +671,7 @@ class XInputGamePadConstants(Constants):
     B = 0x2000
     X = 0x4000
     Y = 0x8000
-    
+
     _batteryTypes=XInputBatteryTypeConstants()
     _batteryLevels=XInputBatteryLevelConstants()
     

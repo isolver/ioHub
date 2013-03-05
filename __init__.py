@@ -159,7 +159,7 @@ def quickStartHubServer(experimentCode, sessionCode, **deviceConfigs):
     
     if experimentCode and sessionCode:    
         # Enable saving of all keyboard and mouse events to the 'ioDataStore'
-        ioConfig['ioDataStore']=dict(experiment_info=dict(code="mouseExp"),session_info=dict(code="S1"))
+        ioConfig['ioDataStore']=dict(experiment_info=dict(code=experimentCode),session_info=dict(code=sessionCode))
     
     # Start the ioHub Server
     return ioHubConnection(ioConfig)

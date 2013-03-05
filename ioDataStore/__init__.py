@@ -237,9 +237,9 @@ class EMRTpyTablesFile():
             self.TABLES['GAMEPAD_EVENT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.gamepad,'GamePadStateChangeEvent', D.GamePadStateChangeEvent.NUMPY_DTYPE, title='GamePad Multi-State Change Event Logging.')
             self.addClassMapping(D.GamePadStateChangeEvent,self.TABLES['GAMEPAD_EVENT'])
             self.addClassMapping(D.GamePadDisconnectEvent,self.TABLES['GAMEPAD_EVENT'])
-            self.addClassMapping(D.GamePadButtonEvent,self.TABLES['GAMEPAD_EVENT'])
-            self.addClassMapping(D.GamePadThumbStickEvent,self.TABLES['GAMEPAD_EVENT'])
-            self.addClassMapping(D.GamePadTriggerEvent,self.TABLES['GAMEPAD_EVENT'])
+            #self.addClassMapping(D.GamePadButtonEvent,self.TABLES['GAMEPAD_EVENT'])
+            #self.addClassMapping(D.GamePadThumbStickEvent,self.TABLES['GAMEPAD_EVENT'])
+            #self.addClassMapping(D.GamePadTriggerEvent,self.TABLES['GAMEPAD_EVENT'])
 
 
         if 'parallelPort' in deviceModulesAvailable:

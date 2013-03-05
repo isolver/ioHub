@@ -51,11 +51,10 @@ if __name__ == "__main__":
     
         runtime.start()
 
-    # The module_directory function determines what the current directory is of
+    # The ioHub.module_directory function determines what the current directory is of
     # the function that is passed to it. It is more reliable when running scripts
     # via IDEs etc in terms of reporting the true file location. That is the claim
     # of the original function author at least. ;) It works, which is what matters.
-    import ioHub
     configurationDirectory=ioHub.module_directory(main)
 
     # run the main function, which starts the experiment runtime

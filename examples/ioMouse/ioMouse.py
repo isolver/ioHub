@@ -4,19 +4,11 @@ Converted PsychoPy mouse.py demo script to use ioHub package for keyboard and
 mouse input.
 """
 from psychopy import visual, core,misc,monitors
-from ioHub.client import ioHubConnection, EventConstants
+from ioHub import quickStartHubServer
+from ioHub.client import EventConstants
 
-# Specify devices you want to use in the ioHub
-devices=dict(Keyboard={},Display={},Mouse={})
-
-# Create an ioHub configuration dictionary.
-ioConfig=dict(monitor_devices=devices)
-
-# Enable saving of all keyboard and mouse events to the 'ioDataStore'
-ioConfig['ioDataStore']=dict(experiment_info=dict(code="mouseExp"),session_info=dict(code="S1"))
-
-# Start the ioHub Server
-io=ioHubConnection(ioConfig)
+import random
+io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
 
 # get 'shortcut' handles to the devices you will be using in the experiment:
 myMouse=io.devices.mouse

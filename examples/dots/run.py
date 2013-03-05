@@ -12,52 +12,17 @@ Overview:
 
 This script is a copy of the PsychoPy 'dots' demo with
 ioHub integration.
-
-To Run:
--------
-
-1. Ensure you have followed the ioHub installation instructions
-   at http://www.github.com/isolver/iohub/wiki
-2. Open a command prompt to the directory containing this file.
-3. Start the test program by running:
-   python.exe run.py
-
-Any issues or questions, please let me know.
 """
 from psychopy import visual, core
-from ioHub.client import ioHubConnection, Computer, EventConstants
+from ioHub import quickStartHubServer
+from ioHub.client import Computer
 
-DOT_COUNT=2000
+DOT_COUNT=1200
 
 # Example where ioHub does not use yaml config files specified by user.
-# Each device you want enabled is a key, value pair in a dict, where
-# the key is the Class name of the device you want enabled, and the value
-# is a dict of configuration properties for that device. If you provide
-# an empty dict() as a device key's value, the default properties for that
-# device will be loaded.
-# This will enable streaming of data for each device to the experiment
-# process, but will not enable saving of device events by the ioHub in
-# the ioDataStore.
 
-devices=dict(Keyboard={},Display={},Mouse={})
-
-# The dict of devices is assigned to the ioConfigs 'monitor_devices' key
-ioConfig=dict(monitor_devices=devices)
-
-# If you want to enable the ioDataStore, and simply use default parameter
-# settings, then just add a'ioDataStore' key to your ioConfig with dict
-# containing the experiment_code and session_code to associate all events
-# with. Experiment codes are unique within an ioDataStore file, for using
-# the same experiment_code multiple times, adds multiple sessions to the
-# experiment. Session_codes are 'not' unique, so if you provide the same
-# session code across different runs of your experiment script, each run
-# will use a different 'session_id' to tag events with.
-
-ioConfig['ioDataStore']=dict(experiment_info=dict(code="IOR_V1.1"),session_info=dict(code="S101-F-R"))
-
-# This creates an ioHub server process and a connection interface for it.
-# using the ioConfig defined above.
-io=ioHubConnection(ioConfig)
+import random
+io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
 
 # By default, keyboard, mouse, and display devices are created if you
 # do not pass any config info to the ioHubConnection class above.
@@ -66,9 +31,6 @@ keyboard=io.devices.keyboard
 
 # set the Screen to use for stimulus presentation (if > one screen is available)
 display.setStimulusScreenIndex(0)
-
-# Lets switch to high priority on the experiment process.
-Computer.enableHighPriority()
 
 # Create a psychopy window, full screen resolution, full screen mode, pix units,
 # with no boarder, using the monitor default profile name used by ioHub,
@@ -79,8 +41,6 @@ myWin = visual.Window(display.getStimulusScreenResolution(),
                         fullscr=True,
                         allowGUI=False,
                         screen=display.getStimulusScreenIndex())
-
-myWin.setRecordFrameIntervals(True)
 
 #INITIALISE SOME STIMULI
 dotPatch =visual.DotStim(myWin,
@@ -119,6 +79,8 @@ lastFlipTime=Computer.getTime()
 myWin.fps()
 exit=False
 
+myWin.setRecordFrameIntervals(True)
+
 while not exit and endTime>Computer.currentTime():
     dotPatch.draw()
     message.draw()
@@ -139,6 +101,7 @@ while not exit and endTime>Computer.currentTime():
 
 Computer.disableHighPriority()
 myWin.close()
-core.quit()
+
 io.quit()### End of experiment logic
 
+core.quit()

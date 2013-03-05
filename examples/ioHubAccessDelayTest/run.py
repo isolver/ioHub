@@ -6,6 +6,7 @@ ioHub
 
 
 from psychopy import visual
+import ioHub
 from ioHub.devices import Computer, EventConstants
 from ioHub.util.experiment import ioHubExperimentRuntime
 from ioHub import OrderedDict
@@ -237,18 +238,25 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
 ##################################################################
-def main(configurationDirectory):
-    import sys
-    if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
-        runtime=ExperimentRuntime(configurationDirectory, configFile)
-    else:
-        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-
-    runtime.start()
+# The below code should never need to be changed, unless you want to get command
+# line arguements or something. 
 
 if __name__ == "__main__":
-    import ioHub
+    def main(configurationDirectory):
+        """
+        Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+        command line, and launches the experiment logic.
+        """
+        import sys
+        if len(sys.argv)>1:
+            configFile=sys.argv[1]
+            runtime=ExperimentRuntime(configurationDirectory, configFile)
+        else:
+            runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+    
+        runtime.start()
+        
     configurationDirectory=ioHub.module_directory(main)
-    main(configurationDirectory)
 
+    # run the main function, which starts the experiment runtime
+    main(configurationDirectory)

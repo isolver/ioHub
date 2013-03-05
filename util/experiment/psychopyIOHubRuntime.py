@@ -156,8 +156,11 @@ a command prompt at the ioHub/examples/simple folder and type:
                 self.experimentConfig[key]=self.configuration[key]
  
         self.experimentSessionDefaults=self.configuration['session_defaults']
-        self.sessionUserVariables=self.experimentSessionDefaults['user_variables']
-        del self.experimentSessionDefaults['user_variables']
+        self.sessionUserVariables=self.experimentSessionDefaults.get('user_variables',None)
+        if self.sessionUserVariables is not None:
+            del self.experimentSessionDefaults['user_variables']
+        else:
+            self.sessionUserVariables={}
 
         # initialize the experiment object based on the configuration settings.
         self.hub=self._initalizeConfiguration()

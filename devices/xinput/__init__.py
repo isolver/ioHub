@@ -82,7 +82,7 @@ class GamePad(XInputDevice):
     __slots__=['_capabilities','_battery_information','_keystroke','_rumble']    
     def __init__(self, *args,**kwargs):
         self._startupConfiguration=kwargs.get('dconfig',{})
-        GamePad.ALL_EVENT_CLASSES=GamePadStateChangeEvent,GamePadDisconnectEvent,GamePadButtonEvent,GamePadTriggerEvent,GamePadThumbStickEvent
+        GamePad.ALL_EVENT_CLASSES=GamePadStateChangeEvent,GamePadDisconnectEvent#,GamePadButtonEvent,GamePadTriggerEvent,GamePadThumbStickEvent
 
         self._startupConfiguration['monitor_event_types']=self._startupConfiguration.get('monitor_event_types',GamePad.ALL_EVENT_CLASSES)
         self._startupConfiguration['device_class']=self._startupConfiguration.get('device_class',self.__class__.__name__)
@@ -116,6 +116,9 @@ class GamePad(XInputDevice):
                                         xinput.XINPUT_GAMEPAD(0,0,0,0,0,0,0),
                                         xinput.XINPUT_VIBRATION(0,0))
         self.setRumble(0,0)
+        
+        if XInputGamePadConstants._initialized is False:
+            XInputGamePadConstants.initialize()
 
     def getButtons(self,gamepad_state=None):
         if gamepad_state == None:
@@ -245,8 +248,9 @@ class GamePad(XInputDevice):
         g1=self._device_state.Gamepad
         g2=self._device_state_buffer.Gamepad
         changed={}      
-            
+        
         if g1.wButtons!=g2.wButtons:
+            import ioHub
             buttonNameList=[]
             if g2.wButtons!=0:
                 for k in XInputGamePadConstants._keys:
@@ -464,28 +468,28 @@ class GamePadDisconnectEvent(GamePadStateChangeEvent):
     def __init__(self,*args,**kwargs):
         GamePadStateChangeEvent.__init__(self,*args,**kwargs)
 
-class GamePadButtonEvent(GamePadStateChangeEvent):
-    EVENT_TYPE_ID=EventConstants.GAMEPAD_BUTTON_EVENT
-    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
-    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
-    __slots__=[]
-    def __init__(self,*args,**kwargs):
-        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
-
-class GamePadThumbStickEvent(GamePadStateChangeEvent):
-    EVENT_TYPE_ID=EventConstants.GAMEPAD_THUMBSTICK_EVENT
-    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
-    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
-    __slots__=[]
-    def __init__(self,*args,**kwargs):
-        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
-
-class GamePadTriggerEvent(GamePadStateChangeEvent):
-    EVENT_TYPE_ID=EventConstants.GAMEPAD_TRIGGER_EVENT
-    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
-    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
-    __slots__=[]
-    def __init__(self,*args,**kwargs):
-        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
+#class GamePadButtonEvent(GamePadStateChangeEvent):
+#    EVENT_TYPE_ID=EventConstants.GAMEPAD_BUTTON_EVENT
+#    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+#    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
+#    __slots__=[]
+#    def __init__(self,*args,**kwargs):
+#        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
+#
+#class GamePadThumbStickEvent(GamePadStateChangeEvent):
+#    EVENT_TYPE_ID=EventConstants.GAMEPAD_THUMBSTICK_EVENT
+#    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+#    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
+#    __slots__=[]
+#    def __init__(self,*args,**kwargs):
+#        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
+#
+#class GamePadTriggerEvent(GamePadStateChangeEvent):
+#    EVENT_TYPE_ID=EventConstants.GAMEPAD_TRIGGER_EVENT
+#    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+#    IOHUB_DATA_TABLE=GamePadStateChangeEvent.EVENT_TYPE_STRING
+#    __slots__=[]
+#    def __init__(self,*args,**kwargs):
+#        GamePadStateChangeEvent.__init__(self,*args,**kwargs)
 
 

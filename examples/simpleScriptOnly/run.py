@@ -129,16 +129,10 @@ while QUIT_EXP is False:
     # can be related to Computer.getTime() current time readings.
     flip_time=Computer.currentSec()
 
-    # get any new keyboard events from the keyboard device
-    # This gets key press and key release events, right now, there is 
-    # no way to get events on only 1 type from a device, you have to filter
-    # them 
-    kb_events=keyboard.getEvents()
-    # for each new keyboard event, check if it matches one
+    # for each new keyboard press event, check if it matches one
     # of the end example keys.
-    for k in kb_events:
-        if EventConstants.KEYBOARD_PRESS == k.type\
-        and k.key in ['SPACE','RETURN','ESCAPE']:
+    for k in keyboard.getEvents(EventConstants.KEYBOARD_PRESS):
+        if k.key in ['SPACE','RETURN','ESCAPE']:
             print 'Quit key pressed: ',k.key
             QUIT_EXP=True
 

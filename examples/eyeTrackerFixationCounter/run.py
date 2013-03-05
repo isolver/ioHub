@@ -4,6 +4,7 @@ ioHub
 """
 
 from psychopy import visual
+import ioHub
 from ioHub.devices import Computer,EventConstants
 from ioHub.util.experiment import ioHubExperimentRuntime, pumpLocalMessageQueue
 
@@ -13,8 +14,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
     ioHubExperimentRuntime __init__ itself.
     """
-    def __init__(self,configFileDirectory, configFile):
-        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
 
     def run(self,*args,**kwargs):
         """
@@ -81,8 +80,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         dwellTime=0.0
         # Loop until we get a keyboard event
         while len(kb.getEvents())==0:
-            eye_events=tracker.getEvents()
-            for ee in eye_events:
+            for ee in tracker.getEvents(EventConstants.FIXATION_END):
                 if EventConstants.FIXATION_END == ee.type:
                     etime=ee.time
                     eeye=ee.eye
@@ -122,29 +120,25 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 ##################################################################
 
-def main():
-    """
-    Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
-    command line, and launches the experiment logic.
-    """
-    import sys
-    import ioHub
-
-    # The module_directory function determines what the current directory is of the function that is passed to it. It is
-    # (supposedly) more reliable when running scripts via IDEs etc in terms of reporting the true file location.
-    configurationDirectory=ioHub.module_directory(main)
-
-    if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
-        runtime=ExperimentRuntime(configurationDirectory, configFile)
-    else:
-        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-
-    runtime.start()
+# The below code should never need to be changed, unless you want to get command
+# line arguements or something. 
 
 if __name__ == "__main__":
-    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
+    def main(configurationDirectory):
+        """
+        Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+        command line, and launches the experiment logic.
+        """
+        import sys
+        if len(sys.argv)>1:
+            configFile=sys.argv[1]
+            runtime=ExperimentRuntime(configurationDirectory, configFile)
+        else:
+            runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+    
+        runtime.start()
+        
+    configurationDirectory=ioHub.module_directory(main)
 
     # run the main function, which starts the experiment runtime
-    main()
-
+    main(configurationDirectory)

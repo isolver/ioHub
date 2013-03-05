@@ -4,7 +4,7 @@ ioHub
 
 ------------------------------------------------------------------------------------------------------------------------
 
-simpleGamePad- IMPLEMENTED WITH SUPPORT FOR XINPUT GAMEPADS ONLY, a.k.a XBOX 360, some LOGITECH ???
+simpleGamePad- IMPLEMENTED WITH SUPPORT FOR XINPUT GAMEPADS ONLY, a.k.a XBOX 360, some LOGITECH
 ++++++++++++++
 
 Desciption:
@@ -41,9 +41,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
     ioHubExperimentRuntime __init__ itself.
     """
-    def __init__(self,configFileDirectory, configFile):
-        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
-
     def run(self,*args,**kwargs):
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
         # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
@@ -235,31 +232,26 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             pv=nv*(screen_dim/2.0)
         return int(pv)
 
-
-##################################################################
-
-def main(configurationDirectory):
-    """
-    Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
-    command line, and launches the experiment logic.
-    """
-    import sys
-    if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
-        runtime=ExperimentRuntime(configurationDirectory, configFile)
-    else:
-        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-
-    runtime.start()
+################################################################################
+# The below code should never need to be changed, unless you want to get command
+# line arguements or something. 
 
 if __name__ == "__main__":
-    import ioHub
-    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
-    #
-    # The module_directory function determines what the current directory is of the function that is passed to it. It is
-    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+    def main(configurationDirectory):
+        """
+        Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+        command line, and launches the experiment logic.
+        """
+        import sys
+        if len(sys.argv)>1:
+            configFile=sys.argv[1]
+            runtime=ExperimentRuntime(configurationDirectory, configFile)
+        else:
+            runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+    
+        runtime.start()
+        
     configurationDirectory=ioHub.module_directory(main)
 
     # run the main function, which starts the experiment runtime
     main(configurationDirectory)
-

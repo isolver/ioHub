@@ -1078,30 +1078,30 @@ except:
     print2err("Warning: mouse device module could not be imported.")
     printExceptionDetailsToStdErr()
 
-if Computer.system == 'Windows':
-    try:
-        from parallelPort import ParallelPort
-        from parallelPort import ParallelPortEvent
-        deviceModulesAvailable.append('parallelPort')
-    except:
-#        print2err("Warning: parallelPort device module could not be imported.")
-#        printExceptionDetailsToStdErr()
-        pass
-try:
-    from serialIO import SerialIO
-    from serialIO import SerialInputEvent
-
-    deviceModulesAvailable.append('serial')
-except:
+#if Computer.system == 'Windows':
+#    try:
+#        from parallelPort import ParallelPort
+#        from parallelPort import ParallelPortEvent
+#        deviceModulesAvailable.append('parallelPort')
+#    except:
+##        print2err("Warning: parallelPort device module could not be imported.")
+##        printExceptionDetailsToStdErr()
+#        pass
+#try:
+#    from serialIO import SerialIO
+#    from serialIO import SerialInputEvent
+#
+#    deviceModulesAvailable.append('serial')
+#except:
 #    print2err("Warning: serial device module could not be imported.")
 #    printExceptionDetailsToStdErr()
-    pass
+#    pass
 
 if Computer.system == 'Windows':
     try:
         import xinput
         from xinput import GamePad
-        from xinput import GamePadStateChangeEvent,GamePadDisconnectEvent,GamePadButtonEvent,GamePadThumbStickEvent,GamePadTriggerEvent
+        from xinput import GamePadStateChangeEvent,GamePadDisconnectEvent#,GamePadButtonEvent,GamePadThumbStickEvent,GamePadTriggerEvent
         deviceModulesAvailable.append('gamepad')
     except:
         print2err("Warning: gamepad device module could not be imported.")
@@ -1129,7 +1129,7 @@ if Computer.system == 'Windows':
 try:
     import display
     from display import Display
-    from ioHub import print2err, highPrecisionTimer
+    from ioHub import print2err#, highPrecisionTimer
     deviceModulesAvailable.append('display')
 except:
     print2err("Warning: display device module could not be imported.")
@@ -1145,23 +1145,23 @@ if Computer.system == 'Windows':
         print2err("Warning: daq device module could not be imported.")
 #        printExceptionDetailsToStdErr()
     
-    try:
-        import filters
-        from filters import EventFilter
-        from filters import GenericFilterEvent
-        from filters import StampeFilter
-        deviceModulesAvailable.append('filter')
-    except:
-        pass
+#try:
+#    import filters
+#    from filters import EventFilter
+#    from filters import GenericFilterEvent
+#    from filters import StampeFilter
+#    deviceModulesAvailable.append('filter')
+#except:
+#    pass
 #        print2err("Warning: daq device module could not be imported.")
 #        printExceptionDetailsToStdErr()
     
-try:
-    import mbed
-    from mbed import MBED1768
-    deviceModulesAvailable.append('mbed')
-except:
-    pass
+#try:
+#    import mbed
+#    from mbed import MBED1768
+#    deviceModulesAvailable.append('mbed')
+#except:
+#    pass
 #    print2err("Warning: mbed device module could not be imported.")
 #    printExceptionDetailsToStdErr()
 

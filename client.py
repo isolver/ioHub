@@ -513,8 +513,8 @@ class ioHubConnection(object):
                 if 'experiment_info' in iods and 'session_info' in iods:
                     experiment_info=iods['experiment_info']
                     session_info=iods['session_info']
-                    del ioHubConfig['ioDataStore']['experiment_info']
-                    del ioHubConfig['ioDataStore']['session_info']
+                    #del ioHubConfig['ioDataStore']['experiment_info']
+                    #del ioHubConfig['ioDataStore']['session_info']
                     
                 else:
                     ioHub.print2err("ERROR: ioHubConfig:ioDataStore must contain both a 'experiment_info' and a 'session_info' key with a dict value each.")
@@ -549,7 +549,7 @@ class ioHubConnection(object):
 
 
         # check for existing ioHub Process based on process if saved to file
-        iopFileName=os.path.join(rootScriptPath,'.iohpid')
+        iopFileName=os.path.join(rootScriptPath ,'.iohpid')
         if os.path.exists(iopFileName):
             try:
                 iopFile= open(iopFileName,'r')
