@@ -36,8 +36,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         kb=self.hub.devices.kb
         mouse=self.hub.devices.mouse
 
-        tracker.runSetupProcedure()
-
+        calibrationOK=tracker.runSetupProcedure()
+        print 'calibrationOK: ',calibrationOK
+        if calibrationOK is False:
+            print "NOTE: Exiting application due to failed calibration."
+            return
+            
         # Read the current resolution of the monitors screen in pixels.
         # We will set our window size to match the current screen resolution and make it a full screen boarderless window.
         screen_resolution= display.getStimulusScreenResolution()

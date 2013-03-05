@@ -1118,12 +1118,12 @@ except:
 
 if Computer.system == 'Windows':
     try:
-        import eyeTracker
-        import eyeTracker.HW
-        from eyeTracker.eye_events import *
+        import eyetracker
+        import eyetracker.HW
+        from eyetracker.eye_events import *
         deviceModulesAvailable.append('eyetracker')
     except:
-        print2err("Warning: eyetrackerinterface device module could not be imported.")
+        print2err("Warning: eyetrackerdevice module could not be imported.")
         printExceptionDetailsToStdErr()
     
 try:

@@ -1,7 +1,7 @@
 """
 ioHub
 pyEyeTracker Interface
-.. file: ioHub/devices/eyeTracker/checkConsistancy.py
+.. file: ioHub/devices/eyetracker/checkConsistancy.py
 
 Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -11,8 +11,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 import ioHub
-import ioHub.devices.eyeTracker.InterfaceClasses
-from ioHub.devices.eyeTracker.InterfaceClasses import EyeTrackerDevice
+import ioHub.devices.eyetracker.InterfaceClasses
+from ioHub.devices.eyetracker.InterfaceClasses import EyeTrackerDevice
 
 # Idea here is to have a function that checks each implementation of the EyeTrackerDevice for
 # consistency relative to the spec.
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     from ioHub.util import describeModule
 
 
-    attributes,methods,builtins,klasses=describeModule.describe(ioHub.devices.eyeTracker.InterfaceClasses.EyeTrackerDevice,True)
+    attributes,methods,builtins,klasses=describeModule.describe(ioHub.devices.eyetracker.InterfaceClasses.EyeTrackerDevice,True)
 
     interfaceAttributes= collections.Counter(attributes.keys())
     interfaceMethods= collections.Counter(methods.keys())
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     print '\n\n'
 
-    eyeTrackerImplementations=EyeTrackerDevice.__subclasses__()
+    eyetrackerImplementations=EyeTrackerDevice.__subclasses__()
 
     for implementation in eyeTrackerImplementations:
         attributes2,methods2,builtins2,klasses2=describeModule.describe(implementation,False)

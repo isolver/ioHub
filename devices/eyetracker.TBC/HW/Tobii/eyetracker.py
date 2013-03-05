@@ -16,7 +16,7 @@ import ioHub.devices
 from ioHub.constants import EventConstants, DeviceConstants, EyeTrackerConstants
 
 from ioHub.devices import Computer
-from ioHub.devices.eyeTracker import EyeTrackerDevice
+from ioHub.devices.eyetracker import EyeTrackerDevice
 
 try:
     from tobiiclasses  import *
@@ -299,6 +299,9 @@ class EyeTracker(EyeTrackerDevice):
 
         The graphicsContext argument should likely be the psychopy full screen window instance that has been created
         for the experiment.
+        
+        Result:
+            bool: True if setup / calibration procedue passed, False otherwise. If false, should likely exit experiment.
         """
         try:
             # Optional kwargs that can be passed in to control built in calibration graphics and sound
@@ -310,16 +313,18 @@ class EyeTracker(EyeTrackerDevice):
 
             genv=TobiiPsychopyCalibrationGraphics(self)
 
-            genv.runCalibration()
+            calibrationOK=genv.runCalibration()
             genv.window.close()
             
             genv._unregisterEventMonitors() 
             genv.clearAllEventBuffers()
             
+            return calibrationOK
+            
         except:
             ioHub.print2err("Error during runSetupProcedure")
             ioHub.printExceptionDetailsToStdErr()
-        return True
+        return False
 
     def enableEventReporting(self,enabled=True):
         EyeTrackerInterface.enableEventReporting(self,enabled)

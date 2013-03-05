@@ -1,6 +1,6 @@
 """
 ioHub
-.. file: ioHub/devices/eyeTracker/InterfaceClasses.py
+.. file: ioHub/devices/eyetracker/InterfaceClasses.py
 
 Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -103,7 +103,7 @@ class EyeTrackerDevice(Device):
     EXT = None
 
     # Lists all supported eye tracker events types by the EyeTracker implementation.
-    # Event type classes are found in the ioHub.devices.eyeTracker.eye_events.py file
+    # Event type classes are found in the ioHub.devices.eyetracker.eye_events.py file
     ALL_EVENT_CLASSES=[]
 
     # Defines the type id (int) of device for ioHub. Do not change.
@@ -124,7 +124,7 @@ class EyeTrackerDevice(Device):
         if you are using an interface that supports eye trackers developed by EyeTrackingCompanyET, you
         would set the eye tracker device in the eye tracker device settings of the experiments iohub_config.yaml to:
 
-            eyeTracker.HW.EyeTrackingCompanyET.EyeTracker
+            eyetracker.HW.EyeTrackingCompanyET.EyeTracker
         """
         if self.__class__._INSTANCE is not None:
             raise ioHub.devices.ioDeviceError(self.__class__.__name__,"EyeTracker object has already been created; "
@@ -669,7 +669,7 @@ class EyeTrackerDevice(Device):
             # ....
             
             # determine the event type and map it to one of the ioHub eye tracker event types
-            # found in ioHub.devices.eyeTracker.eye_events.py
+            # found in ioHub.devices.eyetracker.eye_events.py
             #
             # ......
 
@@ -757,7 +757,7 @@ class EyeTrackerDevice(Device):
         # Convert the native event type to the appropriate DeviceEvent type for an EyeTracker,
         # IN ORDERED LIST FORM.
         #
-        # See iohub.devices.eyeTracker.eye_events.py for the list of intended eye tracker 
+        # See iohub.devices.eyetracker.eye_events.py for the list of intended eye tracker 
         # event types (includes Samples).
         #
         # ......

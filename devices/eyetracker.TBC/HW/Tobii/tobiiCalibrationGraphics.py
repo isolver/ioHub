@@ -53,6 +53,10 @@ class TobiiPsychopyCalibrationGraphics(object):
         self._eyetrackerinterface=eyetrackerInterface
         self._tobii = eyetrackerInterface._tobii._eyetracker
 
+        self._lastCalibrationOK=False
+        self._lastCalibrationReturnCode=0
+        self._lastCalibration=None
+        
         if targetForegroundColor is not None:
             TobiiPsychopyCalibrationGraphics.CALIBRATION_POINT_OUTER_COLOR=targetForegroundColor
 
@@ -107,7 +111,7 @@ class TobiiPsychopyCalibrationGraphics(object):
 
         if self._ioServer:
             for dev in self._ioServer.devices:
-                ioHub.print2err("dev: ",dev.__class__.__name__)
+                #ioHub.print2err("dev: ",dev.__class__.__name__)
                 if dev.__class__.__name__ == 'Keyboard':
                     kbDevice=dev
 
@@ -162,12 +166,28 @@ class TobiiPsychopyCalibrationGraphics(object):
         self.startCalibrationTextScreen=visual.TextStim(self.window, text=instuction_text, pos = self.TEXT_POS, height=self.TEXT_HEIGHT, color=self.TEXT_COLOR, colorSpace='rgb255',alignHoriz='center',alignVert='center',wrapWidth=self.width*0.8)
         
     def runCalibration(self):
+        """
+        Performs a simple calibration routine. 
+        
+        Args: 
+            None
+        
+        Result:
+            bool: True if calibration was successful. False if not, in which case exit the application.            
+        """
         import tobii
+
+        self._lastCalibrationOK=False
+        self._lastCalibrationReturnCode=0
+        self._lastCalibration=None
         
         calibration_sequence_completed=False
         quit_calibration_notified=False
         
-        self.window.flip()
+
+        instuction_text="Press Space Key to Start".center(32)+'\n'+"Eye Tracker Calibration.".center(32)
+        self.startCalibrationTextScreen.setText(instuction_text)
+        
         self.startCalibrationTextScreen.draw()
         self.window.flip()
         
@@ -188,10 +208,10 @@ class TobiiPsychopyCalibrationGraphics(object):
         i=0
         for pt in self.CALIBRATION_POINT_LIST:
             w,h=self.screenSize
-            ioHub.print2err("Screen Size: ",w," ",h)
+            #ioHub.print2err("Screen Size: ",w," ",h)
             self.clearAllEventBuffers()
             pix_pt=int(w*pt[0]-w/2),int(h*(1.0-pt[1])-h/2)
-            ioHub.print2err( "Cal point Mapping: ",pt," == ",pix_pt)
+            #ioHub.print2err( "Cal point Mapping: ",pt," == ",pix_pt)
             self.drawCalibrationTarget(pix_pt)
 
             stime=currentTime()
@@ -208,7 +228,6 @@ class TobiiPsychopyCalibrationGraphics(object):
                 break
             
             pt2D=tobii.sdk.types.Point2D(pt[0],pt[1])
-            ioHub.print2err(pt2D)
             self._tobii.AddCalibrationPoint(pt2D,self.on_add_calibration_point)
             time.sleep(0.5)            
             self.clearCalibrationWindow()
@@ -219,14 +238,133 @@ class TobiiPsychopyCalibrationGraphics(object):
                 calibration_sequence_completed=True
         
         if calibration_sequence_completed:
-            self._tobii.ComputeCalibration(self.on_compute_calibration_result)
+            self._tobii.ComputeCalibration(self.on_compute_calibration)
  
-        msg=1
-        while msg is not "CALIBRATION_COMPLETE":        
-            msg=self.getNextMsg()
+            msg=1
+            while msg not in ["CALIBRATION_COMPUTATION_COMPLETE","CALIBRATION_COMPUTATION_FAILED"]:        
+                msg=self.getNextMsg()
             
         self._tobii.StopCalibration(self.on_stop_calibration)  
+        msg=1
+        while msg is not "CALIBRATION_FINISHED":        
+            msg=self.getNextMsg()
+
+        if self._lastCalibrationOK is True:
+            self._tobii.GetCalibration(self.on_calibration_result)
+
+            msg=1
+            while msg is not "CALIBRATION_RESULT_RECEIVED":        
+                msg=self.getNextMsg()
+            
+            cal_data_dict={}
+
+            import math
+
+            for cal_point_result in self._lastCalibration.plot_data:
+                left_eye_data=cal_point_result.left.map_point
+                left_eye_data=(left_eye_data.x*self.width,left_eye_data.y*self.height),cal_point_result.left.validity
+                
+                right_eye_data=cal_point_result.right.map_point
+                right_eye_data=(right_eye_data.x*self.width,right_eye_data.y*self.height),cal_point_result.right.validity
+                
+                target_pos=cal_point_result.true_point.x*self.width,cal_point_result.true_point.y*self.height
+                
+                if target_pos not in cal_data_dict:
+                    cal_data_dict[target_pos]=[]
+                cal_data_dict[target_pos].append((left_eye_data,right_eye_data))
+
+            cal_stats=dict()
+            for (targ_x,targ_y),eye_cal_result_list in cal_data_dict.iteritems():
+                left_stats=dict(pos_sample_count=0,invalid_sample_count=0,avg_err=0.0,min_err=100000.0,max_err=0.0)
+                right_stats=dict(pos_sample_count=0,invalid_sample_count=0,avg_err=0.0,min_err=100000.0,max_err=0.0)
+                
+                for ((left_x,left_y),left_validity),((right_x,right_y),right_validity) in eye_cal_result_list:
+                    left_stats['pos_sample_count']+=1.0
+                    right_stats['pos_sample_count']+=1.0
+                    
+                    if left_validity==1:
+                        x_err=targ_x-left_x
+                        y_err=targ_y-left_y
+                        left_err=math.sqrt(x_err*x_err+y_err*y_err)
+                        if left_err<left_stats['min_err']:
+                            left_stats['min_err']=left_err
+                        elif left_err>left_stats['max_err']:
+                            left_stats['max_err']=left_err
+                        left_stats['avg_err']+=left_err
+                    else:
+                        left_stats['invalid_sample_count']+=1.0
+
+                        
+                    if right_validity==1:
+                        x_err=targ_x-right_x
+                        y_err=targ_y-right_y                        
+                        right_err=math.sqrt(x_err*x_err+y_err*y_err)
+                        if right_err<right_stats['min_err']:
+                            right_stats['min_err']=right_err
+                        elif right_err>right_stats['max_err']:
+                            right_stats['max_err']=right_err
+                        right_stats['avg_err']+=right_err
+                    else:
+                        right_stats['invalid_sample_count']+=1.0
+                    
+                if right_stats['invalid_sample_count']==0:
+                    right_stats['valid_sample_percentage']=100.0
+                else:
+                    right_stats['valid_sample_percentage']=(1.0-right_stats['invalid_sample_count']/right_stats['pos_sample_count'])*100.0
+                
+                if left_stats['invalid_sample_count']==0:
+                    left_stats['valid_sample_percentage']=100.0
+                else:
+                    left_stats['valid_sample_percentage']=(1.0-left_stats['invalid_sample_count']/left_stats['pos_sample_count'])*100.0
+             
+                if int(right_stats['pos_sample_count']-right_stats['invalid_sample_count'])>0:
+                    right_stats['avg_err']=right_stats['avg_err']/(right_stats['pos_sample_count']-right_stats['invalid_sample_count'])
+                else:
+                    right_stats['avg_err']=-1.0
+                    
+                if int(left_stats['pos_sample_count']-left_stats['invalid_sample_count'])>0:
+                    left_stats['avg_err']=left_stats['avg_err']/(left_stats['pos_sample_count']-left_stats['invalid_sample_count'])
+                else:
+                    left_stats['avg_err']=-1.0
+               
+                cal_stats[(targ_x,targ_y)]=dict(left=left_stats,right=right_stats)
+            
+            # TODO Use calibration stats to show graphical results of calibration
+            
+            instuction_text="Calibration Passed.".center(32)+'\n'       
+            instuction_text+="PRESS 'SPACE' KEY TO CONTINUE.".center(32)+'\n'       
+            self.startCalibrationTextScreen.setText(instuction_text)
+            self.startCalibrationTextScreen.draw()
+            self.window.flip()
+            self.clearAllEventBuffers()
         
+            while 1:
+                msg=self.getNextMsg()
+                if msg == 'SPACE_KEY_ACTION':
+                    return True
+                    
+                self.MsgPump()
+
+        if self._lastCalibrationOK is False:
+            instuction_text="Calibration Failed. Options:".center(32)+'\n'
+            instuction_text=+"SPACE: Re-run Calibration".center(32)+'\n'
+            instuction_text=+"ESCAPE: Exit Program".center(32)
+            self.startCalibrationTextScreen.setText(instuction_text)
+            self.startCalibrationTextScreen.draw()
+            self.window.flip()
+            self.clearAllEventBuffers()
+        
+            while 1:
+                msg=self.getNextMsg()
+                if msg == 'SPACE_KEY_ACTION':
+                    return self.runCalibration()
+                elif msg == 'QUIT':
+                    return False
+                    
+                self.MsgPump()
+        
+        return True
+            
     def clearCalibrationWindow(self):
         self.window.flip(clearBuffer=True)
         
@@ -238,16 +376,29 @@ class TobiiPsychopyCalibrationGraphics(object):
         self.window.flip(clearBuffer=True)
            
     def on_start_calibration(self,*args,**kwargs):
-        ioHub.print2err('on_start_calibration: ',args,kwargs)
-
+        #ioHub.print2err('on_start_calibration: ',args,kwargs)
+        pass
+    
     def on_add_calibration_point(self,*args,**kwargs):
-        ioHub.print2err('on_add_calibration_point: ',args,kwargs)
+        #ioHub.print2err('on_add_calibration_point: ',args,kwargs)
         self._msg_queue.put('DRAW_NEXT')
 
     def on_stop_calibration(self,*args,**kwargs):
-        ioHub.print2err('on_stop_calibration: ',args,kwargs)
+        #ioHub.print2err('on_stop_calibration: ',args,kwargs)
+        self._msg_queue.put("CALIBRATION_FINISHED")
+        
+    def on_compute_calibration(self,*args,**kwargs):
+        self._lastCalibrationReturnCode=args[0]
+        if self._lastCalibrationReturnCode!=0:
+            ioHub.print2err("ERROR: Tobii Calibration Calculation Failed. Error code: {0}".format(self._lastCalibrationReturnCode))
+            self._lastCalibrationOK=False
+            self._msg_queue.put("CALIBRATION_COMPUTATION_FAILED")
+            
+        else:
+            self._msg_queue.put("CALIBRATION_COMPUTATION_COMPLETE")
+            self._lastCalibrationOK=True
 
-    def on_compute_calibration_result(self,*args,**kwargs):
-        ioHub.print2err('on_compute_calibration_result: ',args,kwargs)
-        self._msg_queue.put("CALIBRATION_COMPLETE")
-
+    def on_calibration_result(self,*args,**kwargs):
+        self._lastCalibration=args[1]
+        self._msg_queue.put("CALIBRATION_RESULT_RECEIVED")
+        

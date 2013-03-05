@@ -191,7 +191,7 @@ class DeviceConstants(Constants):
             from ioHub.devices import deviceModulesAvailable
 
             if 'eyetracker' in deviceModulesAvailable:
-                from ioHub.devices.eyeTracker import EyeTrackerDevice
+                from ioHub.devices.eyetracker import EyeTrackerDevice
                 cls._classes[cls.EYE_TRACKER]=EyeTrackerDevice
 
             if 'experiment' in deviceModulesAvailable:

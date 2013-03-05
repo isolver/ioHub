@@ -975,6 +975,8 @@ class EyeTracker(EyeTrackerDevice):
         used instead of registering a timer with the device.
         """
         try:
+            if self._eyelink is None:
+                return
             eyelink=self._eyelink
             DEVICE_TIMEBASE_TO_SEC=EyeTracker.DEVICE_TIMEBASE_TO_SEC
             poll_time=Computer.getTime()
