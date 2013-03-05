@@ -4,6 +4,7 @@ ioHub
 """
 
 from psychopy import visual
+import ioHub
 from ioHub.devices import Computer,EventConstants
 from ioHub.util import getCurrentDateTimeString
 from ioHub.util.experiment import (ioHubExperimentRuntime, DeviceEventTrigger, 
