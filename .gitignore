@@ -106,8 +106,6 @@ ClientBin
 stylecop.*
 ~$*
 *.dbmdl
-.spyderproject
-.iohpid
 
 Generated_Code #added for RIA/Silverlight projects
 
@@ -165,7 +163,11 @@ pip-log.txt
 # Mac crap
 .DS_Store
 
-# dlls, etc
-*.dll
-*.[ao]
+# project related
+.spyderproject
+.iohpid
+*.paths
 *.hdf5
+*.ba[ck]
+_sources
+
