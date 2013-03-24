@@ -1,0 +1,37 @@
+##############################
+ioHub Change Log
+##############################
+
+Release 0.6b2
+==============
+
+#. Refactored the Display Device class towards the goal of, well making more  of it being easier to integrate *properly* with PsychoPy.
+
+#. Did a major overhaul of the EyeTrackerDevice interface:
+    #. Simplified the interface definition, removing several methods that were clearly going to be almost never implemented.
+    #. Removed *args, **kwargs parameter passing to interface methods and replaced with clearly defined parameter expectations.
+    #. Improved the documentation of each interface method, outlining expected behaviour of each and the valid return object types.
+    #. Interface supported the device configuration verification framework put in place for all ioHub Devices.
+
+#. Added a FullScreenWindow class to ioHub.util.experiment, greatly simplifying the creation of a PsychoPy Window with the expected ioHub Display settings.
+
+#. Added support for devices running on the ioHub Server to be able to return exceptions that are then raised by the Experiment Process.
+
+#. Added several new attributes to the Device class, mainly related to being able to optionally specify much more information about the actual device being used (manufacturer, make, model, serial number, etc).
+
+#. Added ability to lock the Mouse device to a Display region on a multi-monitor computer.
+
+#. Changed the MessageEvent.msg_offset attribute to be type float32 so offsets can be represented in the standard sec.msec-usec format.
+
+#. LabJack implementation of AnalogInput Device now uses a fixed fequency streaming mode for sample collection instead of a polled channel value method.
+
+#. Removed unused 'os_device_code' attribute from device classes.
+
+#. Changed the MouseInputEvent 'windowID' attribute to 'window_id'; to make it consistent with the KeyboardInputEvent attribute of the same meaning.
+
+#. Updated the example scripts folder by moving all eye tracking related examples to a subdirectory.
+
+#. Documented all public ioHub Device and DeviceEvent attributes and methods.
+
+#. Created the first version of the ioHub documentation using Sphinx.
+

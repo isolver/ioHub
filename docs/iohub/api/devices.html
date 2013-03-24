@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. ioHub Device and Device Event API &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../index.html" />
+    <link rel="up" title="ioHub API Manual and Specification" href="api_home.html" />
+    <link rel="next" title="1.2.1. ioHub.devices.Computer" href="device_details/computer.html" />
+    <link rel="prev" title="ioHub API Manual and Specification" href="api_home.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1. ioHub Device and Device Event API</a><ul>
+<li><a class="reference internal" href="#abstract-classes">1.1. Abstract Classes</a><ul>
+<li><a class="reference internal" href="#iohub-devices-device">1.1.1. ioHub.devices.Device</a></li>
+<li><a class="reference internal" href="#iohub-devices-deviceevent">1.1.2. ioHub.devices.DeviceEvent</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#device-and-deviceevent-types">1.2. Device and DeviceEvent Types</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#device-class-heirarchy">1.3. Device Class Heirarchy</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="api_home.html"
+         title="previous chapter">&laquo; ioHub API Manual and Specification</a></li>
+  <li><a href="device_details/computer.html"
+         title="next chapter">1.2.1. ioHub.devices.Computer &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../_sources/iohub/api/devices.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-device-and-device-event-api">
+<h1>1. ioHub Device and Device Event API<a class="headerlink" href="#iohub-device-and-device-event-api" title="Permalink to this headline">¶</a></h1>
+<p>The device and device event portion of the ioHub API contains the classes that represent
+the devices in use by the experiment runtime script and the associated events that each device type
+can generate.</p>
+<p>The device and device event API has been designed to try and provide a consistent
+device and event interface across different device and event types, except where
+differences are required to properly represent the device or event of course.</p>
+<p>Two abstract classes (i.e. you never get a instance of one of the classes directly)
+form the base for all Device classes and DeviceEvent classes that are used within
+the ioHub.</p>
+<p>In general, attributes of a class are named using _ format (i.e. eventclass.device_time),
+while method names of a class use camel case fomat (i.e. deviceclass.getEvents() ).
+I find this makes it very easy to distinguish attributes from methods or functions when scanning
+a code completion list for a class in your IDE of choice for example.</p>
+<p>If device events are being saved to the ioDataStore, the hdf5 table for a given event class
+contains columns with the same names as the attributes of the event object that is
+stored in the table. This makes it somewhat easier to remember both event object
+attributes and event data storage tables formats.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">You never create Device or DeviceEvent class instances, regardless of device or event type.
+The ioHub package creates all Device based class instances and DeviceEvent instances as needed,
+and these classses are accessable via methods within the ioHub package.</p>
+</div>
+<div class="section" id="abstract-classes">
+<h2>1.1. Abstract Classes<a class="headerlink" href="#abstract-classes" title="Permalink to this headline">¶</a></h2>
+<p>The parent class of all supported device types in the ioHub is the Device class.
+The parent class of all events, regardless of the device type that it has been received from,
+is the DeviceEvent class.</p>
+<div class="section" id="iohub-devices-device">
+<h3>1.1.1. ioHub.devices.Device<a class="headerlink" href="#iohub-devices-device" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="ioHub.devices.Device">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.</tt><tt class="descname">Device</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.ioObject</span></tt></p>
+<p>The Device class is the base class for all ioHub Device types.
+Any ioHub Device class (i.e Keyboard Device, Mouse Device, etc)
+also include the methods and attributes of this class.</p>
+<dl class="method">
+<dt id="ioHub.devices.Device.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device.clearEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.Device.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device.enableEventReporting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a Device should report events and provide them to the Experiment Process
+and / or save them to the ioDataStore.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>enabled (bool): True (default), monitor and report device events as they occur. False, Do not report any events for the device until reporting is enabled.</dd>
+<dt>Return:</dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.Device.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.Device.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.Device.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device.getEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.Device.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device.isReportingEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.Device.device_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>For device classes that support having multiple of the same type
+being used by the ioHub at the same time (for example xinput gamepads),
+device_number is used to indicate which of the connected devices of that
+type a given ioHub Device instance should connect to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.Device.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maximum size of the device level event buffer for this
+device instance. If the buffer becomes full, when a new event
+is added, the oldest event in the buffer is removed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.Device.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The firmware version attribute can optionally be used to store the
+physical devices hardware version / revision.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.Device.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hardware version attribute can optionally be used to store the
+physical devices hardware version / revision.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.Device.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>The manufactured date of the specific device instance being used,
+if applicable.(Use DD-MM-YYYY string format.)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.Device.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the manufacturer of the device.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.Device.model_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The device model of this Device subclasses instance. Some Device types
+explicitedly support different models of the device and use different
+logic in the ioHub Device implementation based on the model_name given.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.Device.model_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model number can be optionally used to hold the specific model number
+specified on the device.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.Device.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of event type ID&#8217;s that can be generated by this device type
+which should be monitored and reported by the ioHub Server process.
+Event type ID&#8217;s are enumerated using class attributes of the EventConstants class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.Device.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The user defined name given to this device instance. A device name must be
+unique within all devices of the same type_id for a given experiment.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.Device.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unique serial number of the specific device instance being used,
+if applicable.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.Device.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.Device.software_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The software version attribute can optionally be used to store the
+devices software / API version being used by the ioHub Device</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="iohub-devices-deviceevent">
+<h3>1.1.2. ioHub.devices.DeviceEvent<a class="headerlink" href="#iohub-devices-deviceevent" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="ioHub.devices.DeviceEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.</tt><tt class="descname">DeviceEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#DeviceEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.DeviceEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.ioObject</span></tt></p>
+<p>The DeviceEvent class is the base class for all ioHub DeviceEvent types.</p>
+<p>Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseWheelUpEvent, MouseButtonPressEvent,
+KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of
+the DeviceEvent class.</p>
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property attempts to give a sense of the amount to which
+the event time may be off relative to the true time the event
+occurred. confidence_interval is calculated differently depending
+on the device and perhaps event types. In general though, the
+smaller the confidence_interval, the more likely it is that the
+calculated time of the event is correct. For devices where
+a realistic confidence_interval can not be calculated,
+for example if the event device delay is unknown, then a value
+of 0.0 is used. Valid confidence_interval values are
+in sec.msec-usec and will range from 0.000001 sec.msec-usec
+and higher.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>The delay of an event is the known (or estimated) delay from when the
+real world event occurred to when the ioHub received the event for
+processing. This is often called the real-time end-to-end delay
+of an event. If the delay for an event can not be reasonably estimated
+or is not known, a delay of -1.0 is set. Delays are in sec.msec-usec
+and valid values will range from 0.000000 sec.msec-usec and higher.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the device that generates an event type also time stamps
+the events, this field is the time of the event as given by the device,
+converted to sec.msec-usec for consistancy with all other ioHub device times.
+If the device that generates the event does not time stamp
+events, then the device_time is set to the logged_time for the event.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The id assigned to the current device event instance. Every device
+event generated by monitored devices during an experiment session is
+assigned a unique id, starting from 0 for each session, incrementing
+by +1 for each new event.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ioDataStore experiment ID assigned to the experiment code
+specified in the experiment configuration file for the experiment.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filter identifier that the event passed through before being saved.
+If the event did not pass through any filter devices, then the value will be 0.
+Otherwise, the value is the &amp; combination of the filter set that the
+event passed through before being made available to the experiment,
+or saved to the ioDataStore. The filter id can be used to determine
+which filters an event was handled by, but not the order in which handling was done.
+Default value is 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sec.msec time that the event was &#8216;received&#8217; by the ioHub Server Process.
+For devices where the ioHub polls for events, this is the time that the poll
+method was called for the device and the event was retrieved. For
+devices that use the event callback to inform the ioHub of new events,
+this is the time the callback began to be executed. Time is in sec.msec-usec</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ioDataStore session ID assigned for each session of the experiment run.
+Each time the experiment script is run, a new session id is generated for use
+by the ioDataStore within the hdf5 file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The calculated ioHub time is in the normalized time base that all events share,
+regardless of device type. Time is calculated differently depending
+on the device and perhaps event type.
+Time is what should be used when comparing times of events across
+different devices. Time is in sec.msec-usec.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type id for the event. This is used to create DeviceEvent objects
+or dictionary representations of an event based on the data from an
+event value list. Event types are all defined in the EventConstants class as class attributes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="device-and-deviceevent-types">
+<h2>1.2. Device and DeviceEvent Types<a class="headerlink" href="#device-and-deviceevent-types" title="Permalink to this headline">¶</a></h2>
+<p>Details on each supported ioHub Device, and associated DeviceEvent types, can be
+found in the following sections.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="device_details/computer.html">1.2.1. Computer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/computer.html#computer-device-configuration-settings">1.2.1.1. Computer Device Configuration Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="device_details/computer.html#computer-device-events">1.2.1.2. Computer Device Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/keyboard.html">1.2.2. Keyboard</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/keyboard.html#keyboard-device-configuration-settings">1.2.2.1. Keyboard Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/mouse.html">1.2.3. Mouse</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/mouse.html#mouse-device-configuration-settings">1.2.3.1. Mouse Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/display.html">1.2.4. Display</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/display.html#display-device-configuration-settings">1.2.4.1. Display Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/experiment.html">1.2.5. Experiment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/experiment.html#experiment-device-configuration-settings">1.2.5.1. Experiment Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/eyetracker.html">1.2.6. EyeTracker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/eyetracker.html#eyetracker-device-configuration-settings">1.2.6.1. EyeTracker Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/xinput_gamepad.html">1.2.7. XInput Gamepad</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/xinput_gamepad.html#gamepad-device-configuration-settings">1.2.7.1. GamePad Device Configuration Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="device_details/daq.html">1.2.8. Analog to Digitial Input Device</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="device_details/daq.html#daq-device-configuration-settings">1.2.8.1. DAQ Device Configuration Settings</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="device-class-heirarchy">
+<h2>1.3. Device Class Heirarchy<a class="headerlink" href="#device-class-heirarchy" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+digraph inheritance0a1334fa65 {
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ioHub.devices.Device&quot; [style=&quot;setlinewidth(0.5)&quot;,URL=&quot;#ioHub.devices.Device&quot;,fontname=Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans,height=0.25,shape=box,fontsize=10];
+  &quot;ioHub.devices.ioObject&quot; -&gt; &quot;ioHub.devices.Device&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;ioHub.devices.ioObject&quot; [shape=box,style=&quot;setlinewidth(0.5)&quot;,fontsize=10,fontname=Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans,height=0.25];
+}
+</p>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

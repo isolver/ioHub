@@ -15,21 +15,15 @@ import numpy as N
 import inspect
 import sys
 import platform
-
 import os
 import collections
 from collections import namedtuple,Iterable
 
-if sys.version_info<(2,7):
-    from ordereddict import OrderedDict
-else:
-    from collections import OrderedDict
+import constants
 
-#import constants
-from constants import * #EventConstants, DeviceConstants
-    
+   
 #version info for ioHub
-__version__='0.5a1'#util.validate_version("0.5a1")
+__version__='0.6b2'#util.validate_version("0.5a1")
 __license__='GNU GPLv3 (or more recent equivalent)'
 __author__='iSolver Software Solutions'
 __author_email__='sol@isolver-software.com'
@@ -49,11 +43,10 @@ def module_directory(local_function):
 
 import external_libs
 
-def print2err(*args):
-    for a in args:
-        sys.stderr.write(unicode(a))
-    sys.stderr.write('\n\r')
-    sys.stderr.flush()
+if sys.version_info<(2,7):
+    from ordereddict import OrderedDict
+else:
+    from collections import OrderedDict
 
 def isIterable(o):
     return isinstance(o, Iterable)
@@ -152,18 +145,39 @@ def quickStartHubServer(experimentCode, sessionCode, **deviceConfigs):
     
     if len(devices)==0:
         # Specify devices you want to use in the ioHub
-        devices=dict(Keyboard={},Display={},Mouse={})
-
+        devices=OrderedDict()
+        devices['Display']={'origin':'center','reporting_unit_type':'pix'}
+        devices['Keyboard']={}
+        devices['Mouse']={}
     # Create an ioHub configuration dictionary.
     ioConfig=dict(monitor_devices=devices)
     
     if experimentCode and sessionCode:    
         # Enable saving of all keyboard and mouse events to the 'ioDataStore'
-        ioConfig['ioDataStore']=dict(experiment_info=dict(code=experimentCode),session_info=dict(code=sessionCode))
+        ioConfig['data_store']=dict(experiment_info=dict(code=experimentCode),session_info=dict(code=sessionCode))
     
     # Start the ioHub Server
     return ioHubConnection(ioConfig)
-    
+
+RectangleBorder=namedtuple('RectangleBorderClass', 'left top right bottom')
+
+import re
+
+first_cap_re = re.compile('(.)([A-Z][a-z]+)')
+all_cap_re = re.compile('([a-z0-9])([A-Z])')
+
+def convertCamelToSnake(name,lower_snake=True):
+    s1 = first_cap_re.sub(r'\1_\2', name)
+    if lower_snake:
+        return all_cap_re.sub(r'\1_\2', s1).lower()
+    return all_cap_re.sub(r'\1_\2', s1).upper()
+
+def print2err(*args):
+    for a in args:
+        sys.stderr.write(unicode(a))
+    sys.stderr.write('\n\r')
+    sys.stderr.flush()
+   
 def printExceptionDetailsToStdErr():
         import sys, traceback
         exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -172,17 +186,21 @@ def printExceptionDetailsToStdErr():
             print2err(t)
         print2err('\n')
 
-
 class ioHubError(Exception):
-    def __init__(self, msg, *args, **kwargs):
-        Exception.__init__(self, *args, **kwargs)
-        self.msg = msg
-
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args)
+        self.args = args
+        self.kwargs=kwargs
+        
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return "ioHubError:\nMsg: {0:>s}\n".format(self.msg)
+        r="ioHubError:\nArgs: {0}\n".format(self.args)
+        for k,v in self.kwargs.iteritems():
+            r+="\t{0}: {1}\n".format(k,v)
+        return r
 
 global IO_HUB_DIRECTORY
 IO_HUB_DIRECTORY=module_directory(isIterable)
+

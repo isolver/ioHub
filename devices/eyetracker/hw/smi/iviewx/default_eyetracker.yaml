@@ -1,0 +1,29 @@
+eyeTracker.HW.SMI.iViewX.EyeTracker:
+    enable: True
+    name: tracker
+    save_events: True
+    stream_events: True
+    device_timer:
+        interval: 0.001
+    event_buffer_length: 1024
+    monitor_event_types: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent, SaccadeStartEvent, SaccadeEndEvent, BlinkStartEvent, BlinkEndEvent]
+    runtime_settings:
+        sampling_rate: 250
+        track_eyes: BOTH
+        default_calibration: HV9
+        auto_calibration: True
+        runtime_filtering:
+            ALL: OFF
+        default_native_data_file_name: et_data
+        vog_settings:
+            pupil_measure_types: DIAMETER
+            tracking_mode: PUPIL-CR
+            pupil_center_algorithm: CENTROID
+    model_name: N/A
+    model_number: N/A
+    manufacturer_name: N/A
+    serial_number: N/A
+    manufacture_date: DD-MM-YYYY
+    software_version: N/A
+    hardware_version: N/A
+    firmware_version: N/A

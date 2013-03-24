@@ -1,0 +1,619 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. ioHub.client.ioHubConnection and Related Classes &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../index.html" />
+    <link rel="up" title="ioHub API Manual and Specification" href="api_home.html" />
+    <link rel="next" title="3. Experiment Runtime Utility Classes and Functions" href="experiment_utilities.html" />
+    <link rel="prev" title="1.2.8.1.2.2. Measurement Computing AnalogInputDevice Class" href="device_details/daq_interface/MeasurementComputing_Implementation_Notes.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">2. ioHub.client.ioHubConnection and Related Classes</a><ul>
+<li><a class="reference internal" href="#iohub-client-iohubconnection">2.1. ioHub.client.ioHubConnection</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="device_details/daq_interface/MeasurementComputing_Implementation_Notes.html"
+         title="previous chapter">&laquo; 1.2.8.1.2.2. Measurement Computing AnalogInputDevice Class</a></li>
+  <li><a href="experiment_utilities.html"
+         title="next chapter">3. Experiment Runtime Utility Classes and Functions &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../_sources/iohub/api/iohub_connection.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-client-iohubconnection-and-related-classes">
+<h1>2. ioHub.client.ioHubConnection and Related Classes<a class="headerlink" href="#iohub-client-iohubconnection-and-related-classes" title="Permalink to this headline">¶</a></h1>
+<p>The Experiment / PsychoPy script runs in a seperate Process than that of the
+ioHub Server. A UDP message protocal is used by the two processes to communicate
+back and forth. All communication with the ioHub server is initiated by the
+PsychoPy runtime script via the ioHub.client.ioHubConnection class. Each request
+made by the PsychoPy experiment script receives a response from the ioHub Server
+which includes either the data / information requested, or an acknowedgement from
+the ioServer that the request was received and processed. On an Intel i5 type of CPU,
+the round trip time for a request to be sent to the ioHub server and the response be
+received by the PsychoPy script is typically around 0.25 msec on avaergae, with a maximum
+round trip delay of 1.0 msec or less. The round trip time it is taking to request
+and receive back event information can be tested by running the ioHubAccessDelayTest
+which can be found in the ioHub examples folder. This test script requests and receives
+1000 responses from the ioHub server that contain <em>at least</em> one event that has occurred
+since the last request. Requests that receive a response with no events are not included
+in the delay calculation to ensure that the delay represents requests where the ioHub
+Server process needed to send at minimum on event object back to the experiment
+script process.</p>
+<p>If you run the ioHubAccessDelayTest script and find that the ioHub delays are
+significantly longer than stated above, please check the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Are you running the test on a multicore CPU? Using the the ioHub and PychoPy packages together on an old single core or single CPU computer will likely cause increased delays.</li>
+<li>Are other background processes running that can interfer with the experiment or ioHub process and cause poor reduced performance? Examples of such programs or services are file backup software, cloud based file syncronization programs such as Dropbox, Google Drive, bloated antivirus software such as Norton, etc. If any of these types of serverices or programs are running in the background, turn them off while you run your experiment sessions. This is important even if using PsychoPy alone, but is even more important when using ioHub and PsychoPy together.</li>
+</ul>
+</div></blockquote>
+<div class="section" id="iohub-client-iohubconnection">
+<h2>2.1. ioHub.client.ioHubConnection<a class="headerlink" href="#iohub-client-iohubconnection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.client.ioHubConnection">
+<em class="property">class </em><tt class="descclassname">ioHub.client.</tt><tt class="descname">ioHubConnection</tt><big>(</big><em>ioHubConfig=None</em>, <em>ioHubConfigAbsPath=None</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>ioHubConnection is the Experiment Process side class that is responsible for 
+communicating with the ioHub Process. ioHubConnection is responsible for for creating
+the ioHub Server Process, sending requests to the ioHub Server Process, and reading
+the ioHub Server Process reply. This class can also tell the ioHub server when to
+close down and disconnect.</p>
+<p>The ioHubConnection class is also used to access ioHub devices from the PsychoPy
+experiment runtime script. These device objects can be accessed via the ioHubConnection&#8217;s
+<em>deviceByLabel</em> dictionary attribute. For example, to print the available methods for each device registered with the ioHub Server,
+assuming <em>hub</em> refers to the ioHubConnection instance <em>or</em> an instance of the ioHubExperimentRuntime
+class (in which case <em>hub</em> would likely be replaced with <em>self.hub</em>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">device_name</span><span class="p">,</span><span class="n">device_access</span> <span class="ow">in</span> <span class="n">hub</span><span class="o">.</span><span class="n">deviceByLabel</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">print</span> <span class="s">&#39;Device Name: &#39;</span><span class="p">,</span><span class="n">device_name</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">print</span> <span class="s">&#39;Device Interface:&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">device_access</span><span class="o">.</span><span class="n">getDeviceInterface</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="k">print</span> <span class="s">&#39;      &#39;</span><span class="p">,</span><span class="n">method</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">print</span> <span class="s">&quot;--------------&quot;</span>              
+<span class="go">Device Name:  kb</span>
+<span class="go">Device Interface:</span>
+<span class="go">    DeviceConstants</span>
+<span class="go">    clearEvents</span>
+<span class="go">    enableEventReporting</span>
+<span class="go">    getEvents</span>
+<span class="go">    getConfiguration</span>
+<span class="go">    isReportingEvents</span>
+<span class="go">--------------</span>
+<span class="go">Device Name:  mouse</span>
+<span class="go">Device Interface:</span>
+<span class="go">    DeviceConstants</span>
+<span class="go">    clearEvents</span>
+<span class="go">    enableEventReporting</span>
+<span class="go">    getCurrentButtonStates</span>
+<span class="go">    getEvents</span>
+<span class="go">    getPosition</span>
+<span class="go">    getPositionAndDelta</span>
+<span class="go">    getConfiguration</span>
+<span class="go">    getSystemCursorVisibility</span>
+<span class="go">    getVerticalScroll</span>
+<span class="go">    isReportingEvents</span>
+<span class="go">    setPosition</span>
+<span class="go">    setSystemCursorVisibility</span>
+<span class="go">    setVerticalScroll</span>
+<span class="go">--------------</span>
+<span class="go">Device Name:  display</span>
+<span class="go">Device Interface:</span>
+<span class="go">    DeviceConstants</span>
+<span class="go">    clearEvents</span>
+<span class="go">    displayCoord2Pixel</span>
+<span class="go">    enableEventReporting</span>
+<span class="go">    getConfigFileDistance</span>
+<span class="go">    getConfigFileHeight</span>
+<span class="go">    getConfigFileWidth</span>
+<span class="go">    getCoordinateType</span>
+<span class="go">    getEvents</span>
+<span class="go">    getMonitorCount</span>
+<span class="go">    getPsychoPyMonitorSettingsName</span>
+<span class="go">    getScreenInfoList</span>
+<span class="go">    getConfiguration</span>
+<span class="go">    getIndex</span>
+<span class="go">    isReportingEvents</span>
+<span class="go">    pixel2DisplayCoord</span>
+<span class="go">--------------</span>
+<span class="go">Device Name:  experimentRuntime</span>
+<span class="go">Device Interface:</span>
+<span class="go">    DeviceConstants</span>
+<span class="go">    clearEvents</span>
+<span class="go">    enableEventReporting</span>
+<span class="go">    getEvents</span>
+<span class="go">    getConfiguration</span>
+<span class="go">    isReportingEvents</span>
+<span class="go">--------------</span>
+</pre></div>
+</div>
+<p>If you know the name of the device that you want to access (it is the <em>name</em> 
+specified for the device in the iohub_config.yaml settings file) then the device can
+simply be accesed via the <em>devices</em> attribute of either the ioHubConnection or 
+ioHubExperimentRuntime classes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># get the Mouse device, named mouse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mouse</span><span class="o">=</span><span class="n">hub</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">mouse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">current_mouse_position</span> <span class="o">=</span> <span class="n">mouse</span><span class="o">.</span><span class="n">getPosition</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;current mouse position: &#39;</span><span class="p">,</span> <span class="n">current_mouse_position</span>        
+<span class="go">current mouse position:  [-211.0, 371.0]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># get any keyboard events from the keyboard device</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kb</span><span class="o">=</span><span class="n">hub</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">keyboard</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># wait 1 second. While waiting, gets events from ioHub Server and buffers </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#    them locally at an interval that can be set using the checkHubInterval</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#    kwarg, which is set to 0.02 seconds (20 msec) by default.</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hub</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">events</span> <span class="o">=</span> <span class="n">kb</span><span class="o">.</span><span class="n">getEvents</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">kb_event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">print</span> <span class="s">&#39;kb_event: &#39;</span><span class="p">,</span> <span class="n">kb_event</span>        
+<span class="go">kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=71, type=21, device_time=423231.18, logged_time=3.2645300622680224, time=3.2645300622680224, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key=&#39;z&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=72, type=22, device_time=423231.242, logged_time=3.3285222236299887, time=3.3285222236299887, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key=&#39;z&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=73, type=23, device_time=423231.242, logged_time=3.3285222236299887, time=3.3285222236299887, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key=&#39;z&#39;, modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=71, type=21, device_time=423231.18, logged_time=3.2645300622680224, time=3.2645300622680224, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=44, ascii_code=122, key_id=90, key=&#39;z&#39;, modifiers=None, window_id=5310920), duration=0.06399216136196628)        </span>
+<span class="go">kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=86, type=21, device_time=423231.866, logged_time=3.9525340902619064, time=3.9525340902619064, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key=&#39;x&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=87, type=22, device_time=423231.944, logged_time=4.032557043596171, time=4.032557043596171, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key=&#39;x&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=88, type=23, device_time=423231.944, logged_time=4.032557043596171, time=4.032557043596171, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key=&#39;x&#39;, modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=86, type=21, device_time=423231.866, logged_time=3.9525340902619064, time=3.9525340902619064, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=45, ascii_code=120, key_id=88, key=&#39;x&#39;, modifiers=None, window_id=5310920), duration=0.08002295333426446)        </span>
+<span class="go">kb_event:  KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=92, type=21, device_time=423232.272, logged_time=4.352586070308462, time=4.352586070308462, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key=&#39;d&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardReleaseEventNT(experiment_id=0, session_id=0, event_id=93, type=22, device_time=423232.35, logged_time=4.432587591640186, time=4.432587591640186, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key=&#39;d&#39;, modifiers=None, window_id=5310920)        </span>
+<span class="go">kb_event:  KeyboardCharEventNT(experiment_id=0, session_id=0, event_id=94, type=23, device_time=423232.35, logged_time=4.432587591640186, time=4.432587591640186, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key=&#39;d&#39;, modifiers=None, window_id=5310920, pressEvent=KeyboardPressEventNT(experiment_id=0, session_id=0, event_id=92, type=21, device_time=423232.272, logged_time=4.352586070308462, time=4.352586070308462, confidence_interval=0.0, delay=0.0, filter_id=0, scan_code=32, ascii_code=100, key_id=68, key=&#39;d&#39;, modifiers=None, window_id=5310920), duration=0.08000152133172378)</span>
+<span class="go">ioHub Server Process Completed With Code:  0</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.addRowToConditionVariableTable">
+<tt class="descname">addRowToConditionVariableTable</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.addRowToConditionVariableTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.addRowToConditionVariableTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><em>deviceLabel=None</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.clearEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears all events from the global event buffer, or if deviceLabel is not None,
+clears the events only from a specific device event buffer.
+When the global event buffer is cleared, device level event buffers are not effected.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>devicelabel (str): name of the device that should have it&#8217;s event buffer cleared.</dt>
+<dd>If None (the default), the device wide event buffer is cleared
+and device level event buffers are not changed.</dd>
+</dl>
+</dd>
+</dl>
+<p>Return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.currentSec">
+<tt class="descname">currentSec</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.currentSec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.currentSec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sec.msec-usec time retrieved from the ioHub Server process. This method sends a message to
+the ioHub Process asking for the currentSec time on that process, and returns the result.</p>
+<p>Therefore there will be a small delay in getting the current ioHub Process time, and this means
+current_ioHub_secs = self.currentSec()-DELAY, where delay is the time from when the
+ioHub Server Process read the currentSec time to when the PsychoPy process received the reply.</p>
+<dl class="docutils">
+<dt><strong>Note:</strong> On Windows, both the PsychoPy and ioHub Processes use the same time base</dt>
+<dd><p class="first">if you call one of the ioHub Experiment Runtime time methods, so there is <strong>no need</strong>
+to call this method to get the current ioHub Process time.</p>
+<p>It will be more accurate to call one of the following time methods, which gives you
+the current ioHub Process and PsychoPy Process time, as they are the same:</p>
+<ul class="simple">
+<li>ioHub.highPrecisionTimer() : returns sec.msec-usec time</li>
+<li>ioHub.devices.Computer.getSec() : returns sec.msec-usec time</li>
+</ul>
+<p>If running your experiment within the run() method of a class extended from
+ioHub.experiment.ioHubExperimentRuntime, you can also use:</p>
+<ul class="last simple">
+<li>self.currentSec()</li>
+</ul>
+</dd>
+</dl>
+<p>Args: None
+Return (float/double): The ioHub Process sec.msec-usec time when the request was processed</p>
+<blockquote>
+<div>by the ioHub Server Process.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.delay">
+<tt class="descname">delay</tt><big>(</big><em>delay</em>, <em>checkHubInterval=0.02</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the experiment execution for msec.usec interval, while checking the ioHub for
+any new events and retrieving them every &#8216;checkHubInterval&#8217; msec during the delay. Any events
+that are gathered during the delay period will be handed to the experiment the next time
+self.getEvents() is called, unless self.clearEvents() beforehand.</p>
+<p>It is important to allow the PyschoPy Process to periodically either call self.getEvents() events
+during long delaying in program execution so that a) the event queues
+to not reach the specified limits and start descarding old events when 
+new events arrive, and b) so that a very large build up of events does
+not occur on the ioHub Process, that then takes multiple UDP packets
+to transmit to the experiment. This will slow event retrieval down
+unnecessarily. If you are using delay, may as well occationally have the
+experiment process occationally grab any new events from
+the ioHub process during it.</p>
+<p>Also keep in mind that calling self.clearEvents() after any long delays
+between calls to self.getEvents() or self.clearEvents() will clear
+events from the ioHub server so they are not uncessarily  sent to
+the experiment process if you do not need them (they are still being
+stored in the ioDataStore assuming the Device has event reporting
+enabled of course).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>delay (float/double): the sec.msec_usec period that the PsychoPy Process should wait</dt>
+<dd>before returning from the function call.</dd>
+<dt>checkHubInterval (float/double): the sec.msec_usec interval after which any ioHub</dt>
+<dd>events will be retrieved (by calling self.getEvents) and stored
+in a local buffer. This is repeated every checkHubInterval sec.msec_usec until
+the method completes. Default is every 0.01 sec ( 10.0 msec ).</dd>
+</dl>
+</dd>
+</dl>
+<p>Return(float/double): actual duration of delay in sec.msec_usec format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.disableHighPriority">
+<tt class="descname">disableHighPriority</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.disableHighPriority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.disableHighPriority" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the priority of the ioHub Process back to normal priority
+and enables the python GC. In general you would call 
+enableHighPriority() at start of trial and call 
+disableHighPriority() at end of trial.</p>
+<p>Return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.enableHighPriority">
+<tt class="descname">enableHighPriority</tt><big>(</big><em>disable_gc=False</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.enableHighPriority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.enableHighPriority" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the priority of the ioHub Process to high priority
+and optionally (default is False) disable the python GC. This is
+useful for the duration of a trial, for example, where you enable at
+start of trial and disable at end of trial. Improves Windows
+sloppiness greatly in general.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>disable_gc(bool): True = Turn of the Python Garbage Collector. </dt>
+<dd>False = Leave the Garbage Collector running.
+Default: True</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.flushIODataStoreFile">
+<tt class="descname">flushIODataStoreFile</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.flushIODataStoreFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.flushIODataStoreFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manually tell the ioDataStore to flush any events it has beuffered for storage from memory to disk.&#8221;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.getDevice">
+<tt class="descname">getDevice</tt><big>(</big><em>deviceName</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.getDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.getDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the ioHubDeviceView that has a matching name (based on the 
+device : name property specified in the ioHub_config.yaml for the 
+experiment). If no device is found matching the name, None is returned.</p>
+<p>i.e.</p>
+<blockquote>
+<div>keyboard = self.getDevice(&#8216;kb&#8217;)
+kb_events= keyboard.getEvent()</div></blockquote>
+<p>This is the same as using the &#8216;natural naming&#8217; support in the 
+ioHubExperimentRuntime class, i.e:</p>
+<blockquote>
+<div>keyboard = self.devices.kb
+kb_events= keyboard.getEvent()</div></blockquote>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>deviceName (str): Name given to the ioHub Device to be returned</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>device (ioHubDeviceView) <span class="classifier-delimiter">:</span> <span class="classifier">the experimentRuntime represention</span></dt>
+<dd>for the device that matches the name provided.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>deviceLabel=None</em>, <em>asType='namedtuple'</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.getEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any events that have been collected by the ioHub server from monitored devices
+since the last call to getEvents() or since the last call to clearEvents().</p>
+<p>By default all events for all monitored devices are returned, with each event being
+represented as a dictionary of event attributes. When events are retrieved from an event buffer,
+they are removed from the buffer as well.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>deviceLabel (str): optional <span class="classifier-delimiter">:</span> <span class="classifier">if specified, indicates to only retrieve events for</span></dt>
+<dd>the device with the associated label name. None (default) returns
+all device events.</dd>
+<dt>asType (str): optional <span class="classifier-delimiter">:</span> <span class="classifier">indicated how events should be represented when they are returned.</span></dt>
+<dd><blockquote class="first">
+<div>Default: &#8216;dict&#8217;</div></blockquote>
+<p>Events are sent from the ioHub Process as lists of ordered attributes. This is the most
+efficient for data transmission, but not for readability.</p>
+<p>If you do want events to be kept in list form, set asType = &#8216;list&#8217;.</p>
+<p>Setting asType = &#8216;dict&#8217; (the default) converts the events lists to event dictionaries.
+This process is quite fast so the small conversion time is usually worth it given the
+huge benefit in usability within your program.</p>
+<p class="last">Setting asType = &#8216;object&#8217; converts the events to their ioHub DeviceEvent class form.
+This can take a bit of time if the event list is long and currently there is not much
+benefit in doing so vs. treating events as dictionaries. This may change in
+the future. For now, it is suggested that the default, asType=&#8217;dict&#8217; setting be kept.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return (tuple): returns a list of event objects, where the object type is defined by the</dt>
+<dd>&#8216;asType&#8217; parameter.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.getProcessAffinity">
+<tt class="descname">getProcessAffinity</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.getProcessAffinity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.getProcessAffinity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the ioHub Process Affinity setting, as a list of &#8216;processor&#8217; id&#8217;s
+(from 0 to getSystemProcessorCount()-1) that the ioHub Process is able to
+run on.</p>
+<p>For example, on a 2 core CPU with hyper-threading, the possible &#8216;processor&#8217; list would be
+[0,1,2,3], and by default the ioHub Process can run on any of these &#8216;processors&#8217;, so:</p>
+<p>ioHubCPUs=self.getProcessAffinity()
+print ioHubCPUs</p>
+<p>&gt;&gt; [0,1,2,3]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.initializeConditionVariableTable">
+<tt class="descname">initializeConditionVariableTable</tt><big>(</big><em>conditionVariablesProvider</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.initializeConditionVariableTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.initializeConditionVariableTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.quit">
+<tt class="descname">quit</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.quit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.quit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as shutdown, but has same name as psychopy core.quit() so maybe easier for psychopy users to remember.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.sendEvents">
+<tt class="descname">sendEvents</tt><big>(</big><em>events</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.sendEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.sendEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send 1 - N Experiment Events (currently MessageEvents are supported) to the ioHub Process
+for storage. Each object in the events list must be a tuple containing the ordered
+attributes of the event constructor.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>events(tuple): list of ExperimentEvents</dd>
+</dl>
+<p>Return (int): the number of events that the ioHub Server process successfully parsed and saved.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.sendMessageEvent">
+<tt class="descname">sendMessageEvent</tt><big>(</big><em>text</em>, <em>prefix=''</em>, <em>offset=0.0</em>, <em>sec_time=None</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.sendMessageEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.sendMessageEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and send a MessageEvent to the ioHub Server Process for storage
+with the rest of the event data.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">text (str): The text message for the message event. Can be up to 128 characters in length.
+prefix (str): A 0 - 3 character prefix for the message that can be used to sort or group</p>
+<blockquote>
+<div>messages by &#8216;types&#8217;</div></blockquote>
+<dl class="last docutils">
+<dt>offset (float): The usec offset to apply to the time stamp of the message event.</dt>
+<dd>If you send the event before or after the time the event actually occurred,
+and you know what the offset value is, you can provide it here and it
+will be applied to the ioHub time stamp for the event.</dd>
+<dt>usec_time (int/long): Since (at least on Windows currently) if you use the ioHub timers,</dt>
+<dd>the time-base of the experiment process is identical to that of the ioHub
+server process, then you can specific the ioHub time (in usecs) for
+experiment events right in the experiment process itself.</dd>
+</dl>
+</dd>
+</dl>
+<p>Return (bool): True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.sendMessages">
+<tt class="descname">sendMessages</tt><big>(</big><em>messageList</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.sendMessages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.sendMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as the sendMessage method, but accepts a list of lists of message arguments,
+so you can have N messages created and sent at once.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>messageList(tuple): list of lists, where each inner list represents a MessageEvent in list form</dt>
+<dd><dl class="first last docutils">
+<dt>(i.e as an ordered list of event attribute value as would be passed to the</dt>
+<dd>MessageEvent constructor)</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Return (bool): True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.sendToHubServer">
+<tt class="descname">sendToHubServer</tt><big>(</big><em>ioHubMessage</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.sendToHubServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.sendToHubServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>General purpose message sending routine,  used to send a message from the PsychoPy Process
+to the ioHub Process, and then wait for the reply from the ioHub Process before returning.</p>
+<p>The ioHub Server accepts data send either encoded using the [msgpack](<a class="reference external" href="https://github.com/msgpack/msgpack-python">https://github.com/msgpack/msgpack-python</a>)
+library or json encoded using the [ujson](<a class="reference external" href="https://github.com/esnme/ultrajson">https://github.com/esnme/ultrajson</a>) library
+( it is <strong>fast</strong> ).</p>
+<p>Which encoding type is used is specified in the ioHub configuration file by the ipcCoder: parameter.
+By default <em>msgpack</em> is selected, as it seems to be as fast as ujson, but it also compresses
+event data by up to 40 - 50% for transmission.</p>
+<p>All messages sent to the ioHub (a.k.a the ioHubMessage param) have the following simple format:</p>
+<p>(msg_type, [callable_name_for_IPC], ( [optional_list_of_args], {optional_dict_of_kw_args} ) )</p>
+<p>The currently supported message types are:</p>
+<ol class="arabic simple">
+<li>RPC</li>
+<li>GET_EVENTS</li>
+<li>EXP_DEVICE</li>
+</ol>
+<p>Every request to the ioHub Server Process is sent a response / reply back, even if it
+is just to indicate the request was receive and if it was processed successfully or not. All
+responses from the ioHub server are in the form:</p>
+<p>(response_type, <a href="#id1"><span class="problematic" id="id2">*</span></a>response_values)</p>
+<p>where <a href="#id3"><span class="problematic" id="id4">*</span></a>response_values is a list of objects representing the response payload.</p>
+<p>The current ioHub response types are:</p>
+<ol class="arabic simple">
+<li>RPC_RESULT</li>
+<li>GET_EVENTS_RESULT</li>
+<li>DEV_RPC_RESULT</li>
+<li>GET_DEV_LIST_RESULT</li>
+<li>GET_DEV_INTERFACE</li>
+<li>IOHUB_SERVER_ERROR</li>
+</ol>
+<p>The ioHubConnection currently blocks until the request is fulfilled and and a response is
+received from the ioHub server.</p>
+<p>TODO: An aysnc. version could be added if desired. Instead of using callbacks, I prefer the
+idea of the client sending a request and getting a request ticket # back from the ioHub server
+right away, indicating that the job has been submitted for processing. The ioHubConnection can
+then ask the ioHub Server for the status of the job ticket based on ticket number.
+When the ticket number result is ready, it is sent back as the reply to the status request.
+This <strong>aysnc. mode will be necessary</strong> when the worker process is added to the ioHub framework
+to handle long running job requests from the PsychoPy process; for example to load an image
+into a shared memory space, perform long running computations, etc.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>messageList (tuple): ioHub Server Message to send.</dd>
+</dl>
+<p>Return (object): the message response from the ioHub Server process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.setProcessAffinity">
+<tt class="descname">setProcessAffinity</tt><big>(</big><em>processorList</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.setProcessAffinity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.setProcessAffinity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the ioHub Process Affinity based on processorList, a list of &#8216;processor&#8217; id&#8217;s
+(from 0 to getSystemProcessorCount()-1) that the ioHub Process is able to run on.</p>
+<p>For example, on a 2 core CPU with hyper-threading, the possible &#8216;processor&#8217; list would be [0,1,2,3],
+and by default ioHub server processes can run on any of these &#8216;processors&#8217;. To set the ioHub Process to
+only run on core 2 of the CPU, you would call:</p>
+<p>self.setProcessAffinity([2,3])</p>
+<p># check the ioHub Process affinities
+ioHubCPUs=self.getProcessAffinity()
+print ioHubCPUs</p>
+<p>&gt;&gt; [2,3]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.client.ioHubConnection.updateGlobalHubTimeOffset">
+<tt class="descname">updateGlobalHubTimeOffset</tt><big>(</big><em>offset</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.updateGlobalHubTimeOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.updateGlobalHubTimeOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

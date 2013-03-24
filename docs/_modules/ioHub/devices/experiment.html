@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub.devices.experiment &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="ioHub.devices" href="../devices.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"></ul>
+</li>
+          
+          
+            
+          
+          
+            <li></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <h1>Source code for ioHub.devices.experiment</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ioHub</span>
+<span class="sd">.. file: ioHub/devices/experiment/__init__.py</span>
+
+<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">.. fileauthor:: Sol Simpson &lt;sol@isolver-software.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">Device</span><span class="p">,</span><span class="n">Computer</span><span class="p">,</span><span class="n">DeviceEvent</span>
+<span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">DeviceConstants</span><span class="p">,</span> <span class="n">EventConstants</span>
+
+<span class="n">currentSec</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentSec</span>
+
+<div class="viewcode-block" id="ExperimentDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/experiment.html#ioHub.devices.experiment.ExperimentDevice">[docs]</a><span class="k">class</span> <span class="nc">ExperimentDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ExperimentDevice class represents a virtual device, being the </span>
+<span class="sd">    Experiment / PsychoPy Process that is running the experiment script and </span>
+<span class="sd">    has created the ioHub ioServer Process.</span>
+<span class="sd">    A ExperimentDevice device can generate experiment software related events </span>
+<span class="sd">    that are sent to the ioHub to be saved in the ioDataStore along with all </span>
+<span class="sd">    other device events being saved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">EXPERIMENT</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : object</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ExperimentDevice</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[</span><span class="n">MessageEvent</span><span class="p">,]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
+        <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
+            <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
+            <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">ExperimentDevice</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
+            <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
+            <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
+            <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
+            <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
+            <span class="p">}</span>          
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+
+
+        
+    <span class="k">def</span> <span class="nf">_nativeEventCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">currentSec</span><span class="p">()</span> <span class="c"># set logged time of event</span>
+
+        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DELAY_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">-</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
+
+        <span class="c"># on windows ioHub and experiment process use same timebase, so device time == hub time</span>
+        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addNativeEventToBuffer</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    
+    <span class="k">def</span> <span class="nf">_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+ 
+
+    <span class="k">def</span> <span class="nf">_getIOHubEventObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">event</span>
+
+            
+<span class="c">######### Experiment Events ###########</span>
+</div>
+<div class="viewcode-block" id="MessageEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/experiment.html#ioHub.devices.experiment.MessageEvent">[docs]</a><span class="k">class</span> <span class="nc">MessageEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A MessageEvent can be created and sent to the ioHub to record important </span>
+<span class="sd">    marker times during the experiment; for example, when key display changes </span>
+<span class="sd">    occur, when events related to devices not supported by the ioHub have happened, </span>
+<span class="sd">    or simply information about the experiment you want</span>
+<span class="sd">    to store in the ioDataStore along with all the other event data.</span>
+
+<span class="sd">    Since the PsychoPy Process can access the same time base that is used by </span>
+<span class="sd">    the ioHub Process, when you create a Message Event you can time stamp it </span>
+<span class="sd">    at the time of MessageEvent creation, or with the result of a previous call</span>
+<span class="sd">    to one of the ioHub time related methods. This makes experiment messages</span>
+<span class="sd">    extremely accurate temporally when related to other events times saved to</span>
+<span class="sd">    the ioDataSore.</span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.MESSAGE</span>
+<span class="sd">    Event Type String: &#39;MESSAGE&#39;      </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">ExperimentDevice</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MESSAGE</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
+
+    <span class="n">_newDataTypes</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span><span class="s">&#39;msg_offset&#39;</span><span class="p">,</span><span class="s">&#39;i2&#39;</span><span class="p">),</span> <span class="c"># if you want to send the Experiment *before* or *after* the event time occurred</span>
+                                     <span class="c"># and you know exactly when relative to the event time you are sending the message</span>
+                                     <span class="c"># you can specify an offset that will be applied to the message time to give the</span>
+                                     <span class="c"># true event time and not when the message was sent.</span>
+
+                <span class="p">(</span><span class="s">&#39;prefix&#39;</span><span class="p">,</span><span class="s">&#39;a3&#39;</span><span class="p">),</span> <span class="c"># A 0 - 3 character prefix code that you can assign to messages and use it to</span>
+                                 <span class="c"># do such things as group messages into categories or types when</span>
+                                 <span class="c"># retieving them for analysis.</span>
+
+                <span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span><span class="s">&#39;a128&#39;</span><span class="p">)</span>  <span class="c"># The actual text of the message. This can be any python string</span>
+                                 <span class="c"># up to 128 characters in length.</span>
+                <span class="p">]</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">DeviceEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_createAsList</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">msg_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sec_time</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">csec</span><span class="o">=</span><span class="n">currentSec</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">sec_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">csec</span><span class="o">=</span><span class="n">sec_time</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">Computer</span><span class="o">.</span><span class="n">_getNextEventID</span><span class="p">(),</span><span class="n">MessageEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID</span><span class="p">,</span><span class="n">csec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">msg_offset</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">text</span><span class="p">)</span>
+</pre></div></div>
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

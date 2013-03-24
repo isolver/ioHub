@@ -27,7 +27,6 @@ except ImportError:
     from yaml import Loader, Dumper
 
 import ioHub
-from ioHub import EventConstants
 from ioHub.devices import Computer, DeviceEvent
 from ioHub.devices.experiment import MessageEvent
 
@@ -40,6 +39,21 @@ currentSec= Computer.currentSec
 
 class ioHubConnectionException(Exception):
     pass
+
+class ioHubServerError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+        self.args = args
+        self.kwargs=kwargs
+        
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        r="ioHubServerError:\nArgs: {0}\n".format(self.args)
+        for k,v in self.kwargs.iteritems():
+            r+="\t{0}: {1}\n".format(k,v)
+        return r
 
 pack = None
 
@@ -127,10 +141,12 @@ class SocketConnection(object):
                 return result,address
             else:   # using ujson
                 return self.unpack(data[:-2]),address
+        except ioHubServerError as e:
+            print e
+            raise e
         except Exception as e:
             ioHub.printExceptionDetailsToStdErr()
-            raise ioHubConnectionException(" IO_HUB_ERROR ", " ioHubConnection socket.receive", e)
-
+            raise e
 
     def close(self):
         self.sock.close()
@@ -209,14 +225,14 @@ class ioHubDeviceView(object):
     - device:
         device_class: Keyboard
         name: kb
-        saveEvents: True
-        streamEvents: True
+        save_events: True
+        stream_events: True
         event_buffer_length: 256
     - device:
         device_class: Mouse
         name: mouse
-        saveEvents: True
-        streamEvents: True
+        save_events: True
+        stream_events: True
         event_buffer_length: 256
 
     # end .yaml file snippet
@@ -364,7 +380,7 @@ class ioHubConnection(object):
             clearEvents
             enableEventReporting
             getEvents
-            getStartupConfiguration
+            getConfiguration
             isReportingEvents
         --------------
         Device Name:  mouse
@@ -376,7 +392,7 @@ class ioHubConnection(object):
             getEvents
             getPosition
             getPositionAndDelta
-            getStartupConfiguration
+            getConfiguration
             getSystemCursorVisibility
             getVerticalScroll
             isReportingEvents
@@ -393,22 +409,15 @@ class ioHubConnection(object):
             getConfigFileDistance
             getConfigFileHeight
             getConfigFileWidth
-            getDisplayCoordinateType
+            getCoordinateType
             getEvents
             getMonitorCount
-            getPPD
             getPsychoPyMonitorSettingsName
             getScreenInfoList
-            getStartupConfiguration
-            getStimulusScreenBounds
-            getStimulusScreenIndex
-            getStimulusScreenInfo
-            getStimulusScreenOrigin
-            getStimulusScreenReportedRetraceInterval
-            getStimulusScreenResolution
+            getConfiguration
+            getIndex
             isReportingEvents
             pixel2DisplayCoord
-            setStimulusScreenIndex
         --------------
         Device Name:  experimentRuntime
         Device Interface:
@@ -416,7 +425,7 @@ class ioHubConnection(object):
             clearEvents
             enableEventReporting
             getEvents
-            getStartupConfiguration
+            getConfiguration
             isReportingEvents
         --------------
     
@@ -457,6 +466,8 @@ class ioHubConnection(object):
         self._initial_clock_offset=ioHub.highPrecisionTimer()
         Computer.globalClock=ioHub.ioClock(self,self._initial_clock_offset,False)
 
+        print "TODO: Update ioHubConnection class comments, docs."
+        
         if ioHubConfig:
             if not isinstance(ioHubConfig,dict):
                 raise ioHub.ioHubError("The provided ioHub Configuration is not a dictionary.", ioHubConfig)
@@ -508,13 +519,11 @@ class ioHubConnection(object):
             if 'monitor_devices' not in ioHubConfig:
                 ioHub.print2err("ERROR: ioHubConfig must be provided with 'monitor_devices' key.")
                 sys.exit(1)
-            if 'ioDataStore' in ioHubConfig:
-                iods=ioHubConfig['ioDataStore']
+            if 'data_store' in ioHubConfig:
+                iods=ioHubConfig['data_store']
                 if 'experiment_info' in iods and 'session_info' in iods:
                     experiment_info=iods['experiment_info']
                     session_info=iods['session_info']
-                    #del ioHubConfig['ioDataStore']['experiment_info']
-                    #del ioHubConfig['ioDataStore']['session_info']
                     
                 else:
                     ioHub.print2err("ERROR: ioHubConfig:ioDataStore must contain both a 'experiment_info' and a 'session_info' key with a dict value each.")
@@ -571,7 +580,7 @@ class ioHubConnection(object):
         self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         Computer.ioHubServerProcessID = self._server_process.pid
         Computer.ioHubServerProcess=psutil.Process(Computer.ioHubServerProcessID)
-
+        #print 'IOSERVER STARTING UP....'
         # wait for server to send back 'IOHUB_READY' text over stdout, indicating it is running
         # and ready to receive network packets
         hubonline=False
@@ -586,9 +595,17 @@ class ioHubConnection(object):
                     hubonline=True
                     #print "Ending Serving connection attempt due to timeout...."
                     break
+                elif server_output.rstrip() == 'IOHUB_FAILED':
+                    print "ioHub Failed to start, exiting...."
+                    time.sleep(0.25)
+                    sys.exit(1)
+
+                    
             else:
                 time.sleep(0.0001)
-                
+        
+        #print 'Client hubonline: ', hubonline
+        
         # If ioHub server did not repond correctly, terminate process and exit the program.
         if hubonline is False:
             print "ioHub could not be contacted, exiting...."
@@ -598,6 +615,8 @@ class ioHubConnection(object):
                 raise ioHubConnectionException(e)
             finally:
                 sys.exit(1)
+
+        #print '* IOHUB SERVER ONLINE *'        
 
         # save ioHub ProcessID to file so next time it is started, it can be checked and killed if necessary
 
@@ -609,10 +628,14 @@ class ioHubConnection(object):
         except:
             ioHub.printExceptionDetailsToStdErr()
 
+        
         if experiment_info:
+            #print 'Sending experiment_info: {0}'.format(experiment_info)
             self._sendExperimentInfo(experiment_info)
         if session_info:
+            #print 'Sending session_info: {0}'.format(session_info)
             self._sendSessionInfo(session_info)
+
         # create a local 'thin' representation of the registered ioHub devices,
         # allowing such things as device level event access (if supported) 
         # and transparent IPC calls of public device methods and return value access.
@@ -620,7 +643,13 @@ class ioHubConnection(object):
         # is the name given to the device in the ioHub .yaml config file to be access;
         # i.e. hub.devices.ExperimentPCkeyboard would access the experiment PC keyboard
         # device if the default name was being used.
-        self._createDeviceList()
+        #print 'Creating Experiment Process Device List.......'
+        
+        try:
+            self._createDeviceList(ioHubConfig['monitor_devices'])
+        except Exception as e:
+            print "Errror in _createDeviceList: ",str(e)  
+        #print 'Created Experiment Process Device List'
                     
     def _get_maxsize(self, maxsize):
         """
@@ -687,7 +716,7 @@ class ioHubConnection(object):
         #print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
         return results
 
-    def _createDeviceList(self):
+    def _createDeviceList(self,monitor_devices_config):
         """
         Populate the devices attribute object with the registered devices of the ioHub. Each ioHub device becomes an attribute
         of the devices instance, with the attribute name == the name give the device in the ioHub configuration file.
@@ -695,14 +724,47 @@ class ioHubConnection(object):
         from the expriment process.
         """
         # get the list of devices registered with the ioHub
-        deviceList=self._getDeviceList()
+        deviceList=[]
+        for device_config_dict in monitor_devices_config:
+            device_class_name, device_config = device_config_dict.keys()[0], device_config_dict.values()[0]           
+            deviceList.append((device_config.get('name',device_class_name.lower()),device_class_name))
 
+        #ioHub.print2err("_createDeviceList deviceList {0}".format(deviceList))
         # create an experiment process side device object to allow access to the public interface of the
         # ioHub device via transparent IPC.
-        for name,device_class in deviceList:
-            d=ioHubDeviceView(self,name,device_class)
-            self.devices.__dict__[name]=d
-            self.deviceByLabel[name]=d
+        for name,device_class_name in deviceList:
+            try:
+                class_name_start=device_class_name.rfind('.')
+                device_module_path='ioHub.devices.'
+                if class_name_start>0:
+                    device_module_path=device_module_path+device_class_name[:class_name_start].lower()     
+                    device_class_name=device_class_name[class_name_start+1:]
+                else:
+                    device_module_path=device_module_path+device_class_name.lower()
+                    
+                #ioHub.print2err('device_module_path: ',device_module_path)
+                #ioHub.print2err('device_class_name: ',device_class_name)
+                
+                ioHub.devices.import_device(device_module_path,device_class_name)
+    
+                name_start=name.rfind('.')
+                if name_start>0:
+                    name=name[name_start+1:]
+                    
+                #ioHub.print2err("Creating ioHubDeviceView for device name {0}, path {1}, class {1}".format(name,device_module_path,device_class_name))
+    
+                d=ioHubDeviceView(self,name,device_class_name)
+                #ioHub.print2err("Created ioHubDeviceView: {0}".format(d))
+                setattr(self.devices,name,d)
+                self.deviceByLabel[name]=d
+            except:
+                ioHub.print2err("_createDeviceList: Error adding class. ")
+                ioHub.printExceptionDetailsToStdErr()
+                
+        ioHub.constants.DeviceConstants.addClassMappings()
+        ioHub.constants.EventConstants.addClassMappings()
+        
+        #ioHub.print2err("Done _createDeviceList")
 
     # UDP communication with ioHost
     def sendToHubServer(self,ioHubMessage):
@@ -743,8 +805,7 @@ class ioHubConnection(object):
         #. DEV_RPC_RESULT
         #. GET_DEV_LIST_RESULT
         #. GET_DEV_INTERFACE
-        #. IOHUB_ERROR
-        #. RPC_ERROR
+        #. IOHUB_SERVER_ERROR
 
         The ioHubConnection currently blocks until the request is fulfilled and and a response is
         received from the ioHub server.
@@ -784,7 +845,7 @@ class ioHubConnection(object):
 
     def updateGlobalHubTimeOffset(self,offset):
         r=self.sendToHubServer(('RPC','updateGlobalTimeOffset',(offset,)))
-        print 'updateGlobalHubTimeOffset client got: ',r,' : ',r[2]
+        #print 'updateGlobalHubTimeOffset client got: ',r,' : ',r[2]
         return r[2]
 
     @classmethod
@@ -1048,7 +1109,7 @@ class ioHubConnection(object):
         Convert an ioHub event that is current represented as an ordered list of values, and return the correct
         ioHub.devices.DeviceEvent subclass for the given event type.
         """
-        eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
+        eclass=ioHub.constants.EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
         combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
         kwargs = dict(combo)
         return eclass.createEventAsClass(eventValueList)
@@ -1062,12 +1123,11 @@ class ioHubConnection(object):
         try:
             if isinstance(eventValueList,dict):
                 return eventValueList
-            eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
+            eclass=ioHub.constants.EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
             return eclass.createEventAsDict(eventValueList)
         except:
-            print '---------------'
-            print "ERROR: eventValueList: "+str(eventValueList)
-            print '---------------'
+            ioHub.printExceptionDetailsToStdErr()
+            raise ioHub.ioHubError("Error converting ioHub Server event list response to a dict",event_list_response=eventValueList)
 
     @staticmethod
     def _eventListToNamedTuple(eventValueList):
@@ -1078,17 +1138,15 @@ class ioHubConnection(object):
         try:
             if not isinstance(eventValueList,list):
                 return eventValueList
-            eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
+            eclass=ioHub.constants.EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
             return eclass.createEventAsNamedTuple(eventValueList)
         except:
-            print '---------------'
-            print "ERROR: eventValueList: "+str(eventValueList)
             ioHub.printExceptionDetailsToStdErr()
-            print '---------------'
+            raise ioHub.ioHubError("Error converting ioHub Server event list response to a namedtuple",event_list_response=eventValueList)
 
     def sendEvents(self,events):
         """
-        Send 1 - N ExperimentDevice Events (currently MessageEvents are supported) to the ioHub Process
+        Send 1 - N Experiment Events (currently MessageEvents are supported) to the ioHub Process
         for storage. Each object in the events list must be a tuple containing the ordered
         attributes of the event constructor.
 
@@ -1144,7 +1202,7 @@ class ioHubConnection(object):
 
     # client utility methods.
     def _getDeviceList(self):
-        r=self.sendToHubServer(('EXP_DEVICE','GET_DEV_LIST'))
+        r=self.sendToHubServer(('EXP_DEVICE','GET_DEVICE_LIST'))
         return r[2]
 
     def shutdown(self):
@@ -1153,7 +1211,7 @@ class ioHubConnection(object):
         '''
         Same as shutdown, but has same name as psychopy core.quit() so maybe easier for psychopy users to remember.
         '''
-        self._shutDownServer()
+        self.shutdown()
 
     def _shutDownServer(self):
         """
@@ -1161,7 +1219,7 @@ class ioHubConnection(object):
         :return:
         """
         try:
-            self.udp_client.sendTo(('RPC','shutDown'))
+            self.udp_client.sendTo(('STOP_IOHUB_SERVER',))
             self.udp_client.close()
             if Computer.ioHubServerProcess:
                 r=Computer.ioHubServerProcess.wait(timeout=5)
@@ -1293,7 +1351,7 @@ class ioHubConnection(object):
                 return False
             else:
                 if (type(data[0]) in (str,unicode)) and data[0].find('ERROR')>=0:
-                    return ioHubConnectionException(data)
+                    return ioHubServerError(data)
                 return False
         else:
             raise ioHubConnectionException('Response from ioHub should always be iterable and have a length > 0')

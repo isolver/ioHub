@@ -1,0 +1,1264 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2.3. ioHub.devices.mouse.Mouse &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="1. ioHub Device and Device Event API" href="../devices.html" />
+    <link rel="next" title="1.2.4. ioHub.devices.display.Display" href="display.html" />
+    <link rel="prev" title="1.2.2. ioHub.devices.keyboard.Keyboard" href="keyboard.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1.2.3. ioHub.devices.mouse.Mouse</a><ul>
+<li><a class="reference internal" href="#mouse-device-configuration-settings">1.2.3.1. Mouse Device Configuration Settings</a><ul>
+<li><a class="reference internal" href="#mouse-event-types">1.2.3.1.1. Mouse Event Types</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="keyboard.html"
+         title="previous chapter">&laquo; 1.2.2. ioHub.devices.keyboard.Keyboard</a></li>
+  <li><a href="display.html"
+         title="next chapter">1.2.4. ioHub.devices.display.Display &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../_sources/iohub/api/device_details/mouse.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-devices-mouse-mouse">
+<h1>1.2.3. ioHub.devices.mouse.Mouse<a class="headerlink" href="#iohub-devices-mouse-mouse" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Supported Platforms: Linux, Windows (XP SP2, SP3, Windows 7)</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.mouse.Mouse">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">Mouse</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#Mouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.Mouse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseDevice</span></tt></p>
+<p>The Mouse class and related events represent a standard computer mouse device
+and the events a standard mouse can produce. Mouse position data is mapped to
+the coordinate space defined in the ioHub configuration file for the Display.</p>
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a Device should report events and provide them to the Experiment Process
+and / or save them to the ioDataStore.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>enabled (bool): True (default), monitor and report device events as they occur. False, Do not report any events for the device until reporting is enabled.</dd>
+<dt>Return:</dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getCurrentButtonStates">
+<tt class="descname">getCurrentButtonStates</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getCurrentButtonStates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getDisplayIndex">
+<tt class="descname">getDisplayIndex</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getDisplayIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current display index of the ioHub Mouse Device. 
+If the display index == the index of the display being used for stimulus
+presentation, then mouse position is in the display&#8217;s coordinate units.
+If the display index != the index of the display being used for stimulus
+presentation, then mouse position is in OS system mouse ccordinate space.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>(int): index of the Display the mouse is over. Display index&#8217;s range from 0 to N-1, where N is the number of Display&#8217;s active on the Computer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getDisplayIndexForMousePosition">
+<tt class="descname">getDisplayIndexForMousePosition</tt><big>(</big><em>system_mouse_pos</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getDisplayIndexForMousePosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getPosition">
+<tt class="descname">getPosition</tt><big>(</big><em>return_display_index=False</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current position of the ioHub Mouse Device. Mouse Position is in display
+coordinate units, with 0,0 being the center of the screen.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>return_display_index: if True, the display index that is associated with the mouse position will also be returned.</dd>
+<dt>Returns:</dt>
+<dd>tuple: If return_display_index is false (default), return (x,y) position of mouse. If return_display_index is True return ( (x,y), display_index).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getPositionAndDelta">
+<tt class="descname">getPositionAndDelta</tt><big>(</big><em>return_display_index=False</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getPositionAndDelta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple of tuples, being the current position of the ioHub Mouse Device as an (x,y) tuple,
+and the amount the mouse position changed the last time it was updated (dx,dy).
+Mouse Position and Delta are in display coordinate units.</p>
+<p>Args: None
+Return (tuple): ( (x,y), (dx,dy) ) position of mouse, change in mouse position,</p>
+<blockquote>
+<div>both in Display coordinate space.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getSystemCursorVisibility">
+<tt class="descname">getSystemCursorVisibility</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getSystemCursorVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether the system cursor is visible on the currently active Window.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns: </dt>
+<dd>bool: True if system cursor is visible on currently active Window. False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getVerticalScroll">
+<tt class="descname">getVerticalScroll</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getVerticalScroll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current vertical scroll value for the mouse. The vertical scroll value changes when the
+scroll wheel on a mouse is moved up or down. The vertical scroll value is in an arbitrary value space
+ranging for -32648 to +32648. Scroll position is initialize to 0 when the experiment starts.
+Args: None
+Returns (int): current vertical scroll value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.getlockedMouseDisplayID">
+<tt class="descname">getlockedMouseDisplayID</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.getlockedMouseDisplayID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.lockMouseToDisplayID">
+<tt class="descname">lockMouseToDisplayID</tt><big>(</big><em>display_id</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.lockMouseToDisplayID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.setPosition">
+<tt class="descname">setPosition</tt><big>(</big><em>pos</em>, <em>display_index=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.setPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the current position of the ioHub Mouse Device. Mouse position ( pos ) should be specified in
+Display coordinate units, with 0,0 being the center of the screen. If you would like the OS system
+mouse position to also be updated, set updateSystemMousePosition to True (the default). Otherwise,
+set it to False. When the system mouse position is updated, your position ( pos ) is converted
+to the associated screen pixel position expected by the OS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">pos ( (x,y) list or tuple ): The position, in Display coordinate space, to set the mouse position too.</p>
+<p class="last">updateSystemMousePosition (bool): True = the OS mouse position will also be updated, False = it will not.</p>
+</dd>
+<dt>Return:</dt>
+<dd>tuple: new (x,y) position of mouse in Display coordinate space.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.setSystemCursorVisibility">
+<tt class="descname">setSystemCursorVisibility</tt><big>(</big><em>v</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.setSystemCursorVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set whether the system cursor is visible on the currently active Window.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>v (bool): True = make system cursor visible. False = Hide system cursor</dd>
+<dt>Returns:</dt>
+<dd>(bool): True if system cursor is visible on currently active Window. False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.mouse.Mouse.setVerticalScroll">
+<tt class="descname">setVerticalScroll</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.Mouse.setVerticalScroll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the current vertical scroll value for the mouse. The vertical scroll value changes when the
+scroll wheel on a mouse is moved up or down. The vertical scroll value is in an
+arbitrary value space ranging for -32648 to +32648. Scroll position is initialize to 0 when
+the experiment starts. This method allows you to change the scroll value to anywhere in the
+valid value range.
+Args (int): The scroll position you want to set the vertical scroll to. Should be a number</p>
+<blockquote>
+<div>between -32648 to +32648.</div></blockquote>
+<p>Returns (int): current vertical scroll value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.Mouse.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.mouse.Mouse.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="mouse-device-configuration-settings">
+<h2>1.2.3.1. Mouse Device Configuration Settings<a class="headerlink" href="#mouse-device-configuration-settings" title="Permalink to this headline">¶</a></h2>
+<p><strong>TODO: Update Mouse Device config settings.</strong></p>
+<p>To add the Mouse device to the iohub_config.yaml configuration file for and experiment,
+add the following entry to the <strong>monitor_devices</strong> list:</p>
+<div class="highlight-python"><pre>Mouse:
+    # name: The name you want to assign to the device for the experiment
+    #   This name is what will be used to access the device within the experiment
+    #   script via the devices.[device_name] property of the ioHubConnection or
+    #   ioHubExperimentRuntime classes.
+    name: mouse
+
+    # enable: Specifies if the device should be enabled by ioHub and monitored
+    #   for events.
+    #   True = Enable the device on the ioHub Server Process
+    #   False = Disable the device on the ioHub Server Process. No events for
+    #       this device will be reported by the ioHub Server.
+    enable: True
+
+    # saveEvents: *If* the ioHubDataStore is enabled for the experiment, then
+    #   indicate if events for this device should be saved to the
+    #   data_collection/keyboard event group in the hdf5 event file.
+    #   True = Save events for this device to the ioDataStore.
+    #   False = Do not save events for this device in the ioDataStore.
+    saveEvents: True
+
+
+    # streamEvents: Indicate if events from this device should be made available
+    #   during experiment runtime to the Experiment / PsychoPy Process.
+    #   True = Send events for this device to  the Experiment Process in real-time.
+    #   False = Do *not* send events for this device to the Experiment Process in real-time.
+    streamEvents: True
+
+    # auto_report_events: Indicate if events from this device should start being
+    #   processed by the ioHub as soon as the device is loaded at the start of an experiment,
+    #   or if events should only start to be monitored on the device when a call to the
+    #   device's enableEventReporting method is made with a parameter value of True.
+    #   True = Automatically start reporting events for this device when the experiment starts.
+    #   False = Do not start reporting events for this device until enableEventReporting(True)
+    #       is set for the device during experiment runtime.
+    auto_report_events: True
+
+    # event_buffer_length: Specify the maximum number of events (for each
+    #   event type the device produces) that can be stored by the ioHub Server
+    #   before each new event results in the oldest event of the same type being
+    #   discarded from the ioHub device event buffer.
+    event_buffer_length: 256</pre>
+</div>
+<div class="section" id="mouse-event-types">
+<h3>1.2.3.1.1. Mouse Event Types<a class="headerlink" href="#mouse-event-types" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseInputEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseInputEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../devices.html#ioHub.devices.DeviceEvent" title="ioHub.devices.DeviceEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.DeviceEvent</span></tt></a></p>
+<p>The MouseInputEvent is an abstract class that is the parent of all MouseInputEvent types
+that are supported in the ioHub. Mouse position is mapped to the coordinate space
+defined in the ioHub configuration file for the Display.</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>MouseConstants.MOUSE_BUTTON_LEFT, MouseConstants.MOUSE_BUTTON_RIGHT
+and MouseConstants.MOUSE_BUTTON_MIDDLE are int constants
+representing left, right, and middle buttons of the mouse.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 if button is pressed, 0 if button is released</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#8216;All&#8217; currently pressed button id&#8217;s</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>vertical scroll wheel position change when the event occurred</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>vertical scroll wheel absolute position when the event occurred</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>window ID that the mouse was over when the event occurred
+(window does not need to have focus)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>x position of the position when the event occurred; in display coordinate space</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseInputEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseInputEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>y position of the position when the event occurred; in display coordinate space</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseMoveEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseMoveEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ioHub.devices.mouse.MouseInputEvent" title="ioHub.devices.mouse.MouseInputEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseInputEvent</span></tt></a></p>
+<p>MouseMoveEvents occur when the mouse position changes. Mouse position is
+mapped to the coordinate space defined in the ioHub configuration file 
+for the Display.</p>
+<p>Event Type ID: EventConstants.MOUSE_MOVE
+Event Type String: &#8216;MOUSE_MOVE&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMoveEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMoveEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseWheelUpEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseWheelUpEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseWheelEvent</span></tt></p>
+<p>MouseWheelUpEvent&#8217;s are generated when the vertical scroll wheel on the 
+Mouse Device (if it has one) is turned in the direction toward the front 
+of the mouse. Horizontal scrolling is not currently supported.
+Each MouseWheelUpEvent provides the number of units the wheel was turned 
+( +1 ) as well as the absolute scroll value for the mouse, which is an 
+ioHub Mouse attribute that is simply modified by the change value of
+MouseWheelUpEvent and MouseWheelDownEvent types.</p>
+<p>Event Type ID: EventConstants.MOUSE_WHEEL_UP
+Event Type String: &#8216;MOUSE_WHEEL_UP&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelUpEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelUpEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseWheelDownEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseWheelDownEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseWheelEvent</span></tt></p>
+<p>MouseWheelDownEvent&#8217;s are generated when the vertical scroll wheel on the 
+Mouse Device (if it has one) is turned in the direction toward the back
+of the mouse. Horizontal scrolling is not currently supported.
+Each MouseWheelDownEvent provides the number of units the wheel was turned 
+as a negative value ( -1 ) as well as the absolute scroll value for the mouse,
+which is an ioHub Mouse attribute that is simply modified by the change value
+of MouseWheelUpEvent and MouseWheelDownEvent types.</p>
+<p>Event Type ID: EventConstants.MOUSE_WHEEL_DOWN
+Event Type String: &#8216;MOUSE_WHEEL_DOWN&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseWheelDownEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseWheelDownEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseButtonReleaseEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
+<p>MouseButtonUpEvent&#8217;s are created when a button on the mouse is released. 
+The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_RELEASED,
+and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
+assuming you have a 3 button mouse.</p>
+<p>Event Type ID: EventConstants.MOUSE_BUTTON_RELEASE
+Event Type String: &#8216;MOUSE_BUTTON_RELEASE&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseButtonPressEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
+<p>MouseButtonPressEvent&#8217;s are created when a button on the mouse is pressed. 
+The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_PRESSED,
+and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
+assuming you have a 3 button mouse.</p>
+<p>To get the current state of all three buttons on the Mouse Device, 
+the pressed_buttons attribute can be read, which tracks the state of all three
+mouse buttons as an int that is equal to the sum of any pressed button id&#8217;s 
+( MouseConstants.MOUSE_BUTTON_ID_LEFT,  MouseConstants.MOUSE_BUTTON_ID_RIGHT, or
+MouseConstants.MOUSE_BUTTON_ID_MIDDLE ).</p>
+<p>To tell if a given mouse button was depressed when the event occurred, regardless of which
+button triggered the event, you can use the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">isButtonPressed</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pressed_buttons</span> <span class="o">&amp;</span> <span class="n">MouseConstants</span><span class="o">.</span><span class="n">MOUSE_BUTTON_ID_xxx</span> <span class="o">==</span> <span class="n">MouseConstants</span><span class="o">.</span><span class="n">MOUSE_BUTTON_ID_xxx</span>
+</pre></div>
+</div>
+<p>where xxx is LEFT, RIGHT, or MIDDLE.</p>
+<p>For example, if at the time of the event both the left and right mouse buttons
+were in a pressed state:</p>
+<div class="highlight-python"><pre>buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_RIGHT
+isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck
+
+print isButtonPressed
+
+&gt;&gt; True
+
+buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_LEFT
+isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck
+
+print isButtonPressed
+
+&gt;&gt; True
+
+buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_MIDDLE
+isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck
+
+print isButtonPressed
+
+&gt;&gt; False</pre>
+</div>
+<p>Event Type ID: EventConstants.MOUSE_BUTTON_PRESS
+Event Type String: &#8216;MOUSE_BUTTON_PRESS&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonPressEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseDoubleClickEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseDoubleClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
+<p>MouseDoubleClickEvent&#8217;s are created when you rapidly press and release a 
+mouse button twice. This event may never get triggered if your OS does not support it.
+The button that was double clicked (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
+assuming you have a 3 button mouse.</p>
+<p>Event Type ID: EventConstants.MOUSE_DOUBLE_CLICK
+Event Type String: &#8216;MOUSE_DOUBLE_CLICK&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.wheel_change">
+<tt class="descname">wheel_change</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.wheel_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.wheel_value">
+<tt class="descname">wheel_value</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.wheel_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseDoubleClickEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDoubleClickEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

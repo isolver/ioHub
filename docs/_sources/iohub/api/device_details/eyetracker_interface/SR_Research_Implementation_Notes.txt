@@ -1,0 +1,75 @@
+#####################################################
+SR Research EyeLink EyeTracker Class
+#####################################################
+
+.. note::
+    Supported Platforms:
+    
+    Windows (XP SP2, SP3, Windows 7), Linux should work as well, but has yet to be tested.
+    
+    Supported EyeLink Eye Tracker Models: 
+    
+    All models of EyeLink should work with the ioHub eye tracker interface, however
+    most testing has been done on an EyeLink 1000 monocular head supported system.
+    Please report any issues found with using the interface with models of the EyeLink.
+
+.. autoclass:: ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker
+    :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES, EYELINK, EYELINK_1000, EYELINK_II    
+
+Installing other Necessary SR Research Software
+##################################################
+
+The EyeLink implementation of the ioHub common eye tracker interface uses the 
+pyLink module written by SR Research. SR Research has been kind enough to allow
+the distribution of pylink with the PsychoPy software distribution, so no extra
+software needs to be downloaded or installed to use an EyeLink with PsychoPy and ioHub.
+
+Now that was easy!
+    
+EyeLink Device iohub_config.yaml Settings
+###########################################
+
+**TODO: Update EyeLink Device config settings**
+
+To specify the use of an EyeLink eye tracking device within your experiment,
+add the following to the iohub_config.yaml file in the devices list:: 
+
+    -eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
+        enable: True
+        name: tracker
+        saveEvents: True
+        streamEvents: True
+        device_timer:
+            interval: 0.001
+        event_buffer_length: 1024
+        display_settings: *DisplaySettings
+        runtime_settings:
+            sampling_rate: 250
+            track_eyes: LEFT
+            default_calibration: HV9
+            auto_calibration: True
+            auto_calibration_speed: 1.5
+            runtime_filtering:
+                ALL: OFF
+            enable_api_without_connection: False
+            network_settings: 100.1.1.1
+            default_native_data_file_name: et_data
+            vog_settings:
+                pupil_measure_types: DIAMETER
+                tracking_mode: PUPIL-CR
+                pupil_center_algorithm: CENTROID
+                
+iohub_config.yaml settings considerations:
+    * The above eye tracker device configuration options list the full subset of eye tracker configuration options supported by the EyeLink eye tracker implementation.
+    * sampling_rate: must match a supported sampling rate of the EyeLink model being used.
+    * auto_calibration and auto_calibration_speed: support is yet to be implemented, so these options are ignored. Adding these options is / will be very easy.
+
+Supported EyeTracker Device Event Types
+########################################
+
+All EyeTrackerDevice event types are supported by the EyeLink implementation of the ioHub Common Eye Tracker Interface.
+
+General Considerations
+#######################
+
+None at this time.

@@ -1,0 +1,75 @@
+eyetracker.hw.tobii.EyeTracker:
+    # Indicates if the device should actually be loaded at experiment runtime.
+    enable: True
+    # The variable name of the device that will be used to access the ioHub Device class
+    # during experiment run-time, via the devices.[name] attribute of the ioHub
+    # connection or experiment runtime class.
+    name: tracker
+    # Should eye tracker events be saved to the ioHub DataStore file when the device
+    # is recording data ?
+    save_events: True
+    # Should eye tracker events be sent to the Experiment process when the device
+    # is recording data ?
+    stream_events: True
+    # How many eye events (including samples) should be saved in the ioHub event buffer before
+    # old eye events start being replaced my new events when the event buffer reaches
+    # the maximum event length of the buffer defined here.
+    event_buffer_length: 1024
+    # The Tobii implementation of the common eye tracker interface supports the
+    # BinocularEyeSampleEvent event type.
+    monitor_event_types: [ BinocularEyeSampleEvent,]
+    model_name:
+    serial_number: ''
+    runtime_settings:
+        # The supported sampling rates for Tobii are model dependent. Using a defualt of 60 Hz, with the assumption
+        # it is the most common.
+        sampling_rate: 60
+        # Tobii supports BINOCULAR tracking mode only.
+        track_eyes: BINOCULAR
+        calibration:
+            # The Tobii ioHub Common Eye Tracker Interface currently support a 9 pt HV9_POINTS calibration mode.
+            # This is not a limitation of the Tobii system, it is of the current implementation.
+            # Anyone want to add support for more calibration types for the Tobii? ;)
+            type: HV9_POINTS
+            # auto_pace can be True or False. If True, the eye tracker will 
+            # automatically progress from one calibration point to the next.
+            # If False, a manual key or button press is needed to progress to
+            # the next point.
+            auto_pace: True
+            # pacing_speed is the number of sec.msec that a calibration point should
+            # be displayed before moving onto the next point when auto_pace is set to true.
+            # If auto_pace is False, pacing_speed is ignored.
+            pacing_speed: 1.5
+            # screen_background_color specifies the r,g,b,a background color to 
+            # set the calibration, validation, etc, screens to. Each element of the color
+            # should be a value between 0 and 255. 0 == black, 255 == white. In general
+            # the last value of the color list (alpha) can be left at 255, indicating
+            # the color not mixed with the background color at all.
+            screen_background_color: [128,128,128,255]
+            # Target type defines what form of calibration graphic should be used
+            # during calibration, validation, etc. modes.
+            # Currently the Tobii implementation supports the following
+            # target type: CIRCLE_TARGET. To do: Add support for other types, etc.
+            target_type: CIRCLE_TARGET
+            # The associated target attributes sub properties must be supplied
+            # for the given target_type. If target type attribute sections are provided
+            # for target types other than the entry associated with the specified target_type value
+            # they will simple be ignored.
+            circle_attributes:
+                outer_diameter: 33
+                inner_diameter: 6
+                outer_color: [255,255,255,255]
+                inner_color: [0,0,0,255]
+    # Never just start streamin eye tracking data as soon as the ioHub starts.
+    auto_report_events: False
+    # manufacturer_name is used to store the name of the maker of the eye tracking
+    # device. This is for informational purposes only.
+    manufacturer_name: Tobii Technology
+    # The below parameters are not used by the Tobii common eye tracker
+    # interface implementation, so should be left as indicated.
+    device_number: 0
+    model_number: N/A
+    manufacture_date: DD-MM-YYYY
+    software_version: N/A
+    hardware_version: N/A
+    firmware_version: N/A

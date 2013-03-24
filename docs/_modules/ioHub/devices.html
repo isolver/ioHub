@@ -1,0 +1,1233 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub.devices &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub/iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"></ul>
+</li>
+          
+          
+            
+          
+          
+            <li></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <h1>Source code for ioHub.devices</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ioHub</span>
+<span class="sd">.. file: ioHub/devices/__init__.py</span>
+
+<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">.. fileauthor:: Sol Simpson &lt;sol@isolver-software.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">gc</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+
+<span class="k">class</span> <span class="nc">ioDeviceError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;ioDeviceError:</span><span class="se">\n</span><span class="s">Msg: {0:&gt;s}</span><span class="se">\n</span><span class="s">Device: {1:&gt;s}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">),</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ioObjectMetaClass</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="nb">type</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;_newDataTypes&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_newDataTypes</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="k">if</span> <span class="s">&#39;_baseDataTypes&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_findDeviceParent</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+                <span class="n">cls</span><span class="o">.</span><span class="n">_baseDataTypes</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">_dataType</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cls</span><span class="o">.</span><span class="n">_baseDataTypes</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="n">cls</span><span class="o">.</span><span class="n">_dataType</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">_baseDataTypes</span><span class="o">+</span><span class="n">cls</span><span class="o">.</span><span class="n">_newDataTypes</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_dataType</span><span class="p">]</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">NUMPY_DTYPE</span><span class="o">=</span><span class="n">N</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_dataType</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">())</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="s">&#39;DeviceEvent&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">()]:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;NT&#39;</span><span class="p">,</span><span class="n">cls</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_findDeviceParent</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">bases</span><span class="p">):</span>
+        <span class="n">parent</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">bases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;Device&#39;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span>
+                    <span class="n">parent</span><span class="o">=</span><span class="n">p</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="s">&#39;object&#39;</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">parent</span>
+
+<div class="viewcode-block" id="ioObject"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.ioObject">[docs]</a><span class="k">class</span> <span class="nc">ioObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ioObject class is the base class for all ioHub Device and DeviceEvent types.</span>
+
+<span class="sd">    Any ioHub Device or DeviceEvent class (i.e devices like Keyboard Device, Mouse Device, etc;</span>
+<span class="sd">    and device events like Message, KeyboardPressEvent, MouseMoveEvent, etc.)</span>
+<span class="sd">    also include the methods and attributes of this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span><span class="o">=</span> <span class="n">ioObjectMetaClass</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;_attribute_values&#39;</span><span class="p">,]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">:</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_asDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the ioObject in dictionary format, with keys as the ioObject&#39;s</span>
+<span class="sd">        attribute names, and dictionary values equal to the attribute values.</span>
+
+<span class="sd">        Return (dict): dictionary of ioObjects attribute_name, attributes values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_asList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the ioObject in list format, which is a 1D list of the ioObject&#39;s</span>
+<span class="sd">        attribute values, in the order the ioObject expects them if passed to a class constructor.</span>
+
+<span class="sd">        Return (list): 1D list of ioObjects _attribute_values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span>
+
+    <span class="k">def</span> <span class="nf">_asNumpyArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the ioObject as a numpy array, with the array values being equal to</span>
+<span class="sd">        what would be returned by the asList() method, and the array cell data types</span>
+<span class="sd">        being specified by NUMPY_DTYPE class constant.</span>
+
+<span class="sd">        Return (numpy.array): numpy array representation of object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attribute_values</span><span class="p">),],</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMPY_DTYPE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_getRPCInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rpcList</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">dlist</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dlist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&#39;_&#39;</span> <span class="ow">and</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;asNumpyArray&#39;</span><span class="p">,]:</span>
+                <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">d</span><span class="p">)):</span>
+                    <span class="n">rpcList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rpcList</span>
+</div>
+<div class="viewcode-block" id="Computer"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer">[docs]</a><span class="k">class</span> <span class="nc">Computer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Computer class does not extending the ioHub.devices.Device class, however</span>
+<span class="sd">    it is conseptually convienient to think of the Computer class as a type of</span>
+<span class="sd">    Device. The Computer class contains the ioHub Clock used to access the ioHub time</span>
+<span class="sd">    from the Experiment process as well as time stamp all Device Events.</span>
+<span class="sd">    </span>
+<span class="sd">    The Computer Class also contains methods allowing the Experiment and ioHub </span>
+<span class="sd">    Process affinities to be set to particual processing units of the computer</span>
+<span class="sd">    is desired. The operating system priority of either process can also be</span>
+<span class="sd">    increased if desired.</span>
+<span class="sd">    </span>
+<span class="sd">    There is also a long list of methods that can be used to access the Computers</span>
+<span class="sd">    memory usage, CPU usage, network and disk access, and more, as the Computer</span>
+<span class="sd">    class provides an interface to the very useful psutil Python package.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_nextEventID</span><span class="o">=</span><span class="mi">1</span>
+    <span class="n">isIoHubProcess</span><span class="o">=</span><span class="bp">False</span>
+    <span class="n">inHighPriorityMode</span><span class="o">=</span><span class="bp">False</span>
+    <span class="n">globalClock</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">system</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">release</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">machine</span><span class="p">,</span> <span class="n">processor</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span>
+    <span class="n">cpuCount</span><span class="o">=</span><span class="n">psutil</span><span class="o">.</span><span class="n">NUM_CPUS</span>
+    <span class="n">currentProcessID</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+    <span class="n">currentProcess</span><span class="o">=</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">currentProcessID</span><span class="p">)</span>
+    <span class="n">ioHubServerProcessID</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">ioHubServerProcess</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">_process_original_nice_value</span><span class="o">=-</span><span class="mi">1</span> <span class="c"># used on linux.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;WARNING: Computer is a static class, no need to create an instance. just use Computer.xxxxxx&quot;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getProcessorCount"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getProcessorCount">[docs]</a>    <span class="k">def</span> <span class="nf">getProcessorCount</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of parallel processes the computer can carry out at once.</span>
+<span class="sd">        I say &#39;parallel processes&#39; because this number includes cpu count, cores per cpu,</span>
+<span class="sd">        and hyper-threads per cpu (which is at most 2 I believe). So perhaps it would be better to</span>
+<span class="sd">        call this method *getSystemProcessingUnitCount*. For example, if you have an i5 dual core</span>
+<span class="sd">        system with hyper-threading enabled, this method will report 2x2=4 for the count. So</span>
+<span class="sd">        *getSystemProcessorCount* really = cpu_count * cores_per_cpu * hypertheads_per_core</span>
+
+<span class="sd">        If you have a dual CPU, quad core hyper-threaded system (first, can I be your friend)</span>
+<span class="sd">        and second, this method would report 2 x 4 x 2 = 16 for the count.</span>
+
+<span class="sd">        It is true that all of these levels of &#39;parallel processing&#39; can not perform processing</span>
+<span class="sd">        in parallel at all times, particularly hyper-threads. Even multiple cores and cpu&#39;s can</span>
+<span class="sd">        blocked each other if a shared i/o resource is being used by one,</span>
+<span class="sd">        blocking the other. (Very simply put I am sure) ;)</span>
+
+<span class="sd">        Args: None</span>
+
+<span class="sd">        Return: (int) The number of processing units the current computer has.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">cpuCount</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.enableHighPriority"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.enableHighPriority">[docs]</a>    <span class="k">def</span> <span class="nf">enableHighPriority</span><span class="p">(</span><span class="n">disable_gc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;        </span>
+<span class="sd">        Sets the priority of the current process to high priority</span>
+<span class="sd">        and optionally (default is true) disable the python GC. This is very</span>
+<span class="sd">        useful for the duration of a trial, for example, where you enable at</span>
+<span class="sd">        start of trial and disable at end of trial. </span>
+<span class="sd">        </span>
+<span class="sd">        On Linux, the process is set to a nice level of 10.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            disable_gc(bool): True = Turn of the Python Garbage Collector. </span>
+<span class="sd">                              False = Leave the Garbage Collector running.</span>
+<span class="sd">                              Default: True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">disable_gc</span><span class="p">:</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">HIGH_PRIORITY_CLASS</span><span class="p">)</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span><span class="o">=</span><span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+                <span class="n">current_nice</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">()</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">_process_original_nice_value</span><span class="o">=</span><span class="n">current_nice</span>
+                <span class="kn">import</span> <span class="nn">ioHub</span>
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Current nice is: &quot;</span><span class="p">,</span> <span class="n">current_nice</span><span class="p">,</span><span class="s">&#39; pid is &#39;</span><span class="p">,</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcessID</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current_nice</span> <span class="o">&lt;</span><span class="mi">10</span><span class="p">:</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">()</span>
+                    <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Set nice to 10; now reads: &quot;</span><span class="p">,</span> 
+                                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">())</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="o">=</span> <span class="bp">True</span>
+                    
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.enableRealTimePriority"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.enableRealTimePriority">[docs]</a>    <span class="k">def</span> <span class="nf">enableRealTimePriority</span><span class="p">(</span><span class="n">disable_gc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the priority of the current process to real-time priority class</span>
+<span class="sd">        and optionally (default is true) disable the python GC. This is very</span>
+<span class="sd">        useful for the duration of a trial, for example, where you enable at</span>
+<span class="sd">        start of trial and disable at end of trial. Note that on Windows 7</span>
+<span class="sd">        it is not possible to set a process to real-time priority, so high-priority</span>
+<span class="sd">        is used instead.</span>
+<span class="sd">        </span>
+<span class="sd">        On Linux, the process is set to a nice level of 16.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            disable_gc(bool): True = Turn of the Python Garbage Collector.</span>
+<span class="sd">                              False = Leave the Garbage Collector running.</span>
+<span class="sd">                              Default: True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">disable_gc</span><span class="p">:</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">REALTIME_PRIORITY_CLASS</span><span class="p">)</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+                <span class="n">current_nice</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">()</span>
+                <span class="n">Computer</span><span class="o">.</span><span class="n">_process_original_nice_value</span><span class="o">=</span><span class="n">current_nice</span>
+                <span class="kn">import</span> <span class="nn">ioHub</span>
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Current nice and process id are: &quot;</span><span class="p">,</span> <span class="n">current_nice</span><span class="p">,</span> <span class="s">&quot; , &quot;</span><span class="p">,</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcessID</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current_nice</span> <span class="o">&lt;</span><span class="mi">16</span><span class="p">:</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">()</span>
+                    <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Set nice to 16; now reads: &quot;</span><span class="p">,</span> 
+                                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_nice</span><span class="p">())</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.disableRealTimePriority"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.disableRealTimePriority">[docs]</a>    <span class="k">def</span> <span class="nf">disableRealTimePriority</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the priority of the Current Process back to normal priority</span>
+<span class="sd">        and enables the python GC. In general you would call </span>
+<span class="sd">        enableRealTimePriority() at start of trial and call </span>
+<span class="sd">        disableHighPriority() at end of trial.</span>
+
+<span class="sd">        On Linux, sets the nice level of the process back to the value being used</span>
+<span class="sd">        prior to the call to enableRealTimePriority()</span>
+<span class="sd">        </span>
+<span class="sd">        Return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Computer</span><span class="o">.</span><span class="n">disableHighPriority</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.disableHighPriority"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.disableHighPriority">[docs]</a>    <span class="k">def</span> <span class="nf">disableHighPriority</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the priority of the Current Process back to normal priority</span>
+<span class="sd">        and enables the python GC. In general you would call </span>
+<span class="sd">        enableHighPriority() at start of trial and call </span>
+<span class="sd">        disableHighPriority() at end of trial.</span>
+
+<span class="sd">        On Linux, sets the nice level of the process back to the value being used</span>
+<span class="sd">        prior to the call to enableHighPriority()</span>
+<span class="sd">        </span>
+<span class="sd">        Return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NORMAL_PRIORITY_CLASS</span><span class="p">)</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span><span class="o">=</span><span class="bp">False</span>
+                <span class="k">elif</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span><span class="o">==</span><span class="s">&#39;Linux&#39;</span> <span class="ow">and</span> <span class="n">Computer</span><span class="o">.</span><span class="n">_process_original_nice_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_nice</span><span class="p">(</span><span class="n">Computer</span><span class="o">.</span><span class="n">_process_original_nice_value</span><span class="p">)</span>
+                    <span class="n">Computer</span><span class="o">.</span><span class="n">inHighPriorityMode</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">except</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">ioHub</span>            
+            <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;WARNING: Could not disable increased priority for process {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcessID</span><span class="p">))</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getProcessAffinities"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getProcessAffinities">[docs]</a>    <span class="k">def</span> <span class="nf">getProcessAffinities</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the experiment Process Affinity list, ioHub Process Affinity list.</span>
+<span class="sd">        Each as a list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the relevant process is able to run on.</span>
+
+<span class="sd">        For example, on a 2 core CPU with hyper-threading, the possible &#39;processor&#39;</span>
+<span class="sd">        list would be [0,1,2,3], and by default both the Experiment and ioHub</span>
+<span class="sd">        processes can run on any of these &#39;processors&#39;, so::</span>
+
+
+<span class="sd">            psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()</span>
+<span class="sd">            print psychoCPUs,ioHubCPUS</span>
+
+<span class="sd">            &gt;&gt; [0,1,2,3], [0,1,2,3]</span>
+
+
+<span class="sd">        If setProcessAffinities was used to set the Experiment process to core 1</span>
+<span class="sd">        (index 0 and 1) and the ioHub Server process to core 2 (index 2 and 3),</span>
+<span class="sd">        with each using both hyper threads of the given core, the set call would look like::</span>
+
+
+<span class="sd">            Computer.setProcessAffinities([0,1],[2,3])</span>
+
+<span class="sd">            psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()</span>
+<span class="sd">            print psychoCPUs,ioHubCPUS</span>
+
+<span class="sd">            &gt;&gt; [0,1], [2,3]</span>
+
+
+<span class="sd">        If the ioHub is not being used (i.e self.hub == None), then only the Experiment</span>
+<span class="sd">        process affinity list will be returned and None will be returned for the</span>
+<span class="sd">        ioHub process affinity::</span>
+
+<span class="sd">            psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()</span>
+<span class="sd">            print psychoCPUs,ioHubCPUS</span>
+
+<span class="sd">            &gt;&gt; [0,1,2,3], None</span>
+
+<span class="sd">        But in this case, why are you using the ioHub package at all? ;)</span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">        Return (tuple,tuple): the current experiment Process Affinity list, ioHub Process Affinity list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_cpu_affinity</span><span class="p">(),</span><span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcess</span><span class="o">.</span><span class="n">get_cpu_affinity</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.setProcessAffinities"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.setProcessAffinities">[docs]</a>    <span class="k">def</span> <span class="nf">setProcessAffinities</span><span class="p">(</span><span class="n">experimentProcessorList</span><span class="p">,</span> <span class="n">ioHubProcessorList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the experimentProcessAffinity , ioHubProcessAffinity; </span>
+<span class="sd">        each as a list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the relevant process is able to run on.</span>
+
+<span class="sd">        For example, on a 2 core CPU with hyper-threading, the possible &#39;processor&#39;</span>
+<span class="sd">        list would be [0,1,2,3], and by default both the experiment and ioHub</span>
+<span class="sd">        server processes can run on any of these &#39;processors&#39;,</span>
+<span class="sd">        so to have both processes have all processors available </span>
+<span class="sd">        (which is the default), you would call::</span>
+
+<span class="sd">            Computer.setProcessAffinities([0,1,2,3], [0,1,2,3])</span>
+
+<span class="sd">            # check the process affinities</span>
+<span class="sd">            psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()</span>
+<span class="sd">            print psychoCPUs,ioHubCPUS</span>
+
+<span class="sd">            &gt;&gt; [0,1,2,3], [0,1,2,3]</span>
+
+<span class="sd">        based on the above CPU example.</span>
+
+<span class="sd">        If setProcessAffinities was used to set the experiment process to core 1</span>
+<span class="sd">        (index 0,1) and the ioHub server process to core 2 (index 2,3), with </span>
+<span class="sd">        each using both hyper threads of the given core, the set call would look</span>
+<span class="sd">        like::</span>
+
+<span class="sd">            Computer.setProcessAffinities([0,1],[2,3])</span>
+
+<span class="sd">            # check the process affinities</span>
+<span class="sd">            psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()</span>
+<span class="sd">            print psychoCPUs,ioHubCPUS</span>
+
+<span class="sd">            &gt;&gt; [0,1], [2,3]</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            experimentProcessorList(tuple): set the experiment process affinity based on processing unit indexes</span>
+<span class="sd">            ioHubProcessorList(tuple): set the ioHub process affinity based on processing unit indexes. Default for ioHubProcessorList</span>
+<span class="sd">                                       is None, which means do not set the ioHub process affinity.</span>
+
+<span class="sd">        Return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_cpu_affinity</span><span class="p">(</span><span class="n">experimentProcessorList</span><span class="p">)</span>
+        <span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcess</span><span class="o">.</span><span class="n">set_cpu_affinity</span><span class="p">(</span><span class="n">ioHubProcessorList</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Computer.autoAssignAffinities"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.autoAssignAffinities">[docs]</a>    <span class="k">def</span> <span class="nf">autoAssignAffinities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Auto sets the experiment process and ioHub process processor affinities</span>
+<span class="sd">        based on some very simple logic.</span>
+
+<span class="sd">        It is not known at this time if the implementation of this method makes</span>
+<span class="sd">        any sense in terms of actually improving performance. Field tests and </span>
+<span class="sd">        feedback will need to occur, based on which the algorithm can be improved.</span>
+
+<span class="sd">        Currently, if the system is detected to have 1 processing unit, </span>
+<span class="sd">        or greater than 8 processing units, nothing is done by the method.</span>
+
+<span class="sd">        For a system that has two processing units, the PsychoPy Process is </span>
+<span class="sd">        assigned to index 0, ioHub Process assigned to 1.</span>
+
+<span class="sd">        For a system that has four processing units, the Experiment Process is </span>
+<span class="sd">        assigned to index&#39;s 0,1 and the ioHub Process assigned to 2,3.</span>
+
+<span class="sd">        For a system that has eight processing units, the PsychoPy Process is </span>
+<span class="sd">        assigned to index 2,3, ioHub Server assigned to 4,5. All other processes</span>
+<span class="sd">        running on the OS are attempted to be assigned to indexes 0,1,6,7.</span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">        Return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cpu_count</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">cpuCount</span>
+        <span class="k">print</span> <span class="s">&quot;System processor count:&quot;</span><span class="p">,</span> <span class="n">cpu_count</span>
+        <span class="k">if</span> <span class="n">cpu_count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Assigning experiment process to CPU 0, ioHubServer process to CPU 1&#39;</span>
+            <span class="n">Computer</span><span class="o">.</span><span class="n">setProcessAffinities</span><span class="p">([</span><span class="mi">0</span><span class="p">,],[</span><span class="mi">1</span><span class="p">,])</span>
+        <span class="k">elif</span> <span class="n">cpu_count</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Assigning experiment process to CPU 0,1, ioHubServer process to CPU 2,3&#39;</span>
+            <span class="n">Computer</span><span class="o">.</span><span class="n">setProcessAffinities</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">cpu_count</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Assigning experiment process to CPU 2,3, ioHubServer process to CPU 4,5, attempting to assign all others to 0,1,6,7&#39;</span>
+            <span class="n">Computer</span><span class="o">.</span><span class="n">setProcessAffinities</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">Computer</span><span class="o">.</span><span class="n">setAllOtherProcessesAffinity</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">],[</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentProcessID</span><span class="p">,</span><span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcessID</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;autoAssignAffinities does not support </span><span class="si">%d</span><span class="s"> processors.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">cpu_count</span><span class="p">,)</span>
+            </div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getCurrentProcessAffinity"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getCurrentProcessAffinity">[docs]</a>    <span class="k">def</span> <span class="nf">getCurrentProcessAffinity</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the current (calling) process is able to run on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">get_cpu_affinity</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.setCurrentProcessAffinity"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.setCurrentProcessAffinity">[docs]</a>    <span class="k">def</span> <span class="nf">setCurrentProcessAffinity</span><span class="p">(</span><span class="n">processorList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the current (calling) process should only be allowed to run on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span><span class="o">.</span><span class="n">set_cpu_affinity</span><span class="p">(</span><span class="n">processorList</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.setProcessAffinityByID"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.setProcessAffinityByID">[docs]</a>    <span class="k">def</span> <span class="nf">setProcessAffinityByID</span><span class="p">(</span><span class="n">processID</span><span class="p">,</span><span class="n">processorList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the process with the provided processID is able to run on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">processID</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">set_cpu_affinity</span><span class="p">(</span><span class="n">processorList</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getProcessAffinityByID"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getProcessAffinityByID">[docs]</a>    <span class="k">def</span> <span class="nf">getProcessAffinityByID</span><span class="p">(</span><span class="n">processID</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that the process with the provided processID is able to run on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">processID</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">get_cpu_affinity</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.setAllOtherProcessesAffinity"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.setAllOtherProcessesAffinity">[docs]</a>    <span class="k">def</span> <span class="nf">setAllOtherProcessesAffinity</span><span class="p">(</span><span class="n">processorList</span><span class="p">,</span> <span class="n">excludeProcessByIDList</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the list of &#39;processor&#39; id&#39;s (from 0 to getSystemProcessorCount()-1)</span>
+<span class="sd">        that all processes, other than those specified in the excludeProcessByIDList,</span>
+<span class="sd">        are able to run on. excludeProcessByIDList should be a list of process ID</span>
+<span class="sd">        integers, or an empty list. Note that the OS may not allow the calling process</span>
+<span class="sd">        to set the affinity of every other process running on the system. For</span>
+<span class="sd">        example, some system level processing can not have their affinity set</span>
+<span class="sd">        by a user level application. However, in general, many </span>
+<span class="sd">        processes can have their affinity set by another user process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeProcessByIDList</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">set_cpu_affinity</span><span class="p">(</span><span class="n">processorList</span><span class="p">)</span>
+                    <span class="n">print2err</span><span class="p">(</span><span class="s">&#39;Set OK process affinity: </span><span class="si">%s</span><span class="s"> : </span><span class="si">%ld</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">print2err</span><span class="p">(</span><span class="s">&#39;ERROR setting process affinity: </span><span class="si">%s</span><span class="s"> : </span><span class="si">%ld</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.currentTime"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.currentTime">[docs]</a>    <span class="k">def</span> <span class="nf">currentTime</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alias for Computer.currentSec()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">globalClock</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
+        </div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.currentSec"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.currentSec">[docs]</a>    <span class="k">def</span> <span class="nf">currentSec</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current sec.msec-msec time of the system. On Windows this is</span>
+<span class="sd">        implemented by directly calling the Windows QPC functions using ctypes</span>
+<span class="sd">        </span>
+<span class="sd">        This is done so that no offset is applied to the time base used by either</span>
+<span class="sd">        processing in ioHub. The standard Python high resolution timer base starts</span>
+<span class="sd">        at 0.0 based on when the first call to the python time function is called,</span>
+<span class="sd">        which will differed between Experiment and ioHub Processes since they do</span>
+<span class="sd">        not start at exactly the same time.</span>
+<span class="sd">        </span>
+<span class="sd">        By using a 0 offset root time base, both interpreters have a totally </span>
+<span class="sd">        common / shared time-base to use. This means that either process knows</span>
+<span class="sd">        the current time of the other process, since they are the same. ;)</span>
+
+<span class="sd">        For other OS&#39;s, right now the timeit.base_timer function is used, </span>
+<span class="sd">        which as of python 2.7 correctly selects the best high resolution clock</span>
+<span class="sd">        for the OS the interpreter is running on.</span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">        Returns (float/double): sec.msec-usec time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">globalClock</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getTime"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getTime">[docs]</a>    <span class="k">def</span> <span class="nf">getTime</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alias for Computer.currentSec()        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">globalClock</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getNextEventID</span><span class="p">():</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">Computer</span><span class="o">.</span><span class="n">_nextEventID</span>
+        <span class="n">Computer</span><span class="o">.</span><span class="n">_nextEventID</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getPhysicalSystemMemoryInfo"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getPhysicalSystemMemoryInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getPhysicalSystemMemoryInfo</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a named tuple containing information about current memory usage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">m</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getCPUTimeInfo"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getCPUTimeInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getCPUTimeInfo</span><span class="p">(</span><span class="n">percpu</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a named tuple containing information about the computers CPU usage.</span>
+<span class="sd">        (user, system, idle). If percpu is true, a named tuple is returned for </span>
+<span class="sd">        each processing unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_times</span><span class="p">(</span><span class="n">percpu</span><span class="p">)</span>
+
+    <span class="c">#</span>
+    <span class="c"># Local / Current Process Related</span>
+    <span class="c">#</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Computer.getCurrentProcess"><a class="viewcode-back" href="../../iohub/api/device_details/computer.html#ioHub.devices.Computer.getCurrentProcess">[docs]</a>    <span class="k">def</span> <span class="nf">getCurrentProcess</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the current / Local process (as a psutil Process object).</span>
+<span class="sd">        The psutil Process object has some nice methods you can access :</span>
+<span class="sd">            - as_dict(attrs=[], ad_value=None)</span>
+<span class="sd">                Utility method returning process information as a hashable dictionary.</span>
+<span class="sd">                If attrs is specified it must be a list of strings reflecting available</span>
+<span class="sd">                Process class&#39;s attribute names (e.g. [&#39;get_cpu_times&#39;, &#39;name&#39;]) else all</span>
+<span class="sd">                public (read only) attributes are assumed. ad_value is the value which gets</span>
+<span class="sd">                assigned to a dict key in case AccessDenied exception is raised when retrieving</span>
+<span class="sd">                that particular process information.</span>
+<span class="sd">            - getcwd()</span>
+<span class="sd">                Return a string representing the process current working directory.</span>
+<span class="sd">            - get_io_counters()</span>
+<span class="sd">                Return process I/O statistics as a namedtuple including the number of read and write</span>
+<span class="sd">                operations performed by the process and the amount of bytes read and written.</span>
+<span class="sd">                For linux refer to /proc filesysem documentation. On BSD there&#39;s apparently no way to</span>
+<span class="sd">                retrieve bytes counters, hence -1 is returned for read_bytes and write_bytes fields.</span>
+<span class="sd">                OSX is not supported.</span>
+<span class="sd">                    &gt;&gt;&gt; p.get_io_counters()</span>
+<span class="sd">                    io(read_count=454556, write_count=3456, read_bytes=110592, write_bytes=0)</span>
+<span class="sd">            - get_num_threads()</span>
+<span class="sd">                Return the number of threads used by this process.</span>
+<span class="sd">            - get_num_ctx_switches()</span>
+<span class="sd">                Return the number voluntary and involuntary context switches performed by this process.</span>
+<span class="sd">            - get_cpu_times()</span>
+<span class="sd">                Return a tuple whose values are process CPU user and system times which means the amount</span>
+<span class="sd">                of time expressed in seconds that a process has spent in user/system mode.</span>
+<span class="sd">            - get_cpu_percent(interval=0.1)</span>
+<span class="sd">                Return a float representing the process CPU utilization as a percentage.</span>
+<span class="sd">                When interval is &gt; 0.0 compares process times to system CPU times elapsed before</span>
+<span class="sd">                and after the interval (blocking). When interval is 0.0 or None compares process</span>
+<span class="sd">                times to system CPU times elapsed since last call, returning immediately.</span>
+<span class="sd">                In this case is recommended for accuracy that this function be called with</span>
+<span class="sd">                at least 0.1 seconds between calls. Example::</span>
+<span class="sd">                    &gt;&gt;&gt; p = psutil.Process(os.getpid())</span>
+<span class="sd">                    &gt;&gt;&gt; # blocking</span>
+<span class="sd">                    &gt;&gt;&gt; p.get_cpu_percent(interval=1)</span>
+<span class="sd">                    2.0</span>
+<span class="sd">                    &gt;&gt;&gt; # non-blocking (percentage since last call)</span>
+<span class="sd">                    &gt;&gt;&gt; p.get_cpu_percent(interval=0)</span>
+<span class="sd">                    2.9</span>
+<span class="sd">                    &gt;&gt;&gt;</span>
+<span class="sd">            - get_ext_memory_info()</span>
+<span class="sd">                Return a namedtuple with variable fields depending on the platform representing extended memory</span>
+<span class="sd">                information about the process. All numbers are expressed in bytes.</span>
+<span class="sd">            - get_memory_percent()</span>
+<span class="sd">                Compare physical system memory to process resident memory (RSS) and calculate process</span>
+<span class="sd">                memory utilization as a percentage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Computer</span><span class="o">.</span><span class="n">currentProcess</span>
+
+
+<span class="c">########### Base Abstract Device that all other Devices inherit from ##########</span></div></div>
+<div class="viewcode-block" id="Device"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device">[docs]</a><span class="k">class</span> <span class="nc">Device</span><span class="p">(</span><span class="n">ioObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Device class is the base class for all ioHub Device types.</span>
+<span class="sd">    Any ioHub Device class (i.e Keyboard Device, Mouse Device, etc)</span>
+<span class="sd">    also include the methods and attributes of this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEVICE_TYPE_ID_INDEX</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">DEVICE_CLASS_NAME_INDEX</span><span class="o">=</span><span class="mi">1</span>
+    <span class="n">DEVICE_USER_LABEL_INDEX</span><span class="o">=</span><span class="mi">2</span>
+    <span class="n">DEVICE_BUFFER_LENGTH_INDEX</span><span class="o">=</span><span class="mi">3</span>
+    <span class="n">DEVICE_MAX_ATTRIBUTE_INDEX</span><span class="o">=</span><span class="mi">3</span>
+
+    <span class="c"># Multiplier to use to convert this devices event time stamps to sec format.</span>
+    <span class="c"># This is set by the author of the device class or interface implementation.</span>
+    <span class="n">DEVICE_TIMEBASE_TO_SEC</span><span class="o">=</span><span class="mf">1.0</span>
+
+    <span class="n">_baseDataTypes</span><span class="o">=</span><span class="n">ioObject</span><span class="o">.</span><span class="n">_baseDataTypes</span>
+    <span class="n">_newDataTypes</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;type_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>         <span class="c"># The id of the device type = ioHub.DeviceConstants.XXXXXXXXXX</span>
+
+                   <span class="p">(</span><span class="s">&#39;device_class&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">str</span><span class="p">,</span><span class="mi">24</span><span class="p">),</span>   <span class="c"># The name of the Device Class used to create an instance</span>
+                                                <span class="c"># of this device type. = self.__class__.__name__</span>
+
+                   <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">str</span><span class="p">,</span><span class="mi">24</span><span class="p">),</span>           <span class="c"># The name given to this device instance. User Defined. Should be</span>
+                                                <span class="c"># unique within all devices of the same type_id for a given experiment.</span>
+
+                   <span class="p">(</span><span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span> <span class="c"># The maximum size of the device level event buffer for this</span>
+                                                        <span class="c"># device instance. If the buffer becomes full, when a new event</span>
+                                                        <span class="c"># is added, the oldest event in the buffer is removed.</span>
+                <span class="p">]</span>
+
+    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">DeviceConstants</span>
+    
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">UNDEFINED</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+    
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;_nativeEventBuffer&#39;</span><span class="p">,</span><span class="s">&#39;_eventListeners&#39;</span><span class="p">,</span><span class="s">&#39;_ioHubEventBuffer&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;_lastPollTime&#39;</span><span class="p">,</span><span class="s">&#39;_lastCallbackTime&#39;</span><span class="p">,</span><span class="s">&#39;_isReportingEvents&#39;</span><span class="p">,</span><span class="s">&#39;_startupConfiguration&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;monitor_event_types&#39;</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c">#: The id of the device type == DeviceConstants.XXXXXXXXXX</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The name of the Device Class used to create an instance</span>
+        <span class="c">#: of this device type. = self.__class__.__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_class</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The name given to this device instance. User Defined. Should be</span>
+        <span class="c">#: unique within all devices of the same type_id for a given experiment.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The maximum size of the device level event buffer for this</span>
+        <span class="c">#: device instance. If the buffer becomes full, when a new event</span>
+        <span class="c">#: is added, the oldest event in the buffer is removed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_event_buffer_length</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor_event_types</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isReportingEvents</span><span class="o">=</span><span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lastPollTime</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lastCallbackTime</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">ioObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nativeEventBuffer</span><span class="o">=</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_event_buffer_length</span><span class="p">)</span>
+
+        
+<div class="viewcode-block" id="Device.getStartupConfiguration"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device.getStartupConfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">getStartupConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span>
+</div>
+<div class="viewcode-block" id="Device.getEvents"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device.getEvents">[docs]</a>    <span class="k">def</span> <span class="nf">getEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns any DeviceEvents that have occurred since the last call to the devices getEvents() or</span>
+<span class="sd">        clearEvents() methods.</span>
+
+<span class="sd">        Note that calling the ioHub Server level getEvents() or clearEvents() methods does *not* effect</span>
+<span class="sd">        device level event buffers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kwargs (dict): dictionary of parameter key, value object pairs.</span>
+
+<span class="sd">        Return (tuple): a list of lists, with each inner list being an ordered list of event attribute</span>
+<span class="sd">                        values, as would be taken by the events constructor, representing an event related</span>
+<span class="sd">                        to this device type. If no events are available, an empty list is returned.</span>
+
+<span class="sd">                        getEvents() clears the device event buffer after getting the event list, so</span>
+<span class="sd">                        duplicate events are never received.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">eventTypeID</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">clearEvents</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;clearEvents&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">eventTypeID</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">clearEvents</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eventTypeID</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;event_type_id&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+            <span class="n">clearEvents</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;clearEvents&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">currentEvents</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="n">eventTypeID</span><span class="p">:</span>
+            <span class="n">currentEvents</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eventTypeID</span><span class="p">,[]))</span>
+            <span class="k">if</span> <span class="n">clearEvents</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentEvents</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="p">[</span><span class="n">eventTypeID</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">currentEvents</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="n">clearEvents</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentEvents</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clearEvents</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentEvents</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">currentEvents</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">currentEvents</span>
+
+</div>
+<div class="viewcode-block" id="Device.clearEvents"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device.clearEvents">[docs]</a>    <span class="k">def</span> <span class="nf">clearEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears any DeviceEvents that have occurred since the last call to the devices getEvents()</span>
+<span class="sd">        or clearEvents() methods.</span>
+
+<span class="sd">        Note that calling the ioHub Server level getEvents() or clearEvents() methods does *not*</span>
+<span class="sd">        effect device level event buffers.</span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">        Return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Device.enableEventReporting"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device.enableEventReporting">[docs]</a>    <span class="k">def</span> <span class="nf">enableEventReporting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets whether a Device should report events and provide them to the Experiment process</span>
+<span class="sd">        / Save them to the ioDataStore or whether the device should ignore any events that occur.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enabled (bool): True (default): constantly monitor and report for device events.</span>
+<span class="sd">                            False: Do not report any events for the device until reporting is re-enabled.</span>
+
+<span class="sd">        Return (bool): current reporting state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isReportingEvents</span><span class="o">=</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isReportingEvents</span>
+</div>
+<div class="viewcode-block" id="Device.isReportingEvents"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.Device.isReportingEvents">[docs]</a>    <span class="k">def</span> <span class="nf">isReportingEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets whether a Device is currently report events or whether the device is ignoring any events that occur.</span>
+
+<span class="sd">        Args: None</span>
+
+<span class="sd">        Return (bool): current reporting state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isReportingEvents</span>
+</div>
+    <span class="k">def</span> <span class="nf">_handleEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">e</span><span class="p">):</span>
+        <span class="n">etypelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">],</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">etypelist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ioHubEventBuffer</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">]]</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">,]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">etypelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_getNativeEventBuffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nativeEventBuffer</span>
+
+    <span class="k">def</span> <span class="nf">_addNativeEventToBuffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">e</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReportingEvents</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nativeEventBuffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_addEventListener</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">eventTypeIDs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">eventTypeIDs</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">eventTypeIDs</span><span class="o">==</span><span class="s">&#39;ALL&#39;</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">eventTypeIDs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eventTypeIDs</span><span class="o">=</span><span class="p">[</span><span class="n">ei</span><span class="o">.</span><span class="n">EVENT_TYPE_ID</span> <span class="k">for</span> <span class="n">ei</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_event_types</span><span class="p">]</span>
+
+        <span class="n">lca</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ei</span> <span class="ow">in</span> <span class="n">eventTypeIDs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ei</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="p">[</span><span class="n">ei</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="n">l</span><span class="p">,]</span>
+                <span class="n">lca</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">l</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="p">[</span><span class="n">ei</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="p">[</span><span class="n">ei</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+                    <span class="n">lca</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">lca</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">eventTypeIDs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_removeEventListener</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">etypelisteners</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">etypelisteners</span><span class="p">:</span>
+                <span class="n">etypelisteners</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">_getEventListeners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">forEventType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventListeners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">forEventType</span><span class="p">,[])</span>
+
+<span class="c">#    def _poll(self):</span>
+<span class="c">#        pass</span>
+
+<span class="c">#    def _nativeEventCallback(self,event):</span>
+<span class="c">#        return True</span>
+        
+    <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="c">########### Base Device Event that all other Device Events inherit from ##########</span>
+</div>
+<div class="viewcode-block" id="DeviceEvent"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.DeviceEvent">[docs]</a><span class="k">class</span> <span class="nc">DeviceEvent</span><span class="p">(</span><span class="n">ioObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The DeviceEvent class is the base class for all ioHub DeviceEvent types.</span>
+
+<span class="sd">    Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseWheelUpEvent, MouseButtonDownEvent,</span>
+<span class="sd">    KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of</span>
+<span class="sd">    the DeviceEvent class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_EXPERIMENT_ID_INDEX</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">EVENT_SESSION_ID_INDEX</span><span class="o">=</span><span class="mi">1</span>
+    <span class="n">EVENT_ID_INDEX</span><span class="o">=</span><span class="mi">2</span>
+    <span class="n">EVENT_TYPE_ID_INDEX</span><span class="o">=</span><span class="mi">3</span>
+    <span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="o">=</span><span class="mi">4</span>
+    <span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="o">=</span><span class="mi">5</span>
+    <span class="n">EVENT_HUB_TIME_INDEX</span><span class="o">=</span><span class="mi">6</span>
+    <span class="n">EVENT_CONFIDENCE_INTERVAL_INDEX</span><span class="o">=</span><span class="mi">7</span>
+    <span class="n">EVENT_DELAY_INDEX</span><span class="o">=</span><span class="mi">8</span>
+    <span class="n">EVENT_FILTER_ID_INDEX</span><span class="o">=</span><span class="mi">9</span>
+    <span class="n">BASE_EVENT_MAX_ATTRIBUTE_INDEX</span><span class="o">=</span><span class="n">EVENT_FILTER_ID_INDEX</span>
+
+    <span class="c"># The Device Class that generates the given type of event.    </span>
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="bp">None</span>
+    
+    <span class="c"># The string label for the given DeviceEvent type. Should be usable to get Event type</span>
+    <span class="c">#  from ioHub.EventConstants.getName(EVENT_TYPE_STRING), the value of which is the</span>
+    <span class="c"># event type id. This is set by the author of the event class implementation.</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;UNDEFINED_EVENT&#39;</span>
+
+    <span class="c"># The type id int for the given DeviceEvent type. Should be one of the int values in</span>
+    <span class="c"># ioHub.EventConstants.EVENT_TYPE_ID. This is set by the author of the event class implementation.</span>
+    <span class="kn">from</span>  <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">EventConstants</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">UNDEFINED</span>
+    
+
+    <span class="n">_baseDataTypes</span><span class="o">=</span><span class="n">ioObject</span><span class="o">.</span><span class="n">_baseDataTypes</span>
+    <span class="n">_newDataTypes</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span><span class="s">&#39;experiment_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint32</span><span class="p">),</span> <span class="c"># The ioDataStore experiment ID assigned to the experiment code</span>
+                                            <span class="c"># specified in the experiment configuration file for the experiment.</span>
+
+                <span class="p">(</span><span class="s">&#39;session_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint32</span><span class="p">),</span>    <span class="c"># The ioDataStore session ID assigned to the currently running</span>
+                                            <span class="c"># experiment session. Each time the experiment script is run,</span>
+                                            <span class="c"># a new session id is generated for use within the hdf5 file.</span>
+
+                <span class="p">(</span><span class="s">&#39;event_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint32</span><span class="p">),</span>      <span class="c"># The id assigned to the current device event instance. Every device</span>
+                                            <span class="c"># event generated by monitored devices during an experiment session is</span>
+                                            <span class="c"># assigned a unique id, starting from 0 for each session, incrementing</span>
+                                            <span class="c"># by +1 for each new event.</span>
+
+                <span class="p">(</span><span class="s">&#39;type&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>           <span class="c"># The type id for the event. This is used to create DeviceEvent objects</span>
+                                            <span class="c"># or dictionary representations of an event based on the data from an</span>
+                                            <span class="c"># event value list.</span>
+
+                <span class="p">(</span><span class="s">&#39;device_time&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>   <span class="c"># If the device that generates the given device event type also time stamps</span>
+                                            <span class="c"># events, this field is the time of the event as given by the device,</span>
+                                            <span class="c"># converted to sec.msec-usec for consistancy with all other ioHub device times.</span>
+                                            <span class="c"># If the device that generates the given event type does not time stamp</span>
+                                            <span class="c"># events, then the device_time is set to the logged_time for the event.</span>
+
+                <span class="p">(</span><span class="s">&#39;logged_time&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>  <span class="c"># The sec time that the event was &#39;received&#39; by the ioHub Server Process.</span>
+                                            <span class="c"># For devices that poll for events, this is the sec time that the poll</span>
+                                            <span class="c"># method was called for the device and the event was retrieved. For</span>
+                                            <span class="c"># devices that use the event callback, this is the sec time the callback</span>
+                                            <span class="c"># executed and accept the event. Time is in sec.msec-usec</span>
+
+                <span class="p">(</span><span class="s">&#39;time&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>         <span class="c"># Time is in the normalized time base that all events share,</span>
+                                            <span class="c"># regardless of device type. Time is calculated differently depending</span>
+                                            <span class="c"># on the device and perhaps event type.</span>
+                                            <span class="c"># Time is what should be used when comparing times of events across</span>
+                                            <span class="c"># different devices. Time is in sec.msec-usec.</span>
+
+                <span class="p">(</span><span class="s">&#39;confidence_interval&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="c"># This property attempts to give a sense of the amount to which</span>
+                                                    <span class="c"># the event time may be off relative to the true time the event</span>
+                                                    <span class="c"># occurred. confidence_interval is calculated differently depending</span>
+                                                    <span class="c"># on the device and perhaps event types. In general though, the</span>
+                                                    <span class="c"># smaller the confidence_interval, the more likely it is that the</span>
+                                                    <span class="c"># calculated time of the event is correct. For devices where</span>
+                                                    <span class="c"># a realistic confidence_interval can not be calculated,</span>
+                                                    <span class="c"># for example if the event device delay is unknown, then a value</span>
+                                                    <span class="c"># of -1.0 should be used. Valid confidence_interval values are</span>
+                                                    <span class="c"># in sec.msec-usec and will range from 0.000000 sec.msec-usec</span>
+                                                    <span class="c"># and higher.</span>
+
+                <span class="p">(</span><span class="s">&#39;delay&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="p">,</span>       <span class="c"># The delay of an event is the known (or estimated) delay from when the</span>
+                                            <span class="c"># real world event occurred to when the ioHub received the event for</span>
+                                            <span class="c"># processing. This is often called the real-time end-to-end delay</span>
+                                            <span class="c"># of an event. If the delay for an event can not be reasonably estimated</span>
+                                            <span class="c"># or is not known, a delay of -1.0 is set. Delays are in sec.msec-usec</span>
+                                            <span class="c"># and valid values will range from 0.000000 sec.msec-usec and higher.</span>
+
+                <span class="p">(</span><span class="s">&#39;filter_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>       <span class="c"># The filter identifier that the event passed through before being saved.</span>
+                                            <span class="c"># If the event did not pass through any filter devices, then the value will be 0.</span>
+                                            <span class="c"># Otherwise, the value is the | combination of the filter set that the</span>
+                                            <span class="c"># event passed through before being made available to the experiment,</span>
+                                            <span class="c"># or saved to the ioDataStore. The filter id can be used to determine</span>
+                                            <span class="c"># which filters an event was handled by, but not the order in which handling was done.</span>
+                                            <span class="c"># Default value is 0.</span>
+                <span class="p">]</span>
+
+    <span class="c"># The name of the hdf5 table used to store events of this type in the ioDataStore pytables file.</span>
+    <span class="c"># This is set by the author of the event class implementation.</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="bp">None</span>
+
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c">#: The ioDataStore experiment ID assigned to the experiment code</span>
+        <span class="c">#: specified in the experiment configuration file for the experiment.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_id</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The ioDataStore session ID assigned for each session of the experiment run.</span>
+        <span class="c">#: Each time the experiment script is run, a new session id is generated for use</span>
+        <span class="c">#: the ioDataStore within the hdf5 file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The id assigned to the current device event instance. Every device</span>
+        <span class="c">#: event generated by monitored devices during an experiment session is</span>
+        <span class="c">#: assigned a unique id, starting from 0 for each session, incrementing</span>
+        <span class="c">#: by +1 for each new event.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_id</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The type id for the event. This is used to create DeviceEvent objects</span>
+        <span class="c">#: or dictionary representations of an event based on the data from an</span>
+        <span class="c">#: event value list. Event types are all defined in the EventConstants class as class attributes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">=</span><span class="bp">None</span>
+        
+        <span class="c">#: If the device that generates an event type also time stamps</span>
+        <span class="c">#: the events, this field is the time of the event as given by the device,</span>
+        <span class="c">#: converted to sec.msec-usec for consistancy with all other ioHub device times.</span>
+        <span class="c">#: If the device that generates the event does not time stamp</span>
+        <span class="c">#: events, then the device_time is set to the logged_time for the event.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_time</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The sec.msec time that the event was &#39;received&#39; by the ioHub Server Process.</span>
+        <span class="c">#: For devices where the ioHub polls for events, this is the time that the poll</span>
+        <span class="c">#: method was called for the device and the event was retrieved. For</span>
+        <span class="c">#: devices that use the event callback to inform the ioHub of new events,</span>
+        <span class="c">#: this is the time the callback began to be executed. Time is in sec.msec-usec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logged_time</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The calculated ioHub time is in the normalized time base that all events share,</span>
+        <span class="c">#: regardless of device type. Time is calculated differently depending</span>
+        <span class="c">#: on the device and perhaps event type.</span>
+        <span class="c">#: Time is what should be used when comparing times of events across</span>
+        <span class="c">#: different devices. Time is in sec.msec-usec.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: This property attempts to give a sense of the amount to which</span>
+        <span class="c">#: the event time may be off relative to the true time the event</span>
+        <span class="c">#: occurred. confidence_interval is calculated differently depending</span>
+        <span class="c">#: on the device and perhaps event types. In general though, the</span>
+        <span class="c">#: smaller the confidence_interval, the more likely it is that the</span>
+        <span class="c">#: calculated time of the event is correct. For devices where</span>
+        <span class="c">#: a realistic confidence_interval can not be calculated,</span>
+        <span class="c">#: for example if the event device delay is unknown, then a value</span>
+        <span class="c">#: of 0.0 is used. Valid confidence_interval values are</span>
+        <span class="c">#: in sec.msec-usec and will range from 0.000001 sec.msec-usec</span>
+        <span class="c">#: and higher.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidence_interval</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The delay of an event is the known (or estimated) delay from when the</span>
+        <span class="c">#: real world event occurred to when the ioHub received the event for</span>
+        <span class="c">#: processing. This is often called the real-time end-to-end delay</span>
+        <span class="c">#: of an event. If the delay for an event can not be reasonably estimated</span>
+        <span class="c">#: or is not known, a delay of -1.0 is set. Delays are in sec.msec-usec</span>
+        <span class="c">#: and valid values will range from 0.000000 sec.msec-usec and higher.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="c">#: The filter identifier that the event passed through before being saved.</span>
+        <span class="c">#: If the event did not pass through any filter devices, then the value will be 0.</span>
+        <span class="c">#: Otherwise, the value is the &amp; combination of the filter set that the</span>
+        <span class="c">#: event passed through before being made available to the experiment,</span>
+        <span class="c">#: or saved to the ioDataStore. The filter id can be used to determine</span>
+        <span class="c">#: which filters an event was handled by, but not the order in which handling was done.</span>
+        <span class="c">#: Default value is 0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_id</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="n">ioObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="n">other</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DeviceEvent.createEventAsClass"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.DeviceEvent.createEventAsClass">[docs]</a>    <span class="k">def</span> <span class="nf">createEventAsClass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">eventValueList</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">createEventAsDict</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DeviceEvent.createEventAsDict"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.DeviceEvent.createEventAsDict">[docs]</a>    <span class="k">def</span> <span class="nf">createEventAsDict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">,</span><span class="n">values</span><span class="p">))</span>
+
+    <span class="c">#noinspection PyUnresolvedReferences</span></div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DeviceEvent.createEventAsNamedTuple"><a class="viewcode-back" href="../../iohub/api/devices.html#ioHub.devices.DeviceEvent.createEventAsNamedTuple">[docs]</a>    <span class="k">def</span> <span class="nf">createEventAsNamedTuple</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">valueList</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="p">(</span><span class="o">*</span><span class="n">valueList</span><span class="p">)</span>
+<span class="c">#</span>
+<span class="c"># Import Devices and DeviceEvents</span>
+<span class="c">#</span></div></div>
+<span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">DeviceConstants</span><span class="p">,</span> <span class="n">EventConstants</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">pyXHook</span>
+
+<span class="n">deviceModulesAvailable</span><span class="o">=</span><span class="p">[]</span>
+
+
+<span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">print2err</span><span class="p">,</span><span class="n">printExceptionDetailsToStdErr</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">keyboard</span>
+    <span class="kn">from</span> <span class="nn">keyboard</span> <span class="kn">import</span> <span class="n">Keyboard</span>
+    <span class="kn">from</span> <span class="nn">keyboard</span> <span class="kn">import</span> <span class="n">KeyboardEvent</span><span class="p">,</span><span class="n">KeyboardKeyEvent</span><span class="p">,</span><span class="n">KeyboardPressEvent</span><span class="p">,</span><span class="n">KeyboardReleaseEvent</span><span class="p">,</span><span class="n">KeyboardCharEvent</span>
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;keyboard&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: keyboard device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">mouse</span> <span class="kn">as</span> <span class="nn">mouse_module</span>
+    <span class="kn">from</span> <span class="nn">mouse</span> <span class="kn">import</span> <span class="n">Mouse</span>
+    <span class="kn">from</span> <span class="nn">mouse</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MouseEvent</span><span class="p">,</span><span class="n">MouseButtonEvent</span><span class="p">,</span><span class="n">MouseMoveEvent</span><span class="p">,</span><span class="n">MouseWheelEvent</span><span class="p">,</span><span class="n">MouseWheelUpEvent</span><span class="p">,</span>
+                       <span class="n">MouseWheelDownEvent</span><span class="p">,</span><span class="n">MouseButtonDownEvent</span><span class="p">,</span><span class="n">MouseButtonUpEvent</span><span class="p">,</span><span class="n">MouseDoubleClickEvent</span><span class="p">)</span>
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;mouse&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: mouse device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">parallelPort</span> <span class="kn">as</span> <span class="nn">parallelPort_module</span>
+        <span class="kn">from</span> <span class="nn">parallelPort</span> <span class="kn">import</span> <span class="n">ParallelPort</span>
+        <span class="kn">from</span> <span class="nn">parallelPort</span> <span class="kn">import</span> <span class="n">ParallelPortEvent</span>
+        <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;parallelPort&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: parallelPort device module could not be imported.&quot;</span><span class="p">)</span>
+        <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">serialIO</span> <span class="kn">import</span> <span class="n">SerialIO</span>
+    <span class="kn">from</span> <span class="nn">serialIO</span> <span class="kn">import</span> <span class="n">SerialInputEvent</span>
+
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;serial&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: serial device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">xinput</span>
+        <span class="kn">from</span> <span class="nn">xinput</span> <span class="kn">import</span> <span class="n">GamePad</span>
+        <span class="kn">from</span> <span class="nn">xinput</span> <span class="kn">import</span> <span class="n">GamePadStateChangeEvent</span><span class="p">,</span><span class="n">GamePadDisconnectEvent</span><span class="p">,</span><span class="n">GamePadButtonEvent</span><span class="p">,</span><span class="n">GamePadThumbStickEvent</span><span class="p">,</span><span class="n">GamePadTriggerEvent</span>
+        <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;gamepad&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: gamepad device module could not be imported.&quot;</span><span class="p">)</span>
+        <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">experiment</span>
+    <span class="kn">from</span> <span class="nn">experiment</span> <span class="kn">import</span> <span class="n">ExperimentDevice</span>
+    <span class="kn">from</span> <span class="nn">experiment</span> <span class="kn">import</span> <span class="n">MessageEvent</span>
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;experiment&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: experiment device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">eyeTrackerInterface</span>
+        <span class="kn">import</span> <span class="nn">eyeTrackerInterface.HW</span>
+        <span class="kn">from</span> <span class="nn">eyeTrackerInterface.eye_events</span> <span class="kn">import</span> <span class="o">*</span>
+        <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;eyetracker&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: eyetrackerinterface device module could not be imported.&quot;</span><span class="p">)</span>
+        <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+    
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">display</span>
+    <span class="kn">from</span> <span class="nn">display</span> <span class="kn">import</span> <span class="n">Display</span>
+    <span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">print2err</span><span class="p">,</span> <span class="n">highPrecisionTimer</span>
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;display&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: display device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">daq</span>
+        <span class="kn">from</span> <span class="nn">daq</span> <span class="kn">import</span> <span class="n">DAQDevice</span>
+        <span class="kn">from</span> <span class="nn">daq</span> <span class="kn">import</span> <span class="n">DAQEvent</span><span class="p">,</span><span class="n">DAMultiChannelInputEvent</span><span class="p">,</span><span class="n">DASingleChannelInputEvent</span>
+        <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;daq&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: daq device module could not be imported.&quot;</span><span class="p">)</span>
+        <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">filters</span>
+        <span class="kn">from</span> <span class="nn">filters</span> <span class="kn">import</span> <span class="n">EventFilter</span>
+        <span class="kn">from</span> <span class="nn">filters</span> <span class="kn">import</span> <span class="n">GenericFilterEvent</span>
+        <span class="kn">from</span> <span class="nn">filters</span> <span class="kn">import</span> <span class="n">StampeFilter</span>
+        <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;filter&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: daq device module could not be imported.&quot;</span><span class="p">)</span>
+        <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+    
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">mbed</span>
+    <span class="kn">from</span> <span class="nn">mbed</span> <span class="kn">import</span> <span class="n">MBED1768</span>
+    <span class="n">deviceModulesAvailable</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;mbed&#39;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print2err</span><span class="p">(</span><span class="s">&quot;Warning: mbed device module could not be imported.&quot;</span><span class="p">)</span>
+    <span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+
+<span class="n">DeviceConstants</span><span class="o">.</span><span class="n">addClassMappings</span><span class="p">()</span>
+<span class="n">EventConstants</span><span class="o">.</span><span class="n">addClassMappings</span><span class="p">()</span>
+</pre></div>
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

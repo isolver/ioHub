@@ -1,0 +1,17 @@
+Experiment:
+    name: exp
+    enable: True
+    save_events: True
+    stream_events: True
+    auto_report_events: True
+    event_buffer_length: 64
+    monitor_event_types: [MessageEvent,]
+    software_version: N/A
+    device_number: 0
+    model_name: N/A
+    model_number: N/A
+    manufacturer_name: N/A
+    serial_number: N/A
+    manufacture_date: DD-MM-YYYY
+    hardware_version: N/A
+    firmware_version: N/A

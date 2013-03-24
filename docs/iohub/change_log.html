@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub Change Log &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../index.html" />
+    <link rel="next" title="Credits and Thanks" href="credits.html" />
+    <link rel="prev" title="ioHub Known Issues" href="known_issues.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">ioHub Change Log</a><ul>
+<li><a class="reference internal" href="#release-0-6b2">Release 0.6b2</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="known_issues.html"
+         title="previous chapter">&laquo; ioHub Known Issues</a></li>
+  <li><a href="credits.html"
+         title="next chapter">Credits and Thanks &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../_sources/iohub/change_log.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-change-log">
+<h1>ioHub Change Log<a class="headerlink" href="#iohub-change-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="release-0-6b2">
+<h2>Release 0.6b2<a class="headerlink" href="#release-0-6b2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Refactored the Display Device class towards the goal of, well making more  of it being easier to integrate <em>properly</em> with PsychoPy.</p>
+</li>
+<li><dl class="first docutils">
+<dt>Did a major overhaul of the EyeTrackerDevice interface:</dt>
+<dd><ol class="first last arabic simple">
+<li>Simplified the interface definition, removing several methods that were clearly going to be almost never implemented.</li>
+<li>Removed <a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs parameter passing to interface methods and replaced with clearly defined parameter expectations.</li>
+<li>Improved the documentation of each interface method, outlining expected behaviour of each and the valid return object types.</li>
+<li>Interface supported the device configuration verification framework put in place for all ioHub Devices.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p class="first">Added a FullScreenWindow class to ioHub.util.experiment, greatly simplifying the creation of a PsychoPy Window with the expected ioHub Display settings.</p>
+</li>
+<li><p class="first">Added support for devices running on the ioHub Server to be able to return exceptions that are then raised by the Experiment Process.</p>
+</li>
+<li><p class="first">Added several new attributes to the Device class, mainly related to being able to optionally specify much more information about the actual device being used (manufacturer, make, model, serial number, etc).</p>
+</li>
+<li><p class="first">Added ability to lock the Mouse device to a Display region on a multi-monitor computer.</p>
+</li>
+<li><p class="first">Changed the MessageEvent.msg_offset attribute to be type float32 so offsets can be represented in the standard sec.msec-usec format.</p>
+</li>
+<li><p class="first">LabJack implementation of AnalogInput Device now uses a fixed fequency streaming mode for sample collection instead of a polled channel value method.</p>
+</li>
+<li><p class="first">Removed unused &#8216;os_device_code&#8217; attribute from device classes.</p>
+</li>
+<li><p class="first">Changed the MouseInputEvent &#8216;windowID&#8217; attribute to &#8216;window_id&#8217;; to make it consistent with the KeyboardInputEvent attribute of the same meaning.</p>
+</li>
+<li><p class="first">Updated the example scripts folder by moving all eye tracking related examples to a subdirectory.</p>
+</li>
+<li><p class="first">Documented all public ioHub Device and DeviceEvent attributes and methods.</p>
+</li>
+<li><p class="first">Created the first version of the ioHub documentation using Sphinx.</p>
+</li>
+</ol>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

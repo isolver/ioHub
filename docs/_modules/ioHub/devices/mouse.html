@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub.devices.mouse &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="ioHub.devices" href="../devices.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"></ul>
+</li>
+          
+          
+            
+          
+          
+            <li></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <h1>Source code for ioHub.devices.mouse</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ioHub</span>
+<span class="sd">.. file: ioHub/devices/mouse/__init__.py</span>
+
+<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">.. fileauthor:: Sol Simpson &lt;sol@isolver-software.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">Computer</span><span class="p">,</span> <span class="n">Device</span>
+<span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">EventConstants</span><span class="p">,</span> <span class="n">DeviceConstants</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+
+<span class="c"># Mouse Device Instance Settings Data</span>
+
+
+<span class="c"># OS &#39; independent&#39; view of the Mouse Device</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="k">global</span> <span class="n">Mouse</span>
+    <span class="kn">from</span> <span class="nn">_win32</span> <span class="kn">import</span> <span class="n">MouseWindows32</span>
+
+    <span class="k">class</span> <span class="nc">Mouse</span><span class="p">(</span><span class="n">Device</span><span class="p">,</span><span class="n">MouseWindows32</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Mouse class and related events represent a standard computer mouse device</span>
+<span class="sd">        and the events a standard mouse can produce. Mouse position data is mapped to</span>
+<span class="sd">        the coordinate space defined in the ioHub configuration file for the Display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">MOUSE</span>
+        <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+        <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">Mouse</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="n">MouseMoveEvent</span><span class="p">,</span> <span class="n">MouseWheelUpEvent</span><span class="p">,</span> <span class="n">MouseWheelDownEvent</span><span class="p">,</span><span class="n">MouseButtonDownEvent</span><span class="p">,</span><span class="n">MouseButtonUpEvent</span><span class="p">,</span><span class="n">MouseDoubleClickEvent</span>
+            <span class="n">deviceConfig</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
+            <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
+                <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
+                <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">Mouse</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
+                <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
+                <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
+                <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
+                <span class="p">}</span>          
+            <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            <span class="n">MouseWindows32</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">deviceConfig</span>
+
+<span class="k">elif</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+    <span class="k">global</span> <span class="n">Mouse</span>
+    <span class="kn">from</span> <span class="nn">_linux</span> <span class="kn">import</span> <span class="n">MouseLinux</span>
+
+<div class="viewcode-block" id="Mouse"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.Mouse">[docs]</a>    <span class="k">class</span> <span class="nc">Mouse</span><span class="p">(</span><span class="n">Device</span><span class="p">,</span><span class="n">MouseLinux</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Mouse class and related events represent a standard computer mouse device</span>
+<span class="sd">        and the events a standard mouse can produce. Mouse position data is mapped to</span>
+<span class="sd">        the coordinate space defined in the ioHub configuration file for the Display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">MOUSE</span>
+        <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+        <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">Mouse</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="n">MouseMoveEvent</span><span class="p">,</span> <span class="n">MouseWheelUpEvent</span><span class="p">,</span> <span class="n">MouseWheelDownEvent</span><span class="p">,</span><span class="n">MouseButtonDownEvent</span><span class="p">,</span><span class="n">MouseButtonUpEvent</span><span class="p">,</span><span class="n">MouseDoubleClickEvent</span>
+            <span class="n">deviceConfig</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
+            <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
+                <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
+                <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">Mouse</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
+                <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
+                <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
+                <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
+                <span class="p">}</span>          
+            <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            <span class="n">MouseLinux</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">deviceConfig</span>
+
+</div>
+<span class="k">else</span><span class="p">:</span> <span class="c"># assume OS X</span>
+    <span class="kn">import</span> <span class="nn">_osx</span>
+    <span class="k">print</span> <span class="s">&#39;Mouse not implemented on OS X yet.&#39;</span>
+
+<span class="c">############# OS Independent Mouse Event Classes ####################</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">DeviceEvent</span>
+
+<div class="viewcode-block" id="MouseEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The MouseEvent is an abstract class that is the parent of all MouseEvent types</span>
+<span class="sd">    that are supported in the ioHub. Mouse position is mapped to the coordinate space</span>
+<span class="sd">    defined in the ioHub configuration file for the Display.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">Mouse</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_INPUT&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_INPUT</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
+
+    <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[</span>
+                     <span class="p">(</span><span class="s">&#39;button_state&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>    <span class="c"># 1 if button is pressed, 0 if button is released</span>
+                     <span class="p">(</span><span class="s">&#39;button_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>       <span class="c"># 1, 2,or 4, representing left, right, and middle buttons</span>
+                     <span class="p">(</span><span class="s">&#39;pressed_buttons&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> <span class="c"># sum of currently active button int values</span>
+
+                     <span class="p">(</span><span class="s">&#39;x_position&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">int16</span><span class="p">),</span>    <span class="c"># x position of the position when the event occurred</span>
+                     <span class="p">(</span><span class="s">&#39;y_position&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">int16</span><span class="p">),</span>    <span class="c"># y position of the position when the event occurred</span>
+
+                     <span class="p">(</span><span class="s">&#39;wheel_change&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">int8</span><span class="p">),</span>  <span class="c"># vertical scroll wheel position change when the event occurred</span>
+                     <span class="p">(</span><span class="s">&#39;wheel_value&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">int16</span><span class="p">),</span>  <span class="c"># vertical scroll wheel abs. position when the event occurred</span>
+
+                     <span class="p">(</span><span class="s">&#39;windowID&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>      <span class="c"># window ID that the mouse was over when the event occurred</span>
+                                                <span class="c"># (window does not need to have focus)</span>
+                    <span class="p">]</span>
+    <span class="c"># TODO: Determine real maximum key name string and modifiers string</span>
+    <span class="c"># lengths and set appropriately.</span>
+
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">DeviceEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MouseMoveEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseMoveEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseMoveEvent</span><span class="p">(</span><span class="n">MouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseMoveEvents occur when the mouse position changes. Mouse position is</span>
+<span class="sd">    mapped to the coordinate space defined in the ioHub configuration file </span>
+<span class="sd">    for the Display.</span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.MOUSE_MOVE</span>
+<span class="sd">    Event Type String: &#39;MOUSE_MOVE&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_MOVE&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_MOVE</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MouseEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<span class="k">class</span> <span class="nc">MouseWheelEvent</span><span class="p">(</span><span class="n">MouseEvent</span><span class="p">):</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_WHEEL&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_WHEEL</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : MouseWheelEvent</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MouseEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MouseWheelUpEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseWheelUpEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseWheelUpEvent</span><span class="p">(</span><span class="n">MouseWheelEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseWheelUpEvent&#39;s are generated when the vertical scroll wheel on the </span>
+<span class="sd">    Mouse Device (if it has one) is turned in the direction toward the front </span>
+<span class="sd">    of the mouse. Horizontal scrolling is not currently supported.</span>
+<span class="sd">    Each MouseWheelUpEvent provides the number of units the wheel was turned </span>
+<span class="sd">    ( +1 ) as well as the absolute scroll value for the mouse, which is an </span>
+<span class="sd">    ioHub Mouse attribute that is simply modified by the change value of</span>
+<span class="sd">    MouseWheelUpEvent and MouseWheelDownEvent types.</span>
+
+<span class="sd">    Event Type ID: EventConstants.MOUSE_WHEEL_UP</span>
+<span class="sd">    Event Type String: &#39;MOUSE_WHEEL_UP&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_WHEEL_UP&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_WHEEL_UP</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : MouseWheelUpEvent</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MouseWheelEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MouseWheelDownEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseWheelDownEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseWheelDownEvent</span><span class="p">(</span><span class="n">MouseWheelEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseWheelDownEvent&#39;s are generated when the vertical scroll wheel on the </span>
+<span class="sd">    Mouse Device (if it has one) is turned in the direction toward the back</span>
+<span class="sd">    of the mouse. Horizontal scrolling is not currently supported.</span>
+<span class="sd">    Each MouseWheelDownEvent provides the number of units the wheel was turned </span>
+<span class="sd">    as a negative value ( -1 ) as well as the absolute scroll value for the mouse,</span>
+<span class="sd">    which is an ioHub Mouse attribute that is simply modified by the change value</span>
+<span class="sd">    of MouseWheelUpEvent and MouseWheelDownEvent types.</span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.MOUSE_WHEEL_DOWN</span>
+<span class="sd">    Event Type String: &#39;MOUSE_WHEEL_DOWN&#39;    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_WHEEL_DOWN&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_WHEEL_DOWN</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : MouseWheelDownEvent</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MouseWheelEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<span class="k">class</span> <span class="nc">MouseButtonEvent</span><span class="p">(</span><span class="n">MouseEvent</span><span class="p">):</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_BUTTON&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_BUTTON</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : MouseButtonEvent</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MouseEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MouseButtonDownEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseButtonDownEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseButtonDownEvent</span><span class="p">(</span><span class="n">MouseButtonEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseButtonDownEvent&#39;s are created when a button on the mouse is pressed. </span>
+<span class="sd">    The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_PRESSED,</span>
+<span class="sd">    and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,</span>
+<span class="sd">    MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, </span>
+<span class="sd">    assuming you have a 3 button mouse.</span>
+
+<span class="sd">    To get the current state of all three buttons on the Mouse Device, </span>
+<span class="sd">    the pressed_buttons attribute can be read, which tracks the state of all three</span>
+<span class="sd">    mouse buttons as an int that is equal to the sum of any pressed button id&#39;s </span>
+<span class="sd">    ( MouseConstants.MOUSE_BUTTON_ID_LEFT,  MouseConstants.MOUSE_BUTTON_ID_RIGHT, or</span>
+<span class="sd">    MouseConstants.MOUSE_BUTTON_ID_MIDDLE ).</span>
+
+<span class="sd">    To tell if a given mouse button was depressed when the event occurred, regardless of which</span>
+<span class="sd">    button triggered the event, you can use the following::</span>
+
+<span class="sd">        isButtonPressed = event.pressed_buttons &amp; MouseConstants.MOUSE_BUTTON_ID_xxx == MouseConstants.MOUSE_BUTTON_ID_xxx</span>
+
+<span class="sd">    where xxx is LEFT, RIGHT, or MIDDLE.</span>
+
+<span class="sd">    For example, if at the time of the event both the left and right mouse buttons</span>
+<span class="sd">    were in a pressed state::</span>
+
+<span class="sd">        buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_RIGHT</span>
+<span class="sd">        isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck</span>
+
+<span class="sd">        print isButtonPressed</span>
+
+<span class="sd">        &gt;&gt; True</span>
+
+<span class="sd">        buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_LEFT</span>
+<span class="sd">        isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck</span>
+
+<span class="sd">        print isButtonPressed</span>
+
+<span class="sd">        &gt;&gt; True</span>
+
+<span class="sd">        buttonToCheck=MouseConstants.MOUSE_BUTTON_ID_MIDDLE</span>
+<span class="sd">        isButtonPressed = event.pressed_buttons &amp; buttonToCheck == buttonToCheck</span>
+
+<span class="sd">        print isButtonPressed</span>
+
+<span class="sd">        &gt;&gt; False</span>
+
+<span class="sd">    Event Type ID: EventConstants.MOUSE_PRESS</span>
+<span class="sd">    Event Type String: &#39;MOUSE_PRESS&#39;    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_PRESS&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_PRESS</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MouseButtonEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MouseButtonUpEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseButtonUpEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseButtonUpEvent</span><span class="p">(</span><span class="n">MouseButtonEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseButtonUpEvent&#39;s are created when a button on the mouse is released. </span>
+<span class="sd">    The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_RELEASED,</span>
+<span class="sd">    and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,</span>
+<span class="sd">    MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, </span>
+<span class="sd">    assuming you have a 3 button mouse.</span>
+
+<span class="sd">    Event Type ID: EventConstants.MOUSE_RELEASE</span>
+<span class="sd">    Event Type String: &#39;MOUSE_RELEASE&#39;    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_RELEASE&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_RELEASE</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MouseButtonEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MouseDoubleClickEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/mouse.html#ioHub.devices.mouse.MouseDoubleClickEvent">[docs]</a><span class="k">class</span> <span class="nc">MouseDoubleClickEvent</span><span class="p">(</span><span class="n">MouseButtonEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MouseDoubleClickEvent&#39;s are created when you rapidly press and release a </span>
+<span class="sd">    mouse button twice. This event may never get triggered if your OS does not support it.</span>
+<span class="sd">    The button that was double clicked (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,</span>
+<span class="sd">    MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, </span>
+<span class="sd">    assuming you have a 3 button mouse.</span>
+
+<span class="sd">    Event Type ID: EventConstants.MOUSE_DOUBLE_CLICK</span>
+<span class="sd">    Event Type String: &#39;MOUSE_DOUBLE_CLICK&#39;    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MOUSE_DOUBLE_CLICK&#39;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MOUSE_DOUBLE_CLICK</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">MouseEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MouseButtonEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

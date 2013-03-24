@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub.devices.daq &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="ioHub.devices" href="../devices.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"></ul>
+</li>
+          
+          
+            
+          
+          
+            <li></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <h1>Source code for ioHub.devices.daq</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ioHub</span>
+<span class="sd">.. file: ioHub/devices/eyeTrackerInterface/HW/devices/daq/__init__.py</span>
+
+<span class="sd">Copyright (C)  2012-2013 iSolver Software Solutions</span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">.. fileauthor:: Sol Simpson</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">Device</span><span class="p">,</span> <span class="n">DeviceEvent</span>
+<span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">DeviceConstants</span><span class="p">,</span> <span class="n">EventConstants</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+
+
+<div class="viewcode-block" id="DAQDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.DAQDevice">[docs]</a><span class="k">class</span> <span class="nc">DAQDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="n">DAQ_CHANNEL_MAPPING</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">DAQ_GAIN_OPTIONS</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">DAQ_CONFIG_OPTIONS</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+
+    <span class="n">DAQ_INPUT_READ_OPTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;POLL&#39;</span><span class="p">,</span><span class="s">&#39;SCAN&#39;</span><span class="p">]</span> <span class="c"># either of, or list of selections.</span>
+    <span class="n">DAQ_INPUT_READ_TYPE</span> <span class="o">=</span> <span class="nb">str</span> <span class="c"># list or str</span>
+
+    <span class="n">DAQ_INPUT_SCAN_FREQ_TYPE</span> <span class="o">=</span> <span class="nb">int</span> <span class="c"># list or int</span>
+    <span class="n">INPUT_SAMPLE_COUNT_TYPE</span> <span class="o">=</span> <span class="nb">int</span>  <span class="c"># always int</span>
+
+    <span class="n">INPUT_POLL_TYPE_OPTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ALL&#39;</span><span class="p">,</span><span class="s">&#39;EACH&#39;</span><span class="p">]</span> <span class="c">#either ALL or EACH str</span>
+
+    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="n">DEVICE_MODEL_ID</span><span class="o">=</span><span class="mi">0</span> <span class="c"># over write by sub class. Used in multichannel events.</span>
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">DAQ</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReportingEvents</span><span class="p">()</span>
+<span class="c">#</span>
+<span class="c">## Event Multichannel input</span>
+<span class="c">#</span>
+</div>
+<span class="k">class</span> <span class="nc">DAQEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>    
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">DAQDevice</span>
+    
+<div class="viewcode-block" id="DAMultiChannelInputEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.DAMultiChannelInputEvent">[docs]</a><span class="k">class</span> <span class="nc">DAMultiChannelInputEvent</span><span class="p">(</span><span class="n">DAQEvent</span><span class="p">):</span>
+    <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s">&#39;MODEL_ID&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_0&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_1&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_2&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_3&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_4&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_5&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_6&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;AI_7&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="p">]</span>
+    
+    
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">DA_MULTI_CHANNEL_INPUT</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : object</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">DAQEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="c">#</span>
+<span class="c">## Event Multichannel input</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#class DASingleChannelInputEvent(DAQEvent):</span>
+<span class="c">#    _newDataTypes = [</span>
+<span class="c">#        (&#39;channel_name&#39;,N.str,8),</span>
+<span class="c">#        (&#39;float_value&#39;,N.float32),</span>
+<span class="c">#        (&#39;int_value&#39;,N.uint32)</span>
+<span class="c">#        ]</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#    EVENT_TYPE_ID=EventConstants.DA_SINGLE_CHANNEL_INPUT</span>
+<span class="c">#    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)</span>
+<span class="c">#    IOHUB_DATA_TABLE=EVENT_TYPE_STRING</span>
+<span class="c">#    __slots__=[e[0] for e in _newDataTypes]</span>
+<span class="c">#    def __init__(self, *args, **kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#        :rtype : object</span>
+<span class="c">#        :param args:</span>
+<span class="c">#        :param kwargs:</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        DAQEvent.__init__(self, *args, **kwargs)</span>
+</div>
+<span class="kn">import</span> <span class="nn">HW</span>
+</pre></div>
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

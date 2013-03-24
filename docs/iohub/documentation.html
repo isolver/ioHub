@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub Documentation and API Specification &mdash; ioHub 1.0a documentation</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 1.0a documentation" href="../index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>1.0a</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_manual.html">user_manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iohub_license.html">iohub_license</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">ioHub Documentation and API Specification</a><ul>
+<li><a class="reference internal" href="#contents">Contents</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+          
+          
+            <li>
+  <a href="../_sources/iohub/documentation.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-documentation-and-api-specification">
+<h1>ioHub Documentation and API Specification<a class="headerlink" href="#iohub-documentation-and-api-specification" title="Permalink to this headline">¶</a></h1>
+<p>The ioHub is a Python package that allows the seperation of experiment device
+input processing (for devices such as keyboard, mouse, eye tracker, analog, TTL,
+serial, etc) from the main experiment logic (stimulus presentation, experiment design logic, etc.).</p>
+<p>ioHub handles reading device inputs and converting the inputs into common event types
+based on device type, regardless of the underlying hardware. Events are time stamped
+when it is not done by the source device itself, or existing device event
+time stamps are converted to a common timebase (ioHub time) and, when possible,
+delay and drift factors between the input device clock and the ioHub clock are
+corrected for.</p>
+<p>ioHub also provides a common event access API for real-time event monitoring as
+well as providing transparent storage of all events received for future retieval and
+analysis.</p>
+<p>The ioHub clock can be used to get the current time at any point during experiment
+execution, making it easy to integrate and relate event time stamps to other
+experiment based events. Experiment Messages can be sent to the ioHub as
+events themselves and saved with all other event data recorded during an experiment,
+making post hoc analysis of experiment and input device events simple yet powerful.</p>
+<p>While the ioHub package handles device input processing and communication,
+the main experiment logic is handled by a seperate experiment creation and
+runtime package, namely the most excellent open source PsychoPy.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">ioHub Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#relationship-to-experiment-design-and-runtime-packages">Relationship to Experiment Design and Runtime Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#high-level-software-design">High Level Software Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#benifits-of-usage">Benifits of Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#operating-system-support">Operating System Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#device-support">Device Support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">ioHub Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#linux">Linux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">ioHub Usage QuickStart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#adding-the-iohub-api-to-a-standard-or-existing-psychopy-coder-experiment">Adding the ioHub API to a &#8216;standard&#8217; or Existing PsychoPy Coder Experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#converting-a-psychopy-script-to-use-the-iohub-experimentiohubruntime-class">Converting a PsychoPy Script to use the ioHub ExperimentIOHubRuntime Class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_manual.html">ioHub Package User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">ioHub Example Scripts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#examples-overview">Examples Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api_home.html">API Specification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/devices.html">1. ioHub Devices and Device Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/iohub_connection.html">2. Accessing the ioHub Server Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/experiment_utilities.html">3. Experiment Runtime Utility API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/exp_config.html">4. Experiment Configuration File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/iohub_config.html">5. ioHub Devices and ioDataStore Configuration File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/indices.html">6. API Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance and Overhead of the ioHub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#device-event-time-stamp-accuracy">Device Event Time Stamp Accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#experiment-runtime-performance">Experiment Runtime Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#how-real-time-device-event-end-to-end-delay-is-effected">How Real-time Device Event End to End Delay is Effected</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits and Thanks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iohub_license.html">ioHub License</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2012, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -38,23 +38,24 @@ class Constants(object):
  
 class EventConstants(Constants):
     KEYBOARD_INPUT=20
-    KEYBOARD_PRESS=21
-    KEYBOARD_RELEASE=22
-    KEYBOARD_CHAR=23
+    KEYBOARD_KEY=21
+    KEYBOARD_PRESS=22
+    KEYBOARD_RELEASE=23
+    KEYBOARD_CHAR=24
 
     MOUSE_INPUT=30
     MOUSE_BUTTON=31
-    MOUSE_PRESS=32
-    MOUSE_RELEASE=33
+    MOUSE_BUTTON_PRESS=32
+    MOUSE_BUTTON_RELEASE=33
     MOUSE_DOUBLE_CLICK=34
     MOUSE_WHEEL=35
     MOUSE_WHEEL_UP=36
     MOUSE_WHEEL_DOWN=37
     MOUSE_MOVE=38
 
-    EYETRACKER_INPUT=50
-    EYE_SAMPLE=51
-    BINOC_EYE_SAMPLE=52
+    EYETRACKER=50
+    MONOCULAR_EYE_SAMPLE=51
+    BINOCULAR_EYE_SAMPLE=52
     FIXATION_START=53
     FIXATION_END=54
     SACCADE_START=55
@@ -62,106 +63,24 @@ class EventConstants(Constants):
     BLINK_START=57
     BLINK_END=58
 
-    XINPUT=70
-    XINPUT_STATE_CHANGE=71
-    XINPUT_DISCONNECT=-72
-    XINPUT_CONNECT=73
+    GAMEPAD_STATE_CHANGE=81
+    GAMEPAD_DISCONNECT=82
 
-    GAMEPAD_EVENT=80
-    GAMEPAD_BUTTON_EVENT=81
-    GAMEPAD_THUMBSTICK_EVENT=82
-    GAMEPAD_TRIGGER_EVENT=83
-    GAMEPAD_DISCONNECT_EVENT=85
+    MULTI_CHANNEL_ANALOG_INPUT=122
 
-#    DIGITAL_INPUT=100
-#    PARALLEL_PORT_INPUT=102
-#    SERIAL_INPUT=104
-
-#    ANALOG_INPUT=120
-#    DA_SINGLE_CHANNEL_INPUT=121
-    DA_MULTI_CHANNEL_INPUT=122
-
-    EXPERIMENT=150
     MESSAGE=151
-
-    DISPLAY_INPUT=190
-
-    COMPUTER_INPUT=200
-
-#    FILTER_EVENT=210
 
     @classmethod
     def addClassMappings(cls):
         if cls._classes is None:
+            import ioHub
+            
             cls._classes={}
-            from ioHub.devices import deviceModulesAvailable
 
-            if 'eyetracker' in deviceModulesAvailable:
-                from ioHub.devices import (MonocularEyeSample, BinocularEyeSample,
-                    FixationStartEvent,FixationEndEvent,SaccadeStartEvent,
-                    SaccadeEndEvent,BlinkStartEvent,BlinkEndEvent)
+            for event_constant_string,event_class in ioHub.devices.loadedEventClasses.iteritems():
+                cls._classes[getattr(cls,event_constant_string)]=event_class
 
-                cls._classes[cls.EYE_SAMPLE]=MonocularEyeSample
-                cls._classes[cls.BINOC_EYE_SAMPLE]=BinocularEyeSample
-                cls._classes[cls.FIXATION_START]=FixationStartEvent
-                cls._classes[cls.FIXATION_END]=FixationEndEvent
-                cls._classes[cls.SACCADE_START]=SaccadeStartEvent
-                cls._classes[cls.SACCADE_END]=SaccadeEndEvent
-                cls._classes[cls.BLINK_START]=BlinkStartEvent
-                cls._classes[cls.BLINK_END]=BlinkEndEvent
 
-            if 'experiment' in deviceModulesAvailable:
-                from ioHub.devices import MessageEvent
-                cls._classes[cls.MESSAGE]=MessageEvent
-
-            if 'mouse' in deviceModulesAvailable:
-                from ioHub.devices import (MouseMoveEvent, MouseWheelEvent,
-                        MouseWheelUpEvent,MouseWheelDownEvent,MouseButtonEvent,
-                        MouseButtonDownEvent,MouseButtonUpEvent,MouseDoubleClickEvent)
-
-                cls._classes[cls.MOUSE_MOVE]=MouseMoveEvent
-                cls._classes[cls.MOUSE_WHEEL]=MouseWheelEvent
-                cls._classes[cls.MOUSE_WHEEL_UP]=MouseWheelUpEvent
-                cls._classes[cls.MOUSE_WHEEL_DOWN]=MouseWheelDownEvent
-                cls._classes[cls.MOUSE_BUTTON]=MouseButtonEvent
-                cls._classes[cls.MOUSE_PRESS]=MouseButtonDownEvent
-                cls._classes[cls.MOUSE_RELEASE]=MouseButtonUpEvent
-                cls._classes[cls.MOUSE_DOUBLE_CLICK]=MouseDoubleClickEvent
-
-            if 'keyboard' in deviceModulesAvailable:
-                from ioHub.devices import (KeyboardKeyEvent, KeyboardPressEvent,
-                        KeyboardReleaseEvent,KeyboardCharEvent)
-
-                cls._classes[cls.KEYBOARD_INPUT]=KeyboardKeyEvent
-                cls._classes[cls.KEYBOARD_PRESS]=KeyboardPressEvent
-                cls._classes[cls.KEYBOARD_RELEASE]=KeyboardReleaseEvent
-                cls._classes[cls.KEYBOARD_INPUT]=KeyboardKeyEvent
-                cls._classes[cls.KEYBOARD_PRESS]=KeyboardPressEvent
-                cls._classes[cls.KEYBOARD_CHAR]=KeyboardCharEvent
-
-            if 'gamepad' in deviceModulesAvailable:
-                from ioHub.devices import GamePadStateChangeEvent,GamePadDisconnectEvent#,GamePadButtonEvent,
-#                                           GamePadThumbStickEvent,GamePadTriggerEvent)
-                cls._classes[cls.GAMEPAD_EVENT]=GamePadStateChangeEvent
-                cls._classes[cls.GAMEPAD_DISCONNECT_EVENT]=GamePadDisconnectEvent
- 
-            if 'daq' in deviceModulesAvailable:
-                from ioHub.devices import DAMultiChannelInputEvent
-                cls._classes[cls.DA_MULTI_CHANNEL_INPUT]=DAMultiChannelInputEvent
-
-#            if 'parallelPort' in deviceModulesAvailable:
-#                from ioHub.devices import ParallelPortEvent
-#                cls._classes[cls.PARALLEL_PORT_INPUT]=ParallelPortEvent
-
-#            if 'serial' in deviceModulesAvailable:
-#                from ioHub.devices import SerialInputEvent
-#                cls._classes[cls.SERIAL_INPUT]=SerialInputEvent
-
-#            if 'filter' in deviceModulesAvailable:
-#                from ioHub.devices import GenericFilterEvent
-#                cls._classes[cls.FILTER_EVENT]=GenericFilterEvent
-
-            # update classes dict with v,k pairs
             cls._classes.update(dict([(kls,klsname) for klsname,kls in cls._classes.iteritems()]))
 
 EventConstants.initialize()
@@ -171,12 +90,12 @@ class DeviceConstants(Constants):
     KEYBOARD = 20
     MOUSE = 30
 #    KB_MOUSE_COMBO = 25
-    EYE_TRACKER = 50
+    EYETRACKER = 50
     XINPUT= 70
     GAMEPAD=80
 #    PARALLEL_PORT = 102
 #    SERIAL=104
-    DAQ = 120
+    ANALOGINPUT = 120
 #    MBED=130
     EXPERIMENT = 150
     DISPLAY = 190
@@ -187,48 +106,12 @@ class DeviceConstants(Constants):
     @classmethod
     def addClassMappings(cls):
         if cls._classes is None:
+            import ioHub
+            
             cls._classes={}
-            from ioHub.devices import deviceModulesAvailable
 
-            if 'eyetracker' in deviceModulesAvailable:
-                from ioHub.devices.eyetracker import EyeTrackerDevice
-                cls._classes[cls.EYE_TRACKER]=EyeTrackerDevice
-
-            if 'experiment' in deviceModulesAvailable:
-                from ioHub.devices import ExperimentDevice
-                cls._classes[cls.EXPERIMENT]=ExperimentDevice
-
-            if 'mouse' in deviceModulesAvailable:
-                from ioHub.devices import Mouse
-                cls._classes[cls.MOUSE]=Mouse
-
-            if 'keyboard' in deviceModulesAvailable:
-                from ioHub.devices import Keyboard
-                cls._classes[cls.KEYBOARD]=Keyboard
-
-            if 'daq' in deviceModulesAvailable:
-                from ioHub.devices import DAQDevice
-                cls._classes[cls.DAQ]=DAQDevice
-
-            if 'display' in deviceModulesAvailable:
-                from ioHub.devices import Display
-                cls._classes[cls.DISPLAY]=Display
-
-#            if 'parallelPort' in deviceModulesAvailable:
-#                from ioHub.devices import ParallelPort
-#                cls._classes[cls.PARALLEL_PORT]=ParallelPort
-
-#            if 'serial' in deviceModulesAvailable:
-#                from ioHub.devices import SerialIO
-#                cls._classes[cls.SERIAL]=SerialIO
-
-#            if 'filter' in deviceModulesAvailable:
-#                from ioHub.devices import StampeFilter
-#                cls._classes[cls.FILTER]=StampeFilter
-
-#            if 'mbed' in deviceModulesAvailable:
-#                from ioHub.devices import MBED1768
-#                cls._classes[cls.MBED] = MBED1768
+            for device_constant_string,device_class in ioHub.devices.loadedDeviceClasses.iteritems():
+                cls._classes[getattr(cls,device_constant_string)]=device_class
 
             # update classes dict with v,k pairs
             cls._classes.update(dict([(kls,klsname) for klsname,kls in cls._classes.iteritems()]))
@@ -589,9 +472,7 @@ class EyeTrackerConstants(Constants):
     UNKNOWN_MONOCULAR=24
     BINOCULAR_AVERAGED=25
     SIMULATED_MONOCULAR=26
-    SIMULATED_BINOCULAR=26
-    ARTIFICIAL_MONOCULAR_EYE=28
-    ARTIFICIAL_BINOCULAR=29
+    SIMULATED_BINOCULAR=27
 
     H3_POINTS=40
     V3_POINTS=41
@@ -599,12 +480,14 @@ class EyeTrackerConstants(Constants):
     HV5_POINTS=43
     HV9_POINTS=44
     HV13_POINTS=45
-
+    CUSTOM_POINTS=46
+    
     PUPIL_CR_TRACKING=50
     PUPIL_ONLY_TRACKING=51
 
     ELLIPSE_FIT=60
-    CENTROID_FIT=61
+    CIRCLE_FIT = 61
+    CENTROID_FIT = 62
 
     PUPIL_AREA = 70
     PUPIL_DIAMETER = 71
@@ -613,15 +496,33 @@ class EyeTrackerConstants(Constants):
     PUPIL_MAJOR_AXIS = 74
     PUPIL_MINOR_AXIS = 75
     PUPIL_RADIUS = 76
-    PUPIL_HEIGHT = 77
-    PUPIL_WIDTH= 78
 
     AUTO_CALIBRATION_PACING=82
     MANUAL_CALIBRATION_PACING=81
 
-    EYETRACKER_OK=100
-    EYETRACKER_ERROR=101
-    FUNCTIONALITY_NOT_SUPPORTED=102
+    DEFAULT_SETUP_PROCEDURE=90
+    CALIBRATION_START_STATE=91
+    VALIDATION_START_STATE=92
+    DRIFT_CORRECTION_START_STATE=93
+    
+    CLEAR_GRAPHICS=100
+    IMAGE_GRAPHIC=101
+    LINE_GRAPHIC=102
+    MULTILINE_GRAPHIC=103
+    RECTANGLE_GRAPHIC=104
+    CIRCLE_GRAPHIC=105
+    ELLIPSE_GRAPHIC=106
+    TEXT_GRAPHIC=107
+    
+    CIRCLE_TARGET=121
+    CROSSHAIR_TARGET=122
+    IMAGE_TARGET=123
+    MOVIE_TARGET=124
+
+    EYETRACKER_OK=200
+    EYETRACKER_ERROR=201
+    FUNCTIONALITY_NOT_SUPPORTED=202
+    EYETRACKER_CALIBRATION_ERROR=203
 
 EyeTrackerConstants.initialize()
 

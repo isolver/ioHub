@@ -1,0 +1,710 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2.4. ioHub.devices.display.Display &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="1. ioHub Device and Device Event API" href="../devices.html" />
+    <link rel="next" title="1.2.5. ioHub.devices.experiment.ExperimentDevice" href="experiment.html" />
+    <link rel="prev" title="1.2.3. ioHub.devices.mouse.Mouse" href="mouse.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1.2.4. ioHub.devices.display.Display</a><ul>
+<li><a class="reference internal" href="#display-device-configuration-settings">1.2.4.1. Display Device Configuration Settings</a><ul>
+<li><a class="reference internal" href="#display-event-types">1.2.4.1.1. Display Event Types</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="mouse.html"
+         title="previous chapter">&laquo; 1.2.3. ioHub.devices.mouse.Mouse</a></li>
+  <li><a href="experiment.html"
+         title="next chapter">1.2.5. ioHub.devices.experiment.ExperimentDevice &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../_sources/iohub/api/device_details/display.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-devices-display-display">
+<h1>1.2.4. ioHub.devices.display.Display<a class="headerlink" href="#iohub-devices-display-display" title="Permalink to this headline">¶</a></h1>
+<p>Device description text TBC.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Supported Platforms: Linux, Windows (XP SP2, SP3, Windows 7)</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.display.Display">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.display.</tt><tt class="descname">Display</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/display.html#Display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.display.Display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../devices.html#ioHub.devices.Device" title="ioHub.devices.Device"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.Device</span></tt></a></p>
+<dl class="method">
+<dt id="ioHub.devices.display.Display.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.displayCoord2Pixel">
+<tt class="descname">displayCoord2Pixel</tt><big>(</big><em>cx</em>, <em>cy</em>, <em>display_index=None</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/display.html#Display.displayCoord2Pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.display.Display.displayCoord2Pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the given display position (dx, dy), to the associated pixel
+px, py position in the within the display&#8217;s bounds. If display_index
+is None (the default), then it is assumed the dx,dy value is for the
+display index specified for the display configured with ioHub. If
+display_index is not None, then that display index is used in the computation. 
+If the display_index matches the ioHub enable Display devices index, then
+the method converts from the dx,dy value (which would be in the Display&#8217;s 
+coordinate / unit space type) to the pixel position within the displays bounds,
+factoring in the origin specified in the Display device configuration. If the
+display_index does not match the ioHub Display device that is being used, 
+then dx,dy == the output x,y value.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>display_index (int or None): the display index the dx,dy value should be relative to. None == use the currently enabled ioHub Display device&#8217;s index.</dd>
+<dt>Returns:</dt>
+<dd>tuple: (px,py), the mapped pixel position based on the &#8216;logic&#8217; noted in the description of the method.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a Device should report events and provide them to the Experiment Process
+and / or save them to the ioDataStore.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>enabled (bool): True (default), monitor and report device events as they occur. False, Do not report any events for the device until reporting is enabled.</dd>
+<dt>Return:</dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getBounds">
+<tt class="descname">getBounds</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the display&#8217;s pixel bounds representing the left,top,right,and bottom 
+edge of the the monitor in native pixel units.</p>
+<p><strong>Note:</strong> (left, top, right, bottom) bounds will &#8216;not&#8217; always be 
+(0, 0, pixel_width, pixel_height). If a multiple display setup is 
+being used, (left, top, right, bottom) indicates the actual absolute 
+pixel bounds assigned to that monitor by the OS. It can be assumed that
+right = left + display_pixel_width and bottom =  top + display_pixel_height</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>tuple: (left, top, right, bottom) pixel bounds for the Display.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getComputerDisplayCount">
+<em class="property">classmethod </em><tt class="descname">getComputerDisplayCount</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getComputerDisplayCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of Displays connected to the Computer that are also active.
+For example, a Computer may have 3 Displays connected to it, but the video card
+may only support having two displays active at a time.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>int: active computer display count.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getComputerDisplayRuntimeInfoList">
+<em class="property">classmethod </em><tt class="descname">getComputerDisplayRuntimeInfoList</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getComputerDisplayRuntimeInfoList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of dictionaries containing run-time determined settings for 
+each active computer display; based on querying the video card settings.</p>
+<p>The keys of each dict are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>index: see getIndex().</li>
+<li>pixel_width: the horizontal pixel resolution of the Display.</li>
+<li>pixel_height: the vertical pixel resolution of the Display.</li>
+<li>pixel_resolution: pixel_width,pixel_height</li>
+<li>bounds: see getBounds()</li>
+<li>retrace_rate: The vertical retrace rate of the Display in Hz., as reported by the OS.</li>
+<li>bits_per_pixel: Number if bits being used to represent all channels of a pixel by the OS.</li>
+<li>primary: True if the current Monitor is also the primary monitor reported by the OS.</li>
+</ol>
+</div></blockquote>
+<p>The length of the list will equal getComputerDisplayCount().</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>list: Each element being a dict of run-time attributes for the associated display index; determined when the Display device was created.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getConfigurationByIndex">
+<em class="property">classmethod </em><tt class="descname">getConfigurationByIndex</tt><big>(</big><em>display_index</em><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getConfigurationByIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns full configuration dictionary for the Display device created with 
+the specified display_index (called device_number in the device configuration settings).</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>display_index (int): display number to return the configuration dictionary for.</dd>
+<dt>Returns:</dt>
+<dd>dict: The configuration settings used to create the ioHub Display Device instance.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getCoordBounds">
+<tt class="descname">getCoordBounds</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getCoordBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the display&#8217;s left,top,right,and bottom bounds in the Display
+devices coordinate space.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>tuple: (left, top, right, bottom) coordinate bounds for the Display.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getCoordinateType">
+<tt class="descname">getCoordinateType</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getCoordinateType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinate, or reporting unit, type specified for the Display.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>str: Currently only &#8216;pix&#8217; is supported.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getDefaultEyeDistance">
+<tt class="descname">getDefaultEyeDistance</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getDefaultEyeDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the default  distance from the particpant&#8217;s eye to the Display&#8217;s
+physical screen surface, as specified in the ioHub Display device&#8217;s
+configuration settings. Currently this is the distance from the  participant&#8217;s
+eye of interest, or the average of both eyes when binocular data is being obtained,
+to the center of the Display screen being used for stimulus presentation.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>int: Default display in mm from the participant to the display screen surface.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getDeviceNumber">
+<tt class="descname">getDeviceNumber</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getDeviceNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display index. In a single display configuration, this will always
+equal 0. In a multiple display configuration, valid index&#8217;s range from
+0 - N-1, where N equals the number of display&#8217;s connected and active
+on the Computer being used.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>int: display index, 0 to N-1, where N equals the number connected and active display&#8217;s.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getDisplayIndexForNativePixelPosition">
+<em class="property">classmethod </em><tt class="descname">getDisplayIndexForNativePixelPosition</tt><big>(</big><em>pixel_pos</em><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getDisplayIndexForNativePixelPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index of the display that the native OS pixel position would
+fall within, based on the bounds information that ioHub has for each 
+active computer display.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>pixel_pos (tuple): the native x,y position to query the display index of.</dd>
+<dt>Returns:</dt>
+<dd>int: The index of the display that the pixel_pos falls within based on each display&#8217;s bounds.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getEnabledDisplayCount">
+<em class="property">classmethod </em><tt class="descname">getEnabledDisplayCount</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getEnabledDisplayCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of Display Device instances that the ioHub Server has 
+been informed about. Currently, only one Display instance can be created,
+representing any of the computer&#8217;s physical active displays. This display
+will be used to create the full screen window used for stimulus presentation.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>int: ioHub Display Device count. Currently limited to 1.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getIndex">
+<tt class="descname">getIndex</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the display index. In a single display configuration, this will always
+equal 0. In a multiple display configuration, valid index&#8217;s range from
+0 - N-1, where N equals the number of display&#8217;s connected and active
+on the Computer being used.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>int: display index, 0 to N-1, where N equals the number connected and active display&#8217;s.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getOrigin">
+<tt class="descname">getOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Get the Displays origin in for the coordinate space. Valid options are:</dt>
+<dd><ol class="first last arabic simple">
+<li>center: The 0.0, 0.0 point of the coord space is at the display center.</li>
+<li>top_left: The 0.0, 0.0 point of the coord space the top, left corner of the display.</li>
+<li>bottom_right: The 0.0, 0.0 point of the coord space the bottom, left corner of the display.</li>
+</ol>
+</dd>
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>str: The origin value selected for the display.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getPhysicalDimensions">
+<tt class="descname">getPhysicalDimensions</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getPhysicalDimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Display&#8217;s physical screen area ( width and height ) as 
+specified in the ioHub Display devices configuration settings.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>dict: A dict containing the screen &#8216;width&#8217; and &#8216;height&#8217; as keys, as well as the &#8216;unit_type&#8217; the width and height are specified in. Currently on &#8216;mm&#8217; is supported for unit_type.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getPixelResolution">
+<tt class="descname">getPixelResolution</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getPixelResolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the monitor&#8217;s pixel resolution based on the current graphics mode.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>tuple: (width,height) of the monitor based on it&#8217;s current graphics mode.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getPixelsPerDegree">
+<tt class="descname">getPixelsPerDegree</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getPixelsPerDegree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Display&#8217;s horizontal and vertical pixels per degree calculation
+based on the physical Display settings provided by the monitor in the device&#8217;s
+configuration file settings and the resolution of the Display reported by the
+OS.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>tuple: (ppd_x, ppd_y) given the monitors current resolution and the physical settings provided in the device&#8217;s configuration file.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getPsychopyMonitorName">
+<tt class="descname">getPsychopyMonitorName</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getPsychopyMonitorName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the psychoPy Monitor configuration being used for the Display.</p>
+<p>This method is only of meaning when psychoPy is being used as the Python
+framework driving stimulus presentation in the Experiment process script.
+(which is usually the case).</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>str: Name of the PsychoPy Monitor configuration being used for the Display.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getRetraceInterval">
+<tt class="descname">getRetraceInterval</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getRetraceInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the display&#8217;s reported retrace &#8216;interval&#8217; (1000.0/retrace_rate)*0.001
+based on the current graphics mode.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>float: retrace interval of Monitor reported by OS in sec.msec format</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.getRuntimeInfo">
+<tt class="descname">getRuntimeInfo</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getRuntimeInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary containing run-time determined settings for the 
+current display based on querying the video card settings. The keys of the dict are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>index: see getIndex().</li>
+<li>pixel_width: the horizontal pixel resolution of the Display.</li>
+<li>pixel_height: the vertical pixel resolution of the Display.</li>
+<li>pixel_resolution: pixel_width,pixel_height</li>
+<li>bounds: see getBounds()</li>
+<li>retrace_rate: The vertical retrace rate of the Display in Hz., as reported by the OS.</li>
+<li>bits_per_pixel: Number if bits being used to represent all channels of a pixel by the OS.</li>
+<li>primary: True if the current Monitor is also the primary monitor reported by the OS.</li>
+</ol>
+</div></blockquote>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>dict: run-time attributes of the Display, determined when the Display device was created.</dd>
+</dl>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.display.Display.getRuntimeInfoByIndex">
+<em class="property">classmethod </em><tt class="descname">getRuntimeInfoByIndex</tt><big>(</big><em>display_index</em><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.getRuntimeInfoByIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary containing run-time determined settings for the 
+display that has the associated display_index. Run-time settings are 
+based on querying the video card settings of the system. 
+The keys of the dict are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>index: see getIndex().</li>
+<li>pixel_width: the horizontal pixel resolution of the Display.</li>
+<li>pixel_height: the vertical pixel resolution of the Display.</li>
+<li>pixel_resolution: pixel_width,pixel_height</li>
+<li>bounds: see getBounds()</li>
+<li>retrace_rate: The vertical retrace rate of the Display in Hz., as reported by the OS.</li>
+<li>bits_per_pixel: Number if bits being used to represent all channels of a pixel by the OS.</li>
+<li>primary: True if the current Monitor is also the primary monitor reported by the OS.</li>
+</ol>
+</div></blockquote>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>display_index (int): The index of the display to get run-time settings for. Valid display indexes are 0 - N-1, where N is the number of active physically connected displays of the computer in use.</dd>
+<dt>Returns:</dt>
+<dd>dict: run-time attributes of display that has index display_index.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.display.Display.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.display.Display.pixel2DisplayCoord">
+<tt class="descname">pixel2DisplayCoord</tt><big>(</big><em>px</em>, <em>py</em>, <em>display_index=None</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/display.html#Display.pixel2DisplayCoord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.display.Display.pixel2DisplayCoord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the given pixel position (px, py), to the associated Display
+devices x, y position in the display&#8217;s coordinate space. If display_index
+is None (the default), then it is assumed the px,py value is for the
+display index specified for the display configured with ioHub. If
+display_index is not None, then that display index is used in the computation. 
+If the display_index matches the ioHub enable Display devices index, then
+the method converts from the px,py value to the DIsplay devices 
+coordinate / unit space type (Currently also only pix is supported), factoring
+in the origin specified in the Display device configuration. If the
+display_index does not match the ioHub Display device that is being used, 
+then px,py == the output x,y value.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>display_index (int or None): the display index the px,py value should be relative to. None == use the currently enabled ioHub Display device&#8217;s index.</dd>
+<dt>Returns:</dt>
+<dd>tuple: (x,y), the mapped position based on the &#8216;logic&#8217; noted in the description of the method.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.display.Display.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.display.Display.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.display.Display.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.display.Display.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.display.Display.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.display.Display.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.display.Display.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.display.Display.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.display.Display.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.display.Display.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.display.Display.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.display.Display.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.display.Display.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="display-device-configuration-settings">
+<h2>1.2.4.1. Display Device Configuration Settings<a class="headerlink" href="#display-device-configuration-settings" title="Permalink to this headline">¶</a></h2>
+<p><strong>TODO: Update Display config settings</strong></p>
+<p>To add the Display device to the iohub_config.yaml configuration file for and experiment,
+add the following entry to the <strong>monitor_devices</strong> list:</p>
+<div class="highlight-python"><pre>Display:
+    # name: The name you want to assign to the device for the experiment
+    #   This name is what will be used to access the device within the experiment
+    #   script via the devices.[device_name] property of the ioHubConnection or
+    #   ioHubExperimentRuntime classes.
+    name: display
+
+    # reporting_unit_type: Specify the coordinate space unit type that should
+    #   be used for the stimulus screen during experiment runtime.
+    #   Currently only 'pixels' is supported, however 'degrees',
+    #   and 'normalized' will also be supported in the near future.
+    reporting_unit_type: pixels
+
+    # display_index: specify the diaply index to use to create the full
+    #   screen stimulus window on. The primary display is index 0, secondary
+    #   display index 1, etc.
+    display_index: 0
+
+    # physical_stimulus_area: specify the actual screen physical dimensions, in mm,
+    #   that is illuminated when the monitor and computer are on.
+    #   This should be measured when the monitor being used is in the screen
+    #   resolution and refresh rate mode that will be used during the experiment,
+    #   as the actual area of the screen that shows visual stimuli can change
+    #   depending on the display mode it is in.
+    #   This is true for many CRT monitors, but also for some LCD monitors
+    #   when they are not run at their native pixel resolution.
+    #   screen stimulus window on. The primary display is index 0, secondary
+    #   display index 1, etc.
+    # width: the width of the active stimulus screen area in mm
+    # height: the height of the active stimulus screen area in mm
+    # unit_type: constant as mm
+    physical_stimulus_area:
+        width: 500
+        height: 281
+        unit_type: mm
+
+    # default_eye_to_surface_distance: specify the distance from the eye to the
+    #   defined point on the surface that is being used as the stimulus screen
+    #   in mm. In situiations where a chin  rest or other form of head stabilization
+    #   is not being used, enter the expected average distance of the eyes to
+    #   the specified surface point.
+    # surface_center: enter the distance from the eyes to the center of the
+    #   stimulus surface being used in mm.
+    # unit_type: constant as mm
+    default_eye_to_surface_distance:
+        surface_center: 500
+        unit_type: mm
+
+    # display_pixel_origin: specify what the 0,0 point of the display is for
+    # the experiment software being used. This defaults to what PsychoPy uses,
+    # which is an origin in the center of the screen, or [0.5,0.5] of the
+    # stimulus display screen width and height.
+    # If using a stimulus package like pygame directly, set this to [0.0, 0.0],
+    # to indicate that pygame has a screen origin of the top left hand  corner
+    # of the screen.
+    display_pixel_origin: [0.5,0.5]
+
+    # psychopy_config_file: specify the name to give the psychopy Monitor
+    #   object that is created by the ioHub based on the ioHub Display
+    #   configuration settings.
+    psychopy_config_file: ioHubDefault</pre>
+</div>
+<div class="section" id="display-event-types">
+<h3>1.2.4.1.1. Display Event Types<a class="headerlink" href="#display-event-types" title="Permalink to this headline">¶</a></h3>
+<p>The Display Device currently has no associated event types.</p>
+</div>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

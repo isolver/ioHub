@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2.6.1.2.3. SR Research EyeLink EyeTracker Class &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../../index.html" />
+    <link rel="up" title="1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice" href="../eyetracker.html" />
+    <link rel="next" title="1.2.6.1.2.4. Tobii EyeTracker Class" href="Tobii_Implementation_Notes.html" />
+    <link rel="prev" title="1.2.6.1.2.2. SMI iView EyeTracker Class" href="SMI_Implementation_Notes.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1.2.6.1.2.3. SR Research EyeLink EyeTracker Class</a><ul>
+<li><a class="reference internal" href="#installing-other-necessary-sr-research-software">1.2.6.1.2.3.1. Installing other Necessary SR Research Software</a></li>
+<li><a class="reference internal" href="#eyelink-device-iohub-config-yaml-settings">1.2.6.1.2.3.2. EyeLink Device iohub_config.yaml Settings</a></li>
+<li><a class="reference internal" href="#supported-eyetracker-device-event-types">1.2.6.1.2.3.3. Supported EyeTracker Device Event Types</a></li>
+<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.3.4. General Considerations</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="SMI_Implementation_Notes.html"
+         title="previous chapter">&laquo; 1.2.6.1.2.2. SMI iView EyeTracker Class</a></li>
+  <li><a href="Tobii_Implementation_Notes.html"
+         title="next chapter">1.2.6.1.2.4. Tobii EyeTracker Class &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../../_sources/iohub/api/device_details/eyetracker_interface/SR_Research_Implementation_Notes.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="sr-research-eyelink-eyetracker-class">
+<h1>1.2.6.1.2.3. SR Research EyeLink EyeTracker Class<a class="headerlink" href="#sr-research-eyelink-eyetracker-class" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported Platforms:</p>
+<p>Windows (XP SP2, SP3, Windows 7), Linux should work as well, but has yet to be tested.</p>
+<p>Supported EyeLink Eye Tracker Models:</p>
+<p class="last">All models of EyeLink should work with the ioHub eye tracker interface, however
+most testing has been done on an EyeLink 1000 monocular head supported system.
+Please report any issues found with using the interface with models of the EyeLink.</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.eyetracker.hw.sr_research.eyelink.</tt><tt class="descname">EyeTracker</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice" title="ioHub.devices.eyetracker.EyeTrackerDevice"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.eyetracker.EyeTrackerDevice</span></tt></a></p>
+<p>The EyeLink EyeTracker class implements support of the SR Research EyeLink 1000 and EyeLink II
+for the ioHub Common Eye Tracker Interface.</p>
+<p>Please see the  eyetracker/hw/sr_research/eyelink/eyetracker/EyeTracker.py documentation page for 
+details on the supported ioHub configuration settings, implementation notes regarding 
+the EyeLink implementation of the Common Eye Tracker Interface API, and other
+useful information.</p>
+<p>The EyeLink implementation of the ioHub Common Eye Tracker Interface is currently supported under
+Windows XP and Windows 7. Linux support is likely also available, 
+however it has not been tested at this time.</p>
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getLastGazePosition">
+<tt class="descname">getLastGazePosition</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getLastGazePosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getLastSample">
+<tt class="descname">getLastSample</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.getLastSample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isConnected">
+<tt class="descname">isConnected</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isRecordingEnabled">
+<tt class="descname">isRecordingEnabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isRecordingEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.runSetupProcedure">
+<tt class="descname">runSetupProcedure</tt><big>(</big><em>starting_state=90</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.runSetupProcedure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.sendCommand">
+<tt class="descname">sendCommand</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>message_contents</em>, <em>time_offset=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.setConnectionState">
+<tt class="descname">setConnectionState</tt><big>(</big><em>enable</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.setConnectionState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.setRecordingState">
+<tt class="descname">setRecordingState</tt><big>(</big><em>recording</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.setRecordingState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.trackerSec">
+<tt class="descname">trackerSec</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.trackerSec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.trackerTime">
+<tt class="descname">trackerTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.trackerTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="installing-other-necessary-sr-research-software">
+<h2>1.2.6.1.2.3.1. Installing other Necessary SR Research Software<a class="headerlink" href="#installing-other-necessary-sr-research-software" title="Permalink to this headline">¶</a></h2>
+<p>The EyeLink implementation of the ioHub common eye tracker interface uses the
+pyLink module written by SR Research. SR Research has been kind enough to allow
+the distribution of pylink with the PsychoPy software distribution, so no extra
+software needs to be downloaded or installed to use an EyeLink with PsychoPy and ioHub.</p>
+<p>Now that was easy!</p>
+</div>
+<div class="section" id="eyelink-device-iohub-config-yaml-settings">
+<h2>1.2.6.1.2.3.2. EyeLink Device iohub_config.yaml Settings<a class="headerlink" href="#eyelink-device-iohub-config-yaml-settings" title="Permalink to this headline">¶</a></h2>
+<p><strong>TODO: Update EyeLink Device config settings</strong></p>
+<p>To specify the use of an EyeLink eye tracking device within your experiment,
+add the following to the iohub_config.yaml file in the devices list:</p>
+<div class="highlight-python"><pre>-eyeTrackerInterface.HW.SR_Research.EyeLink.EyeTracker:
+    enable: True
+    name: tracker
+    saveEvents: True
+    streamEvents: True
+    device_timer:
+        interval: 0.001
+    event_buffer_length: 1024
+    display_settings: *DisplaySettings
+    runtime_settings:
+        sampling_rate: 250
+        track_eyes: LEFT
+        default_calibration: HV9
+        auto_calibration: True
+        auto_calibration_speed: 1.5
+        runtime_filtering:
+            ALL: OFF
+        enable_api_without_connection: False
+        network_settings: 100.1.1.1
+        default_native_data_file_name: et_data
+        vog_settings:
+            pupil_measure_types: DIAMETER
+            tracking_mode: PUPIL-CR
+            pupil_center_algorithm: CENTROID</pre>
+</div>
+<dl class="docutils">
+<dt>iohub_config.yaml settings considerations:</dt>
+<dd><ul class="first last simple">
+<li>The above eye tracker device configuration options list the full subset of eye tracker configuration options supported by the EyeLink eye tracker implementation.</li>
+<li>sampling_rate: must match a supported sampling rate of the EyeLink model being used.</li>
+<li>auto_calibration and auto_calibration_speed: support is yet to be implemented, so these options are ignored. Adding these options is / will be very easy.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="supported-eyetracker-device-event-types">
+<h2>1.2.6.1.2.3.3. Supported EyeTracker Device Event Types<a class="headerlink" href="#supported-eyetracker-device-event-types" title="Permalink to this headline">¶</a></h2>
+<p>All EyeTrackerDevice event types are supported by the EyeLink implementation of the ioHub Common Eye Tracker Interface.</p>
+</div>
+<div class="section" id="general-considerations">
+<h2>1.2.6.1.2.3.4. General Considerations<a class="headerlink" href="#general-considerations" title="Permalink to this headline">¶</a></h2>
+<p>None at this time.</p>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

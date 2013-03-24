@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1. ioHubExperimentRuntime Class &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="3. Experiment Runtime Utility Classes and Functions" href="../experiment_utilities.html" />
+    <link rel="next" title="3.2. ScreenState Classes" href="screenStates.html" />
+    <link rel="prev" title="3. Experiment Runtime Utility Classes and Functions" href="../experiment_utilities.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">3.1. ioHubExperimentRuntime Class</a><ul>
+<li><a class="reference internal" href="#iohubexperimentruntime-class-definition">3.1.1. ioHubExperimentRuntime Class Definition</a></li>
+<li><a class="reference internal" href="#example-usage">3.1.2. Example Usage</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="../experiment_utilities.html"
+         title="previous chapter">&laquo; 3. Experiment Runtime Utility Classes and Functions</a></li>
+  <li><a href="screenStates.html"
+         title="next chapter">3.2. ScreenState Classes &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../_sources/iohub/api/experiment_utilities/ioHubExperimentRuntime.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohubexperimentruntime-class">
+<h1>3.1. ioHubExperimentRuntime Class<a class="headerlink" href="#iohubexperimentruntime-class" title="Permalink to this headline">¶</a></h1>
+<p>The ioHubExperimentRuntime Class is a core class using in the ioHub Package. If
+your experiment contains more than just a keyboard and mouse device, or even if those
+are the only devices used, using the ioHubExperimentRuntime class helps make your script mode
+modular and helps you control the specific device settings used across sessions of
+an experiment during data collection.</p>
+<p>The main features of the ioHubExperimentRuntime classs are:
+#. Simple addition of the experiment logic by simply creating your main experiment script in the runmethod of the ioHubExperimentRuntime class extension.
+#. Use of an experiment_config.yaml and ioHub_congif.yaml to represent experiment and device setting to be used during the experiment runtime.
+#. Automatic creation of the ioHubCOnnection class, creation of the ioHub Server process, and initialization of all devices specified in the iohub_config.yaml.
+#. Automatic display of an &#8220;Experiment Details&#8221; Dialog at the start of each experiment session, listing some of the experiment details, helping to ensure the correct experiment is being run.
+#. Automatic display of an Experiment Session information dialog, which can be customized within the experiment_config.yaml for each experiment, allowing collection of relevent participant data prior to the start of the experiment itself.
+#. Automatic cleanup of ioHub and PsychoPy objects as necessary at the end of the experiment.</p>
+<div class="section" id="iohubexperimentruntime-class-definition">
+<h2>3.1.1. ioHubExperimentRuntime Class Definition<a class="headerlink" href="#iohubexperimentruntime-class-definition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ioHubExperimentRuntime</tt><big>(</big><em>configFilePath</em>, <em>configFile</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<blockquote>
+<div><p>ioHubExperimentRuntime is a utility class that is used to &#8216;bind&#8217; the ioHub framework to the PsychoPy API in an easy to use way,
+hiding many of the internal complexities of the implementation and making it as simple to use within a PsychoPy script
+as possible. That is the <em>intent</em> anyway.</p>
+<p>The ioHubExperimentRuntime class is intended to be extended in a user script, with the .run() method being implemented with
+the actual contents of the main body of the experiment. As an example, a run.py file could be created and contain
+the following code as a minimal implementation of using the ioHubExperimentRuntime to combine psychopy and ioHub functionality
+to display a window and wait for a key press to close the window and terminate the experiment. The source file and .yaml
+config files for this simple example can be found in ioHub/examples/simple :</p>
+</div></blockquote>
+<p>import ioHub
+from ioHub.experiment import ioHubExperimentRuntime</p>
+<dl class="docutils">
+<dt>class ExperimentRuntime(ioHubExperimentRuntime):</dt>
+<dd><dl class="first last docutils">
+<dt>def __init__(self,configFileDirectory, configFile):</dt>
+<dd>ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)</dd>
+<dt>def run(self,*args,**kwargs):</dt>
+<dd><p class="first">###
+#
+# Your experiment logic start here. You can do anything you would in a standard psychopy script.
+# You can even import a psychopy script and just call a function in it to run it if you wanted
+#</p>
+<p>#
+# See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
+#</p>
+<p>print &#8220;Starting Experiment Script...&#8221;</p>
+<p># ....</p>
+<p>print &#8220;Completed Experiment Script...&#8221;</p>
+<p class="last">### End run method / end of experiment logic</p>
+</dd>
+</dl>
+</dd>
+<dt>def main(configurationDirectory):</dt>
+<dd><p class="first">#
+# Main function simply checks for a command line arg and assumes it is the name of the experiment config file if
+# it was provided, otherwise it uses &#8220;experiment_config.yaml&#8221; by default
+# An instance of ExperimentRuntime is created and the start method is called for it, which calls the .run method you
+# implemented for your experiment.</p>
+<p>import sys
+if len(sys.argv)&gt;1:</p>
+<blockquote>
+<div>configFile=unicode(sys.argv[1])
+runtime=ExperimentRuntime(configurationDirectory, configFile)</div></blockquote>
+<dl class="docutils">
+<dt>else:</dt>
+<dd>runtime=ExperimentRuntime(configurationDirectory, &#8220;experiment_config.yaml&#8221;)</dd>
+</dl>
+<p class="last">runtime.start()</p>
+</dd>
+<dt>if __name__ == &#8220;__main__&#8221;:</dt>
+<dd><p class="first"># This code only gets called when the python file is executed, not if it is loaded as a module by another python file
+#
+# The module_directory function determines what the current directory is of the function that is passed to it. It is
+# more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+configurationDirectory=ioHub.module_directory(main)</p>
+<p class="last"># run the main function, which starts the experiment runtime
+main(configurationDirectory)</p>
+</dd>
+</dl>
+<p>################################## End of Stub Example ioHubExperimentRuntime implementation ###############################</p>
+<p>Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
+These files are read by the ioHubExperimentRuntime and the ioHub system and make it much easier for the ioHub and associated devices to be
+configurated than if you needed to do it within a python script. So while at first these files may seem like extra overhead, we hope that they are found to
+actually save time and work in the end. Comments and feedback on this would be highly apprieciated.</p>
+<p>The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
+a command prompt at the ioHub/examples/simple folder and type:</p>
+<blockquote>
+<div>python.exe run.py</div></blockquote>
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getLoadedExperimentConfiguration">
+<tt class="descname">getLoadedExperimentConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getLoadedExperimentConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the full YAML parsing of experiment_config.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getSavedExperimentParameters">
+<tt class="descname">getSavedExperimentParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getSavedExperimentParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the experiment parameters saved to the DataStore.
+These are also displayed in the read-only Experiment Dialog.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getSavedSessionParameters">
+<tt class="descname">getSavedSessionParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getSavedSessionParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the experiment session parameters saved to the DataStore.
+These are also displayed in the Session Dialog. These do &#8216;not&#8217; include
+user defined parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getSavedUserDefinedParameters">
+<tt class="descname">getSavedUserDefinedParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getSavedUserDefinedParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the experiment session user defined parameters saved to the DataStore.
+These are also displayed in the Session Dialog.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.printExceptionDetails">
+<em class="property">static </em><tt class="descname">printExceptionDetails</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.printExceptionDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out stack trace info for the last exception in multiple ways.
+No idea if all of this is needed, in fact I know it is not. But for now why not.
+Taken straight from the python 2.7.3 manual on Exceptions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.run">
+<tt class="descname">run</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>The run method is what gets calls when the ioHubExperimentRuntime.start method is called. The run method is intended
+to be over written by your extension class and should include your experiment / program logic. By default it does nothing.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><a href="#id1"><span class="problematic" id="id2">*</span></a>args: list of unnamed input variables passed to method
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: dictionary of named variables passed to method. Variable names are the dict keys.</dd>
+</dl>
+<p>Return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>The start method should be called by the main portion of your experiment script.
+This method simply wraps a call to self.run() in an exception handler that tries to
+ensure any error that occurs is printed out in detail, and that the ioHub server process
+is terminates even in the case of an exception that may not have been handled explicitly
+in your script.</p>
+<p>Args: None
+Return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="example-usage">
+<h2>3.1.2. Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<p>The Quickstart section of this manual contains an example of how to use the
+ioHubExperimentRuntime class and create the two .yaml configuration files.</p>
+<p>The ioHub examples folder also has many demos of how to use this class, as most
+of the demos were written using it.</p>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

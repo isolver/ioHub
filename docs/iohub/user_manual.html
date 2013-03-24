@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub Package User Manual &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">ioHub Package User Manual</a><ul>
+<li><a class="reference internal" href="#initalizing-the-iohub-event-server">Initalizing the ioHub Event Server</a><ul>
+<li><a class="reference internal" href="#method-1-simple-initialization-directly-within-a-python-script">Method 1: Simple Initialization Directly within a Python Script</a></li>
+<li><a class="reference internal" href="#method-2-using-the-iohubexperimentruntime-class-and-yaml-configuration-files">Method 2: Using the ioHubExperimentRuntime Class and YAML Configuration Files</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#working-with-iohub-devices-and-device-events">Working with ioHub Devices and Device Events</a><ul>
+<li><a class="reference internal" href="#accessing-iohub-devices">Accessing ioHub Devices</a></li>
+<li><a class="reference internal" href="#accessing-iohub-device-events">Accessing ioHub Device Events</a><ul>
+<li><a class="reference internal" href="#device-independent-event-access">Device Independent Event Access</a></li>
+<li><a class="reference internal" href="#device-level-event-access">Device Level Event Access</a></li>
+<li><a class="reference internal" href="#accessing-a-specific-event-type">Accessing a Specific Event Type</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#clearing-iohub-device-event-buffers">Clearing ioHub Device Event Buffers</a></li>
+<li><a class="reference internal" href="#the-iohub-time-base">The ioHub Time Base</a></li>
+<li><a class="reference internal" href="#setting-experiment-and-iohub-process-priority-and-affinity">Setting Experiment and ioHub Process Priority and Affinity</a></li>
+<li><a class="reference internal" href="#using-experiment-runtime-utility-classes">Using Experiment Runtime Utility Classes</a></li>
+<li><a class="reference internal" href="#the-iodatastore">The ioDataStore</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+          
+          
+            <li>
+  <a href="../_sources/iohub/user_manual.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-package-user-manual">
+<h1>ioHub Package User Manual<a class="headerlink" href="#iohub-package-user-manual" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="initalizing-the-iohub-event-server">
+<h2>Initalizing the ioHub Event Server<a class="headerlink" href="#initalizing-the-iohub-event-server" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="method-1-simple-initialization-directly-within-a-python-script">
+<h3>Method 1: Simple Initialization Directly within a Python Script<a class="headerlink" href="#method-1-simple-initialization-directly-within-a-python-script" title="Permalink to this headline">¶</a></h3>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="method-2-using-the-iohubexperimentruntime-class-and-yaml-configuration-files">
+<h3>Method 2: Using the ioHubExperimentRuntime Class and YAML Configuration Files<a class="headerlink" href="#method-2-using-the-iohubexperimentruntime-class-and-yaml-configuration-files" title="Permalink to this headline">¶</a></h3>
+<p>Contents TBD</p>
+</div>
+</div>
+<div class="section" id="working-with-iohub-devices-and-device-events">
+<h2>Working with ioHub Devices and Device Events<a class="headerlink" href="#working-with-iohub-devices-and-device-events" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<div class="section" id="accessing-iohub-devices">
+<h3>Accessing ioHub Devices<a class="headerlink" href="#accessing-iohub-devices" title="Permalink to this headline">¶</a></h3>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="accessing-iohub-device-events">
+<h3>Accessing ioHub Device Events<a class="headerlink" href="#accessing-iohub-device-events" title="Permalink to this headline">¶</a></h3>
+<p>Contents TBD</p>
+<div class="section" id="device-independent-event-access">
+<h4>Device Independent Event Access<a class="headerlink" href="#device-independent-event-access" title="Permalink to this headline">¶</a></h4>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="device-level-event-access">
+<h4>Device Level Event Access<a class="headerlink" href="#device-level-event-access" title="Permalink to this headline">¶</a></h4>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="accessing-a-specific-event-type">
+<h4>Accessing a Specific Event Type<a class="headerlink" href="#accessing-a-specific-event-type" title="Permalink to this headline">¶</a></h4>
+<p>Contents TBD</p>
+</div>
+</div>
+</div>
+<div class="section" id="clearing-iohub-device-event-buffers">
+<h2>Clearing ioHub Device Event Buffers<a class="headerlink" href="#clearing-iohub-device-event-buffers" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="the-iohub-time-base">
+<h2>The ioHub Time Base<a class="headerlink" href="#the-iohub-time-base" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="setting-experiment-and-iohub-process-priority-and-affinity">
+<h2>Setting Experiment and ioHub Process Priority and Affinity<a class="headerlink" href="#setting-experiment-and-iohub-process-priority-and-affinity" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="using-experiment-runtime-utility-classes">
+<h2>Using Experiment Runtime Utility Classes<a class="headerlink" href="#using-experiment-runtime-utility-classes" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+</div>
+<div class="section" id="the-iodatastore">
+<h2>The ioDataStore<a class="headerlink" href="#the-iodatastore" title="Permalink to this headline">¶</a></h2>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+<p>Contents TBD</p>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

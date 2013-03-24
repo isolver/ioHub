@@ -1,0 +1,46 @@
+monitor_devices:
+    - Display:
+        name: display
+        reporting_unit_type: pix
+        device_number: 0
+        physical_dimensions:
+            width: 500
+            height: 281
+            unit_type: mm
+        default_eye_distance:
+            surface_center: 500
+            unit_type: mm
+        psychopy_monitor_name: ioDefault
+        origin: center
+    - Keyboard:
+        name: kb
+        enable: True
+        save_events: True
+        stream_events: True
+        auto_report_events: True
+        event_buffer_length: 256
+    - Mouse:
+        name: mouse
+        enable: True
+        save_events: True
+        stream_events: True
+        auto_report_events: True
+        event_buffer_length: 256
+    - Experiment:
+        name: experimentRuntime
+        save_events: True
+        stream_events: True
+        auto_report_events: True
+        event_buffer_length: 64
+    - xinput.Gamepad:
+        device_number: -1
+        name: gamepad
+        enable: True
+        save_events: True
+        stream_events: True
+        auto_report_events: True
+        event_buffer_length: 256
+        device_timer:
+            interval: 0.005
+data_store:
+    enable: True

@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2.6.1.2.4. Tobii EyeTracker Class &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../../index.html" />
+    <link rel="up" title="1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice" href="../eyetracker.html" />
+    <link rel="next" title="1.2.7. Gamepad Device and Events API" href="../xinput_gamepad.html" />
+    <link rel="prev" title="1.2.6.1.2.3. SR Research EyeLink EyeTracker Class" href="SR_Research_Implementation_Notes.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1.2.6.1.2.4. Tobii EyeTracker Class</a><ul>
+<li><a class="reference internal" href="#installing-the-tobii-tobii-analytics-sdk-3-0-rc-1">1.2.6.1.2.4.1. Installing the Tobii Tobii Analytics SDK 3.0 RC 1</a></li>
+<li><a class="reference internal" href="#tobii-device-iohub-config-yaml-settings">1.2.6.1.2.4.2. Tobii Device iohub_config.yaml settings</a></li>
+<li><a class="reference internal" href="#supported-eyetracker-device-event-types">1.2.6.1.2.4.3. Supported EyeTracker Device Event Types</a></li>
+<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.4.4. General Considerations</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="SR_Research_Implementation_Notes.html"
+         title="previous chapter">&laquo; 1.2.6.1.2.3. SR Research EyeLink EyeTracker Class</a></li>
+  <li><a href="../xinput_gamepad.html"
+         title="next chapter">1.2.7. Gamepad Device and Events API &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../../_sources/iohub/api/device_details/eyetracker_interface/Tobii_Implementation_Notes.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="tobii-eyetracker-class">
+<h1>1.2.6.1.2.4. Tobii EyeTracker Class<a class="headerlink" href="#tobii-eyetracker-class" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported Platforms:</p>
+<p>Windows (XP SP2, SP3, Windows 7), Linux should work as well, but has yet to be tested.</p>
+<p>Supported Tobii Eye Tracker Models:</p>
+<p class="last">Tobii Analytics SDK 3.0 RC 1, which is the Tobii software that the Tobii implementation of the ioHub common eye tracker interface relies on, supports the following eye trackers out-of-the-box: Tobii X60, Tobii X120, Tobii T60, Tobii T120, Tobii T60 XL, Tobii TX300 and Tobii IS-1.
+Tobii Analytics SDK 3.0 RC 1 does <strong>not</strong> support the following eye trackers, and therefore neither does the ioHub common eye tracker interface: Tobii 1750, Tobii X50, Tobii 2150, Tobii 1740 (D10), Tobii P10, C-Eye, and PCEye. Support for Tobii 1750, Tobii X50 and Tobii 2150 models will be added in a later firmware release.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently Python 2.6 must be used to use the Tobii eye tracker, Python 2.7 is not supported. When a Python 2.7 compatible version of the Tobii Python package becomes available, the Tobii system will also be able to use used within PsychoPy and ioHub when running Python 2.7.</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.eyetracker.hw.tobii.</tt><tt class="descname">EyeTracker</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice" title="ioHub.devices.eyetracker.EyeTrackerDevice"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.eyetracker.EyeTrackerDevice</span></tt></a></p>
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.getLastGazePosition">
+<tt class="descname">getLastGazePosition</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.getLastGazePosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the latest 2D eye gaze position retrieved from the Tobii device.
+This represents where on the calibrated surface the eye tracker is 
+reporting each eyes gaze vector is intersecting.</p>
+<p>In general, the y or vertical component of each eyes gaze position should
+be the same value, since in typical user populations the two eyes are
+yoked vertically when they move. Therefore any difference between the 
+two eyes in the y dimention is likely due to eye tracker error.</p>
+<p>Differences between the x, or horizontal component of the gaze position,
+indicate that the participant is being reported as looking behind or
+in front of the calibrated plane. When a user is looking at the 
+calibration surface , the x component of the two eyes gaze position should be the same.
+Differences between the x value for each eye either indicates that the
+user is not focussing at the calibrated depth, or that there is error in the eye data.</p>
+<p>The above remarks are true for any eye tracker in general.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.getLastSample">
+<tt class="descname">getLastSample</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.getLastSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the latest sample retrieved from the Tobii device. The Tobii
+system always using the BinocularSample Evenet type. The following fields
+of this ioHub event type are supported:</p>
+<blockquote>
+<div>TO DO: give list of fields used in binoc. sample event and a meaning
+for each field that is relevent for the Tobii system.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.isConnected">
+<tt class="descname">isConnected</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.isConnected" title="Permalink to this definition">¶</a></dt>
+<dd><p>isConnected returns whether the Tobii is connected to the experiment PC
+and if the tracker state is valid. Returns True if the tracker can be 
+put into Record mode, etc and False if there is an error with the tracker
+or tracker connection with the experiment PC.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.isRecordingEnabled">
+<tt class="descname">isRecordingEnabled</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.isRecordingEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>isRecordingEnabled returns the recording state from the eye tracking device.
+True == the device is recording data
+False == Recording is not occurring</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.runSetupProcedure">
+<tt class="descname">runSetupProcedure</tt><big>(</big><em>starting_state=90</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.runSetupProcedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>runSetupProcedure passes the graphics environment over to the eye tracker interface so that it can perform such things
+as camera setup, calibration, etc. This is a blocking call that will not return until the setup procedure is done; at which time
+the graphics environment can be taken back over by psychopy.  See the EyeTrackerSetupGraphics class for more information.</p>
+<p>The graphicsContext argument should likely be the psychopy full screen window instance that has been created
+for the experiment.</p>
+<dl class="docutils">
+<dt>Result:</dt>
+<dd>bool: True if setup / calibration procedue passed, False otherwise. If false, should likely exit experiment.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.sendCommand">
+<tt class="descname">sendCommand</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Tobii has several custom commands that can be sent to set or get
+information about the eye tracker that is specific to Tobii
+systems. Valid command tokens and associated possible valid command values
+are as follows:</p>
+<dl class="docutils">
+<dt>TO DO: complete based on these tracker object methods</dt>
+<dd><ul class="first last simple">
+<li>getTrackerDetails</li>
+<li>getName</li>
+<li>setName</li>
+<li>getHeadBox</li>
+<li>setXSeriesPhysicalPlacement (no-op if tracker is not an X series system)</li>
+<li>getEyeTrackerPhysicalPlacement</li>
+<li>getAvailableExtensions</li>
+<li>getEnabledExtensions</li>
+<li>enableExtension</li>
+<li></li>
+</ul>
+</dd>
+</dl>
+<p>Commands always return their result at the end of the command call, if
+there is any result to return. Otherwise EyeTrackerConstants.EYETRACKER_OK
+is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>message_contents</em>, <em>time_offset=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sendMessage method sends a text or int message to the eye tracker.</p>
+<p>Messages are generally used to send information you want 
+saved with the native eye data file and are often used to 
+synchronize stimulus changes in the experiment with the eye
+data stream being saved to the native eye tracker data file (if any).</p>
+<p>This means that the sendMessage implementation needs to 
+perform in real-time, with a delay of &lt;1 msec from when a message is 
+sent to when it is time stamped by the eye tracker, for it to be 
+accurate in this regard.</p>
+<p>If this standard can not be met, the expected delay and message 
+timing precision (variability) should be provided in the eye tracker&#8217;s 
+implementation notes.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>message_contents (str or int): </dt>
+<dd>If message_contents is a string, check with the implementations documentation if there are any string length limits.</dd>
+</dl>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>time_offset (float): sec.msec_usec time offset that the time stamp of</dt>
+<dd><p class="first">the message should be offset in the eye tracker data file.
+time_offset can be used so that a message can be sent
+for a display change <strong>BEFORE</strong> or <strong>AFTER</strong> the actual
+flip occurred, using the following formula:</p>
+<p>time_offset = sendMessage_call_time - event_time_message_represent</p>
+<p>Both times should be based on the ioHub.Computer.getTime() time base.</p>
+<p class="last">If time_offset is not supported by the eye tracker implementation being used, a warning message will be printed to stdout.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt>
+<dd>(int): EyeTrackerConstants.EYETRACKER_OK, EyeTrackerConstants.EYETRACKER_ERROR, or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.setConnectionState">
+<tt class="descname">setConnectionState</tt><big>(</big><em>enable</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.setConnectionState" title="Permalink to this definition">¶</a></dt>
+<dd><p>setConnectionState is a no-op when using the Tobii system, as the 
+connection is established when the Tobii EyeTracker class is created, and remains
+active until the program ends, or a error occurs resulting in the loss
+of the tracker connection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.setRecordingState">
+<tt class="descname">setRecordingState</tt><big>(</big><em>recording</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.setRecordingState" title="Permalink to this definition">¶</a></dt>
+<dd><p>setRecordingState is used to start or stop the recording of data from 
+the eye tracking device.</p>
+<dl class="docutils">
+<dt>args:</dt>
+<dd><dl class="first last docutils">
+<dt>recording (bool): if True, the eye tracker will start recordng available</dt>
+<dd>eye data and sending it to the experiment program if data streaming
+was enabled for the device. If recording == False, then the eye
+tracker stops recording eye data and streaming it to the experiment.</dd>
+</dl>
+</dd>
+</dl>
+<p>If the eye tracker is already recording, and setRecordingState(True) is
+called, the eye tracker will simple continue recording and the method call
+is a no-op. Likewise if the system has already stopped recording and 
+setRecordingState(False) is called again.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.trackerSec">
+<tt class="descname">trackerSec</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.trackerSec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current eye tracker time, normalized to sec.msec.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.trackerTime">
+<tt class="descname">trackerTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.trackerTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current eye tracker time in native time base. The Tobii system uses a 
+usec timebase.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.tobii.EyeTracker.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.tobii.EyeTracker.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="installing-the-tobii-tobii-analytics-sdk-3-0-rc-1">
+<h2>1.2.6.1.2.4.1. Installing the Tobii Tobii Analytics SDK 3.0 RC 1<a class="headerlink" href="#installing-the-tobii-tobii-analytics-sdk-3-0-rc-1" title="Permalink to this headline">¶</a></h2>
+<p>A copy of the Tobii Python Module and required C DLLs is bundled with the ioHub
+module for Windows when using Python 2.6. The only additional software <strong>you need
+to be sure is installed is the Apple Boujour Software.</strong></p>
+</div>
+<div class="section" id="tobii-device-iohub-config-yaml-settings">
+<h2>1.2.6.1.2.4.2. Tobii Device iohub_config.yaml settings<a class="headerlink" href="#tobii-device-iohub-config-yaml-settings" title="Permalink to this headline">¶</a></h2>
+<p>To specify the use of a Tobii eye tracking device within your experiment,
+add the following to the iohub_config.yaml file in the devices list:</p>
+<div class="highlight-python"><pre>- eyetracker.hw.tobii.EyeTracker:
+    # Should the device be enabled by the ioHub Server? If False, it is the
+    # same as if the device was not in the device list at all.
+    enable: True
+    # The name of the device when accessed runtime the experiment run-time.
+    name: tracker
+    # Optionally restrict detected Tobii eye trackers that are accessable by
+    # the computer to those with a matching Tobii model name. To not filter
+    # by model name, comment the parameter out, or remove it from the
+    # device configuration.
+    #model_name:
+    # Optionally restrict the detected Tobii eye tracker to only the one
+    # with a matching Tobii serial number. To not filter by serial number,
+    # comment the parameter out, or remove it from the device configuration.
+    #serial_number:
+    # Should events generated by the device be saved to the ioHub DataStore?
+    save_events: True
+    # Should events generated by the device be streamed to the Experiment Process
+    # for online access?
+    stream_events: True
+    # The number of events that the device event que will store before replacing
+    # the oldest event in the que with each new event.
+    event_buffer_length: 512
+    runtime_settings:
+        # The sampling rate (in Hz) to set the Tobii tracker too. This must be a valid
+        # Sampling rate for the Tobii model you are using.
+        sampling_rate: 60.0
+        calibration:
+            # The Tobii ioHub Common Eye Tracker Interface currently support
+            # a 9 pt HV9_POINTS calibration mode.
+            # This is not a limitation of the Tobii system, it is of the
+            # current ioHub Common Eye Tracker Interface implementation.
+            # Anyone want to add support for more calibration types for the Tobii? ;)
+            type: HV9_POINTS
+            # auto_pace can be True or False. If True, the eye tracker will
+            # automatically progress from one calibration point to the next.
+            # If False, a manual key or button press is needed to progress to
+            # the next point. Currently this parameter is ignored and auto_pace
+            # is always True. TODO: Fix this. ;)
+            auto_pace: True
+            # pacing_speed is the number of sec.msec that a calibration point should
+            # be displayed before moving onto the next point when auto_pace is set to true.
+            # If auto_pace is False, pacing_speed is ignored. Currently this parameter is
+            # ignored and pacing_speed is always equal to 2 seconds.
+            # TODO: Fix this. ;)
+            pacing_speed: 1.5
+            # screen_background_color specifies the r,g,b,a background color to
+            # set the calibration, validation, etc, screens to. Each element of the color
+            # should be a value between 0 and 255. 0 == black, 255 == white. In general
+            # the last value of the color list (alpha) can be left at 255, indicating
+            # the color not mixed with the background color at all.
+            screen_background_color: [128,128,128,255]
+            # Target type defines what form of calibration graphic should be used
+            # during calibration, validation, etc. modes.
+            # Currently the Tobii implementation supports the following
+            # target type: CIRCLE_TARGET. To do: Add support for other types, etc.
+            target_type: CIRCLE_TARGET
+            # The associated target attributes sub properties must be supplied
+            # for the given target_type. If target type attribute sections are provided
+            # for target types other than the entry associated with the specified target_type value
+            # they will simply be ignored.
+            circle_attributes:
+                outer_diameter: 33
+                inner_diameter: 6
+                outer_color: [255,255,255,255]
+                inner_color: [255,0,0,255]</pre>
+</div>
+</div>
+<div class="section" id="supported-eyetracker-device-event-types">
+<h2>1.2.6.1.2.4.3. Supported EyeTracker Device Event Types<a class="headerlink" href="#supported-eyetracker-device-event-types" title="Permalink to this headline">¶</a></h2>
+<p>The Tobii Analytics SDK 3.0 RC 1 provides real-time access to binocular sample data.
+Therefore the BinocularEyeSample event type is supported when using a Tobii as
+the ioHub EyeTracker device.</p>
+</div>
+<div class="section" id="general-considerations">
+<h2>1.2.6.1.2.4.4. General Considerations<a class="headerlink" href="#general-considerations" title="Permalink to this headline">¶</a></h2>
+<p>The Tobii Analytics SDK 3.0 RC 1 software provides streaming eye sample functionality,
+there is no functionality to save the data being streamed to disk by the Tobii Analytics SDK 3.0 RC 1
+itself. Therefore it is highly recommended that the ioDataStore be enabled for experiments using
+the Tobii system, as the ioDataStore will save all sample events received from the Tobii system
+when the ioHub EyeTracking device interface is in &#8216;recording mode&#8217;. The hdf5 file saved
+by the ioDataStore can then be used to retrieve the Tobii sample data for post hoc analysis.</p>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ioHub.devices.keyboard &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="ioHub.devices" href="../devices.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/api/indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../iohub/iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"></ul>
+</li>
+          
+          
+            
+          
+          
+            <li></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <h1>Source code for ioHub.devices.keyboard</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ioHub</span>
+<span class="sd">.. file: ioHub/devices/keyboard/__init__.py</span>
+
+<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
+
+<span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
+<span class="sd">.. fileauthor:: Sol Simpson &lt;sol@isolver-software.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">global</span> <span class="n">Keyboard</span>
+<span class="n">Keyboard</span><span class="o">=</span><span class="bp">None</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">ujson</span>
+
+<span class="kn">import</span> <span class="nn">ioHub</span>
+<span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">KeyboardConstants</span><span class="p">,</span> <span class="n">DeviceConstants</span><span class="p">,</span> <span class="n">EventConstants</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">Device</span><span class="p">,</span> <span class="n">Computer</span>
+
+
+
+
+<span class="c">##### Modifier Keys #####</span>
+
+<span class="n">MODIFIER_KEYS</span><span class="o">=</span><span class="n">KeyboardConstants</span><span class="o">.</span><span class="n">_modifierCodes</span><span class="o">.</span><span class="n">_names</span>
+
+<span class="n">dt</span><span class="o">=</span><span class="n">N</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s">&#39;CONTROL_LEFT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;CONTROL_RIGHT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;SHIFT_LEFT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;SHIFT_RIGHT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;MENU_LEFT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;MENU_RIGHT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">),(</span><span class="s">&#39;WIN_LEFT&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">bool</span><span class="p">)])</span>
+<span class="n">MODIFIER_ACTIVE</span><span class="o">=</span><span class="n">N</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ioHubKeyboardDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">KEYBOARD</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;_keyStatusDict&#39;</span><span class="p">,</span><span class="s">&#39;_lastProcessedEventID&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keyStatusDict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="o">=</span><span class="mi">0</span>
+
+
+    <span class="k">def</span> <span class="nf">_getCharEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        _getCharEvents is called automatically as part of the keyboard event handling process within ioHub.</span>
+<span class="sd">        Users do not need to call it, thus why it is a _ &#39;private&#39; method.</span>
+
+<span class="sd">        _getCharEvents uses KeyPress and KeyRelease Events to generate Keyboard Char Events.</span>
+<span class="sd">        A Char event has the same base event structure as a KeyReleaseEvent, but adds a</span>
+<span class="sd">        field to hold an associated key press event and a second field to hold the duration</span>
+<span class="sd">        that the keyboard char was pressed.</span>
+
+<span class="sd">        When a KeyPressEvent is detected, the event is stored in a dictionary using the event.key as the dict key.</span>
+<span class="sd">        Repeated &#39;press&#39; events for the same key are ignored (i.e. keyboard repeats when you hold a key down).</span>
+
+<span class="sd">        When a KeyReleaseEvent is detected, the event.key is checked for in the char dict. If it is present,</span>
+<span class="sd">        a KeyboardCharEvent is created using the KeyboardReleaseEvent as the basis for the Char event, and the</span>
+<span class="sd">        KeyboardStartEvent that was stored in the dict for the startEvent, and duration calculated fields.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">press_events</span><span class="o">=</span><span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEvents</span><span class="p">(</span><span class="n">event_type_id</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_PRESS</span><span class="p">,</span><span class="n">clearEvents</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="p">]</span>
+        <span class="n">release_events</span><span class="o">=</span><span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEvents</span><span class="p">(</span><span class="n">event_type_id</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_RELEASE</span><span class="p">,</span><span class="n">clearEvents</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="p">]</span>
+
+        <span class="n">keypress_events</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">keyrelease_events</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">press_events</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">press_events</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="o">=</span><span class="n">press_events</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span>
+                <span class="n">keypress_events</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">press_events</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">press_events</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">i</span><span class="o">-=</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">release_events</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">release_events</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lastProcessedEventID</span><span class="o">=</span><span class="n">release_events</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span>
+                <span class="n">keyrelease_events</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">release_events</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">release_events</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">i</span><span class="o">-=</span><span class="mi">1</span>
+
+        <span class="n">press_events</span><span class="o">=</span><span class="bp">None</span>
+        <span class="n">release_events</span><span class="o">=</span><span class="bp">None</span>
+
+        <span class="n">charEvents</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keypress_events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keyStatusDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_keyStatusDict</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]]</span><span class="o">=</span><span class="n">e</span>
+
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keyrelease_events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keyStatusDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">key_press</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keyStatusDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">key_release</span><span class="o">=</span><span class="n">e</span>
+                <span class="n">charEvent</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">key_release</span><span class="p">)</span>
+                <span class="n">charEvent</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">KeyboardCharEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID</span>
+                <span class="n">charEvent</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_ID_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">_getNextEventID</span><span class="p">()</span>
+                <span class="n">charEvent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key_press</span><span class="p">))</span>
+                <span class="n">charEvent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key_release</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">]</span><span class="o">-</span><span class="n">key_press</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">])</span>
+                <span class="n">charEvents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">charEvent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charEvents</span>
+
+    <span class="k">def</span> <span class="nf">clearEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cEvents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCharEvents</span><span class="p">()</span>
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_addNativeEventToBuffer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">cEvents</span><span class="p">]</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">clearEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_handleEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">e</span><span class="p">):</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">_handleEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">cEvents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCharEvents</span><span class="p">()</span>
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_addNativeEventToBuffer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">cEvents</span><span class="p">]</span>
+
+<span class="c">###### recast based on OS ##########</span>
+
+<span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Windows&#39;</span><span class="p">:</span>
+    <span class="kn">from</span>  <span class="nn">_win32</span> <span class="kn">import</span>  <span class="n">KeyboardWindows32</span>
+    
+    <span class="k">class</span> <span class="nc">Keyboard</span><span class="p">(</span><span class="n">ioHubKeyboardDevice</span><span class="p">,</span><span class="n">KeyboardWindows32</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">deviceConfig</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
+            <span class="n">Keyboard</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[</span><span class="n">KeyboardPressEvent</span><span class="p">,</span> <span class="n">KeyboardReleaseEvent</span><span class="p">,</span><span class="n">KeyboardCharEvent</span><span class="p">]</span>
+            <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
+                <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
+                <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">Keyboard</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
+                <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
+                <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
+                <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">deviceConfig</span>
+                        
+            <span class="n">ioHubKeyboardDevice</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            <span class="n">KeyboardWindows32</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+
+<span class="k">elif</span> <span class="n">Computer</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s">&#39;Linux&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">_linux</span> <span class="kn">import</span> <span class="n">KeyboardLinux</span>
+<div class="viewcode-block" id="Keyboard"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.Keyboard">[docs]</a>    <span class="k">class</span> <span class="nc">Keyboard</span><span class="p">(</span><span class="n">ioHubKeyboardDevice</span><span class="p">,</span><span class="n">KeyboardLinux</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">deviceConfig</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
+            <span class="n">Keyboard</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[</span><span class="n">KeyboardPressEvent</span><span class="p">,</span> <span class="n">KeyboardReleaseEvent</span><span class="p">,</span><span class="n">KeyboardCharEvent</span><span class="p">]</span>
+            <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
+                <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
+                <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">Keyboard</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
+                <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
+                <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
+                <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="n">deviceConfig</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
+                <span class="p">}</span>       
+            <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">deviceConfig</span>
+            <span class="n">ioHubKeyboardDevice</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+            <span class="n">KeyboardLinux</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
+</div>
+<span class="k">else</span><span class="p">:</span> <span class="c"># assume OS X</span>
+    <span class="k">print</span> <span class="s">&#39;Keyboard not implemented on OS X yet.&#39;</span>
+    
+<span class="c">############# OS independent Keyboard Event classes ####################</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">DeviceEvent</span>
+
+<div class="viewcode-block" id="KeyboardEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.KeyboardEvent">[docs]</a><span class="k">class</span> <span class="nc">KeyboardEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">Keyboard</span>
+
+    <span class="c"># TODO: Determine real maximum key name string and modifiers string</span>
+    <span class="c"># lengths and set appropriately.</span>
+    <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="s">&#39;scan_code&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">int</span><span class="p">),</span>  <span class="c"># the scan code for the key that was pressed.</span>
+                                            <span class="c"># Represents the physical key id on the keyboard layout</span>
+
+                    <span class="p">(</span><span class="s">&#39;ascii_code&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span>  <span class="c"># the ASCII byte value for the key (0 - 255)</span>
+
+                    <span class="p">(</span><span class="s">&#39;key_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">int</span><span class="p">),</span>      <span class="c"># the translated key ID, based on the keyboard local settings of the OS.</span>
+
+                    <span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">str</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span>       <span class="c"># a string representation of what key was pressed.</span>
+
+                    <span class="p">(</span><span class="s">&#39;modifiers&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">str</span><span class="p">,</span><span class="mi">80</span><span class="p">),</span>  <span class="c"># indicates what modifier keys were active when the key was pressed.</span>
+
+                    <span class="p">(</span><span class="s">&#39;window_id&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="c"># the id of the window that had focus when the key was pressed.</span>
+                    <span class="p">]</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">DeviceEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">createEventAsDict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">values</span><span class="p">):</span>
+        <span class="n">ed</span><span class="o">=</span><span class="nb">super</span><span class="p">(</span><span class="n">KeyboardEvent</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">createEventAsDict</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ed</span><span class="p">[</span><span class="s">&#39;modifiers&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ed</span>
+        <span class="n">ed</span><span class="p">[</span><span class="s">&#39;modifiers&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ujson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ed</span><span class="p">[</span><span class="s">&#39;modifiers&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ed</span>
+
+    <span class="c">#noinspection PyUnresolvedReferences</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">createEventAsNamedTuple</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">valueList</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="p">(</span><span class="o">*</span><span class="n">valueList</span><span class="p">)</span>
+        <span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">ujson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="p">(</span><span class="o">*</span><span class="n">valueList</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="KeyboardKeyEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.KeyboardKeyEvent">[docs]</a><span class="k">class</span> <span class="nc">KeyboardKeyEvent</span><span class="p">(</span><span class="n">KeyboardEvent</span><span class="p">):</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_INPUT</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :rtype : object</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">KeyboardEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeyboardPressEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.KeyboardPressEvent">[docs]</a><span class="k">class</span> <span class="nc">KeyboardPressEvent</span><span class="p">(</span><span class="n">KeyboardKeyEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A KeyboardPressEvent is generated when a key on a monitored keyboard is depressed.</span>
+<span class="sd">    The event is created prior to the keyboard key being released. If a key is held down for</span>
+<span class="sd">    an extended period of time, multiple KeyboardPressEvent events may be generated depending</span>
+<span class="sd">    on your OS and the OS&#39;s settings for key repeat event creation. </span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.KEYBOARD_PRESS</span>
+<span class="sd">    Event Type String: &#39;KEYBOARD_PRESS&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_PRESS</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">KeyboardKeyEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">KeyboardKeyEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="KeyboardReleaseEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.KeyboardReleaseEvent">[docs]</a><span class="k">class</span> <span class="nc">KeyboardReleaseEvent</span><span class="p">(</span><span class="n">KeyboardKeyEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A KeyboardReleaseEvent is generated when a key on a monitored keyboard is released.</span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.KEYBOARD_RELEASE</span>
+<span class="sd">    Event Type String: &#39;KEYBOARD_RELEASE&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_RELEASE</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">KeyboardKeyEvent</span><span class="o">.</span><span class="n">IOHUB_DATA_TABLE</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">KeyboardKeyEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeyboardCharEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/keyboard.html#ioHub.devices.keyboard.KeyboardCharEvent">[docs]</a><span class="k">class</span> <span class="nc">KeyboardCharEvent</span><span class="p">(</span><span class="n">KeyboardReleaseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A KeyboardCharEvent is generated when a key on the keyboard is pressed and then</span>
+<span class="sd">    released. The KeyboardKeyEvent includes information about the key that was</span>
+<span class="sd">    released, as well as a refernce to the KeyboardPressEvent that is associated</span>
+<span class="sd">    with the KeyboardReleaseEvent. Any auto-repeat functionality that may be </span>
+<span class="sd">    created by the OS keyboard driver is ignored.</span>
+<span class="sd">    </span>
+<span class="sd">    Event Type ID: EventConstants.KEYBOARD_CHAR</span>
+<span class="sd">    Event Type String: &#39;KEYBOARD_CHAR&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="s">&#39;pressEvent&#39;</span><span class="p">,</span><span class="n">KeyboardPressEvent</span><span class="o">.</span><span class="n">NUMPY_DTYPE</span><span class="p">),</span>  <span class="c"># contains the keyboard press event that is</span>
+                                                                      <span class="c"># associated with the release event</span>
+
+                      <span class="p">(</span><span class="s">&#39;duration&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="c"># duration of the Keyboard char event</span>
+    <span class="p">]</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_CHAR</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">KeyboardReleaseEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">createEventAsDict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">values</span><span class="p">):</span>
+        <span class="n">ed</span><span class="o">=</span><span class="nb">super</span><span class="p">(</span><span class="n">KeyboardEvent</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">createEventAsDict</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ed</span><span class="p">[</span><span class="s">&#39;pressEvent&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ed</span>
+        <span class="n">ed</span><span class="p">[</span><span class="s">&#39;pressEvent&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">KeyboardPressEvent</span><span class="o">.</span><span class="n">createEventAsDict</span><span class="p">(</span><span class="n">ed</span><span class="p">[</span><span class="s">&#39;pressEvent&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ed</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">createEventAsNamedTuple</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">valueList</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="p">(</span><span class="o">*</span><span class="n">valueList</span><span class="p">)</span>
+        <span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">KeyboardPressEvent</span><span class="o">.</span><span class="n">createEventAsNamedTuple</span><span class="p">(</span><span class="n">valueList</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">namedTupleClass</span><span class="p">(</span><span class="o">*</span><span class="n">valueList</span><span class="p">)</span></div>
+</pre></div>
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

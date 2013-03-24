@@ -1,0 +1,596 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2.8. ioHub.devices.daq.DAQDevice &mdash; ioHub 0.6rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-2.2.1.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive-2.2.1.min.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.6rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/..\..\Python-2.7.3\Lib\site-packages\IPython\frontend\html\notebook\static\mathjax"></script>
+    <script type="text/javascript" src="../../../_static/js/bootstrap-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="1. ioHub Device and Device Event API" href="../devices.html" />
+    <link rel="next" title="1.2.8.1.2.1. LabJack U6 AnalogInputDevice Class" href="daq_interface/LabJack_Implementation_Notes.html" />
+    <link rel="prev" title="1.2.7. Gamepad Device and Events API" href="xinput_gamepad.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+<div class="container">
+  
+  <div id="navbar" class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+      <a class="brand" href="../../../index.html">ioHub</a>
+      <span class="navbar-text pull-left"><b>0.6rc1</b></span>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
+          
+            <li class="dropdown">
+  <a href="../../../index.html" class="dropdown-toggle" data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_home.html">API Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indices.html">6. API Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_log.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../iohub_license.html">License</a></li>
+</ul>
+</ul>
+</li>
+            <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">1.2.8. ioHub.devices.daq.DAQDevice</a><ul>
+<li><a class="reference internal" href="#daq-device-configuration-settings">1.2.8.1. DAQ Device Configuration Settings</a><ul>
+<li><a class="reference internal" href="#iohub-devices-daq-damultichannelinputevent">1.2.8.1.1. ioHub.devices.daq.DAMultiChannelInputEvent</a></li>
+<li><a class="reference internal" href="#daq-hardware-implementations">1.2.8.1.2. DAQ Hardware Implementations</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+          
+          
+            
+  <li><a href="xinput_gamepad.html"
+         title="previous chapter">&laquo; 1.2.7. Gamepad Device and Events API</a></li>
+  <li><a href="daq_interface/LabJack_Implementation_Notes.html"
+         title="next chapter">1.2.8.1.2.1. LabJack U6 AnalogInputDevice Class &raquo;</a></li>
+          
+          
+            <li>
+  <a href="../../../_sources/iohub/api/device_details/daq.txt"
+     rel="nofollow">Source</a></li>
+          
+        </ul>
+
+        
+          
+<form class="navbar-search pull-right" style="margin-bottom:-3px;" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section" id="iohub-devices-daq-daqdevice">
+<h1>1.2.8. ioHub.devices.daq.DAQDevice<a class="headerlink" href="#iohub-devices-daq-daqdevice" title="Permalink to this headline">¶</a></h1>
+<p>Device description text TBC.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Supported Platforms: Windows (XP SP2, SP3, Windows 7)</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.daq.AnalogInputDevice">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.daq.</tt><tt class="descname">AnalogInputDevice</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../devices.html#ioHub.devices.Device" title="ioHub.devices.Device"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.Device</span></tt></a></p>
+<dl class="method">
+<dt id="ioHub.devices.daq.AnalogInputDevice.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.daq.AnalogInputDevice.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a Device should report events and provide them to the Experiment Process
+and / or save them to the ioDataStore.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>enabled (bool): True (default), monitor and report device events as they occur. False, Do not report any events for the device until reporting is enabled.</dd>
+<dt>Return:</dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.daq.AnalogInputDevice.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.daq.AnalogInputDevice.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.daq.AnalogInputDevice.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.DAQ_CHANNEL_MAPPING">
+<tt class="descname">DAQ_CHANNEL_MAPPING</tt><em class="property"> = {}</em><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.DAQ_CHANNEL_MAPPING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.DAQ_CONFIG_OPTIONS">
+<tt class="descname">DAQ_CONFIG_OPTIONS</tt><em class="property"> = {}</em><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.DAQ_CONFIG_OPTIONS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.DAQ_GAIN_OPTIONS">
+<tt class="descname">DAQ_GAIN_OPTIONS</tt><em class="property"> = {}</em><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.DAQ_GAIN_OPTIONS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.channel_sampling_rate">
+<tt class="descname">channel_sampling_rate</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.channel_sampling_rate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.input_channel_count">
+<tt class="descname">input_channel_count</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.input_channel_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.AnalogInputDevice.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.daq.AnalogInputDevice.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="daq-device-configuration-settings">
+<h2>1.2.8.1. DAQ Device Configuration Settings<a class="headerlink" href="#daq-device-configuration-settings" title="Permalink to this headline">¶</a></h2>
+<p><strong>TODO: Update config file settings</strong></p>
+<p>To add a DAQ device to the iohub_config.yaml configuration file for and experiment,
+add the following entry to the <strong>monitor_devices</strong> list:</p>
+<div class="highlight-python"><pre>XXXXXXXXXXXXXXX:
+    # name: The name you want to assign to the device for the experiment
+    #   This name is what will be used to access the device within the experiment
+    #   script via the devices.[device_name] property of the ioHubConnection or
+    #   ioHubExperimentRuntime classes.
+    name: daq
+
+    # enable: Specifies if the device should be enabled by ioHub and monitored
+    #   for events.
+    #   True = Enable the device on the ioHub Server Process
+    #   False = Disable the device on the ioHub Server Process. No events for
+    #       this device will be reported by the ioHub Server.
+    enable: True
+
+    # saveEvents: *If* the ioHubDataStore is enabled for the experiment, then
+    #   indicate if events for this device should be saved to the
+    #   data_collection/keyboard event group in the hdf5 event file.
+    #   True = Save events for this device to the ioDataStore.
+    #   False = Do not save events for this device in the ioDataStore.
+    saveEvents: True
+
+
+    # streamEvents: Indicate if events from this device should be made available
+    #   during experiment runtime to the Experiment / PsychoPy Process.
+    #   True = Send events for this device to  the Experiment Process in real-time.
+    #   False = Do *not* send events for this device to the Experiment Process in real-time.
+    streamEvents: True
+
+    # auto_report_events: Indicate if events from this device should start being
+    #   processed by the ioHub as soon as the device is loaded at the start of an experiment,
+    #   or if events should only start to be monitored on the device when a call to the
+    #   device's enableEventReporting method is made with a parameter value of True.
+    #   True = Automatically start reporting events for this device when the experiment starts.
+    #   False = Do not start reporting events for this device until enableEventReporting(True)
+    #       is set for the device during experiment runtime.
+    auto_report_events: True
+
+    # event_buffer_length: Specify the maximum number of events (for each
+    #   event type the device produces) that can be stored by the ioHub Server
+    #   before each new event results in the oldest event of the same type being
+    #   discarded from the ioHub device event buffer.
+    event_buffer_length: 256</pre>
+</div>
+<div class="section" id="iohub-devices-daq-damultichannelinputevent">
+<h3>1.2.8.1.1. ioHub.devices.daq.DAMultiChannelInputEvent<a class="headerlink" href="#iohub-devices-daq-damultichannelinputevent" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.daq.</tt><tt class="descname">MultiChannelAnalogInputEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.daq.AnalogInputEvent</span></tt></p>
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.PARENT_DEVICE">
+<tt class="descname">PARENT_DEVICE</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.PARENT_DEVICE" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">AnalogInputDevice</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.namedTupleClass">
+<tt class="descname">namedTupleClass</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.namedTupleClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">MultiChannelAnalogInputEventNT</span></tt></p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsClass">
+<em class="property">classmethod </em><tt class="descname">createEventAsClass</tt><big>(</big><em>eventValueList</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsClass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsDict">
+<em class="property">classmethod </em><tt class="descname">createEventAsDict</tt><big>(</big><em>values</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsNamedTuple">
+<em class="property">classmethod </em><tt class="descname">createEventAsNamedTuple</tt><big>(</big><em>valueList</em><big>)</big><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.createEventAsNamedTuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_0">
+<tt class="descname">AI_0</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_1">
+<tt class="descname">AI_1</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_2">
+<tt class="descname">AI_2</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_3">
+<tt class="descname">AI_3</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_4">
+<tt class="descname">AI_4</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_5">
+<tt class="descname">AI_5</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_6">
+<tt class="descname">AI_6</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_7">
+<tt class="descname">AI_7</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.AI_7" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.BASE_EVENT_MAX_ATTRIBUTE_INDEX">
+<tt class="descname">BASE_EVENT_MAX_ATTRIBUTE_INDEX</tt><em class="property"> = 9</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.BASE_EVENT_MAX_ATTRIBUTE_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.CLASS_ATTRIBUTE_NAMES">
+<tt class="descname">CLASS_ATTRIBUTE_NAMES</tt><em class="property"> = ['experiment_id', 'session_id', 'event_id', 'type', 'device_time', 'logged_time', 'time', 'confidence_interval', 'delay', 'filter_id', 'AI_0', 'AI_1', 'AI_2', 'AI_3', 'AI_4', 'AI_5', 'AI_6', 'AI_7']</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.CLASS_ATTRIBUTE_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_CONFIDENCE_INTERVAL_INDEX">
+<tt class="descname">EVENT_CONFIDENCE_INTERVAL_INDEX</tt><em class="property"> = 7</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_CONFIDENCE_INTERVAL_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_DELAY_INDEX">
+<tt class="descname">EVENT_DELAY_INDEX</tt><em class="property"> = 8</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_DELAY_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_DEVICE_TIME_INDEX">
+<tt class="descname">EVENT_DEVICE_TIME_INDEX</tt><em class="property"> = 4</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_DEVICE_TIME_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_EXPERIMENT_ID_INDEX">
+<tt class="descname">EVENT_EXPERIMENT_ID_INDEX</tt><em class="property"> = 0</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_EXPERIMENT_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_FILTER_ID_INDEX">
+<tt class="descname">EVENT_FILTER_ID_INDEX</tt><em class="property"> = 9</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_FILTER_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_HUB_TIME_INDEX">
+<tt class="descname">EVENT_HUB_TIME_INDEX</tt><em class="property"> = 6</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_HUB_TIME_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_ID_INDEX">
+<tt class="descname">EVENT_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_LOGGED_TIME_INDEX">
+<tt class="descname">EVENT_LOGGED_TIME_INDEX</tt><em class="property"> = 5</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_LOGGED_TIME_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_SESSION_ID_INDEX">
+<tt class="descname">EVENT_SESSION_ID_INDEX</tt><em class="property"> = 1</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_SESSION_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_ID">
+<tt class="descname">EVENT_TYPE_ID</tt><em class="property"> = 122</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_ID_INDEX">
+<tt class="descname">EVENT_TYPE_ID_INDEX</tt><em class="property"> = 3</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_STRING">
+<tt class="descname">EVENT_TYPE_STRING</tt><em class="property"> = 'MULTI_CHANNEL_ANALOG_INPUT'</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.EVENT_TYPE_STRING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.IOHUB_DATA_TABLE">
+<tt class="descname">IOHUB_DATA_TABLE</tt><em class="property"> = 'MULTI_CHANNEL_ANALOG_INPUT'</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.IOHUB_DATA_TABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.NUMPY_DTYPE">
+<tt class="descname">NUMPY_DTYPE</tt><em class="property"> = dtype([('experiment_id', '&lt;u4'), ('session_id', '&lt;u4'), ('event_id', '&lt;u4'), ('type', '|u1'), ('device_time', '&lt;f4'), ('logged_time', '&lt;f4'), ('time', '&lt;f4'), ('confidence_interval', '&lt;f4'), ('delay', '&lt;f4'), ('filter_id', '&lt;i2'), ('AI_0', '&lt;f4'), ('AI_1', '&lt;f4'), ('AI_2', '&lt;f4'), ('AI_3', '&lt;f4'), ('AI_4', '&lt;f4'), ('AI_5', '&lt;f4'), ('AI_6', '&lt;f4'), ('AI_7', '&lt;f4')])</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.NUMPY_DTYPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.e">
+<tt class="descname">e</tt><em class="property"> = ('AI_7', &lt;type 'numpy.float32'&gt;)</em><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.e" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.daq.MultiChannelAnalogInputEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.daq.MultiChannelAnalogInputEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="daq-hardware-implementations">
+<h3>1.2.8.1.2. DAQ Hardware Implementations<a class="headerlink" href="#daq-hardware-implementations" title="Permalink to this headline">¶</a></h3>
+<p>The following links provide details on the common DAQ interface implementation
+for each currently supported DAQ hardware device. It is very important to review
+the documentation for the system you are using the common DAQ interface with.
+By doing so it should be clear what areas of the common interface are supported by
+a specific implementation and what areas are not.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="daq_interface/LabJack_Implementation_Notes.html">1.2.8.1.2.1. LabJack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/LabJack_Implementation_Notes.html#installing-other-necessary-labjack-software">1.2.8.1.2.1.1. Installing other Necessary LabJack Software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/LabJack_Implementation_Notes.html#labjack-u6-iohub-config-yaml-settings">1.2.8.1.2.1.2. LabJack U6 iohub_config.yaml Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/LabJack_Implementation_Notes.html#general-considerations">1.2.8.1.2.1.3. General Considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="daq_interface/MeasurementComputing_Implementation_Notes.html">1.2.8.1.2.2. Measurement Computing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/MeasurementComputing_Implementation_Notes.html#installing-other-necessary-measurement-computing-software">1.2.8.1.2.2.1. Installing other Necessary Measurement Computing Software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/MeasurementComputing_Implementation_Notes.html#measurement-computing-analoginputdevice-iohub-config-yaml-settings">1.2.8.1.2.2.2. Measurement Computing AnalogInputDevice iohub_config.yaml Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daq_interface/MeasurementComputing_Implementation_Notes.html#general-considerations">1.2.8.1.2.2.3. General Considerations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013, iSolver Software Solutions.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

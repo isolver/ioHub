@@ -1,0 +1,45 @@
+##########################################
+ioHub Documentation and API Specification
+##########################################
+
+The ioHub is a Python package that allows the seperation of experiment device
+input processing (for devices such as keyboard, mouse, eye tracker, analog, TTL,
+serial, etc) from the main experiment logic (stimulus presentation, experiment design logic, etc.). 
+
+ioHub handles reading device inputs and converting the inputs into common event types
+based on device type, regardless of the underlying hardware. Events are time stamped 
+when it is not done by the source device itself, or existing device event
+time stamps are converted to a common timebase (ioHub time) and, when possible, 
+delay and drift factors between the input device clock and the ioHub clock are 
+corrected for.
+
+ioHub also provides a common event access API for real-time event monitoring as
+well as providing transparent storage of all events received for future retieval and 
+analysis.  
+
+The ioHub clock can be used to get the current time at any point during experiment
+execution, making it easy to integrate and relate event time stamps to other 
+experiment based events. Experiment Messages can be sent to the ioHub as
+events themselves and saved with all other event data recorded during an experiment,
+making post hoc analysis of experiment and input device events simple yet powerful.
+
+While the ioHub package handles device input processing and communication, 
+the main experiment logic is handled by a seperate experiment creation and 
+runtime package, namely the most excellent open source PsychoPy.
+
+Contents
+---------
+
+.. toctree::
+   :maxdepth: 2
+   
+   overview
+   installation
+   quickstart
+   user_manual
+   examples
+   API Specification <api/api_home>
+   API Index <api/indices>
+   performance
+   credits
+   iohub_license
