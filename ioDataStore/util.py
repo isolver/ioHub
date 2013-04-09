@@ -9,13 +9,10 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-import ioHub
+
 from tables import *
 import os
-from pprint import pprint
 from collections import namedtuple
-from ioHub.constants import EventConstants
-import numpy
 import ujson
 
 global _hubFiles
@@ -24,123 +21,7 @@ try:
     len(_hubFiles)
 except:
     _hubFiles=[]
-    
-def openHubFile(filepath,filename,mode):
-    global _hubFiles
-    hubFile=openFile(os.path.join(filepath,filename), mode)
-    _hubFiles.append(hubFile)
-    return hubFile
-
-def closeHubFile(hubFile):
-    global _hubFiles
-    if hubFile in _hubFiles:
-        _hubFiles.remove(hubFile)
-    hubFile.close()
-
-def closeAllFiles():
-    global _hubFiles
-    for t in _hubFiles:
-        t.close()
-    _hubFiles[:]=[None,]*len(_h5files)
-    _hubFiles=[]
-
-def printHubFileStructure(hubFile):
-    print hubFile
-    
-def printHubFileMetaData(hubFile,tableName,parentName=None):
-    for group in hubFile.walkGroups("/"):
-        for table in hubFile.listNodes(group, classname='Table'):
-            if table.name == tableName:
-                print '------------------'
-                print "Path:", table
-                print "Table name:", table.name
-                print "Number of rows in table:", table.nrows
-                print "Number of cols in table:", len(table.colnames)
-                print "Attribute name := type, shape:"
-                for name in table.colnames:
-                    print '\t',name, ':= %s, %s' % (table.coldtypes[name], table.coldtypes[name].shape)
-                print '------------------'
-                return
-            
-def getTableFromHubFile(hubFile,tableName,parentName=None):
-    for group in hubFile.walkGroups("/"):
-        for table in hubFile.listNodes(group, classname='Table'):
-            if table.name == tableName:
-                return table
-    return None
-    
-def hubTableToExcel(filePath, fileName, tableName, experiment_id=0,session_id=0):
-    from openpyxl import Workbook
-    
-    hf=openHubFile(filePath, fileName, 'r')
-
-    hfTable=getTableFromHubFile(hf,tableName)
-    nrows=hfTable.nrows
-
-    wb = Workbook(optimized_write = True)
-    ws = wb.create_sheet()
-    ws.title = tableName
-   
-    ws.append(hfTable.colnames)
-
-    #result=[row for row in hfTable if (row['experiment_id'] == 0 and row['session_id'] == 0)]
-    for r in hfTable:    
-        ws.append(r[:])
-
-    wb.save(fileName+'.xlsx') # don't forget to save !
-    
-    closeHubFile(hf)
-    
-    return nrows
-
-
-def qtOpenFileDialog():
-    from PyQt4 import QtGui
-    import sys
-
-    app = QtGui.QApplication(sys.argv)
-
-    fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '.')
-
-    if fname:
-        filePath, fileName = os.path.split(str(fname))
-        experimentData = ExperimentDataAccessUtility(filePath, fileName)
-        return experimentData
-    app.quit()
-    return None
-
-
-def qtDisplayConditionVariablesTable(experimentData):
-    from PyQt4 import QtGui
-    import sys
-
-    app = QtGui.QApplication(sys.argv)
-
-    entries = []
-    tableWidget = QtGui.QTableWidget()
-    cvNames=[]
-    if isinstance(experimentData, ExperimentDataAccessUtility):
-        condition_variables_table = experimentData.hdfFile.root.data_collection.condition_variables.EXP_CV_1
-        cvNames=experimentData.getConditionVariableNames()    
-        entries = [row[:] for row in condition_variables_table]
-    else:
-        entries = [row.condition_set[:] for row in experimentData]
-        cvNames=experimentData[0].condition_set._fields 
         
-    tableWidget.setRowCount(len(entries))
-    tableWidget.setColumnCount(len(entries[0]))
-
-    tableWidget.setHorizontalHeaderLabels(cvNames)
-
-    for i, row in enumerate(entries):
-        for j, col in enumerate(row):
-            col = str(col)
-            item = QtGui.QTableWidgetItem(col)
-            tableWidget.setItem(i, j, item)
-
-    tableWidget.show()
-    app.exec_()
-
 ########### Experiment / Experiment Session Based Data Access #################
 
 class ExperimentDataAccessUtility(object):
@@ -157,6 +38,9 @@ class ExperimentDataAccessUtility(object):
 
         try:
             self.hdfFile=openHubFile(hdfFilePath,hdfFileName,mode)
+            global _hubFiles
+            self.hdfFile=openFile(os.path.join(hdfFilePath,hdfFileName), mode)
+            _hubFiles.append(self.hdfFile)            
         except Exception as e:
             print e
             raise ExperimentDataAccessException(e)
@@ -165,11 +49,24 @@ class ExperimentDataAccessUtility(object):
 
     def printTableStructure(self,tableName):
         if self.hdfFile:
-            printHubFileMetaData(self.hdfFile,tableName)
+            hubFile=self.hdfFile
+            for group in hubFile.walkGroups("/"):
+                for table in hubFile.listNodes(group, classname='Table'):
+                    if table.name == tableName:
+                        print '------------------'
+                        print "Path:", table
+                        print "Table name:", table.name
+                        print "Number of rows in table:", table.nrows
+                        print "Number of cols in table:", len(table.colnames)
+                        print "Attribute name := type, shape:"
+                        for name in table.colnames:
+                            print '\t',name, ':= %s, %s' % (table.coldtypes[name], table.coldtypes[name].shape)
+                        print '------------------'
+                        return
 
     def printHubFileStructure(self):
         if self.hdfFile:
-            printHubFileStructure(self.hdfFile)
+            print self.hdfFile
     
     def getExperimentMetaData(self):
         if self.hdfFile:
@@ -256,9 +153,6 @@ class ExperimentDataAccessUtility(object):
                 return None
         else:
             raise ExperimentDataAccessException("Unhandled value type !: {0} is not a valid type for value {1}".format(type(value),value))
-
-
-
             
     def getEventAttributeValues(self,event_type_id,event_attribute_names,filter_id=None, conditionVariablesFilter=None, startConditions=None,endConditions=None):
         if self.hdfFile:
@@ -363,8 +257,10 @@ class ExperimentDataAccessUtility(object):
             return None
 
     def close(self):
-        closeHubFile(self.hdfFile)
-
+        global _hubFiles
+        if self.hdfFile in _hubFiles:
+            _hubFiles.remove(self.hdfFile)
+        self.hdfFile.close()
         
         self.experimentCodes=None
         self.hdfFilePath=None

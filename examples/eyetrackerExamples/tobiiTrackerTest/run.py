@@ -75,7 +75,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 
         tracker.setRecordingState(True)
         self.clearScreen.flip()
-        self.hub.delay(0.050)
+        self.hub.wait(0.050)
 
         # Clear all events from the global event buffer,
         # and from the all device level event buffers.
@@ -100,7 +100,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # A key was pressed so exit experiment.
         # Wait 250 msec before ending the experiment 
         # (makes it feel less abrupt after you press the key to quit IMO)
-        self.hub.delay(0.250)
+        self.hub.wait(0.250)
 
         tracker.setRecordingState(False)
         tracker.setConnectionState(False)

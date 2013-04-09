@@ -1,4 +1,4 @@
-﻿"""
+"""
 ioHub
 .. file: ioHub/server.py
 
@@ -354,12 +354,6 @@ class udpServer(DatagramServer):
     def clearEventBuffer(self):
         return self.iohub.clearEventBuffer()
 
-    def currentSec(self):
-        return currentSec()
-
-    def updateGlobalTimeOffset(self,offset):
-        Computer.globalClock.setOffset(offset)
-
     def enableHighPriority(self,disable_gc=True):
         Computer.enableHighPriority(disable_gc)
 
@@ -526,7 +520,7 @@ class ioServer(object):
         deviceDict=ioServer.deviceDict
         iohub=self
         if ('Mouse' in deviceDict or 'Keyboard' in deviceDict):
-            if Computer.system == 'Windows':           
+            if Computer.system == 'win32':           
                 iohub.log("Creating pyHook Monitors....")
                 #ioHub.print2err("Creating pyHook Monitors....")
 
@@ -559,7 +553,7 @@ class ioServer(object):
                 
                 #ioHub.print2err("Created pyHook Monitor.")
                 
-            elif Computer.system == 'Linux':
+            elif Computer.system == 'linux2':
                 # TODO: consider switching to xlib-ctypes implementation of xlib
                 # https://github.com/garrybodsworth/pyxlib-ctypes
                 iohub.log("Creating pyXHook Monitors....")
@@ -582,7 +576,38 @@ class ioServer(object):
                 self._hookManager.start()
                 iohub.log("pyXHook Thread Created.")
                 #ioHub.print2err("pyXHook.HookManager thread created.")
-                
+
+            else: # OSX
+                if 'Mouse' in deviceDict:
+                    mouseHookMonitor=DeviceMonitor(deviceDict['Mouse'],0.004)
+                    self.deviceMonitors.append(mouseHookMonitor)
+                    deviceDict['Mouse']._CGEventTapEnable(deviceDict['Mouse']._tap, True)
+
+                if 'Keyboard' in deviceDict:
+                    kbHookMonitor=DeviceMonitor(deviceDict['Keyboard'],0.004)
+                    self.deviceMonitors.append(kbHookMonitor)
+                    deviceDict['Keyboard']._CGEventTapEnable(deviceDict['Keyboard']._tap, True)
+
+#                import ioHub.devices.pyXHook
+#                
+#                self._hookManager = ioHub.devices.pyXHook.HookManager()
+#                if 'Keyboard' in deviceDict:
+#                    ioHub.print2err("Hooking Keyboard.....")
+#                    self._hookManager.HookKeyboard()
+#                    self._hookManager.KeyDown = deviceDict['Keyboard']._nativeEventCallback
+#                    self._hookManager.KeyUp = deviceDict['Keyboard']._nativeEventCallback
+#                if 'Mouse' in deviceDict:                
+#                    ioHub.print2err("Hooking Mouse.....")
+#                    self._hookManager.HookMouse()
+#                    self._hookManager.MouseAllButtonsDown = deviceDict['Mouse']._nativeEventCallback
+#                    self._hookManager.MouseAllButtonsUp = deviceDict['Mouse']._nativeEventCallback
+#                    self._hookManager.MouseAllMotion = deviceDict['Mouse']._nativeEventCallback
+#
+#                #ioHub.print2err("Starting pyXHook.HookManager.....")
+#                self._hookManager.start()
+#                iohub.log("pyXHook Thread Created.")
+                #ioHub.print2err("pyXHook.HookManager thread created.")
+                  
         self.log("Time Offset: {0}".format(initial_time_offset))
         #ioHub.print2err("-- ioServer Init Complete -- ")
         
@@ -813,7 +838,7 @@ class ioServer(object):
         try:
             self._running=False
     
-            if Computer.system=='Linux':
+            if Computer.system=='linux2':
                 if self._hookManager:
                     self._hookManager.cancel()
     
@@ -845,7 +870,6 @@ class ioServer(object):
 # ------------------ Main / Quickstart testing -------------------------
 
 def run(initial_time_offset,rootScriptPathDir,configFilePath):
-
     import tempfile
     tdir=tempfile.gettempdir()
     cdir,cfile=os.path.split(configFilePath)
@@ -859,30 +883,27 @@ def run(initial_time_offset,rootScriptPathDir,configFilePath):
     else:
         ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
 
+
     try:
         s = ioServer(initial_time_offset, rootScriptPathDir, ioHubConfig)
     except Exception,e:
-        ioHub.print2err("ioHub Server could not be created without errors, EXITING SERVER!!")
-        ioHub.print2err("Error: ",e)
         ioHub.printExceptionDetailsToStdErr()
-        sys.stdout.write("IOHUB_FAILED\n\r\n\r")
         sys.stdout.flush()
 
         return -1
     
     try:
         s.log('Receiving datagrams on :9000')
-        
         s.udpService.start()
 
         for m in s.deviceMonitors:
             m.start()
 
         gevent.spawn(s.processDeviceEvents,0.001)
-        
+
         sys.stdout.write("IOHUB_READY\n\r\n\r")
         sys.stdout.flush()
-                   
+        
         gevent.run()
 
     except Exception as e:
@@ -896,8 +917,8 @@ def run(initial_time_offset,rootScriptPathDir,configFilePath):
     return -1
     
 if __name__ == '__main__':
+    import sys
     prog=sys.argv[0]
-
     if len(sys.argv)>=2:
         initial_offset=float(sys.argv[1])
     if len(sys.argv)>=3:

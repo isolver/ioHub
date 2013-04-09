@@ -32,7 +32,7 @@
     <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../index.html" />
     <link rel="up" title="1. ioHub Device and Device Event API" href="../devices.html" />
     <link rel="next" title="1.2.8. ioHub.devices.daq.DAQDevice" href="daq.html" />
-    <link rel="prev" title="1.2.6.1.2.4. Tobii Eye Tracker Implementation Notes" href="eyetracker_interface/Tobii_Implementation_Notes.html" />
+    <link rel="prev" title="1.2.6.1.2.4. Tobii EyeTracker Class" href="eyetracker_interface/Tobii_Implementation_Notes.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -91,7 +91,7 @@
           
             
   <li><a href="eyetracker_interface/Tobii_Implementation_Notes.html"
-         title="previous chapter">&laquo; 1.2.6.1.2.4. Tobii Eye Tracker Implementation Notes</a></li>
+         title="previous chapter">&laquo; 1.2.6.1.2.4. Tobii EyeTracker Class</a></li>
   <li><a href="daq.html"
          title="next chapter">1.2.8. ioHub.devices.daq.DAQDevice &raquo;</a></li>
           
@@ -202,7 +202,7 @@ add the following entry to the <strong>monitor_devices</strong> list:</p>
 <h3>1.2.7.1.1. GamePad Class Definition<a class="headerlink" href="#gamepad-class-definition" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ioHub.devices.xinput.Gamepad">
-<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">Gamepad</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">Gamepad</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.xinput.XInputDevice</span></tt></p>
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.clearEvents">
@@ -234,7 +234,7 @@ and / or save them to the ioDataStore.</p>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getButtons">
-<tt class="descname">getButtons</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getButtons" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getButtons</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getButtons" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -276,37 +276,37 @@ by default a namedtuple object is returned for each event.</dd>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getLastReadBatteryInfo">
-<tt class="descname">getLastReadBatteryInfo</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getLastReadBatteryInfo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getLastReadBatteryInfo</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getLastReadBatteryInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getLastReadBatteryInfo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getLastReadCapabilitiesInfo">
-<tt class="descname">getLastReadCapabilitiesInfo</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getLastReadCapabilitiesInfo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getLastReadCapabilitiesInfo</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getLastReadCapabilitiesInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getLastReadCapabilitiesInfo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getPressedButtonList">
-<tt class="descname">getPressedButtonList</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getPressedButtonList" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getPressedButtonList</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getPressedButtonList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getPressedButtonList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getPressedButtons">
-<tt class="descname">getPressedButtons</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getPressedButtons" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getPressedButtons</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getPressedButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getPressedButtons" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getRumbleState">
-<tt class="descname">getRumbleState</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getRumbleState" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getRumbleState</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getRumbleState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getRumbleState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getThumbSticks">
-<tt class="descname">getThumbSticks</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getThumbSticks" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getThumbSticks</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getThumbSticks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getThumbSticks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.getTriggers">
-<tt class="descname">getTriggers</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getTriggers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getTriggers</tt><big>(</big><em>gamepad_state=None</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.getTriggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.getTriggers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -323,17 +323,17 @@ by default a namedtuple object is returned for each event.</dd>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.setRumble">
-<tt class="descname">setRumble</tt><big>(</big><em>lowFrequencyValue=0</em>, <em>highFrequencyValue=0</em>, <em>duration=1.0</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.setRumble" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setRumble</tt><big>(</big><em>lowFrequencyValue=0</em>, <em>highFrequencyValue=0</em>, <em>duration=1.0</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.setRumble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.setRumble" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.updateBatteryInformation">
-<tt class="descname">updateBatteryInformation</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.updateBatteryInformation" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">updateBatteryInformation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.updateBatteryInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.updateBatteryInformation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ioHub.devices.xinput.Gamepad.updateCapabilitiesInformation">
-<tt class="descname">updateCapabilitiesInformation</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.updateCapabilitiesInformation" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">updateCapabilitiesInformation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#Gamepad.updateCapabilitiesInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.Gamepad.updateCapabilitiesInformation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -408,8 +408,13 @@ by default a namedtuple object is returned for each event.</dd>
 <h3>1.2.7.1.2. GamePad Event Types<a class="headerlink" href="#gamepad-event-types" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ioHub.devices.xinput.GamepadStateChangeEvent">
-<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">GamepadStateChangeEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">GamepadStateChangeEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#GamepadStateChangeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../devices.html#ioHub.devices.DeviceEvent" title="ioHub.devices.DeviceEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.DeviceEvent</span></tt></a></p>
+<dl class="attribute">
+<dt id="ioHub.devices.xinput.GamepadStateChangeEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 3</em><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ioHub.devices.xinput.GamepadStateChangeEvent.buttonIDs">
 <tt class="descname">buttonIDs</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.buttonIDs" title="Permalink to this definition">¶</a></dt>
@@ -426,13 +431,13 @@ by default a namedtuple object is returned for each event.</dd>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.xinput.GamepadStateChangeEvent.controller_id">
-<tt class="descname">controller_id</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.controller_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.xinput.GamepadStateChangeEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.delay" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.xinput.GamepadStateChangeEvent.delay">
-<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.xinput.GamepadStateChangeEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadStateChangeEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -499,8 +504,13 @@ by default a namedtuple object is returned for each event.</dd>
 
 <dl class="class">
 <dt id="ioHub.devices.xinput.GamepadDisconnectEvent">
-<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">GamepadDisconnectEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ioHub.devices.xinput.</tt><tt class="descname">GamepadDisconnectEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/xinput.html#GamepadDisconnectEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ioHub.devices.xinput.GamepadStateChangeEvent" title="ioHub.devices.xinput.GamepadStateChangeEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.xinput.GamepadStateChangeEvent</span></tt></a></p>
+<dl class="attribute">
+<dt id="ioHub.devices.xinput.GamepadDisconnectEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 3</em><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ioHub.devices.xinput.GamepadDisconnectEvent.buttonIDs">
 <tt class="descname">buttonIDs</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.buttonIDs" title="Permalink to this definition">¶</a></dt>
@@ -517,13 +527,13 @@ by default a namedtuple object is returned for each event.</dd>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.xinput.GamepadDisconnectEvent.controller_id">
-<tt class="descname">controller_id</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.controller_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.xinput.GamepadDisconnectEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.delay" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.xinput.GamepadDisconnectEvent.delay">
-<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.xinput.GamepadDisconnectEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.xinput.GamepadDisconnectEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

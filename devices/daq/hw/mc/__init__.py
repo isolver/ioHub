@@ -340,6 +340,7 @@ class AnalogInput(AnalogInputDevice):
         
         daqEvent=[0,    # exp id
             0,              # session id
+            0, #device id (not currently used)
             Computer._getNextEventID(),  # event id
             MultiChannelAnalogInputEvent.EVENT_TYPE_ID,    # event type
             device_time,   # device time

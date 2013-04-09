@@ -22,12 +22,28 @@ from ioHub.server import createErrorResult
 
 try:
     from tobiiclasses  import *
+except:
+    ioHub.print2err("Error importing tobiiclasses")
+    ioHub.printExceptionDetailsToStdErr()
+
+try:
     from tobiiCalibrationGraphics import TobiiPsychopyCalibrationGraphics
 except:
-    pass
+    ioHub.print2err("Error importing TobiiPsychopyCalibrationGraphics")
+    ioHub.printExceptionDetailsToStdErr()
+
 
 class EyeTracker(EyeTrackerDevice):
     """
+    The Tobii implementation of the Common Eye Tracker Interface can be used
+    by providing the following EyeTracker path as the device class in 
+    the iohub_config.yaml device settings file:
+        
+        eyetracker.hw.tobii.EyeTracker
+        
+    See the configuration options section of the Tobii Common Eye Tracker 
+    Interface documentation for a full description and listing of all valid
+    configuration settings for this device. 
     """
     _tobii=None
 
@@ -37,12 +53,7 @@ class EyeTracker(EyeTrackerDevice):
                          'BlinkStartEvent', 'BlinkEndEvent']
     __slots__=[]
 
-    def __init__(self,*args,**kwargs):
-        """
-        EyeTracker class. This class is to be extended by each eye tracker specific implementation
-        of the ioHub Common Eye Tracker Interface.
-        """
-        
+    def __init__(self,*args,**kwargs):        
         EyeTrackerDevice.__init__(self,*args,**kwargs)
 
         model_name=self.model_name
@@ -61,7 +72,6 @@ class EyeTracker(EyeTrackerDevice):
             pass
         
         if self._tobii and self._runtime_settings['sampling_rate'] and self._runtime_settings['sampling_rate'] in self._tobii.getAvailableSamplingRates():
-            #ioHub.print2err('Settings Tobii sampling rate to %f.'%self._runtime_settings['sampling_rate'])
             self._tobii.setSamplingRate(self._runtime_settings['sampling_rate'])
     
         self._latest_sample=None
@@ -69,8 +79,8 @@ class EyeTracker(EyeTrackerDevice):
         
     def trackerTime(self):
         """
-        Current eye tracker time in native time base. The Tobii system uses a 
-        usec timebase.
+        Current eye tracker time in the eye tracker's native time base. 
+        The Tobii system uses a usec timebase.
         """
         if self._tobii:
             return self._tobii.getCurrentEyeTrackerTime()
@@ -78,7 +88,7 @@ class EyeTracker(EyeTrackerDevice):
         
     def trackerSec(self):
         """
-        Current eye tracker time, normalized to sec.msec.
+        Current eye tracker time, normalized to sec.msec format.
         """
         if self._tobii:
             return self._tobii.getCurrentEyeTrackerTime()*self.DEVICE_TIMEBASE_TO_SEC
@@ -87,9 +97,9 @@ class EyeTracker(EyeTrackerDevice):
     def setConnectionState(self,enable):
         """
         setConnectionState is a no-op when using the Tobii system, as the 
-        connection is established when the Tobii EyeTracker class is created, and remains
-        active until the program ends, or a error occurs resulting in the loss
-        of the tracker connection.
+        connection is established when the Tobii EyeTracker class is created, 
+        and remains active until the program ends, or a error occurs resulting
+        in the loss of the tracker connection.
         """
         if self._tobii:
             return self._tobii.getTrackerDetails().get('status',False)=='OK'
@@ -106,46 +116,56 @@ class EyeTracker(EyeTrackerDevice):
             return self._tobii.getTrackerDetails().get('status',False)=='OK'
         return False
             
+    def sendMessage(self,message_contents,time_offset=None):
+        """
+        The sendMessage method is not supported by the Tobii implementation 
+        of the Common Eye Tracker Interface, as the Tobii SDK does not support
+        saving eye data to a native data file during recording.
+        """
+        EyeTrackerConstants.EYETRACKER_INTERFACE_METHOD_NOT_SUPPORTED
+
     def sendCommand(self, key, value=None):
         """
-        The Tobii has several custom commands that can be sent to set or get
-        information about the eye tracker that is specific to Tobii
-        systems. Valid command tokens and associated possible valid command values
-        are as follows:
-        
-        TO DO: complete based on these tracker object methods
-            - getTrackerDetails
-            - getName
-            - setName
-            - getHeadBox
-            - setXSeriesPhysicalPlacement (no-op if tracker is not an X series system)
-            - getEyeTrackerPhysicalPlacement
-            - getAvailableExtensions
-            - getEnabledExtensions
-            - enableExtension
-            - ....
-            
-        Commands always return their result at the end of the command call, if
-        there is any result to return. Otherwise EyeTrackerConstants.EYETRACKER_OK
-        is returned.
+        Currently the sendCommand method is not supported by the Tobii eye tracker interface.
         """
-        EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED
+        
+#        TODO: The Tobii has several custom commands that can be sent to set or get
+#        information about the eye tracker that is specific to Tobii
+#        systems. Valid command tokens and associated possible valid command values
+#        are as follows:
+#        
+#        TO DO: complete based on these tracker object methods
+#            - getTrackerDetails
+#            - getName
+#            - setName
+#            - getHeadBox
+#            - setXSeriesPhysicalPlacement (no-op if tracker is not an X series system)
+#            - getEyeTrackerPhysicalPlacement
+#            - getAvailableExtensions
+#            - getEnabledExtensions
+#            - enableExtension
+#            - ....
+#            
+#        Commands always return their result at the end of the command call, if
+#        there is any result to return. Otherwise EyeTrackerConstants.EYETRACKER_OK
+#        is returned.
+        
+        EyeTrackerConstants.EYETRACKER_INTERFACE_METHOD_NOT_SUPPORTED
 
     def runSetupProcedure(self,starting_state=EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE):
         """
-        runSetupProcedure passes the graphics environment over to the eye tracker interface so that it can perform such things
-        as camera setup, calibration, etc. This is a blocking call that will not return until the setup procedure is done; at which time
-        the graphics environment can be taken back over by psychopy.  See the EyeTrackerSetupGraphics class for more information.
-
-        The graphicsContext argument should likely be the psychopy full screen window instance that has been created
-        for the experiment.
+        runSetupProcedure performs a calibration routine for the Tobii 
+        eye tracking system. The current calibration options are relatively limited
+        for the Tobii ioHub interface compared to a standard Tobii calibration 
+        procedure. It is hoped that this will be improved in the ioHub Tobii 
+        interface as time permits.
         
         Result:
             bool: True if setup / calibration procedue passed, False otherwise. If false, should likely exit experiment.
         """
         try:
-            calibration_properties=self._runtime_settings.get('calibration')
-            circle_attributes=calibration_properties.get('circle_attributes')
+            calibration_properties=self.getConfiguration().get('calibration')
+            circle_attributes=calibration_properties.get('target_attributes')
             targetForegroundColor=circle_attributes.get('outer_color') # [r,g,b] of outer circle of targets
             targetBackgroundColor=circle_attributes.get('inner_color') # [r,g,b] of inner circle of targets
             screenColor=calibration_properties.get('screen_background_color')                     # [r,g,b] of screen
@@ -174,6 +194,11 @@ class EyeTracker(EyeTrackerDevice):
         return EyeTrackerConstants.EYETRACKER_ERROR
 
     def enableEventReporting(self,enabled=True):
+        """
+        enableEventReporting is functionaly identical to the eye tracker 
+        device specific setRecordingState method.
+        """
+        
         try:        
             enabled=EyeTrackerDevice.enableEventReporting(self,enabled)
             self.setRecordingState(enabled)
@@ -219,7 +244,8 @@ class EyeTracker(EyeTrackerDevice):
 
     def isRecordingEnabled(self):
         """
-        isRecordingEnabled returns the recording state from the eye tracking device.
+        isRecordingEnabled returns the recording state from the eye tracking 
+        device.
         True == the device is recording data
         False == Recording is not occurring
         """
@@ -227,26 +253,18 @@ class EyeTracker(EyeTrackerDevice):
             return self._tobii._isRecording
         return False
         
-    def _setSamplingRate(self,sampling_rate):
-        return self._tobii.setSamplingRate(sampling_rate)
-
-        
     def getLastSample(self):
         """
         Returns the latest sample retrieved from the Tobii device. The Tobii
-        system always using the BinocularSample Evenet type. The following fields
-        of this ioHub event type are supported:
-            
-            TO DO: give list of fields used in binoc. sample event and a meaning
-            for each field that is relevent for the Tobii system.
+        system always using the BinocularSample Event type.
         """
         return self._latest_sample
 
     def getLastGazePosition(self):
         """
         Returns the latest 2D eye gaze position retrieved from the Tobii device.
-        This represents where on the calibrated surface the eye tracker is 
-        reporting each eyes gaze vector is intersecting.
+        This represents where the eye tracker is reporting each eye gaze vector
+        is intersecting the calibrated surface.
         
         In general, the y or vertical component of each eyes gaze position should
         be the same value, since in typical user populations the two eyes are
@@ -265,6 +283,9 @@ class EyeTracker(EyeTrackerDevice):
         """
         return self._latest_gaze_position
     
+    def _setSamplingRate(self,sampling_rate):
+        return self._tobii.setSamplingRate(sampling_rate)
+
     def _poll(self):
         """
         The Tobii system uses a callback approach to providing new eye data as 
@@ -309,16 +330,11 @@ class EyeTracker(EyeTrackerDevice):
         The _getIOHubEventObject method is called by the ioHub Server to convert 
         new native device event objects that have been received to the appropriate 
         ioHub Event type representation. 
-        
-        If the ioHub Device has been implemented to use the _poll() method of checking for
-        new events, then this method simply should return what it is passed, and is the
-        default implmentation for the method.
-        
-        If the ioHub Device has been implemented to use the evnt callback method
-        to register new native device events with the ioHub Server, then this method should be
-        overwritten by the Device subclass to convert the native event data into
-        an appropriate ioHub Event representation. See the implementation of the 
-        Keyboard or Mouse device classes for an example of such an implementation.
+               
+        The Tobii ioHub eye tracker implementation uses a callback method
+        to register new native device events with the ioHub Server. 
+        Therefore this method converts the native Tobii event data into 
+        an appropriate ioHub Event representation. 
         
         Args:
             native_event_data: object or tuple of (callback_time, native_event_object)
@@ -362,6 +378,7 @@ class EyeTracker(EyeTrackerDevice):
             binocSample=[
                          0,
                          0,
+                         0, #device id (not currently used)
                          Computer._getNextEventID(),
                          event_type,
                          device_event_time,
@@ -381,7 +398,7 @@ class EyeTracker(EyeTrackerDevice):
                          EyeTrackerConstants.UNDEFINED, # Left Camera Sensor position x
                          EyeTrackerConstants.UNDEFINED, # Left Camera Sensor position y
                          eye_data_event.LeftPupil,
-                         EyeTrackerConstants.PUPIL_DIAMETER,
+                         EyeTrackerConstants.PUPIL_DIAMETER_MM,
                          EyeTrackerConstants.UNDEFINED, # Left pupil size measure 2
                          EyeTrackerConstants.UNDEFINED, # Left pupil size measure 2 type
                          EyeTrackerConstants.UNDEFINED, # Left PPD x
@@ -400,7 +417,7 @@ class EyeTracker(EyeTrackerDevice):
                          EyeTrackerConstants.UNDEFINED, #Right Camera Sensor position x
                          EyeTrackerConstants.UNDEFINED, #Right Camera Sensor position y
                          eye_data_event.RightPupil,
-                         EyeTrackerConstants.PUPIL_DIAMETER,
+                         EyeTrackerConstants.PUPIL_DIAMETER_MM,
                          EyeTrackerConstants.UNDEFINED, # Right pupil size measure 2
                          EyeTrackerConstants.UNDEFINED, # Right pupil size measure 2 type
                          EyeTrackerConstants.UNDEFINED, # Right PPD x
@@ -432,9 +449,7 @@ class EyeTracker(EyeTrackerDevice):
         
     def _eyeTrackerToDisplayCoords(self,eyetracker_point):
         """
-        For eye tracker that have a static or fixed type internal mapping,
-        this method is used to convert from eye tracker units to display units.
-        Default implementation is to just pass the data through untouched.
+        Converts Tobii gaze positions to the Display device coordinate space.
         """
         gaze_x=eyetracker_point[0]
         gaze_y=eyetracker_point[1]
@@ -450,13 +465,7 @@ class EyeTracker(EyeTrackerDevice):
         
     def _displayToEyeTrackerCoords(self,display_x,display_y):
         """
-        For eye tracker that have a static or fixed type internal mapping,
-        this method is used to convert from display units to eye tracker units.
-        Default implementation is to just pass the data through untouched.
-
-        For the Tobii system, this means converting from the screen coordinate
-        space to a normalized value between 0.0 and 1.0. 0.0 is top-left of
-        screen, 1.0 is bottom-right.
+        Converts a Display device point to Tobii gaze position coordinate space.
         """
         
         left,top,right,bottom=self._display_device.getCoordBounds()
@@ -467,6 +476,6 @@ class EyeTracker(EyeTrackerDevice):
         return gaze_x,gaze_y
 
     def _close(self):
-        if self._tobii:
+        if self._tobii and self._tobii._mainloop:
             self._tobii.disconnect()
         EyeTrackerDevice._close(self)

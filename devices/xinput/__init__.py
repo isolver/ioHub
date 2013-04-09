@@ -159,6 +159,7 @@ class Gamepad(XInputDevice):
                 gpe= [
                     0,                                      # experiment_id filled in by ioHub
                     0,                                      # session_id filled in by ioHub
+                    self.device_number,                     # device id : number 0-3 representing which controller event is from.                    
                     Computer._getNextEventID(),             # unique event id
                     GamepadStateChangeEvent.EVENT_TYPE_ID,  # id representation of event type
                     self._state_time,                       # device Time
@@ -167,7 +168,6 @@ class Gamepad(XInputDevice):
                     self._time_ci,                          # confidence Interval
                     delay,                                  # delay
                     0,
-                    self.device_number,                          # number 0-3 representing which controller event is from.
                     buttons,                                # buttons id's that were pressed at the time of the state change.
                     'B',                                    # buttons 1 char placeholder
                     changed.get('LeftThumbStick',(0.0,0.0,0.0)),   # normalized x,y, and magnitude value for left thumb stick
@@ -189,6 +189,7 @@ class Gamepad(XInputDevice):
             gpe= [
                 0,                                      # experiment_id filled in by ioHub
                 0,                                      # session_id filled in by ioHub
+                self.device_number,                          # number 0-3 representing which controller event is from.
                 Computer._getNextEventID(),             # unique event id
                 GamepadDisconnectEvent.EVENT_TYPE_ID,  # id representation of event type
                 self._state_time,                       # device Time
@@ -197,7 +198,6 @@ class Gamepad(XInputDevice):
                 self._time_ci,                          # confidence Interval
                 delay,                                  # delay
                 0,                                      #filter_id 0 by default
-                self.device_number,                          # number 0-3 representing which controller event is from.
                 0,                                      # buttons id's that were pressed at the time of the state change.
                 'B',                                      # buttons 1 char placeholder
                 0,                                      # normalized x,y, and magnitude value for left thumb stick
@@ -374,15 +374,7 @@ class GamepadStateChangeEvent(DeviceEvent):
     EVENT_TYPE_ID=EventConstants.GAMEPAD_STATE_CHANGE
     EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING
-    _newDataTypes = [ ('controller_id',N.uint8),  #number 0-3 representing which controller event is for.
-                                                  # On xbox360 controller, the id of the controller can be
-                                                  # visually determined by the quadrant that is illuminated
-                                                  # on the center 'red circle of light'.
-                                                  # Top Left = XINPUT_USER_0 == 0
-                                                  # Top Right = XINPUT_USER_1 == 1
-                                                  # Bottom Right = XINPUT_USER_2 == 2
-                                                  # Bottom Left = XINPUT_USER_3 == 3
-
+    _newDataTypes = [
 
                       ('buttonIDs',N.uint32),     # the buttons that were pressed at the time of the state change.
                                                   # All buttons that are pressed are & together into this field.

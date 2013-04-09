@@ -274,74 +274,6 @@ and device level event buffers are not changed.</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="ioHub.client.ioHubConnection.currentSec">
-<tt class="descname">currentSec</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.currentSec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.currentSec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the sec.msec-usec time retrieved from the ioHub Server process. This method sends a message to
-the ioHub Process asking for the currentSec time on that process, and returns the result.</p>
-<p>Therefore there will be a small delay in getting the current ioHub Process time, and this means
-current_ioHub_secs = self.currentSec()-DELAY, where delay is the time from when the
-ioHub Server Process read the currentSec time to when the PsychoPy process received the reply.</p>
-<dl class="docutils">
-<dt><strong>Note:</strong> On Windows, both the PsychoPy and ioHub Processes use the same time base</dt>
-<dd><p class="first">if you call one of the ioHub Experiment Runtime time methods, so there is <strong>no need</strong>
-to call this method to get the current ioHub Process time.</p>
-<p>It will be more accurate to call one of the following time methods, which gives you
-the current ioHub Process and PsychoPy Process time, as they are the same:</p>
-<ul class="simple">
-<li>ioHub.highPrecisionTimer() : returns sec.msec-usec time</li>
-<li>ioHub.devices.Computer.getSec() : returns sec.msec-usec time</li>
-</ul>
-<p>If running your experiment within the run() method of a class extended from
-ioHub.experiment.ioHubExperimentRuntime, you can also use:</p>
-<ul class="last simple">
-<li>self.currentSec()</li>
-</ul>
-</dd>
-</dl>
-<p>Args: None
-Return (float/double): The ioHub Process sec.msec-usec time when the request was processed</p>
-<blockquote>
-<div>by the ioHub Server Process.</div></blockquote>
-</dd></dl>
-
-<dl class="method">
-<dt id="ioHub.client.ioHubConnection.delay">
-<tt class="descname">delay</tt><big>(</big><em>delay</em>, <em>checkHubInterval=0.02</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.delay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pause the experiment execution for msec.usec interval, while checking the ioHub for
-any new events and retrieving them every &#8216;checkHubInterval&#8217; msec during the delay. Any events
-that are gathered during the delay period will be handed to the experiment the next time
-self.getEvents() is called, unless self.clearEvents() beforehand.</p>
-<p>It is important to allow the PyschoPy Process to periodically either call self.getEvents() events
-during long delaying in program execution so that a) the event queues
-to not reach the specified limits and start descarding old events when 
-new events arrive, and b) so that a very large build up of events does
-not occur on the ioHub Process, that then takes multiple UDP packets
-to transmit to the experiment. This will slow event retrieval down
-unnecessarily. If you are using delay, may as well occationally have the
-experiment process occationally grab any new events from
-the ioHub process during it.</p>
-<p>Also keep in mind that calling self.clearEvents() after any long delays
-between calls to self.getEvents() or self.clearEvents() will clear
-events from the ioHub server so they are not uncessarily  sent to
-the experiment process if you do not need them (they are still being
-stored in the ioDataStore assuming the Device has event reporting
-enabled of course).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt>delay (float/double): the sec.msec_usec period that the PsychoPy Process should wait</dt>
-<dd>before returning from the function call.</dd>
-<dt>checkHubInterval (float/double): the sec.msec_usec interval after which any ioHub</dt>
-<dd>events will be retrieved (by calling self.getEvents) and stored
-in a local buffer. This is repeated every checkHubInterval sec.msec_usec until
-the method completes. Default is every 0.01 sec ( 10.0 msec ).</dd>
-</dl>
-</dd>
-</dl>
-<p>Return(float/double): actual duration of delay in sec.msec_usec format.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ioHub.client.ioHubConnection.disableHighPriority">
 <tt class="descname">disableHighPriority</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.disableHighPriority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.disableHighPriority" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the priority of the ioHub Process back to normal priority
@@ -592,9 +524,41 @@ print ioHubCPUs</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ioHub.client.ioHubConnection.updateGlobalHubTimeOffset">
-<tt class="descname">updateGlobalHubTimeOffset</tt><big>(</big><em>offset</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.updateGlobalHubTimeOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.updateGlobalHubTimeOffset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="ioHub.client.ioHubConnection.wait">
+<tt class="descname">wait</tt><big>(</big><em>delay</em>, <em>check_hub_interval=0.02</em><big>)</big><a class="headerlink" href="#ioHub.client.ioHubConnection.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the experiment execution for msec.usec interval, while checking the ioHub for
+any new events and retrieving them every &#8216;checkHubInterval&#8217; msec during the delay. Any events
+that are gathered during the delay period will be handed to the experiment the next time
+self.getEvents() is called, unless self.clearEvents() beforehand.</p>
+<p>It is important to allow the PyschoPy Process to periodically either call self.getEvents() events
+during long delaying in program execution so that a) the event queues
+to not reach the specified limits and start descarding old events when 
+new events arrive, and b) so that a very large build up of events does
+not occur on the ioHub Process, that then takes multiple UDP packets
+to transmit to the experiment. This will slow event retrieval down
+unnecessarily. If you are using delay, may as well occationally have the
+experiment process occationally grab any new events from
+the ioHub process during it.</p>
+<p>Also keep in mind that calling self.clearEvents() after any long delays
+between calls to self.getEvents() or self.clearEvents() will clear
+events from the ioHub server so they are not uncessarily  sent to
+the experiment process if you do not need them (they are still being
+stored in the ioDataStore assuming the Device has event reporting
+enabled of course).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>delay (float/double): the sec.msec_usec period that the PsychoPy Process should wait</dt>
+<dd>before returning from the function call.</dd>
+<dt>check_hub_interval (float/double): the sec.msec_usec interval after which any ioHub</dt>
+<dd>events will be retrieved (by calling self.getEvents) and stored
+in a local buffer. This is repeated every checkHubInterval sec.msec_usec until
+the method completes. Default is every 0.01 sec ( 10.0 msec ).</dd>
+</dl>
+</dd>
+</dl>
+<p>Return(float/double): actual duration of delay in sec.msec_usec format.</p>
+</dd></dl>
 
 </dd></dl>
 

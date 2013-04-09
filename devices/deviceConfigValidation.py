@@ -222,12 +222,17 @@ def isValidString(config_param_name,value,constraints):
         max_length=int(constraints.get('max_length'))
         first_char_alpha=bool(constraints.get('first_char_alpha'))
         
+            
         if len(value)>=min_length:
             if len(value)<=max_length:
                 if first_char_alpha is True and value[0].isalpha() is False:
                     raise StringValueError(config_param_name,value,constraints)
                 else:
                     return value
+
+    elif int(constraints.get('min_length')) == 0 and value is None:
+        return value
+
     raise StringValueError(config_param_name,value,constraints)
 
 def isValidFloat(config_param_name,value,constraints):

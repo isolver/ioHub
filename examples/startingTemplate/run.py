@@ -28,7 +28,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         print "Hello World. Press any key to quit."
         kb=self.devices.kb
         while not kb.getEvents():
-            self.hub.delay(0.010)
+            self.hub.wait(0.010)
         ### End of experiment logic
 
 # The below code should never need to be changed, unless you want to get command

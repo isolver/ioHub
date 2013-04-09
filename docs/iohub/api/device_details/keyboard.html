@@ -123,7 +123,7 @@
 <dl class="class">
 <dt id="ioHub.devices.keyboard.Keyboard">
 <em class="property">class </em><tt class="descclassname">ioHub.devices.keyboard.</tt><tt class="descname">Keyboard</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/keyboard.html#Keyboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.keyboard.Keyboard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.keyboard.ioHubKeyboardDevice</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.keyboard._win32.KeyboardWindows32</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.keyboard.ioHubKeyboardDevice</span></tt></p>
 <dl class="method">
 <dt id="ioHub.devices.keyboard.Keyboard.clearEvents">
 <tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.keyboard.Keyboard.clearEvents" title="Permalink to this definition">¶</a></dt>
@@ -322,10 +322,15 @@ add the following entry to the <strong>monitor_devices</strong> list:</p>
 <h3>1.2.2.1.1. Keyboard Event Types<a class="headerlink" href="#keyboard-event-types" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent">
-<em class="property">class </em><tt class="descclassname">ioHub.devices.keyboard.</tt><tt class="descname">KeyboardInputEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ioHub.devices.keyboard.</tt><tt class="descname">KeyboardInputEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/keyboard.html#KeyboardInputEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../devices.html#ioHub.devices.DeviceEvent" title="ioHub.devices.DeviceEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.DeviceEvent</span></tt></a></p>
 <p>The KeyboardInputEvent class is an abstract class that is the parent of all
 Keyboard related event types.</p>
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardInputEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.ascii_code">
 <tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
@@ -341,6 +346,11 @@ int value between 0 and 255.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.delay">
 <tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardInputEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -436,6 +446,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <p>Event Type ID: EventConstants.KEYBOARD_PRESS</p>
 <p>Event Type String: &#8216;KEYBOARD_PRESS&#8217;</p>
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardPressEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardPressEvent.ascii_code">
 <tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -448,6 +463,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardPressEvent.delay">
 <tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardPressEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -525,6 +545,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <p>Event Type ID: EventConstants.KEYBOARD_RELEASE</p>
 <p>Event Type String: &#8216;KEYBOARD_RELEASE&#8217;</p>
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.ascii_code">
 <tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -537,6 +562,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.delay">
 <tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -618,6 +648,11 @@ created by the OS keyboard driver is ignored.</p>
 <p>Event Type ID: EventConstants.KEYBOARD_CHAR</p>
 <p>Event Type String: &#8216;KEYBOARD_CHAR&#8217;</p>
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardCharEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardCharEvent.ascii_code">
 <tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -630,6 +665,11 @@ created by the OS keyboard driver is ignored.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardCharEvent.delay">
 <tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardCharEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

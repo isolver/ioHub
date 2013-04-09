@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ioHub
 .. file: ioHub/devices/__init__.py
@@ -9,12 +10,20 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 from __future__ import division
-import gc, os, platform
+import gc, os, sys, platform
 import collections
 from collections import deque
 from operator import itemgetter
 import numpy as N
-import psutil
+
+global _psutil_available
+_psutil_available=False
+
+if sys.platform != 'darwin':
+    import psutil
+    _psutil_available=True
+
+from ioHub import print2err
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg):
@@ -138,10 +147,6 @@ class Computer(object):
     if desired. The operating system priority of either process can also be
     increased if desired.
     
-    There is also a long list of methods that can be used to access the current processes
-    memory usage, CPU usage, network and disk access, and more, as the Computer
-    class provides an interface to the very useful Process class of the `psutil Python package <https://code.google.com/p/psutil/>`_.
-    
     The Computer class only contains static or class level methods, so an instance 
     of the class does **not** need to be created. The Computer device can either be accessed 
     via the ioHub package using 'ioHub.devices.Computer', or using the 'devices.computer'
@@ -163,14 +168,9 @@ class Computer(object):
     #: access this class directly, instead use the Computer.getTime()
     #: and associated method name alias's to actually get the current ioHub time.
     globalClock=None
-    
-    _platform_uname = platform.uname()
 
     #: The name of the current operating system Python is running on.
-    #: i.e. Windows or Linux
-    system=_platform_uname[0]
-    
-    #node, release, version, machine, processor = _platform_uname[1:]
+    system=sys.platform
     
     #: Attribute representing the number of *processing units* available on the current computer. 
     #: This includes cpu's, cpu cores, and hyperthreads. Notes:
@@ -178,14 +178,23 @@ class Computer(object):
     #:      - For single core CPU's,  num_cores_per_cpu = 1.
     #:      - For CPU's that do not support hyperthreading,  num_hyperthreads = 1
     #:        otherwise num_hyperthreads = 2.  
-    processingUnitCount=psutil.NUM_CPUS
+    if _psutil_available:
+        processingUnitCount=psutil.NUM_CPUS
+    else:
+        import multiprocessing
+        processingUnitCount=multiprocessing.cpu_count()
     
     #: The system ID of the current Python process.
     currentProcessID=os.getpid()
     
     #: Access to the psutil.Process class for the current system Process.
-    currentProcess=psutil.Process(currentProcessID)
-    
+    if _psutil_available:
+        currentProcess=psutil.Process(currentProcessID)
+    else:
+        
+        import multiprocessing
+        currentProcess=multiprocessing.current_process()
+        
     #: The system ID of the ioHub Server process.
     ioHubServerProcessID=None
     
@@ -213,22 +222,22 @@ class Computer(object):
                               False = Leave the Garbage Collector running.
                               Default: True
         """
+        if _psutil_available is False:
+            print2err("Computer.enableHighPriority is not supported on OS X")
+            return False
+        
         if Computer.inHighPriorityMode is False:
             if disable_gc:
                 gc.disable()
-            if Computer.system=='Windows':
+            if Computer.system=='win32':
                 Computer.currentProcess.set_nice(psutil.HIGH_PRIORITY_CLASS)
                 Computer.inHighPriorityMode=True
-            elif Computer.system=='Linux':
+            elif Computer.system=='linux2':
                 current_nice=Computer.currentProcess.get_nice()
                 Computer._process_original_nice_value=current_nice
-                import ioHub
-                ioHub.print2err("Current nice is: ", current_nice,' pid is ',Computer.currentProcessID)
                 if current_nice <10:
                     Computer.currentProcess.set_nice(10)
                     Computer.currentProcess.get_nice()
-                    ioHub.print2err("Set nice to 10; now reads: ", 
-                                    Computer.currentProcess.get_nice())
                     Computer.inHighPriorityMode = True
                     
 
@@ -249,22 +258,22 @@ class Computer(object):
                               False = Leave the Garbage Collector running.
                               Default: True
         """
+        if _psutil_available is False:
+            print2err("Computer.enableRealtimePriority is not supported on OS X")
+            return False
+
         if Computer.inHighPriorityMode is False:
             if disable_gc:
                 gc.disable()
-            if Computer.system=='Windows':
+            if Computer.system=='win32':
                 Computer.currentProcess.set_nice(psutil.REALTIME_PRIORITY_CLASS)
                 Computer.inHighPriorityMode = True
-            elif Computer.system=='Linux':
+            elif Computer.system=='linux2':
                 current_nice=Computer.currentProcess.get_nice()
                 Computer._process_original_nice_value=current_nice
-                import ioHub
-                ioHub.print2err("Current nice and process id are: ", current_nice, " , ",Computer.currentProcessID)
                 if current_nice <16:
                     Computer.currentProcess.set_nice(16)
                     Computer.currentProcess.get_nice()
-                    ioHub.print2err("Set nice to 16; now reads: ", 
-                                    Computer.currentProcess.get_nice())
                     Computer.inHighPriorityMode = True
 
     @staticmethod
@@ -280,6 +289,10 @@ class Computer(object):
         
         Return: None
         """
+        if _psutil_available is False:
+            print2err("Computer.disableRealTimePriority is not supported on OS X")
+            return False
+
         Computer.disableHighPriority()
 
     @staticmethod
@@ -295,18 +308,22 @@ class Computer(object):
         
         Return: None
         """
+        
+        if _psutil_available is False:
+            print2err("Computer.disableHighPriority is not supported on OS X")
+            return False
+        
         try:
             if Computer.inHighPriorityMode is True:
                 gc.enable()
-                if Computer.system=='Windows':
+                if Computer.system=='win32':
                     Computer.currentProcess.set_nice(psutil.NORMAL_PRIORITY_CLASS)
                     Computer.inHighPriorityMode=False
-                elif Computer.system=='Linux' and Computer._process_original_nice_value > 0:
+                elif Computer.system=='linux2' and Computer._process_original_nice_value > 0:
                     Computer.currentProcess.set_nice(Computer._process_original_nice_value)
                     Computer.inHighPriorityMode=False
         except psutil.AccessDenied:
-            import ioHub            
-            ioHub.print2err("WARNING: Could not disable increased priority for process {0}".format(Computer.currentProcessID))
+            print2err("WARNING: Could not disable increased priority for process {0}".format(Computer.currentProcessID))
 
     @staticmethod
     def getProcessAffinities():
@@ -350,6 +367,8 @@ class Computer(object):
 
         But in this case, why are you using the ioHub package at all? ;)
         """
+        if _psutil_available is False:
+            return range(Computer.processingUnitCount),range(Computer.processingUnitCount),
         return Computer.currentProcess.get_cpu_affinity(),Computer.ioHubServerProcess.get_cpu_affinity()
 
     @staticmethod
@@ -393,6 +412,9 @@ class Computer(object):
 
             >> [0,1], [2,3]
         """
+        if _psutil_available is False:
+            print2err("Computer.setProcessAffinities is not supported on OSX.")
+            return
         Computer.currentProcess.set_cpu_affinity(experimentProcessorList)
         Computer.ioHubServerProcess.set_cpu_affinity(ioHubProcessorList)
 
@@ -424,6 +446,9 @@ class Computer(object):
         assigned to index 2,3, ioHub Server assigned to 4,5. All other processes
         running on the OS are attempted to be assigned to indexes 0,1,6,7.
         """
+        if _psutil_available is False:
+            print2err("Computer.autoAssignAffinities is not supported on OSX.")
+            return
         cpu_count=Computer.cpuCount
         print "System processor count:", cpu_count
         if cpu_count == 2:
@@ -451,6 +476,8 @@ class Computer(object):
         Returns:
             None        
         """
+        if _psutil_available is False:
+            return range(Computer.processingUnitCount)
         return Computer.currentProcess.get_cpu_affinity()
 
     @staticmethod
@@ -466,6 +493,9 @@ class Computer(object):
             None
         
         """
+        if _psutil_available is False:
+            print2err("Computer.setCurrentProcessAffinity is not supported on OSX.")
+            return
         return Computer.currentProcess.set_cpu_affinity(processorList)
 
     @staticmethod
@@ -482,6 +512,9 @@ class Computer(object):
         Returns:
             None
         """
+        if _psutil_available is False:
+            print2err("Computer.setProcessAffinityByID is not supported on OSX.")
+            return
         p=psutil.Process(processID)
         return p.set_cpu_affinity(processorList)
 
@@ -497,6 +530,8 @@ class Computer(object):
         Returns:
            processorList (list): list of int processor ID's to set process with the given processID too. An empty list means all processors.
         """
+        if _psutil_available is False:
+            return range(Computer.processingUnitCount)
         p=psutil.Process(processID)
         return p.get_cpu_affinity()
 
@@ -521,6 +556,9 @@ class Computer(object):
         Returns:
            None
         """
+        if _psutil_available is False:
+            print2err("Computer.setAllOtherProcessesAffinity is not supported on OSX.")
+            return
         for p in psutil.process_iter():
             if p.pid not in excludeProcessByIDList:
                 try:
@@ -596,6 +634,10 @@ class Computer(object):
                vmem.free: the amount of memory that is free in bytes.On Windows, this is the same as vmem.available.
            
         """
+        if _psutil_available is False:
+            print2err("Computer.getPhysicalSystemMemoryInfo is not supported on OS X")
+            return False
+        
         m= psutil.virtual_memory()
         return m
 
@@ -609,6 +651,10 @@ class Computer(object):
         Returns:
            cputimes(user=float, system=float, idle=float)
         """
+        if _psutil_available is False:
+            print2err("Computer.getCPUTimeInfo is not supported on OS X")
+            return False
+
         return psutil.cpu_times(percpu)
 
     #
@@ -618,15 +664,14 @@ class Computer(object):
     @staticmethod
     def getCurrentProcess():
         """
-        Get the current / Local process (as a psutil Process object).
-        The psutil Process object has some nice methods you can access. 
-        See the `psutil project documentation <https://code.google.com/p/psutil/wiki/Documentation#Classes>`_ for details.
+        Get the current / Local process On Windows and Linux, this is
+        a psutil.Process class instance. On OS X, it is a multiprocessing.Process instance.
 
         Args:
            None
                       
         Returns:
-           psutil.Process object for the current system process.
+           Process object for the current system process.
            
         """
         return Computer.currentProcess
@@ -1204,20 +1249,21 @@ class DeviceEvent(ioObject):
     """
     The DeviceEvent class is the base class for all ioHub DeviceEvent types.
 
-    Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseWheelUpEvent, MouseButtonPressEvent,
+    Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseScrollEvent, MouseButtonPressEvent,
     KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of
     the DeviceEvent class.
     """
     EVENT_EXPERIMENT_ID_INDEX=0
     EVENT_SESSION_ID_INDEX=1
-    EVENT_ID_INDEX=2
-    EVENT_TYPE_ID_INDEX=3
-    EVENT_DEVICE_TIME_INDEX=4
-    EVENT_LOGGED_TIME_INDEX=5
-    EVENT_HUB_TIME_INDEX=6
-    EVENT_CONFIDENCE_INTERVAL_INDEX=7
-    EVENT_DELAY_INDEX=8
-    EVENT_FILTER_ID_INDEX=9
+    DEVICE_ID_INDEX=2
+    EVENT_ID_INDEX=3
+    EVENT_TYPE_ID_INDEX=4
+    EVENT_DEVICE_TIME_INDEX=5
+    EVENT_LOGGED_TIME_INDEX=6
+    EVENT_HUB_TIME_INDEX=7
+    EVENT_CONFIDENCE_INTERVAL_INDEX=8
+    EVENT_DELAY_INDEX=9
+    EVENT_FILTER_ID_INDEX=10
     BASE_EVENT_MAX_ATTRIBUTE_INDEX=EVENT_FILTER_ID_INDEX
 
     # The Device Class that generates the given type of event.    
@@ -1241,6 +1287,12 @@ class DeviceEvent(ioObject):
                 ('session_id',N.uint32),    # The ioDataStore session ID assigned to the currently running
                                             # experiment session. Each time the experiment script is run,
                                             # a new session id is generated for use within the hdf5 file.
+
+                ('device_id',N.uint16),     # The unique id assigned to the device that generated the event.
+                                            # CUrrrently not used, but will be in the future for device types that
+                                            # support > one instance of that device type to be enabled 
+                                            # during an experiment. Currenly only one device of a given type
+                                            #can be used in an experiment.
 
                 ('event_id',N.uint32),      # The id assigned to the current device event instance. Every device
                                             # event generated by monitored devices during an experiment session is
@@ -1312,6 +1364,9 @@ class DeviceEvent(ioObject):
         #: Each time the experiment script is run, a new session id is generated for use
         #: by the ioDataStore within the hdf5 file.
         self.session_id=None
+
+        #: Currently not used.
+        self.device_id=None
 
         #: The id assigned to the current device event instance. Every device
         #: event generated by monitored devices during an experiment session is
@@ -1397,7 +1452,7 @@ class DeviceEvent(ioObject):
 # Import Devices and DeviceEvents
 #
 
-from ioHub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake
+from ioHub import printExceptionDetailsToStdErr,convertCamelToSnake
 
 loadedDeviceClasses=dict()
 loadedEventClasses=dict()

@@ -185,7 +185,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # wait 250 msec before ending the experiment (makes it feel less
         # abrupt after you press the key)
-        self.hub.delay(0.250)
+        self.hub.wait(0.250)
 
         # for fun, test getting a bunch of events at once,
         # likely causing a mutlipacket getEvents()

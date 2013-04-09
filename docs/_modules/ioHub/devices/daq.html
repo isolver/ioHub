@@ -100,7 +100,7 @@
   <h1>Source code for ioHub.devices.daq</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">ioHub</span>
-<span class="sd">.. file: ioHub/devices/eyeTrackerInterface/HW/devices/daq/__init__.py</span>
+<span class="sd">.. file: ioHub/devices/daq/__init__.py</span>
 
 <span class="sd">Copyright (C)  2012-2013 iSolver Software Solutions</span>
 <span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
@@ -115,27 +115,21 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
 
 
-<div class="viewcode-block" id="DAQDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.DAQDevice">[docs]</a><span class="k">class</span> <span class="nc">DAQDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalogInputDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.AnalogInputDevice">[docs]</a><span class="k">class</span> <span class="nc">AnalogInputDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">DAQ_CHANNEL_MAPPING</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
     <span class="n">DAQ_GAIN_OPTIONS</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
     <span class="n">DAQ_CONFIG_OPTIONS</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
 
-    <span class="n">DAQ_INPUT_READ_OPTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;POLL&#39;</span><span class="p">,</span><span class="s">&#39;SCAN&#39;</span><span class="p">]</span> <span class="c"># either of, or list of selections.</span>
-    <span class="n">DAQ_INPUT_READ_TYPE</span> <span class="o">=</span> <span class="nb">str</span> <span class="c"># list or str</span>
+    <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;input_channel_count&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> 
+                     <span class="p">(</span><span class="s">&#39;channel_sampling_rate&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">.</span><span class="n">uint16</span><span class="p">)]</span>
 
-    <span class="n">DAQ_INPUT_SCAN_FREQ_TYPE</span> <span class="o">=</span> <span class="nb">int</span> <span class="c"># list or int</span>
-    <span class="n">INPUT_SAMPLE_COUNT_TYPE</span> <span class="o">=</span> <span class="nb">int</span>  <span class="c"># always int</span>
+    <span class="n">EVENT_CLASS_NAMES</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;MultiChannelAnalogInputEvent&#39;</span><span class="p">]</span>
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">ANALOGINPUT</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="s">&quot;ANALOGINPUT&quot;</span>
 
-    <span class="n">INPUT_POLL_TYPE_OPTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ALL&#39;</span><span class="p">,</span><span class="s">&#39;EACH&#39;</span><span class="p">]</span> <span class="c">#either ALL or EACH str</span>
-
-    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
-    
-    <span class="n">DEVICE_MODEL_ID</span><span class="o">=</span><span class="mi">0</span> <span class="c"># over write by sub class. Used in multichannel events.</span>
-    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">DAQ</span>
-    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
-    <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReportingEvents</span><span class="p">()</span>
@@ -143,12 +137,11 @@
 <span class="c">## Event Multichannel input</span>
 <span class="c">#</span>
 </div>
-<span class="k">class</span> <span class="nc">DAQEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>    
-    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">DAQDevice</span>
+<span class="k">class</span> <span class="nc">AnalogInputEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>    
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">AnalogInputDevice</span>
     
-<div class="viewcode-block" id="DAMultiChannelInputEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.DAMultiChannelInputEvent">[docs]</a><span class="k">class</span> <span class="nc">DAMultiChannelInputEvent</span><span class="p">(</span><span class="n">DAQEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiChannelAnalogInputEvent"><a class="viewcode-back" href="../../../iohub/api/device_details/daq.html#ioHub.devices.daq.MultiChannelAnalogInputEvent">[docs]</a><span class="k">class</span> <span class="nc">MultiChannelAnalogInputEvent</span><span class="p">(</span><span class="n">AnalogInputEvent</span><span class="p">):</span>
     <span class="n">_newDataTypes</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s">&#39;MODEL_ID&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;AI_0&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;AI_1&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;AI_2&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
@@ -158,46 +151,12 @@
         <span class="p">(</span><span class="s">&#39;AI_6&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;AI_7&#39;</span><span class="p">,</span><span class="n">N</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="p">]</span>
-    
-    
-    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">DA_MULTI_CHANNEL_INPUT</span>
-    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MULTI_CHANNEL_ANALOG_INPUT</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MULTI_CHANNEL_ANALOG_INPUT&#39;</span>
     <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
     <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :rtype : object</span>
-<span class="sd">        :param args:</span>
-<span class="sd">        :param kwargs:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">DAQEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="c">#</span>
-<span class="c">## Event Multichannel input</span>
-<span class="c">#</span>
-<span class="c">#</span>
-<span class="c">#class DASingleChannelInputEvent(DAQEvent):</span>
-<span class="c">#    _newDataTypes = [</span>
-<span class="c">#        (&#39;channel_name&#39;,N.str,8),</span>
-<span class="c">#        (&#39;float_value&#39;,N.float32),</span>
-<span class="c">#        (&#39;int_value&#39;,N.uint32)</span>
-<span class="c">#        ]</span>
-<span class="c">#</span>
-<span class="c">#</span>
-<span class="c">#    EVENT_TYPE_ID=EventConstants.DA_SINGLE_CHANNEL_INPUT</span>
-<span class="c">#    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)</span>
-<span class="c">#    IOHUB_DATA_TABLE=EVENT_TYPE_STRING</span>
-<span class="c">#    __slots__=[e[0] for e in _newDataTypes]</span>
-<span class="c">#    def __init__(self, *args, **kwargs):</span>
-<span class="c">#        &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        :rtype : object</span>
-<span class="c">#        :param args:</span>
-<span class="c">#        :param kwargs:</span>
-<span class="c">#        &quot;&quot;&quot;</span>
-<span class="c">#        DAQEvent.__init__(self, *args, **kwargs)</span>
-</div>
-<span class="kn">import</span> <span class="nn">HW</span>
+        <span class="n">AnalogInputEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </pre></div>
 
 </div>

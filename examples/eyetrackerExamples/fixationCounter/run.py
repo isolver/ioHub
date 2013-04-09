@@ -55,7 +55,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         print "FIX_DETECTED fix_end_time fix_x fix_y fdur fix_rt"
 
         tracker.setRecordingState(True)
-        self.hub.delay(0.050)
+        self.hub.wait(0.050)
 
         flip_time=window.flip()
         self.hub.clearEvents('all')
@@ -97,7 +97,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.hub.delay(0.250)
+        self.hub.wait(0.250)
 
         tracker.setConnectionState(False)
 

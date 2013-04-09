@@ -109,12 +109,1054 @@
 <span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
 <span class="sd">.. fileauthor:: Sol Simpson &lt;sol@isolver-software.com&gt;</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">ioHub</span>
+<span class="kn">from</span> <span class="nn">ioHub.devices</span> <span class="kn">import</span> <span class="n">Device</span>
+<span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">DeviceConstants</span><span class="p">,</span><span class="n">EyeTrackerConstants</span>
+<span class="kn">import</span> <span class="nn">hw</span>
+
+<span class="c">#noinspection PyUnusedLocal,PyTypeChecker</span>
+<div class="viewcode-block" id="EyeTrackerDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice">[docs]</a><span class="k">class</span> <span class="nc">EyeTrackerDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The EyeTrackerDevice class is the main class for the common eye tracker </span>
+<span class="sd">    interface API built into ioHub.</span>
+
+<span class="sd">    The common eye tracker interface class is implemented for different</span>
+<span class="sd">    eye tracker models by creating a subclass of the EyeTrackerDevice class</span>
+<span class="sd">    and implementing the common eye tracker API components that can be supported</span>
+<span class="sd">    by the given eye tracking hardware. It is these sub classes of the</span>
+<span class="sd">    EyeTrackerDevice that are used to define which implementation of the </span>
+<span class="sd">    common eye tracker interface is to be used during an experiment,</span>
+<span class="sd">    based on which eye tracker hardware you plan on using.</span>
+
+<span class="sd">    Not every eye tracker implementation of the common eye tracker interface</span>
+<span class="sd">    will support all of the interfaces functionality, however a core set of minimum</span>
+<span class="sd">    functionality is expected to be supported by all implementation. </span>
+<span class="sd">    This is not surprising given the deversity of eye tracking devices in use today,</span>
+<span class="sd">    and the common eye tracker interface was designed with this in mind.</span>
+<span class="sd">    When a specific implementation does not support a given method, if that method</span>
+<span class="sd">    is called, a default *not supported* behaviour is built into the base </span>
+<span class="sd">    implementation (currently the default behaviour is to simply do nothing and treat</span>
+<span class="sd">    non supported functionality as no-op calls within the API). This will likely</span>
+<span class="sd">    improve over time to provide some form of developer feedback when non supported</span>
+<span class="sd">    functionality is being used by a particular eye tracker implementation.</span>
+
+<span class="sd">    On the other hand, some eye trackers offer very specialized functionality that</span>
+<span class="sd">    is not as common across the eye tracking field, or functionality that currently </span>
+<span class="sd">    maybe just missing from the common eye tracker interface. In these cases, </span>
+<span class="sd">    the devlopers of the specific eye tracker implementation can expose non standard </span>
+<span class="sd">    eye tracker interface functionality for their device by adding extra command types</span>
+<span class="sd">    that are accessed by the sendCommand method of the eye tracker device API. </span>
+<span class="sd">    This practice is discurraged and should be used as a last resort however, as doing so breaks </span>
+<span class="sd">    the idea of having eye tracking experiment scripts that can</span>
+<span class="sd">    be run on different eye tracking hardware simply by changing the eye tracker</span>
+<span class="sd">    class being used in the iohub_config.yaml</span>
+<span class="sd">    </span>
+<span class="sd">    Methods in the EyeTrackerDevice class are broken down into several categories</span>
+<span class="sd">    within the EyeTracker class:</span>
+
+<span class="sd">    #. Eye Tracker Initialization / State Setting.</span>
+<span class="sd">    #. Ability to Define the Graphics Layer for the Eye Tracker to Use During Calibration / System Setup.</span>
+<span class="sd">    #. Starting and Stopping of Data Recording.</span>
+<span class="sd">    #. Sending Synchronization messages or codes to the Eye Tracker.</span>
+<span class="sd">    #. Accessing Eye Tracker Data During Recording.</span>
+<span class="sd">    #. Accessing the Eye Tracker Timebase.</span>
+<span class="sd">    #. Synchronizing the ioHub time base with the Eye Tracker time base, so Eye Tracker events can be provided with local time stamps when that is appropriate.</span>
+
+<span class="sd">    .. note:: </span>
+
+<span class="sd">        Only **one** instance of EyeTracker can be created within an experiment. Attempting to create &gt; 1</span>
+<span class="sd">        instance will raise an exception. To get the current instance of the EyeTracker you can call the</span>
+<span class="sd">        class method EyeTracker.getInstance(); this is useful as it saves needing to pass an eyeTracker</span>
+<span class="sd">        instance variable around your code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Used to hold the EyeTracker subclass instance to ensure only one instance of</span>
+    <span class="c"># a given eye tracker type is created. This is a current ioHub limitation, not the limitation of</span>
+    <span class="c"># all eye tracking hardware.</span>
+    <span class="n">_INSTANCE</span><span class="o">=</span><span class="bp">None</span>
+    
+    <span class="c"># the multiplier needed to convert device times to sec.msec times.</span>
+    <span class="n">DEVICE_TIMEBASE_TO_SEC</span><span class="o">=</span><span class="mf">1.0</span>
+
+    <span class="c"># Used by pyEyeTrackerDevice implementations to store relationships between an eye</span>
+    <span class="c"># trackers command names supported for EyeTrackerDevice sendCommand method and</span>
+    <span class="c"># a private python function to call for that command. This allows an implementation</span>
+    <span class="c"># of the interface to expose functions that are not in the core EyeTrackerDevice spec</span>
+    <span class="c"># without have to use the EXT extension class.</span>
+    <span class="n">_COMMAND_TO_FUNCTION</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">EYETRACKER</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;EYETRACKER&#39;</span>
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;_latest_sample&#39;</span><span class="p">,</span><span class="s">&#39;_latest_gaze_position&#39;</span><span class="p">,</span> <span class="s">&#39;_runtime_settings&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The EyeTrackerDevice class is extended by each eye tracker hardware</span>
+<span class="sd">        specific implementation of the common eye tracker interface. The hardware</span>
+<span class="sd">        specific extensions of the EyeTrackerDevice class are named EyeTracker.</span>
+
+<span class="sd">        Please review the EyeTracker device documentation page for the specific </span>
+<span class="sd">        eye tracker hardware that is being used at experiment runtime to get the</span>
+<span class="sd">        appropriate class path for that eye tracker implementation; this class</span>
+<span class="sd">        path is what is used to indicate what implementation of the common eye</span>
+<span class="sd">        tracker interface will be loaded when the experiment starts.</span>
+<span class="sd">        For example, if the experiment will be run using the interface </span>
+<span class="sd">        that supports eye trackers developed by EyeTrackingCompanyET (hypothetically),</span>
+<span class="sd">        then set the eye tracker device class that starts the eye tracker device </span>
+<span class="sd">        settings section of the iohub_config.yaml for the experiment to:</span>
+
+<span class="sd">        eyetracker.HW.EyeTrackingCompanyET.EyeTracker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_INSTANCE</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">ioDeviceError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;EyeTracker object has already been created; &quot;</span>
+                                                    <span class="s">&quot;only one instance can exist. Delete existing &quot;</span>
+                                                    <span class="s">&quot;instance before recreating EyeTracker object.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_INSTANCE</span><span class="o">=</span><span class="bp">self</span>
+                
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">])</span>
+
+        <span class="c"># hold last received ioHub eye sample (in ordered array format) from tracker.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_sample</span><span class="o">=</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+    
+        <span class="c"># holds the last gaze position read from the eye tracker as an x,y tuple. If binocular recording is</span>
+        <span class="c"># being performed, this is an average of the left and right gaze position x,y fields.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_gaze_position</span><span class="o">=</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>                                        
+
+        <span class="c"># stores the eye tracker runtime related configuration settings from the ioHub .yaml config file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_settings</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">][</span><span class="s">&#39;runtime_settings&#39;</span><span class="p">]</span>                                          
+    
+        <span class="c">#TODO: Add support for message ID to Message text lookup table in ioDataStore</span>
+        <span class="c"># data table that can be used by ET systems that support sending int codes,</span>
+        <span class="c"># but not text to tracker at runtime for syncing.</span>
+        
+<div class="viewcode-block" id="EyeTrackerDevice.trackerTime"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.trackerTime">[docs]</a>    <span class="k">def</span> <span class="nf">trackerTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        trackerTime returns the current time reported by the eye tracker device.</span>
+<span class="sd">        The time base is implementation dependent. </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        </span>
+<span class="sd">        Return:</span>
+<span class="sd">            float: The eye tracker hardware&#39;s reported current time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+   </div>
+<div class="viewcode-block" id="EyeTrackerDevice.trackerSec"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.trackerSec">[docs]</a>    <span class="k">def</span> <span class="nf">trackerSec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        trackerSec takes the time received by the EyeTracker.trackerTime() method</span>
+<span class="sd">        and returns the time in sec.usec-msec format.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        </span>
+<span class="sd">        Return:</span>
+<span class="sd">            float: The eye tracker hardware&#39;s reported current time in sec.msec-usec format.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+        
+   </div>
+<div class="viewcode-block" id="EyeTrackerDevice.setConnectionState"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.setConnectionState">[docs]</a>    <span class="k">def</span> <span class="nf">setConnectionState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">enable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        setConnectionState is used to connect ( setConnectionState(True) ) </span>
+<span class="sd">        or disable ( setConnectionState(False) ) the connection of the ioHub </span>
+<span class="sd">        to the eyetracker hardware.</span>
+<span class="sd">        </span>
+<span class="sd">        Note that a connection to the eye tracking hardware is automatically</span>
+<span class="sd">        openned when the ioHub Server process is started. So there is no need to</span>
+<span class="sd">        call this method at the start of your experiment. Doing so will have no</span>
+<span class="sd">        effect on the connection state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enable (bool): True = enable the connection, False = disable the connection.</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            bool: indicates the current connection state to the eye tracking hardware.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+            </div>
+<div class="viewcode-block" id="EyeTrackerDevice.isConnected"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.isConnected">[docs]</a>    <span class="k">def</span> <span class="nf">isConnected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        isConnected returns whether the EyeTrackerDevice is connected to the</span>
+<span class="sd">        eye tracker hardware or not.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">            </span>
+<span class="sd">        Return:</span>
+<span class="sd">            bool:  True = the eye tracking hardware is connected. False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+            </div>
+<div class="viewcode-block" id="EyeTrackerDevice.sendCommand"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The sendCommand method allows arbitrary *commands* or *requests* to be</span>
+<span class="sd">        issued to the eye tracker device. Valid values for the arguements of this </span>
+<span class="sd">        method are completely implementation specific, so please refer to the </span>
+<span class="sd">        eye tracker implentation page for the eye tracker being used for a list of </span>
+<span class="sd">        valid key and value combinations (if any). </span>
+<span class="sd">        </span>
+<span class="sd">        In general, eye tracker implementations should **not** need to support </span>
+<span class="sd">        this method unless there is critical eye tracker functionality that is </span>
+<span class="sd">        not accessable using the other methods in the EyeTrackerDevice class.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): the command or function name that should be run.</span>
+<span class="sd">            value (object): the (optional) value associated with the key. </span>
 
 
-<span class="kn">import</span> <span class="nn">InterfaceClasses</span>
-<span class="kn">from</span> <span class="nn">InterfaceClasses</span> <span class="kn">import</span> <span class="n">EyeTrackerDevice</span>
-<span class="kn">import</span> <span class="nn">eye_events</span>
-<span class="kn">import</span> <span class="nn">HW</span>
+<span class="sd">        Return:</span>
+<span class="sd">            object: the result of the command call</span>
+<span class="sd">            int: EyeTrackerConstants.EYETRACKER_OK</span>
+<span class="sd">            int: EyeTrackerConstants.EYETRACKER_ERROR</span>
+<span class="sd">            int: EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+        </div>
+<div class="viewcode-block" id="EyeTrackerDevice.sendMessage"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.sendMessage">[docs]</a>    <span class="k">def</span> <span class="nf">sendMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message_contents</span><span class="p">,</span><span class="n">time_offset</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The sendMessage method sends a text or int message to the eye tracker. </span>
+<span class="sd">        </span>
+<span class="sd">        Messages are generally used to send information you want </span>
+<span class="sd">        saved with the native eye data file and are often used to </span>
+<span class="sd">        synchronize stimulus changes in the experiment with the eye</span>
+<span class="sd">        data stream being saved to the native eye tracker data file (if any).</span>
+<span class="sd">        </span>
+<span class="sd">        This means that the sendMessage implementation needs to </span>
+<span class="sd">        perform in real-time, with a delay of &lt;1 msec from when a message is </span>
+<span class="sd">        sent to when it is time stamped by the eye tracker, for it to be </span>
+<span class="sd">        accurate in this regard.</span>
+
+<span class="sd">        If this standard can not be met, the expected delay and message </span>
+<span class="sd">        timing precision (variability) should be provided in the eye tracker&#39;s </span>
+<span class="sd">        implementation notes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           message_contents (str or int): </span>
+<span class="sd">               If message_contents is a string, check with the implementations documentation if there are any string length limits.</span>
+
+<span class="sd">        Kwargs:</span>
+<span class="sd">           time_offset (float): sec.msec_usec time offset that the time stamp of</span>
+<span class="sd">                              the message should be offset in the eye tracker data file.</span>
+<span class="sd">                              time_offset can be used so that a message can be sent</span>
+<span class="sd">                              for a display change **BEFORE** or **AFTER** the actual</span>
+<span class="sd">                              flip occurred, using the following formula:</span>
+<span class="sd">                                  </span>
+<span class="sd">                              time_offset = sendMessage_call_time - event_time_message_represent</span>
+<span class="sd">                              </span>
+<span class="sd">                              Both times should be based on the ioHub.Computer.getTime() time base.</span>
+<span class="sd">                              </span>
+<span class="sd">                              If time_offset is not supported by the eye tracker implementation being used, a warning message will be printed to stdout.</span>
+<span class="sd">        </span>
+<span class="sd">        Return:</span>
+<span class="sd">            (int): EyeTrackerConstants.EYETRACKER_OK, EyeTrackerConstants.EYETRACKER_ERROR, or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED                      </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+            
+        <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+    </div>
+<div class="viewcode-block" id="EyeTrackerDevice.runSetupProcedure"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.runSetupProcedure">[docs]</a>    <span class="k">def</span> <span class="nf">runSetupProcedure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">starting_state</span><span class="o">=</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">DEFAULT_SETUP_PROCEDURE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The runSetupProcedure allows the eye tracker interface to perform </span>
+<span class="sd">        such things as participant placement validation, camera setup, calibration,</span>
+<span class="sd">        and validation type activities. The details of what this method does exactly</span>
+<span class="sd">        is implementation specific. This is a blocking call for the experiment process</span>
+<span class="sd">        and will not return until the necessary steps have been done so that the</span>
+<span class="sd">        eye tracker is ready to start collecting eye data when the method returns.</span>
+<span class="sd">        </span>
+<span class="sd">        Args: </span>
+<span class="sd">            None</span>
+<span class="sd">            </span>
+<span class="sd">        Kwargs: </span>
+<span class="sd">            starting_state (int): The state that the eye tracker should start with or</span>
+<span class="sd">                perform when the runSetupProcedure method is called. Valid options are:</span>
+<span class="sd">                    EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE (the default) indicates that the standard setup and calibration procedure should be performed.</span>
+<span class="sd">                    EyeTrackerConstants.CALIBRATION_START_STATE indicates the eye tracker should immediately start the calibration procedure when the method is called.</span>
+<span class="sd">                    EyeTrackerConstants.VALIDATION_START_STATE indicates the eye tracker should immediately start the validation procedure when the method is called.</span>
+<span class="sd">                    EyeTrackerConstants.DRIFT_CORRECTION_START_STATE indicates the eye tracker should immediately start the validation procedure when the method is called.</span>
+<span class="sd">                An eye tracker implementation is only required to support the EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE setting.</span>
+<span class="sd">                </span>
+<span class="sd">        Return:</span>
+<span class="sd">            int: EyeTrackerConstants.EYETRACKER_OK if this method and starting_state is supported and the runSetupProcedure ran successfully. If the starting state specified was anything other than EyeTrackerConstants.VALIDATION_START_STATE, the performed calibration routine must have also passed (been sucessful). </span>
+<span class="sd">                 EyeTrackerConstants.EYETRACKER_CALIBRATION_ERROR if this method and starting_state is supported but either calibration or drift correction (depending on the state argument provided) failed. In this case; the method can be called again to attempt a sucessful calibration and or drift correction.                </span>
+<span class="sd">                 EyeTrackerConstants.EYETRACKER_ERROR if this method is supported and starting_state is, but an error occurred during the method (other than a failed calibration or drift correct result).</span>
+<span class="sd">                 EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the eye tracker implementation does not support this method or the specified starting_state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># Implementation Note: Change this list to only include the states your eye tracker can support.</span>
+        <span class="n">IMPLEMENTATION_SUPPORTED_STATES</span><span class="o">=</span><span class="p">[</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">DEFAULT_SETUP_PROCEDURE</span><span class="p">,</span>
+                                         <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">CALIBRATION_START_STATE</span><span class="p">,</span>
+                                         <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">VALIDATION_START_STATE</span><span class="p">,</span>
+                                         <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">starting_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">DEFAULT_SETUP_PROCEDURE</span><span class="p">,</span>
+                              <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">CALIBRATION_START_STATE</span><span class="p">,</span>
+                              <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">VALIDATION_START_STATE</span><span class="p">,</span>
+                              <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span><span class="p">]:</span>
+
+            <span class="k">if</span> <span class="n">starting_state</span> <span class="ow">in</span> <span class="n">IMPLEMENTATION_SUPPORTED_STATES</span><span class="p">:</span>
+                <span class="c"># Implementation Note: Run your custom implementation logic for the method here</span>
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;EyeTracker should handle runSetupProcedure method with starting_state of {0} now.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">starting_state</span><span class="p">))</span>
+                
+                <span class="c"># Implementation Note: result should be changed to return one of</span>
+                <span class="c">#       EyeTrackerConstants.EYETRACKER_OK </span>
+                <span class="c">#       EyeTrackerConstants.EYETRACKER_CALIBRATION_ERROR </span>
+                <span class="c">#       EyeTrackerConstants.EYETRACKER_ERROR </span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+                <span class="k">return</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">createErrorResult</span><span class="p">(</span><span class="s">&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;</span><span class="p">,</span><span class="n">error_message</span><span class="o">=</span><span class="s">&quot;The starting_state arguement value provided is not recognized&quot;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&quot;EyeTracker.runSetupProcedure&quot;</span><span class="p">,</span><span class="n">arguement</span><span class="o">=</span><span class="s">&#39;starting_state&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">starting_state</span><span class="p">)</span>            
+
+                </div>
+<div class="viewcode-block" id="EyeTrackerDevice.setRecordingState"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.setRecordingState">[docs]</a>    <span class="k">def</span> <span class="nf">setRecordingState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">recording</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The setRecordingState method is used to start or stop the recording </span>
+<span class="sd">        and transmition of eye data from the eye tracking device.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            recording (bool): if True, the eye tracker will start recordng data.; false = stop recording data.</span>
+<span class="sd">           </span>
+<span class="sd">        Return:</span>
+<span class="sd">            bool: the current recording state of the eye tracking device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">recording</span><span class="p">,</span><span class="nb">bool</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">createErrorResult</span><span class="p">(</span><span class="s">&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;</span><span class="p">,</span><span class="n">error_message</span><span class="o">=</span><span class="s">&quot;The recording arguement value provided is not a boolean.&quot;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&quot;EyeTracker.setRecordingState&quot;</span><span class="p">,</span><span class="n">arguement</span><span class="o">=</span><span class="s">&#39;recording&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">recording</span><span class="p">)</span>
+        
+        <span class="c"># Implementation Note: Perform your implementation specific logic for this method here</span>
+        <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;EyeTracker should handle setRecordingState method with recording value of {0} now.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">recording</span><span class="p">))</span>
+        
+        <span class="c"># Implementation Note: change current_recording_state to be True or False, based on whether the eye tracker is now recording or not.</span>
+        <span class="n">current_recording_state</span><span class="o">=</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+        <span class="k">return</span> <span class="n">current_recording_state</span>
+</div>
+<div class="viewcode-block" id="EyeTrackerDevice.isRecordingEnabled"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.isRecordingEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordingEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The isRecordingEnabled method indicates if the eye tracker device is currently</span>
+<span class="sd">        recording data or not. </span>
+<span class="sd">   </span>
+<span class="sd">        Args:</span>
+<span class="sd">           None</span>
+<span class="sd">  </span>
+<span class="sd">        Return:</span>
+<span class="sd">            bool: True == the device is recording data; False == Recording is not occurring</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># Implementation Note: Perform your implementation specific logic for this method here</span>
+        <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;EyeTracker should handle isRecordingEnabled method now.&quot;</span><span class="p">)</span>
+
+        <span class="c"># Implementation Note: change is_recording to be True or False, based on whether the eye tracker is recording or not.</span>
+        <span class="n">is_recording</span><span class="o">=</span><span class="n">EyeTrackerConstants</span><span class="o">.</span><span class="n">FUNCTIONALITY_NOT_SUPPORTED</span>
+        
+        <span class="k">return</span> <span class="n">is_recording</span>
+        </div>
+<div class="viewcode-block" id="EyeTrackerDevice.getLastSample"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.getLastSample">[docs]</a>    <span class="k">def</span> <span class="nf">getLastSample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The getLastSample method returns the latest ioHub sample event available.</span>
+<span class="sd">        The eye tracker must be recording data for a sample event to be returned, otherwise None is returned.</span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: If this method is not supported by the eye tracker interface, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.</span>
+
+<span class="sd">            None: If the eye tracker is not currently recording data.</span>
+
+<span class="sd">            EyeSample: If the eye tracker is recording in a monocular tracking mode, the latest sample event of this event type is returned.</span>
+
+<span class="sd">            BinocularEyeSample:  If the eye tracker is recording in a binocular tracking mode, the latest sample event of this event type is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_sample</span>
+</div>
+<div class="viewcode-block" id="EyeTrackerDevice.getLastGazePosition"><a class="viewcode-back" href="../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice.getLastGazePosition">[docs]</a>    <span class="k">def</span> <span class="nf">getLastGazePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The getLastGazePosition method returns the latest eye gaze position retieved from the eye tracker device.</span>
+<span class="sd">        This is the position on the calibrated 2D surface that the eye tracker is reporting as the current eye position.</span>
+<span class="sd">        The units are in the units in use by the Display device. </span>
+<span class="sd">        </span>
+<span class="sd">        If binocular recording is being performed, the average position of both eyes is returned. </span>
+<span class="sd">        </span>
+<span class="sd">        If no samples have been received from the eye tracker, or the eye tracker is not currently recording data, None is returned.</span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: If this method is not supported by the eye tracker interface, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.</span>
+
+<span class="sd">            None: If the eye tracker is not currently recording data or no eye samples have been received.</span>
+
+<span class="sd">            tuple: Latest (gaze_x,gaze_y) position of the eye(s)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_gaze_position</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_eyeTrackerToDisplayCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">eyetracker_point</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The _eyeTrackerToDisplayCoords method must be used by an eye trackers implementation</span>
+<span class="sd">        of the common eye tracker interface to convert monitor screen based x,y coordinates</span>
+<span class="sd">        from the eye trackers coordinate space to the ioHub.devices.Display coordinate</span>
+<span class="sd">        space being used. Any screen based coordinates that exist in the data</span>
+<span class="sd">        provided to the ioHub by the device implementation must use this method to</span>
+<span class="sd">        convert the x,y screen position to the correct coordinate space.</span>
+<span class="sd">        </span>
+<span class="sd">        Default implementation is to just pass the x,y screen position through as (x,y) tuple.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            eyetracker_point (object): eye tracker implementation specific data type representing an x, y position on the calibrated 2D plane (typically a computer display screen).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (x,y): The x,y eye position on the calibrated surface in the current ioHub.devices.Display coordinate type and space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gaze_x</span><span class="o">=</span><span class="n">eyetracker_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gaze_y</span><span class="o">=</span><span class="n">eyetracker_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="c"># do mapping if necessary</span>
+        <span class="c"># default is no mapping </span>
+        <span class="n">display_x</span><span class="o">=</span><span class="n">gaze_x</span>
+        <span class="n">display_y</span><span class="o">=</span><span class="n">gaze_y</span>
+
+        <span class="k">return</span> <span class="n">display_x</span><span class="p">,</span> <span class="n">display_y</span>
+   
+    <span class="k">def</span> <span class="nf">_displayToEyeTrackerCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">display_x</span><span class="p">,</span><span class="n">display_y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The _displayToEyeTrackerCoords method must be used by an eye trackers implementation</span>
+<span class="sd">        of the common eye tracker interface to convert any gaze positions provided</span>
+<span class="sd">        by the ioHub to the appropriate x,y gaze position coordinate space for the eye tracking device in use.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is simply the inverse operation performed by the _eyeTrackerToDisplayCoords</span>
+<span class="sd">        method.</span>
+<span class="sd">        </span>
+<span class="sd">        Default implementation is to just return the gaze_x,gaze_y values unchanged.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            display_x (float): The horizontal eye position on the calibrated 2D surface in ioHub.devices.Display coordinate space.</span>
+<span class="sd">            display_y (float): The vertical eye position on the calibrated 2D surface in ioHub.devices.Display coordinate space.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (object): eye tracker implementation specific data type representing an x, y position on the calibrated 2D plane (typically a computer display screen).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># do mapping if necessary</span>
+        <span class="c"># default is no mapping </span>
+        <span class="n">gaze_x</span><span class="o">=</span><span class="n">display_x</span>
+        <span class="n">gaze_y</span><span class="o">=</span><span class="n">display_y</span>
+        
+        <span class="k">return</span> <span class="n">gaze_x</span><span class="p">,</span><span class="n">gaze_y</span>
+    
+<span class="c">#    def _poll(self):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The _poll method is used when the ioHub Device needs to periodically</span>
+<span class="c">#        check for new events received from the native device / device API.</span>
+<span class="c">#        Normally this means that the native device interface is using some form</span>
+<span class="c">#        data buffer or que to place new device events in until the ioHub Device </span>
+<span class="c">#        reads them.</span>
+<span class="c">#</span>
+<span class="c">#        The ioHub Device can *poll* and check for any new events that</span>
+<span class="c">#        are available, retrieve the new events, and process them </span>
+<span class="c">#        to create ioHub Events as necessery. Each subclass of ioHub.devives.Device</span>
+<span class="c">#        that wishes to use event polling **must** override the _poll method</span>
+<span class="c">#        in the Device classes implementation. The configuration section of the</span>
+<span class="c">#        iohub_config.yaml for the device **must** also contain the device_timer: interval</span>
+<span class="c">#        parameter as explained below. </span>
+<span class="c">#</span>
+<span class="c">#        **See the comments in the ioHub.devices.Device._poll() method for more important details.  </span>
+<span class="c">#        and a simple generic sudo code implementation.**</span>
+<span class="c">#</span>
+<span class="c">#        If the eye tracker device uses the event callback method for notifying </span>
+<span class="c">#        the ioHub Server of new native device interface events as they become available,</span>
+<span class="c">#        then the _handleNativeEvent() and _getIOHubEventObject() methods must </span>
+<span class="c">#        implemented for the EyeTracker class being implemented and it must **not**</span>
+<span class="c">#        extend the _poll() method. Furthermore, the EyeTracker device configuration</span>
+<span class="c">#        section of the iohub_config.yaml must **not** contain a &#39;device_timer&#39;</span>
+<span class="c">#        setting, as the ioHub Server uses the presence of this device setting to</span>
+<span class="c">#        determine of a Device class uses the polling vs. callback event detection </span>
+<span class="c">#        approach.             </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        </span>
+<span class="c">#        # Replace the following line with your Device classes implementation of the method if the device is polling.</span>
+<span class="c">#        # Remove this method from your class if the device is not using event polling for event detection</span>
+<span class="c">#        # and are using an event callback approach instead.</span>
+<span class="c">#        Device._poll(self)</span>
+<span class="c">#        </span>
+<span class="c">#    def _handleNativeEvent(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The _handleEvent method can be used by the native device interface that</span>
+<span class="c">#        the ioHub Device class implements to register new native device events</span>
+<span class="c">#        by calling this method of the ioHub Device class. </span>
+<span class="c">#        </span>
+<span class="c">#        **See the comments in the ioHub.devices.Device._handleNativeEvent() </span>
+<span class="c">#        method for more important details and a simple generic sudo code implementation.**</span>
+<span class="c">#</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        # Replace the following line with your Device classes implementation of</span>
+<span class="c">#        # the method if the device is using event callbacks.</span>
+<span class="c">#        # Remove this method from your class if the device is using a polling model</span>
+<span class="c">#        # to detect new events.</span>
+<span class="c">#        Device._handleNativeEvent(self,*args,**kwargs)</span>
+<span class="c"># </span>
+<span class="c">#    def _getIOHubEventObject(self,native_event_data):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The _getIOHubEventObject method is called by the ioHub Server to convert </span>
+<span class="c">#        new native device event objects that have been received to the appropriate </span>
+<span class="c">#        ioHub Event type representation. </span>
+<span class="c">#        </span>
+<span class="c">#        If the ioHub Device has been implemented to use the _poll() method of checking for</span>
+<span class="c">#        new events, then this method simply should return what it is passed, and is the</span>
+<span class="c">#        default implmentation for the method.</span>
+<span class="c">#        </span>
+<span class="c">#        If the ioHub Device has been implemented to use the evnt callback method</span>
+<span class="c">#        to register new native device events with the ioHub Server, then this method should be</span>
+<span class="c">#        overwritten by the Device subclass to convert the native event data into</span>
+<span class="c">#        an appropriate ioHub Event representation. See the implementation of the </span>
+<span class="c">#        Keyboard or Mouse device classes for an example of such an implementation.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            native_event_data: object or tuple of (callback_time, native_event_object)</span>
+<span class="c">#           </span>
+<span class="c">#        Returns:</span>
+<span class="c">#            tuple: The appropriate ioHub Event type in list form.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        # Replace the following line with your Device classes implementation of</span>
+<span class="c">#        # the method if the device is using event callbacks.</span>
+<span class="c">#        # Remove this method from your class if the device is using a polling model</span>
+<span class="c">#        # to detect new events.</span>
+<span class="c">#        ioHub.print2err(&quot;EyeTrackerDevice_getIOHubEventObject being called!!&quot;)</span>
+<span class="c">#</span>
+<span class="c">#        #return Device._getIOHubEventObject(self,native_event_data)</span>
+        
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Do any final cleanup of the eye tracker before the object is destroyed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_INSTANCE</span><span class="o">=</span><span class="bp">None</span>
+
+<span class="c"># The below methods have been removed, as they all relate to attributes of the </span>
+<span class="c"># eye tracker that are really related to the eyetracker config file setup</span>
+<span class="c"># and many eye trackers will not support these methods anyhow, so they over complicate</span>
+<span class="c"># the interface for little extra value (IMO).</span>
+
+<span class="c">#    def createNativeDataFile(self, native_file_name, eye_tracker_native_file_directory=None, over_write=True):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The createNativeDataFile method instructs the eye tracker to open a new </span>
+<span class="c">#        native data file in the eye tracker computer / application. The currently</span>
+<span class="c">#        open eye tracker native can be closed using the closeNativeDataFile() method.</span>
+<span class="c">#       </span>
+<span class="c">#        Note that using native data files is not supported by all eye tracking hardware </span>
+<span class="c">#        and is not required when using the ioHub if the eye tracker send the eye tracker</span>
+<span class="c">#        events needed during experiment runtime. If this is the case, the ioDataStore </span>
+<span class="c">#        can save all events received from the eye tracker into the ioHub Servers</span>
+<span class="c">#        event data file and this file can be used to access eye tracker events post hoc.</span>
+<span class="c">#        </span>
+<span class="c">#        If the ExperimentRuntime device has also sent appropriate Message events</span>
+<span class="c">#        to the ioHub during the experiment runtime, everything needed to perform</span>
+<span class="c">#        data analysis should be available in the ioDataStore file saved.</span>
+<span class="c">#        </span>
+<span class="c">#        Args: </span>
+<span class="c">#            native_file_name (str): the name of the native data file to open by the eye tracker Host application. The file name should *not* include any path information. The file type extension is optional when specifying the file_name.</span>
+<span class="c">#        </span>
+<span class="c">#        Kwargs:</span>
+<span class="c">#            eye_tracker_native_file_directory (str): Directory to save the name data file to (eye tracker host computer or application relative). </span>
+<span class="c">#           </span>
+<span class="c">#            over_write (bool): If True, the eye tracker will over write an existing data file that has the same name and directory provided. If False, no data file will be created and EyeTrackerConstants.EYETRACKER_ERROR will be returned by the method. </span>
+<span class="c">#        </span>
+<span class="c">#        Note that if either of the optional Kwargs are provided by the experiment script,</span>
+<span class="c">#        but are not supported by the eye tracker implementation being used, </span>
+<span class="c">#        they will be ignored and a warning message will be printed to stdout.</span>
+<span class="c">#        </span>
+<span class="c">#        Return:</span>
+<span class="c">#            (bool): EyeTrackerConstants.EYETRACKER_OK, EyeTrackerConstants.EYETRACKER_ERROR, or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED             </span>
+<span class="c">#            </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#        </span>
+<span class="c">#    def closeNativeDataFile(self):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The closeNativeDataFile is used to close a currently open native eye tracker data file.</span>
+<span class="c">#        If no native data file has been openned, then calling this method does nothing.</span>
+<span class="c">#        </span>
+<span class="c">#        Once a native data file has been closed, on eye tracker systems that run on a seperate</span>
+<span class="c">#        computer than the Experiment computer, the getNativeDataFile() method</span>
+<span class="c">#        may be used to transfer the native data file from the eye tracker computer</span>
+<span class="c">#        to the experiment / ioHub computer.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            None</span>
+<span class="c">#            </span>
+<span class="c">#        Return:</span>
+<span class="c">#            int: EyeTrackerConstants.EYETRACKER_OK if this method is supported, a native data file was open on the eye tracker host software, and it was successfully closed</span>
+<span class="c">#                 EyeTrackerConstants.EYETRACKER_ERROR if this method is supported, but either no native data file was open when closeNativeDataFile() was called, or another eye tracker host error occurred.</span>
+<span class="c">#                 EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the eye tracker implementation does not support this method.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    </span>
+<span class="c">#    def getNativeDataFile(self, native_file_name, eye_tracker_native_file_directory=None, prompt_for_local_save_location=False):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The getNativeDataFile method is only of relevence on eye tracker systems</span>
+<span class="c">#        that run on a seperate computer than the experiment / ioHub computer</span>
+<span class="c">#        </span>
+<span class="c">#        In such cases, the method may be used to transfer the a native eye tracker data file</span>
+<span class="c">#        from the eye tracker computer to the experiment computer.</span>
+<span class="c">#        </span>
+<span class="c">#        If the requested naive eye tracker file is open when this method is called, the eye tracker</span>
+<span class="c">#        will close the file prior to transfering it.</span>
+<span class="c">#</span>
+<span class="c">#        Args: </span>
+<span class="c">#            native_file_name (str): the name of the native data file to transfer from the eye tracker Host application. The file name should *not* include any path information. The file type extension is optional when specifying the file_name.</span>
+<span class="c">#        </span>
+<span class="c">#        Kwargs:</span>
+<span class="c">#            eye_tracker_native_file_directory (str): Directory that the native file should be retrieved from on the Eye Tracker Host computer.  </span>
+<span class="c">#            </span>
+<span class="c">#            prompt_for_local_save_location (bool): If True, a file save dialog will be displayed allowing the selection of the location to save the native data file to. If False (the default), no dialog will be displayed and the native data file will ve saved in the same directory the experiment script is in.</span>
+<span class="c">#        </span>
+<span class="c">#        Return: </span>
+<span class="c">#            int: EyeTrackerConstants.EYETRACKER_OK if this method is supported, the requested native data file was successfully transfered.</span>
+<span class="c">#                 EyeTrackerConstants.EYETRACKER_ERROR if this method is supported, but the requested native data file was not transfered to the experiment computer; either because the supplied file name and / or path could not be found, or another file transfer error occurred.</span>
+<span class="c">#                 EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the eye tracker implementation does not support this method.</span>
+<span class="c">#            </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        </span>
+<span class="c">#        # Implementation Suggestions:</span>
+<span class="c">#        # It is suggested that implementions of this mehtod first check that </span>
+<span class="c">#        # the requested file exists on the host computer. If the file exists and can be transfered, </span>
+<span class="c">#        # then use the value of prompt_for_local_save_location to determine if </span>
+<span class="c">#        # a file save dialog should be displayed or not. </span>
+<span class="c">#        # The ioHub.util.experiment.dialogs.FileDialog can be used for this purpose</span>
+<span class="c">#        # if needed.</span>
+<span class="c">#        </span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED      </span>
+<span class="c">#    def getSampleFilterLevel(self,data_stream=EyeTrackerConstants.FILTER_ALL):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The getSampleFilterLevel method returns the eye tracker hardware controlled</span>
+<span class="c">#        *temporal* eye sample data filter level for the specified data_stream (if any).</span>
+<span class="c">#        The degree to which this method is supported is eye tracker implementation dependent. </span>
+<span class="c">#        A specific eye tracker may fully support the method, not support this </span>
+<span class="c">#        method at all, or may only support a subset of the defined data_stream constants. </span>
+<span class="c">#</span>
+<span class="c">#        The defined possible data stream types are:</span>
+<span class="c">#            </span>
+<span class="c">#            EyeTrackerConstants.FILTER_ALL : The eye tracker applies the same filter to all filterable data streams it supports.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_FILE : The eye tracker supports an eye sample filter that is applied only to samples saved to the eye trackers native data file.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_NET : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported network interface.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_SERIAL : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported serial interface.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_ANALOG : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported analog interface.</span>
+<span class="c">#</span>
+<span class="c">#        The defined possible filter level values for any supported data stream types are:</span>
+<span class="c">#            </span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_OFF : No temporal eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_1 : The lowest level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_2 : A mid level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_3 : A mid level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_4 : A mid level of eye eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_5 : The highest level of eye eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#         </span>
+<span class="c">#        If the eye tracker implementation for the device being used does not support this method, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED will be returned</span>
+<span class="c">#         </span>
+<span class="c">#        If the eye tracker implementation for the device being used does not support the data_stream value provided, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED will be returned</span>
+<span class="c">#</span>
+<span class="c">#        If the eye tracker implementation for the device being used supports the data_stream value provided, one of the EyeTrackerConstants.FILTER_LEVEL_* constants will be returned.</span>
+<span class="c">#        </span>
+<span class="c">#        Note that the filter levels specified by the common eye tracker interface are intended to be as general purpose as possible.</span>
+<span class="c">#        Refer to the eye tracker implementation notes page for the eye tracker being used to determine how these filter level constants map to vendor specific filter levels or types.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            data_stream (int): Specifies which data stream is being queried for the active sample data filter level. Must be one of the constants refernced above. </span>
+<span class="c">#        </span>
+<span class="c">#        Return: </span>
+<span class="c">#            int: EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the method or data_stream specified is not supported by the eye tracker implementation being used. Otherwise, the EyeTrackerConstants.FILTER_LEVEL_* that is in place for the specified data_stream type.</span>
+<span class="c">#            </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        method_is_supported=True</span>
+<span class="c">#        </span>
+<span class="c">#        if method_is_supported:</span>
+<span class="c">#            all_possible_data_streams=[EyeTrackerConstants.FILTER_FILE,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_NET,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_SERIAL,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_ANALOG,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_ALL]</span>
+<span class="c">#            </span>
+<span class="c">#            if data_stream not in all_possible_data_streams:</span>
+<span class="c">#                return ioHub.server.createErrorResult(&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;,error_message=&quot;The data_stream arguement value provided is not a valid data stream constant.&quot;,method=&quot;EyeTracker.getDataFilterLevel&quot;,arguement=&#39;data_stream&#39;, value=data_stream)</span>
+<span class="c">#                </span>
+<span class="c">#            supported_data_streams=[EyeTrackerConstants.FILTER_FILE,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_NET,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_SERIAL,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_ANALOG,</span>
+<span class="c">#                                    EyeTrackerConstants.FILTER_ALL]</span>
+<span class="c">#     </span>
+<span class="c">#            if data_stream in supported_data_streams:</span>
+<span class="c">#                # Implementation Note: Run your custom implementation logic for the method here</span>
+<span class="c">#                ioHub.print2err(&quot;EyeTracker should handle getDataFilterLevel method now.&quot;)</span>
+<span class="c">#                </span>
+<span class="c">#                # Implementation Note: result should be changed to return one of</span>
+<span class="c">#                #       EyeTrackerConstants.EyeTrackerConstants.FILTER_LEVEL_</span>
+<span class="c">#                result = EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#                return result</span>
+<span class="c">#                </span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED     </span>
+<span class="c">#        </span>
+<span class="c">#    def setSampleFilterLevel(self,filter_settings_dict):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The setSampleFilterLevel method sets the eye tracker hardware controlled</span>
+<span class="c">#        *temporal* eye sample data filter level for the specified data_stream(s).</span>
+<span class="c">#        </span>
+<span class="c">#        The degree to which this method is supported is eye tracker implementation dependent. </span>
+<span class="c">#        A specific eye tracker may fully support the method, not support this </span>
+<span class="c">#        method at all, or may only support a subset of the defined data_stream constants. </span>
+<span class="c">#</span>
+<span class="c">#        The defined possible data stream types are:</span>
+<span class="c">#            </span>
+<span class="c">#            EyeTrackerConstants.FILTER_ALL : The eye tracker applies the same filter to all filterable data streams it supports.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_FILE : The eye tracker supports an eye sample filter that is applied only to samples saved to the eye trackers native data file.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_ONLINE : The eye tracker supports an eye sample filter that is applied only to samples over realtime interfaces during recording.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_NET : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported network interface.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_SERIAL : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported serial interface.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_ANALOG : The eye tracker supports an eye sample filter that is applied only to samples sent over the supported analog interface.</span>
+<span class="c">#</span>
+<span class="c">#        The defined possible filter level values for any supported data stream types are:</span>
+<span class="c">#            </span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_OFF : No temporal eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_1 : The lowest level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_2 : A mid level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_3 : A mid level of eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_4 : A mid level of eye eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#            EyeTrackerConstants.FILTER_LEVEL_5 : The highest level of eye eye sample filtering is being performed by the eye tracking device for the given data stream.</span>
+<span class="c">#         </span>
+<span class="c">#        If the eye tracker implementation for the device being used does not support this method, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED will be returned</span>
+<span class="c">#         </span>
+<span class="c">#        If the eye tracker implementation for the device being used does not support one of the data_stream values provided, that EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED will be returned for that data stream key in the result dictionary.</span>
+<span class="c">#</span>
+<span class="c">#        If the eye tracker implementation for the device being used supports the data_stream value provided, the filter level for that stream will be updated and the current filter level will be returned as the value for the associated data_stream key in the returned dictionary.</span>
+<span class="c">#        </span>
+<span class="c">#        Note that the filter levels specified by the common eye tracker interface are intended to be as general purpose as possible.</span>
+<span class="c">#        Refer to the eye tracker implementation notes page for the eye tracker being used to determine how these filter level constants map to vendor specific filter levels or types.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            filter_settings_dict (dict): A dictionary indicating the data streams (dict keys) and associated filter level constants (values) to update the eye tracker settings with. </span>
+<span class="c">#        </span>
+<span class="c">#        Return: </span>
+<span class="c">#            dict: EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the method is not supported, or a dict with the same data stream keys as were passed in the filter_settings_dict, with the value for each key being the updated filter level, or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED if the data steam key provided is not supported by the eye tracker implementation.        </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        </span>
+<span class="c">#        functionality_supported=True        </span>
+<span class="c">#        </span>
+<span class="c">#        if not functionality_supported:</span>
+<span class="c">#            return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED     </span>
+<span class="c">#</span>
+<span class="c">#        if not isinstance(filter_settings_dict,dict):</span>
+<span class="c">#            return ioHub.server.createErrorResult(&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;,</span>
+<span class="c">#                                    error_message=&quot;The filter_settings_dict arguement value provided is not a dict.&quot;,</span>
+<span class="c">#                                    method=&quot;EyeTracker.setSampleFilterLevel&quot;,arguement=&#39;filter_settings_dict&#39;, value=filter_settings_dict)</span>
+<span class="c">#</span>
+<span class="c">#        ALL_STREAM_TYPES=(EyeTrackerConstants.FILTER_ALL,</span>
+<span class="c">#                          EyeTrackerConstants.FILTER_NET,</span>
+<span class="c">#                          EyeTrackerConstants.FILTER_FILE,</span>
+<span class="c">#                          EyeTrackerConstants.FILTER_SERIAL,</span>
+<span class="c">#                          EyeTrackerConstants.FILTER_ANALOG)</span>
+<span class="c">#</span>
+<span class="c">#        ALL_FILTER_LEVELS=(EyeTrackerConstants.FILTER_LEVEL_OFF,</span>
+<span class="c">#                           EyeTrackerConstants.FILTER_LEVEL_1,</span>
+<span class="c">#                           EyeTrackerConstants.FILTER_LEVEL_2,</span>
+<span class="c">#                           EyeTrackerConstants.FILTER_LEVEL_3,</span>
+<span class="c">#                           EyeTrackerConstants.FILTER_LEVEL_4,</span>
+<span class="c">#                           EyeTrackerConstants.FILTER_LEVEL_5)</span>
+<span class="c">#                           </span>
+<span class="c">#        supportedDataStreams=(EyeTrackerConstants.FILTER_ALL,)</span>
+<span class="c">#</span>
+<span class="c">#        result_dict={}</span>
+<span class="c">#        for data_stream, filter_level in filter_settings_dict.iteritems():</span>
+<span class="c">#</span>
+<span class="c">#            if data_stream not in ALL_STREAM_TYPES:</span>
+<span class="c">#                return ioHub.server.createErrorResult(&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;,</span>
+<span class="c">#                                    error_message=&quot;One of the provided data stream types is not a valid.&quot;,</span>
+<span class="c">#                                    method=&quot;EyeTracker.setSampleFilterLevel&quot;,arguement=&#39;filter_settings_dict&#39;, invalid_data_stream_key=data_stream)</span>
+<span class="c">#    </span>
+<span class="c">#            if data_stream not in ALL_FILTER_LEVELS:</span>
+<span class="c">#               return ioHub.server.createErrorResult(&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;,</span>
+<span class="c">#                                    error_message=&quot;One of the provided filter level values is not a valid.&quot;,</span>
+<span class="c">#                                    method=&quot;EyeTracker.setSampleFilterLevel&quot;,arguement=&#39;filter_settings_dict&#39;, invalid_filter_level_value=filter_level)</span>
+<span class="c">#                     </span>
+<span class="c">#            if data_stream in supportedDataStreams:</span>
+<span class="c">#                # Implementation Note: Add your filter level setting code for the current data stream here.</span>
+<span class="c">#                ioHub.print2err(&quot;EyeTracker should handle setSampleFilterLevel method for data stream {0} now.&quot;.format(filter_level))</span>
+<span class="c">#                result_dict[data_stream]=filter_level</span>
+<span class="c">#            else:</span>
+<span class="c">#                result_dict[data_stream]=EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#                </span>
+<span class="c">#        return result_dict</span>
+<span class="c">#        </span>
+<span class="c">#    def getEyesToTrack(self):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The getEyesToTrack method returns the eye(s) that the tracker is set to record for and provide events from.</span>
+<span class="c">#        The return value is an EyeTrackerConstants associated with one of the valid &#39;eye recording types&#39;:</span>
+<span class="c">#</span>
+<span class="c">#        EyeTrackerConstants.LEFT_EYE : The left eye is being tracked; Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.RIGHT_EYE : The right eye is being tracked; Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.UNKNOWN_MONOCULAR : The either the left or right eye is being tracked, however the eye tracker is unable to specify which. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.BINOCULAR : Both eyes of the participant are being tracked. Binocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.BINOCULAR_AVERAGED : Both eyes of the participant are being tracked and the x and y data for each eye has been averaged. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.SIMULATED_MONOCULAR : The eye tracking device is providing simulated monocular eye data. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#        EyeTrackerConstants.SIMULATED_BINOCULAR :  The eye tracking device is providing simulated binocular eye data. Binocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            </span>
+<span class="c">#        Different eye tracker implementations will support a different subset of these eye recording types.</span>
+<span class="c">#        </span>
+<span class="c">#        To get the string representation of an int EyeTrackerConstants value, use:</span>
+<span class="c">#</span>
+<span class="c">#            EyeTrackerConstants.getName(constant_id)</span>
+<span class="c">#</span>
+<span class="c">#        Args:</span>
+<span class="c">#            None</span>
+<span class="c">#            </span>
+<span class="c">#        Return:</span>
+<span class="c">#            int: If the method is not supported, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned. Otherwise, the currently set eye(s) to track value is returned, as one of the EyeTrackerConstants eye to track values.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        </span>
+<span class="c">#        # Implementation Note: Add the code needed to return the current eye(s) be tracked constant.</span>
+<span class="c">#        </span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    def setEyesToTrack(self,track_eyes):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The setEyesToTrack method sets the eye(s) that the eye tracker should track and provide events for.</span>
+<span class="c">#        The track_eyes arguement must be one of the EyeTrackerConstants associated with one of the valid &#39;eye recording types&#39;:</span>
+<span class="c">#</span>
+<span class="c">#            EyeTrackerConstants.LEFT_EYE : The left eye is being tracked; Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.RIGHT_EYE : The right eye is being tracked; Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.UNKNOWN_MONOCULAR : The either the left or right eye is being tracked, however the eye tracker is unable to specify which. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.BINOCULAR : Both eyes of the participant are being tracked. Binocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.BINOCULAR_AVERAGED : Both eyes of the participant are being tracked and the x and y data for each eye has been averaged. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.SIMULATED_MONOCULAR : The eye tracking device is providing simulated monocular eye data. Monocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            EyeTrackerConstants.SIMULATED_BINOCULAR :  The eye tracking device is providing simulated binocular eye data. Binocular Eye Sample events will be created by the ioHub.</span>
+<span class="c">#            </span>
+<span class="c">#        Different eye tracker implementations will support a different subset of these eye recording types.</span>
+<span class="c">#        </span>
+<span class="c">#        To get the string representation of an int EyeTrackerConstants value, use:</span>
+<span class="c">#</span>
+<span class="c">#            EyeTrackerConstants.getName(constant_id)</span>
+<span class="c">#</span>
+<span class="c">#        Args:</span>
+<span class="c">#            track_eyes (int) : The EyeTrackerConstants value for one of the eye recording types.</span>
+<span class="c">#            </span>
+<span class="c">#        Return:</span>
+<span class="c">#            int: If the method in general, or the specified eyes to track type,  is not supported EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned. Otherwise, the currently set eye(s) to track value is returned, as one of the EyeTrackerConstants eye to track values.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    def getSamplingRate(self,all_supported_rates=False):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The getSamplingRate method returns different values based on the value of the all_supported_rates arguement.</span>
+<span class="c">#        If all_supported_rates = False (the default), then the current sampling rate of the eye tracker (in Hz) is returned.</span>
+<span class="c">#        If all_supported_rates = True, then a tuple of all valid sampling rates (in Hz) the eye tracker supports is returned. </span>
+<span class="c">#        In both cases, sampling rate values are returned as floats.</span>
+<span class="c">#</span>
+<span class="c">#        Args:</span>
+<span class="c">#            all_supported_rates (bool): If False (the default), return all possible sampling rates the eye tracker will support. If True, the current sample rate of the eye tracker is returned in hz.    </span>
+<span class="c">#</span>
+<span class="c">#        Return:</span>
+<span class="c">#            int: If the method is not supported by the eye tracker implementation, or the given value for all_supported_rates is not supported, then EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.</span>
+<span class="c">#           </span>
+<span class="c">#            float: If all_supported_rates = False, the current Hz sampling rate of the eye tracker is returned. </span>
+<span class="c">#</span>
+<span class="c">#            tuple of floats: If all_supported_rates = True, the all supported sampling rates for the eye tracker are returned. </span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#        functionality_supported=True        </span>
+<span class="c">#        </span>
+<span class="c">#        if not functionality_supported:</span>
+<span class="c">#            return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED     </span>
+<span class="c">#</span>
+<span class="c">#        if not isinstance(all_supported_rates,bool):</span>
+<span class="c">#            return ioHub.server.createErrorResult(&quot;INVALID_METHOD_ARGUMENT_VALUE&quot;,</span>
+<span class="c">#                                    error_message=&quot;The all_supported_rates arguement value provided is not a bool.&quot;,</span>
+<span class="c">#                                    method=&quot;EyeTracker.getSamplingRate&quot;,</span>
+<span class="c">#                                    arguement=&#39;all_supported_rates&#39;, </span>
+<span class="c">#                                    value=all_supported_rates)</span>
+<span class="c">#</span>
+<span class="c">#        if all_supported_rates is False:</span>
+<span class="c">#             # Implementation Note: Add code to return the eye trackers current sample rate setting in Hz.</span>
+<span class="c">#             EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#        else:</span>
+<span class="c">#            # Implementation Note: Add code to return a tuple of all supported sampling rates of the current eye tracker in Hz.</span>
+<span class="c">#            # If This can not be supported, return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#            return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    def setSamplingRate(self,sampling_rate):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The setSamplingRate method sets the eye tracker to use the requested sampling rate (in Hz).</span>
+<span class="c">#        If the specified sampling rate is not valid for the eye tracker, an exception is created.</span>
+<span class="c">#        If this method is not supported by the eye tracker interface, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.</span>
+<span class="c">#        Otherwise, the updated sampling rate value is returned.</span>
+<span class="c"># </span>
+<span class="c">#        Args:</span>
+<span class="c">#            sampling_rate (float): The sample rate in Hz to set the eye tracker to.</span>
+<span class="c">#            </span>
+<span class="c">#        Return:</span>
+<span class="c">#            int: If the method is not supported, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.</span>
+<span class="c">#</span>
+<span class="c">#            exception: If the provided sampling_rate value is not supported by the eye tracker, an exception is created.</span>
+<span class="c">#</span>
+<span class="c">#            float: The sampling rate the eye tracker is actually now set to in Hz.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#    def drawToHostApplicationWindow(self,graphic_type,**graphic_attributes):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The drawToHostApplicationWindow method provides a generic interface for </span>
+<span class="c">#        ET devices that support having graphics drawn to the </span>
+<span class="c">#        Host / Control Computer / Application gaze overlay area that used used </span>
+<span class="c">#        by the eye tracker operator during experiment runtime to monitor eye </span>
+<span class="c">#        tracking performance, or other similar graphics area functionality.</span>
+<span class="c">#</span>
+<span class="c">#        The define drawing operation types, one of which is passed to the graphic_type</span>
+<span class="c">#        input parameter of the method, are specified in the EyeTrackerConstants class:</span>
+<span class="c">#</span>
+<span class="c">#            #. EyeTrackerConstants.CLEAR_GRAPHICS: Clear all graphics from the eye trackers drawing reagion.</span>
+<span class="c">#            #. EyeTrackerConstants.IMAGE_GRAPHIC: Draw an image to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.LINE_GRAPHIC: Draw a line to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.MULTILINE_GRAPHIC: Draw amultiple connected lines to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.RECTANGLE_GRAPHIC: Draw a rectangle to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.CIRCLE_GRAPHIC: Draw a circle to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.ELLIPSE_GRAPHIC: Draw an ellipse to the eye trackers drawing region.</span>
+<span class="c">#            #. EyeTrackerConstants.TEXT_GRAPHIC=107: Draw text to the eye trackers drawing region.</span>
+<span class="c">#        </span>
+<span class="c">#        The kwargs (graphic_attributes) passed to the method will be used as </span>
+<span class="c">#        the required settings for the given graphic_type.</span>
+<span class="c">#        </span>
+<span class="c">#        If the implementation of the common eye tracker interface does not </span>
+<span class="c">#        support this method, or does not support the provided graphic_type </span>
+<span class="c">#        EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned. </span>
+<span class="c">#</span>
+<span class="c">#        If the implementation of the common eye tracker interface supports this</span>
+<span class="c">#        method and the provided graphic_type, the request will be processed.</span>
+<span class="c">#        Any graphic_attribute kwargs that are not used by the implementation </span>
+<span class="c">#        being used will simply be ignored. graphic_attributes&#39; that are required</span>
+<span class="c">#        but missing from the method call, or contain an invalid value for the given</span>
+<span class="c">#        graphic_attribute key, will return an exception with details on the error.</span>
+<span class="c">#        </span>
+<span class="c">#        If the method is successfully handled, EyeTrackerConstants.EYETRACKER_OK is reeturned.</span>
+<span class="c">#</span>
+<span class="c">#        Args:</span>
+<span class="c">#            graphic_type (int): One of the EyeTrackerConstants.*_GRAPHIC[S] constants</span>
+<span class="c">#            </span>
+<span class="c">#        Kwargs:</span>
+<span class="c">#            *various*: The valid kwargs for the method depend on the graphic_type value provided.</span>
+<span class="c">#            </span>
+<span class="c">#        Returns:</span>
+<span class="c">#            int: Either EyeTrackerConstants.EYETRACKER_OK or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED    </span>
+<span class="c">#</span>
+<span class="c">#    def getDigitalPortState(self, port):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The getDigitalPortState method returns the current value of the specified </span>
+<span class="c">#        digital port on the eye tracker computer.</span>
+<span class="c">#        </span>
+<span class="c">#        This method be used to read the parallel port or idigial lines on the</span>
+<span class="c">#        eye tracker computer if the eye tracker has such functionality.</span>
+<span class="c">#</span>
+<span class="c">#        If the implementation of the common eye tracker interface does not </span>
+<span class="c">#        support this method EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned. </span>
+<span class="c">#</span>
+<span class="c">#        If the provided port number is not valid for the eye tracker computer, an exception will be returned.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            port (int): The base 10 equivelent of the digital port address to from on the eye tracker PC. Consult your eye tracker device  documentation for appropriate values.</span>
+<span class="c">#            </span>
+<span class="c">#        Kwargs:</span>
+<span class="c">#            None</span>
+<span class="c">#            </span>
+<span class="c">#        Returns:</span>
+<span class="c">#            int: The base 10 representation of the value read from the port. The maximum value of the result will depend on the number of bits read from the port on the eye tracker, but should not exceed 2**32 (i.e. 32 bits).</span>
+<span class="c">#        &quot;&quot;&quot; </span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#         </span>
+<span class="c">#    def setDigitalPortState(self, port, value):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        The setDigitalPortState method sets the value of the specified </span>
+<span class="c">#        digital port on the eye tracker computer.</span>
+<span class="c">#        </span>
+<span class="c">#        This method can be used to set the parallel port or idigial lines on the</span>
+<span class="c">#        eye tracker computer if the eye tracker has such functionality.</span>
+<span class="c">#</span>
+<span class="c">#        If the implementation of the common eye tracker interface does not </span>
+<span class="c">#        support this method EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned. </span>
+<span class="c">#</span>
+<span class="c">#        If the provided port number is not valid for the eye tracker computer, or the value is not within the valid range for the specified port, an exception will be returned.</span>
+<span class="c">#        </span>
+<span class="c">#        Args:</span>
+<span class="c">#            port (int): The base 10 equivelent of the digital port address to from on the eye tracker PC. Consult your eye tracker device  documentation for appropriate values.</span>
+<span class="c">#            value (int): The base 10 equivelent of the value to set on the specified port. Consult your eye tracker device documentation for appropriate values.</span>
+<span class="c">#            </span>
+<span class="c">#        Kwargs:</span>
+<span class="c">#            None</span>
+<span class="c">#            </span>
+<span class="c">#        Returns:</span>
+<span class="c">#            int: Either EyeTrackerConstants.EYETRACKER_OK or EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+
+
+    
+    <span class="c">#</span>
+    <span class="c"># After some actual use, it is not clear to me that the idea of the experiment flow generic </span>
+    <span class="c"># eye tracker methods are really of any practical use. Nice idea that does not </span>
+    <span class="c"># work well in practice. ;)</span>
+    <span class="c">#</span>
+    <span class="c"># So for now these methods are being removed from the interface specification,</span>
+    <span class="c"># None of the existing implementations officially used or implemented them anyhow.</span>
+    <span class="c">#</span>
+
+<span class="c">#</span>
+<span class="c">#    def experimentStartDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that is used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the start of an experiment.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c"># </span>
+<span class="c">#    def blockStartDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that can be used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the start of an experiment block.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    def trialStartDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that can be used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the start of an experiment trial.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#         </span>
+<span class="c">#    def trialEndDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that can be used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the end of an experiment trial.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#         </span>
+<span class="c">#    def blockEndDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that can be used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the end of an experiment block.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span>
+<span class="c">#</span>
+<span class="c">#    def experimentEndDefaultLogic(self,*args,**kwargs):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Experiment Centered Generic method that can be used to perform a set of</span>
+<span class="c">#        eye tracker default code associated with the end of an experiment session.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED</span></div>
 </pre></div>
 
 </div>

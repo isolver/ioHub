@@ -1,7 +1,9 @@
 """
 ioHub
-pyEyeTracker Interface
+Common Eye Tracker Interface
 .. file: ioHub/devices/eyetracker/hw/sr_research/eyelink/eyetracker.py
+
+Copyright (C) 2012-2013 iSolver Software Solutions
 
 Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
@@ -228,8 +230,8 @@ class EyeTracker(EyeTrackerDevice):
             import eyeLinkCoreGraphicsIOHubPsychopy
             EyeLinkCoreGraphicsIOHubPsychopy = eyeLinkCoreGraphicsIOHubPsychopy.EyeLinkCoreGraphicsIOHubPsychopy
             
-            calibration_properties=self._runtime_settings.get('calibration')
-            circle_attributes=calibration_properties.get('circle_attributes')
+            calibration_properties=self.getConfiguration().get('calibration')
+            circle_attributes=calibration_properties.get('target_attributes')
             targetForegroundColor=circle_attributes.get('outer_color') # [r,g,b] of outer circle of targets
             targetBackgroundColor=circle_attributes.get('inner_color') # [r,g,b] of inner circle of targets
             screenColor=calibration_properties.get('screen_background_color')                     # [r,g,b] of screen
@@ -421,6 +423,7 @@ class EyeTracker(EyeTrackerDevice):
                         binocSample=[
                                      0,
                                      0,
+                                     0, #device id (not currently used)
                                      Computer._getNextEventID(),
                                      event_type,
                                      ne.event_timestamp,
@@ -429,7 +432,6 @@ class EyeTracker(EyeTrackerDevice):
                                      confidenceInterval,
                                      ne.event_delay,
                                      0,
-                                     myeye,
                                      leftGaze[0],
                                      leftGaze[1],
                                      EyeTrackerConstants.UNDEFINED,
@@ -512,6 +514,7 @@ class EyeTracker(EyeTrackerDevice):
 
                         monoSample=[0,
                                     0,
+                                    0, #device id (not currently used)
                                     Computer._getNextEventID(),
                                     event_type,
                                     ne.event_timestamp,
@@ -583,6 +586,7 @@ class EyeTracker(EyeTrackerDevice):
 
                     fee=[0,
                          0,
+                         0, #device id (not currently used)
                          Computer._getNextEventID(),
                          etype,
                          ne.event_timestamp,
@@ -684,6 +688,7 @@ class EyeTracker(EyeTrackerDevice):
 
                     see=[0,
                          0,
+                         0, #device id (not currently used)
                          Computer._getNextEventID(),
                         etype,
                         ne.event_timestamp,
@@ -756,6 +761,7 @@ class EyeTracker(EyeTrackerDevice):
                     bee=[
                         0,
                         0,
+                        0,
                         Computer._getNextEventID(),
                         etype,
                         ne.event_timestamp,
@@ -795,6 +801,7 @@ class EyeTracker(EyeTrackerDevice):
                     se=[
                         0,                                      # exp ID
                         0,                                      # sess ID
+                        0, #device id (not currently used)
                         Computer._getNextEventID(),              # event ID
                         etype,                                  # event type
                         ne.event_timestamp,
@@ -839,6 +846,7 @@ class EyeTracker(EyeTrackerDevice):
                     bse=[
                         0,
                         0,
+                        0, #device id (not currently used)
                         Computer._getNextEventID(),
                         etype,
                         ne.event_timestamp,
@@ -910,13 +918,13 @@ class EyeTracker(EyeTrackerDevice):
                     elif cal_key == 'pacing_speed': # in seconds.msec
                         eyelink.setAutoCalibrationPacing(int(cal_val*1000))        
                     elif cal_key == 'type':
-                        VALID_CALIBRATION_TYPES=dict(H3_POINTS="H3",HV3_POINTS="HV3",HV5_POINTS="HV5",HV9_POINTS="HV9",HV13_POINTS="HV13")
+                        VALID_CALIBRATION_TYPES=dict(THREE_POINTS="HV3",FIVE_POINTS="HV5",NINE_POINTS="HV9",THIRTEEN_POINTS="HV13")
                         eyelink.setCalibrationType(VALID_CALIBRATION_TYPES[cal_val])
                     elif cal_key == 'target_type': 
                         pass
                     elif cal_key == 'screen_background_color':
                         pass
-                    elif cal_key == 'circle_attributes':
+                    elif cal_key == 'target_attributes':
                         pass
                     else:
                         ioHub.print2err("WARNING: unhandled eye tracker calibration setting: {0}, value: {1}".format(cal_key,cal_val))

@@ -2,8 +2,6 @@
 ioHub
 .. file: ioHub/util/dialogs.py
 
-* Implements dialogs using PyQt4 / guidata *
-
 Copyright (C) 2012-2013 iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
@@ -13,38 +11,60 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 ------------------------------------------------------------------------------------------------------------------------
 """
 
-import os
+import os,platform
+import wx
+import wx.lib.agw.genericmessagedialog as GMD     
 
-def set_frame_display(frame, display_index):
-    """
-    Centers a wx window on the given Display index.
-    """
-    import wx
-    num_displays=wx.Display.GetCount()
-    if display_index < 0:
-        display_index=0
-    if display_index >= num_displays:
-        display_index=num_displays-1
-    display = wx.Display(display_index)
-    x, y, w, h = display.GetGeometry()
-    frame.SetPosition((x, y))
-    frame.Center()
+if platform.system() == 'Windows':
+    def showSimpleWin32Dialog(message,caption):
+        import win32gui
+        win32gui.MessageBox(None,message,caption,0)
+            
+class ioHubDialog(object):
+    wxapp=None
+    def __init__(self,display_index=0):
+        self.dialog=None
+        self.display_index=display_index
+        if ioHubDialog.wxapp is None:
+            ioHubDialog.wxapp = wx.PySimpleApp()
 
+        
+    def set_frame_display(self):
+        """
+        Centers a wx window on the given Display index.
+        """
+        num_displays=wx.Display.GetCount()
+        if self.display_index < 0:
+            self.display_index=0
+        if self.display_index >= num_displays:
+            self.display_index=0
+        x, y, w, h = wx.Display(self.display_index).GetGeometry()
+        self.dialog.SetPosition((x, y))
+        self.dialog.Center()
+
+    def Destroy(self):
+        if self.dialog is not None:
+            self.dialog.Destroy()
+            self.dialog=None
+      
+        
+    def __del__(self):
+        self.Destroy()
 #
 ## ProgressBar
 #
 
-class ProgressBarDialog(object):
+class ProgressBarDialog(ioHubDialog):
     """
     wx based progress bar interface.
     """
     def __init__(self,dialogTitle="Progress Dialog",dialogText="Percent Complete", maxValue=100.0,display_index=0):
-        import wx
-        self.wxapp = wx.PySimpleApp()
+        ioHubDialog.__init__(self,display_index)
         self.dialog = wx.ProgressDialog(dialogTitle,dialogText,maxValue, None,wx.PD_AUTO_HIDE|wx.PD_APP_MODAL|wx.PD_ELAPSED_TIME|wx.PD_ESTIMATED_TIME|wx.PD_REMAINING_TIME)
         
-        if display_index is not None:        
-            set_frame_display(self.dialog,display_index)
+
+        self.set_frame_display()
+            
         self.minimumValue=0.0
         self.maximumValue=maxValue
         self.currentValue=self.minimumValue
@@ -54,9 +74,7 @@ class ProgressBarDialog(object):
         self.currentValue=value
 
     def close(self):
-        self.wxapp.Exit()
-        self.dialog=None
-        self.wxapp=None
+        self.Destroy()
 
     def getCurrentStatus(self):
         return self.currentValue
@@ -65,8 +83,7 @@ class ProgressBarDialog(object):
 ## MessageDialog
 #
 
-class MessageDialog(object):
-    import wx    
+class MessageDialog(ioHubDialog): 
     YES_NO_BUTTONS=wx.YES_NO
     OK_BUTTON=wx.OK
     CANCEL_BUTTON = wx.CANCEL
@@ -85,12 +102,9 @@ class MessageDialog(object):
     CANCEL_RESULT=wx.ID_CANCEL
      
     def __init__(self,msg,title=None,showButtons=wx.OK, 
-                 dialogType=wx.ICON_INFORMATION, allowCancel=True,display_index=0):
-        import wx
-        import wx.lib.agw.genericmessagedialog as GMD     
-
-        self.wxapp = wx.PySimpleApp()
-        
+                 dialogType=wx.ICON_INFORMATION, allowCancel=True,
+                 display_index=0):
+        ioHubDialog.__init__(self,display_index)
         if showButtons not in [MessageDialog.YES_NO_BUTTONS,MessageDialog.OK_BUTTON]:
             raise AttributeError(
             "MessageDialog showButtons arg must be either MessageDialog.YES_NO_BUTTONS or MessageDialog.OK_BUTTON")
@@ -121,51 +135,28 @@ class MessageDialog(object):
         
         d=wx.Display(0)
         x,y,w,h=d.GetGeometry()
-        del d
+        d=None
         
-        self.dlg = GMD.GenericMessageDialog(None, msg,
+        self.dialog = GMD.GenericMessageDialog(None, msg,
                                        title,
-                                       showButtons | dialogType, wrap=int(w/4))
+                                       showButtons | dialogType)#, wrap=int(w/4))
         #TODO Change to own image         
         import images        
-        self.dlg.SetIcon(images.Mondrian.GetIcon())
+        self.dialog.SetIcon(images.Mondrian.GetIcon())
 
-        if display_index is not None:
-            set_frame_display(self.dlg,display_index)        
+        self.set_frame_display()        
         
+
     def show(self):
-        result=self.dlg.ShowModal()
-        self.destroy()
+        result=self.dialog.ShowModal()
+        self.Destroy()
         return result
-    
-    def destroy(self):
-        try:
-            self.dlg.Destroy()
-        except:
-            pass      
-        try:
-            del self.dlg
-        except:
-            pass      
-        try:
-            self.wxapp.Exit()
-        except:
-            pass
-        try:
-            del self.wxapp
-        except:
-            pass
-        
-        
-    def __del__(self):
-        self.destroy()
         
 #
 ## FileChooserDialog
 #        
 
-class FileDialog(object):
-    import wx
+class FileDialog(ioHubDialog):
     PYTHON_SCRIPT_FILES="Python source (*.py)|*.py" 
     EXCEL_FILES="Spreadsheets (*.xls)|*.xls"
     IODATA_FILES="ioDataStore Files (*.hdf5)|*.hdf5"
@@ -178,10 +169,7 @@ class FileDialog(object):
                  defaultFile="", openFile=True, allowMultipleSelections= False, 
                  allowChangingDirectories = True, fileTypes="All files (*.*)|*.*",
                  display_index=0):
-                     
-        import wx
-        self.wxapp = wx.PySimpleApp()
-
+        ioHubDialog.__init__(self,display_index)
         dstyle=0
         
         if openFile is True:
@@ -198,7 +186,7 @@ class FileDialog(object):
                 fileTypesCombined+='|'
             fileTypesCombined=fileTypesCombined[:-1]
             
-        self.dlg = wx.FileDialog(
+        self.dialog = wx.FileDialog(
             None, message=message,
             defaultDir=defaultDir, 
             defaultFile=defaultFile,
@@ -206,45 +194,10 @@ class FileDialog(object):
             style=dstyle
             )
 
-        if display_index is not None:
-            set_frame_display(self.dlg,display_index)        
+        self.set_frame_display()        
 
     def show(self):
-        result=self.dlg.ShowModal()
-        selections=self.dlg.GetPaths()
-        self.dlg.Destroy()
-        self.wxapp.Exit()
+        result=self.dialog.ShowModal()
+        selections=self.dialog.GetPaths()
+        self.Destroy()
         return result, selections
-    
-    def destroy(self):
-        try:
-            self.dlg.Destroy()
-        except:
-            pass
-        try:
-            del self.dlg
-        except:
-            pass
-        try:
-            self.wxapp.Exit()
-        except:
-            pass
-        try:
-            del self.wxapp
-        except:
-            pass
-        
-        
-    def __del__(self):
-        self.destroy()
-        
-if __name__ == '__main__':
-    md = MessageDialog('My message!')
-    result=md.show()
-    md.destroy()
-    print 'MessageDialog is OK_RESULT', md.OK_RESULT==result
-    
-    md = FileDialog('My message!')
-    result=md.show()
-    md.destroy()
-    print 'FileDialog result is: ', result

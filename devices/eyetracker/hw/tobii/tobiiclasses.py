@@ -18,12 +18,17 @@ import copy
 
 import numpy as np
 
-import tobii.sdk.mainloop
-import tobii.sdk.browsing
-import tobii.sdk.eyetracker
-
-from tobii.sdk.time.clock import Clock
-from tobii.sdk.time import sync
+try:
+    import tobii
+    import tobii.sdk
+    import tobii.sdk.mainloop
+    import tobii.sdk.browsing
+    import tobii.sdk.eyetracker
+    from tobii.sdk.time.clock import Clock
+    from tobii.sdk.time import sync
+except:
+    # This only happens when it is Sphinx auto-doc loading the file
+    pass
 
 import ioHub
 from ioHub.devices import Computer
@@ -522,6 +527,8 @@ class TobiiTracker(object):
         self._eyetracker.EnableExtension(extension_id)
         
     def disconnect(self):
+        if self._isRecording:
+            self.stopTracking()
         self._mainloop.stop()
         self._mainloop=None
         self._eyetracker_info=None
@@ -530,7 +537,7 @@ class TobiiTracker(object):
         self._eyetracker=None
         
     def __del__(self):
-        if self._mainloop:        
+        if self._mainloop:
             self.disconnect()
 
 # test script

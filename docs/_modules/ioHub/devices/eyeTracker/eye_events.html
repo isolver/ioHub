@@ -112,16 +112,16 @@
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">DeviceEvent</span>
 <span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">EventConstants</span>
-<span class="kn">from</span> <span class="nn">.import</span> <span class="nn">EyeTrackerDevice</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">EyeTrackerDevice</span>
 
 <span class="c">##################### Eye Tracker Sample Stream Types ################################</span>
 <span class="c">#</span>
 <span class="k">class</span> <span class="nc">EyeTrackerEvent</span><span class="p">(</span><span class="n">DeviceEvent</span><span class="p">):</span>
     <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">EyeTrackerDevice</span>
 
-<div class="viewcode-block" id="MonocularEyeSample"><a class="viewcode-back" href="../../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.eye_events.MonocularEyeSample">[docs]</a><span class="k">class</span> <span class="nc">MonocularEyeSample</span><span class="p">(</span><span class="n">EyeTrackerEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="MonocularEyeSampleEvent"><a class="viewcode-back" href="../../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.eye_events.MonocularEyeSampleEvent">[docs]</a><span class="k">class</span> <span class="nc">MonocularEyeSampleEvent</span><span class="p">(</span><span class="n">EyeTrackerEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A MonocularEyeSample represents the eye position and eye attribute data collected from one frame or reading</span>
+<span class="sd">    A MonocularEyeSampleEvent represents the eye position and eye attribute data collected from one frame or reading</span>
 <span class="sd">    of an eye tracker device that is recoding from only one eye, or is recording from both eyes and averaging the</span>
 <span class="sd">    binocular data. The eye sample class contains a large number of attributes to try and accommodate for</span>
 <span class="sd">    the different field types different eye trackers report at a sample level. therefore it will not be</span>
@@ -220,8 +220,8 @@
         <span class="p">(</span><span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;u1&#39;</span><span class="p">)</span>    <span class="c"># An available status word for the eye tracker sample.</span>
                             <span class="c"># Meaning is completely tracker dependent.</span>
                     <span class="p">]</span>
-    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">EYE_SAMPLE</span>
-    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MONOCULAR_EYE_SAMPLE</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&quot;MONOCULAR_EYE_SAMPLE&quot;</span>
     <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
 
     <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
@@ -338,9 +338,9 @@
 
         <span class="n">DeviceEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="BinocularEyeSample"><a class="viewcode-back" href="../../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.eye_events.BinocularEyeSample">[docs]</a><span class="k">class</span> <span class="nc">BinocularEyeSample</span><span class="p">(</span><span class="n">EyeTrackerEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="BinocularEyeSampleEvent"><a class="viewcode-back" href="../../../../iohub/api/device_details/eyetracker.html#ioHub.devices.eyetracker.eye_events.BinocularEyeSampleEvent">[docs]</a><span class="k">class</span> <span class="nc">BinocularEyeSampleEvent</span><span class="p">(</span><span class="n">EyeTrackerEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The BinocularEyeSample event represents the eye position and eye attribute data collected from</span>
+<span class="sd">    The BinocularEyeSampleEvent event represents the eye position and eye attribute data collected from</span>
 <span class="sd">    one frame or reading of an eye tracker device that is recording both eyes of a participant.</span>
 <span class="sd">    The BinocularEyeSample class contains a large number of attributes to try and accommodate</span>
 <span class="sd">    for the different field types different eye trackers report at a sample level.</span>
@@ -392,8 +392,8 @@
                     <span class="p">(</span><span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="s">&#39;u1&#39;</span><span class="p">)</span>
                     <span class="p">]</span>
 
-    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">BINOC_EYE_SAMPLE</span>
-    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">BINOCULAR_EYE_SAMPLE</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&quot;BINOCULAR_EYE_SAMPLE&quot;</span>
     <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
 
     <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>

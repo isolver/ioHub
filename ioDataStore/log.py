@@ -10,7 +10,6 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 from tables import *
-import ioHub
 
 class ExperimentLog(IsDescription):
     experiment_id = UInt32Col() # Unique site experiment ID

@@ -232,7 +232,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 tracker.setRecordingState(True)
 
             # delay a short time to let " the data start flow'in "
-            self.hub.delay(.050)
+            self.hub.wait(.050)
 
             # In this paradigm, each 'trial' is the movement from one target location to another.
             # Recording of eye data is on for the whole block of XxY target positions within the block.
@@ -341,7 +341,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             Computer.disableHighPriority()
 
             # give a 100 msec delay before starting next block
-            self.hub.delay(.100)
+            self.hub.wait(.100)
 
         # end of block set, return from method.
         self.clearScreen.flip(text='BLOCK_SET_END')

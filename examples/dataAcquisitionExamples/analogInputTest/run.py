@@ -144,7 +144,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             actualDelay=self.hub.delay(0.250)
     
         # wait 250 msec before ending the experiment
-        actualDelay=self.hub.delay(0.250)
+        actualDelay=self.hub.wait(0.250)
         print "Delay requested %.6f, actual delay %.6f, Diff: %.6f"%(0.250,actualDelay,actualDelay-0.250)
 
         # for fun, test getting a bunch of events at once, likely causing a mutlipacket getEvents()

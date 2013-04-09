@@ -1,10 +1,17 @@
 """
-ioHub.devices.eyetracker.HW.SR_Research.EyeLink module __init__
+ioHub
+ioHub Common Eye Tracker Interface
+.. file: ioHub/devices/eyetracker/hw/smi/iviewx/__init__.py
 
-Copyright (C) 2012 XXXXXXXX, Sol Simpson
+Copyright (C) 2012-2013 XXXXXXXX, iSolver Software Solutions
 Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).
 
-.. moduleauthor:: XXXXXXXXXXX + contributors, please see credits section of documentation.
+.. moduleauthor:: Sol Simpson + contributors
 """
+from ioHub import addDirectoryToPythonPath
 
-from eyetracker import *
+addDirectoryToPythonPath('devices/eyetracker/hw/smi/iviewx','bin')
+
+from eyetracker import (EyeTracker, MonocularEyeSampleEvent, BinocularEyeSampleEvent,
+                        FixationStartEvent,FixationEndEvent,SaccadeStartEvent,
+                        SaccadeEndEvent,BlinkStartEvent,BlinkEndEvent)

@@ -10,7 +10,6 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 """
 from __future__ import division
-import timeit
 import numpy as N
 import inspect
 import sys
@@ -19,9 +18,7 @@ import os
 import collections
 from collections import namedtuple,Iterable
 
-import constants
-
-   
+  
 #version info for ioHub
 __version__='0.6b2'#util.validate_version("0.5a1")
 __license__='GNU GPLv3 (or more recent equivalent)'
@@ -31,6 +28,15 @@ __maintainer_email__='sol@isolver-software.com'
 __users_email__='sol@isolver-software.com'
 __url__='http://www.github.com/isolver/ioHub/wiki/'
 
+SUPPORTED_SYS_NAMES=['linux2','win32','cygwin','darwin']
+
+if sys.platform not in SUPPORTED_SYS_NAMES:
+    print ''
+    print "ERROR: ioHub is not supported on the current OS platform. Supported options are: ", SUPPORTED_SYS_NAMES
+    print "EXITING......"
+    print ''
+    sys.exit(1)
+    
 def module_path(local_function):
     """ returns the module path without the use of __file__.  Requires a function defined
    locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
@@ -41,9 +47,58 @@ def module_directory(local_function):
     moduleDirectory,mname=os.path.split(mp)
     return moduleDirectory
 
-import external_libs
+global IO_HUB_DIRECTORY
+IO_HUB_DIRECTORY=module_directory(module_path)
 
-if sys.version_info<(2,7):
+def print2err(*args):
+    import pprint
+    pprint.pprint(args, stream=sys.stderr, indent=1, width=80, depth=None)
+    sys.stderr.flush()
+   
+def printExceptionDetailsToStdErr():
+        import sys, traceback,pprint
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        pprint.pprint(exc_type, stream=sys.stderr, indent=1, width=80, depth=None)        
+        pprint.pprint(exc_value, stream=sys.stderr, indent=1, width=80, depth=None)
+        pprint.pprint(traceback.format_tb(exc_traceback), stream=sys.stderr, indent=1, width=80, depth=None)
+
+class ioHubError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args)
+        self.args = args
+        self.kwargs=kwargs
+        
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        r="ioHubError:\nArgs: {0}\n".format(self.args)
+        for k,v in self.kwargs.iteritems():
+            r+="\t{0}: {1}\n".format(k,v)
+        return r
+        
+def getOsName():
+    _os_name=platform.system()
+    if _os_name == 'Windows':
+        return 'win32'
+    if _os_name == 'Linux':
+        return 'linux'   
+    return 'osx'
+    
+def getPythonVerStr():
+    cur_version = sys.version_info
+    return 'python%d%d'%(cur_version[0],cur_version[1])
+    
+def addDirectoryToPythonPath(path_from_iohub_root,leaf_folder=''):
+    dir_path=os.path.join(IO_HUB_DIRECTORY,path_from_iohub_root,getOsName(),getPythonVerStr(),leaf_folder)
+    if os.path.isdir(dir_path) and dir_path not in sys.path:
+        sys.path.append(dir_path)  
+    else:
+        print2err("Could not add path: ",dir_path)
+        dir_path=None
+    return dir_path
+
+if getPythonVerStr() != 'python27':
     from ordereddict import OrderedDict
 else:
     from collections import OrderedDict
@@ -54,10 +109,9 @@ def isIterable(o):
 global highPrecisionTimer
 def highPrecisionTimer():
     raise ioHubError("highPrecisionTimer function must be overwritten by a platform specific implementation.")
-
 if platform.system() == 'Windows':
     global _fcounter, _qpfreq, _winQueryPerformanceCounter
-    from ctypes import byref, c_int64, windll
+    from ctypes import byref, c_int64, windll,cdll
     _Kernel32=windll.Kernel32
     _fcounter = c_int64()
     _qpfreq = c_int64()
@@ -67,11 +121,14 @@ if platform.system() == 'Windows':
     def highPrecisionTimer():
         _winQueryPerformanceCounter(byref(_fcounter))
         return  _fcounter.value/_qpfreq.value
-elif platform.system() == 'Linux':
-    highPrecisionTimer = timeit.default_timer
-else: # assume OS X?
-    highPrecisionTimer = timeit.default_timer
-
+else:
+    if getPythonVerStr() == 'python27':    
+        import timeit
+        highPrecisionTimer = timeit.default_timer
+    else:
+        import time
+        highPrecisionTimer = time.time
+        
 class ioClock(object):
     """
     Modified from psychopy.core.Clock, so ioClock supports the psychopy
@@ -138,6 +195,8 @@ class ioClock(object):
             r=self.hubConnection.updateGlobalHubTimeOffset(offset)
         self.timeAtLastReset = r
 
+import constants
+
 def quickStartHubServer(experimentCode, sessionCode, **deviceConfigs):
     from ioHub.client import ioHubConnection
 
@@ -171,36 +230,4 @@ def convertCamelToSnake(name,lower_snake=True):
     if lower_snake:
         return all_cap_re.sub(r'\1_\2', s1).lower()
     return all_cap_re.sub(r'\1_\2', s1).upper()
-
-def print2err(*args):
-    for a in args:
-        sys.stderr.write(unicode(a))
-    sys.stderr.write('\n\r')
-    sys.stderr.flush()
-   
-def printExceptionDetailsToStdErr():
-        import sys, traceback
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        print2err('ioHub Exception:\n exc_type: {0} \nexc_value {1}'.format(exc_type,exc_value))
-        for t in traceback.format_tb(exc_traceback):            
-            print2err(t)
-        print2err('\n')
-
-class ioHubError(Exception):
-    def __init__(self, *args, **kwargs):
-        Exception.__init__(self, *args)
-        self.args = args
-        self.kwargs=kwargs
-        
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        r="ioHubError:\nArgs: {0}\n".format(self.args)
-        for k,v in self.kwargs.iteritems():
-            r+="\t{0}: {1}\n".format(k,v)
-        return r
-
-global IO_HUB_DIRECTORY
-IO_HUB_DIRECTORY=module_directory(isIterable)
 

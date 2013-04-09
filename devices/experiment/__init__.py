@@ -121,6 +121,7 @@ class MessageEvent(DeviceEvent):
         csec=currentSec()
         if sec_time is not None:
             csec=sec_time
-        return (0,0,Computer._getNextEventID(),MessageEvent.EVENT_TYPE_ID,csec,0,0,0.0,0.0,0,msg_offset,prefix,text)
+        return (0,0,0,Computer._getNextEventID(),MessageEvent.EVENT_TYPE_ID,
+                csec,0,0,0.0,0.0,0,msg_offset,prefix,text)
 
 

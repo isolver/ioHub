@@ -13,9 +13,11 @@ Distributed under the terms of the GNU General Public License
 """
 
 import numpy as np
+import wx
 
 from .. import Device,Computer
 import ioHub
+
 
 currentSec=Computer.currentSec
             
@@ -440,8 +442,8 @@ class Display(Device):
     @classmethod
     def _createAllRuntimeInfoDicts(cls):
         import wx
-        wxapp=wx.PySimpleApp()             
-
+        from ioHub.util.experiment import ioHubDialog
+        tempd=ioHubDialog()
         display_count=wx.Display.GetCount()
 
         runtime_info_list=[]
@@ -463,7 +465,12 @@ class Display(Device):
             runtime_info['pixel_resolution']=mode.w,mode.h
                                                 
             runtime_info_list.append(runtime_info)
-        wxapp.Exit()
+
+            #ioHub.print2err("Display {0} runtime info: {1}".format(i,runtime_info))
+            del d
+            
+        tempd.Destroy()
+        tempd=None
         
         return runtime_info_list
 
@@ -646,6 +653,7 @@ class Display(Device):
         
         
             def pix2coord(self, x,y,display_index=None):
+                #ioHub.print2err('Display {0} bounds: {1}'.format(display_index,self.getBounds()))
                 if display_index == self.getIndex(): 
                     return a*x+b*y+c, b*x-a*y+d
                 return x,y

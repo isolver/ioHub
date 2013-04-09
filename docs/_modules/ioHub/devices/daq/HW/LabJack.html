@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ioHub.devices.daq.HW.LabJack &mdash; ioHub 0.6rc1 documentation</title>
+    <title>ioHub.devices.daq.hw.labjack &mdash; ioHub 0.6rc1 documentation</title>
     
     <link rel="stylesheet" href="../../../../../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
@@ -97,266 +97,244 @@
   </div>
 
   
-  <h1>Source code for ioHub.devices.daq.HW.LabJack</h1><pre>
+  <h1>Source code for ioHub.devices.daq.hw.labjack</h1><pre>
 import ioHub
-from ...import DAQDevice, DAMultiChannelInputEvent#, DASingleChannelInputEvent
-from ....import Computer, EventConstants, DeviceConstants, ioDeviceError
+from ... import AnalogInputDevice, MultiChannelAnalogInputEvent
+from .... import Computer,ioDeviceError
 import pylabjack
+import sys
 import numpy as N
 
-<div class="viewcode-block" id="DAQ"><a class="viewcode-back" href="../../../../../iohub/api/device_details/daq_interface/LabJack_Implementation_Notes.html#ioHub.devices.daq.HW.LabJack.DAQ">[docs]</a>class DAQ(DAQDevice):
+<div class="viewcode-block" id="AnalogInput"><a class="viewcode-back" href="../../../../../iohub/api/device_details/daq_interface/LabJack_Implementation_Notes.html#ioHub.devices.daq.hw.labjack.AnalogInput">[docs]</a>class AnalogInput(AnalogInputDevice):
     """
     """
-    NUM_CHANNELS=8
-    CHANNEL_NUMBERS = range(NUM_CHANNELS)
-    CHANNEL_OPTIONS = [0, 0, 0, 0, 0, 0, 0, 0]
-    DAQ_CHANNEL_MAPPING = dict()
-    DAQ_CHANNEL_MAPPING['AIN0'] = 0
-    DAQ_CHANNEL_MAPPING['AIN1'] = 1
-    DAQ_CHANNEL_MAPPING['AIN2'] = 2
-    DAQ_CHANNEL_MAPPING['AIN3'] = 3
-    DAQ_CHANNEL_MAPPING['AIN4'] = 4
-    DAQ_CHANNEL_MAPPING['AIN5'] = 5
-    DAQ_CHANNEL_MAPPING['AIN6'] = 6
-    DAQ_CHANNEL_MAPPING['AIN7'] = 7
-
-
-    DAQ_CONFIG_OPTIONS = dict()
-    DAQ_CONFIG_OPTIONS['DEFAULTOPTION'] = 0
-
-    DAQ_MODEL_OPTIONS = dict()
-    DAQ_MODEL_OPTIONS['U6'] = 'U6'
+    _SUPPORTED_MODELS = dict()
+    _SUPPORTED_MODELS['U6'] = pylabjack.u6.U6
 
     ANALOG_TO_DIGITAL_RANGE=2**16
     ANALOG_RANGE=22.0
-    ALL_EVENT_CLASSES = []
     # &lt;&lt;&lt;&lt;&lt;
-    lastPollTime = 0.0
 
-    # &gt;&gt;&gt; implementation specific private class attributes
-    _DLL = None
-    # &lt;&lt;&lt;
-
-    DEVICE_MODEL_ID=2
-    DEVICE_TYPE_ID = DeviceConstants.DAQ
-    DEVICE_TYPE_STRING = DeviceConstants.getName(DEVICE_TYPE_ID)
-
-    _newDataTypes = [('board_id', N.uint8), ('daq_model',N.str_,32), ('resolution_index',N.uint8), ('settling_factor',N.uint8),
-                     ('channel_sample_rate', N.uint16)]
-
-    __slots__=[e[0] for e in _newDataTypes]+['_device','_scanBuffer','_sampleCount','_missedCount','_lastStartStreamingTimePre','_lastStartStreamingTimePost','_streaming','_feedbackArguments']
+    _newDataTypes = [('resolution_index',N.uint8),('settling_factor',N.uint8)]
+    __slots__=[e[0] for e in _newDataTypes]+['_labjack',
+                                            '_calibration_data',
+                                            '_data_streaming_thread',
+                                            '_scan_count']
     def __init__(self, *args, **kwargs):
         """
         """
-        deviceConfig = kwargs['dconfig']
+        AnalogInputDevice.__init__(self, *args, **kwargs)
 
-        self._startupConfiguration = deviceConfig
+        self._labjack=None
 
-        DAQ.ALL_EVENT_CLASSES = [DAMultiChannelInputEvent, ]
-
-        deviceConfig['name'] = deviceConfig.get('name', 'daq')
-        deviceConfig['device_class'] = DAQ.__name__
-        deviceConfig['monitor_event_types'] = deviceConfig.get('monitor_event_types', DAQ.ALL_EVENT_CLASSES)
-        deviceConfig['max_event_buffer_length'] = deviceConfig.get('event_buffer_length', 1024)
-        deviceConfig['type_id'] = self.DEVICE_TYPE_ID
-        deviceConfig['_isReportingEvents'] = deviceConfig.get('auto_report_events', False)
-        deviceConfig['os_device_code'] = 'OS_DEV_CODE_NOT_SET'
-
-        deviceConfig['board_id'] = deviceConfig.get('board_id', 0)
-        deviceConfig['daq_model']=deviceConfig.get('daq_model','U6')
-        deviceConfig['resolution_index'] = deviceConfig.get('resolution_index', 0)
-        deviceConfig['settling_factor'] = deviceConfig.get('settling_factor', 0)
-        deviceConfig['channel_sample_rate']=deviceConfig.get('channel_sample_rate',1000)
-
-        DAQDevice.__init__(self, *args, **deviceConfig)
-
-        self._device=None
-
-        if self.daq_model == 'U6':
-            from pylabjack import u6 # Import the u6 class
-            self._device = u6.U6()
-            self._device.getCalibrationData()
-
-        self._lastStartStreamingTimePre=0.0
-        self._lastStartStreamingTimePost=0.0
-        self._missedCount=0
-        self._scanBuffer=[0] * self.NUM_CHANNELS
-        self._streaming=False
-
-
-
-
-<div class="viewcode-block" id="DAQ.enableEventReporting"><a class="viewcode-back" href="../../../../../iohub/api/device_details/daq_interface/LabJack_Implementation_Notes.html#ioHub.devices.daq.HW.LabJack.DAQ.enableEventReporting">[docs]</a>    def enableEventReporting(self, enable):
+        if self.model_name in self._SUPPORTED_MODELS.keys():
+            try:
+                self._labjack = self._SUPPORTED_MODELS[self.model_name]()
+                self._calibration_data=self._labjack.getCalibrationData()
+                self._labjack.streamConfig( NumChannels = self.input_channel_count,
+                                           ChannelNumbers = range(self.input_channel_count),
+                                           ChannelOptions = [ 0 ]*self.input_channel_count,
+                                           SettlingFactor = self.settling_factor, 
+                                           ResolutionIndex = self.resolution_index,
+                                           SampleFrequency = self.channel_sampling_rate)
+    
+                self._data_streaming_thread=LabJackDataReader(self)
+                self._data_streaming_thread.start()
+            except:
+                ioHub.print2err("ERROR DURING LABJACK INIT")
+                ioHub.printExceptionDetailsToStdErr()    
+        else:
+            ioHub.print2err("AnalogInput Model %s is not supported. Supported models are %s, using model_name parameter."%(self.model_name,str(self._SUPPORTED_MODELS.keys()),))
+            raise ioDeviceError(self,"AnalogInput Model not supported: %s"%(self.model_name))
+            sys.exit(0)
+        
+        self._scan_count=0
+        
+<div class="viewcode-block" id="AnalogInput.enableEventReporting"><a class="viewcode-back" href="../../../../../iohub/api/device_details/daq_interface/LabJack_Implementation_Notes.html#ioHub.devices.daq.hw.labjack.AnalogInput.enableEventReporting">[docs]</a>    def enableEventReporting(self, enable):
         try:
-            #ioHub.print2err("---------------------------------------------")
-            #ioHub.print2err("DAQ.enableEventReporting: ", enable)
             current = self.isReportingEvents()
-            if enable is False and current == enable:
-                return current
-            if enable is True and current is True and self._streaming is True:
-                return True
+            if current == enable:
+                return enable
 
-            if DAQDevice.enableEventReporting(self, enable) is True:
-                #ioHub.print2err("enabling streaming....")
-
-                self._missedCount=0
-                self._sampleCount=0
-                self._lastStartStreamingTimePre = 0.0
-                self._lastStartStreamingTimePost = 0.0
-                self._scanBuffer=[0]*self.NUM_CHANNELS
-
-                #self._lastStartStreamingTimePre=Computer.getTime()
-                #self._device.streamConfig(NumChannels=self.NUM_CHANNELS, ChannelNumbers=self.CHANNEL_NUMBERS,
-                #    ChannelOptions=self.CHANNEL_OPTIONS, SettlingFactor=self.settling_factor,
-                #    ResolutionIndex=self.resolution_index, ScanFrequency=self.channel_sample_rate)
-                FIOEIOAnalog = ( 2 ** self.NUM_CHANNELS ) - 1;
-                fios = FIOEIOAnalog &amp; (0xFF)
-                eios = FIOEIOAnalog/256
-
-                from pylabjack import u6
-                self._device.getFeedback(u6.PortDirWrite(Direction = [0, 0, 0], WriteMask = [0, 0, 15]))
-
-
-                self._feedbackArguments = []
-
-                self._feedbackArguments.append(u6.DAC0_8(Value = 125))
-                self._feedbackArguments.append(u6.PortStateRead())
-
-                gain_index=0
-                differential=False
-                for i in range(self.NUM_CHANNELS):
-                    self._feedbackArguments.append( u6.AIN24(i,self.resolution_index, gain_index, self.settling_factor, differential) )
-
-                #ioHub.print2err(self.NUM_CHANNELS, "ChannelNumbers=",self.CHANNEL_NUMBERS,
-                #    "ChannelOptions=",self.CHANNEL_OPTIONS, "SettlingFactor=",self.settling_factor,
-                #    "ResolutionIndex=",self.resolution_index, "ScanFrequency=",self.channel_sample_rate)
-
-                #self._lastStartStreamingTimePost=Computer.getTime()
-
-                if self._streaming is False:
-                    #self._device.streamStart()
-                    self._streaming=True
-                    #ioHub.print2err("Streaming started...")
-
-            else:
-                #ioHub.print2err("disabling streaming....")
-                if self._streaming is True:
-                    self._streaming=False
-                    #self._device.streamStop()
-            #ioHub.print2err("---------------------------------------------")
-        except:
-            ioHub.printExceptionDetailsToStdErr()
-</div>
-    def _poll(self):
-        try:
-            pollTime=Computer.currentSec()
-            rend=pollTime
-            if self.isReportingEvents() is True and self._streaming is True:
-                rstart=Computer.currentTime()
-                results = self._device.getFeedback(self._feedbackArguments )
-                rend=Computer.currentTime()
-                ci=rend-rstart
-                event =[
+            if AnalogInputDevice.enableEventReporting(self, enable) is True:
+                self._scan_count=0
+                self._data_streaming_thread.enableDataStreaming(True)
                 
-                    0, # exp id
-                    0, # session id
-                    Computer._getNextEventID(), # event id
-                    DAMultiChannelInputEvent.EVENT_TYPE_ID, # event type
-                    0, # device time
-                    pollTime, # logged time
-                    rend, # hub time
-                    ci, # confidence interval
-                    rend-self._lastPollTime, # delay
-                    0, # filter_id
-                    self.DEVICE_MODEL_ID
-                    ]
-                for j in range(self.NUM_CHANNELS):
-                    ain = self._device.binaryToCalibratedAnalogVoltage(0, results[ 2 + j ])
-                    event.append(ain)
-                self._addNativeEventToBuffer(event)
+            else:
+                self._data_streaming_thread.enableDataStreaming(False)
+                                     
         except:
+            ioHub.print2err("----- LabJack AnalogInput enableEventReporting ERROR ----")
             ioHub.printExceptionDetailsToStdErr()
-        self._lastPollTime=rend
+            ioHub.print2err("---------------------------------------------------------")
+</div>
+    def _nativeEventCallback(self,labjack_data):
+        if not self.isReportingEvents():
+            return False
+            
+        logged_time=Computer.getTime()
+        start_pre,start_post,analog_data=labjack_data
+
+        str_proto='AIN%d'
+        channel_index_list=range(self.input_channel_count)
+        ain=[]
+        ain_counts=[]
+        for c in channel_index_list:
+            ai=analog_data[str_proto%c]
+            ain.append(ai)
+            ain_counts.append(len(ai))
+
+        #ioHub.print2err("Channel Counts: {0} {1}".format(logged_time,ain_counts))
+        ain_counts=tuple(ain_counts)
+        
+        if ain_counts[0] != ain_counts[-1]:
+            err_str="Channel Sample Count Mismatch: "
+            for c in channel_index_list:
+                err_str+='{%d}, '%c
+            err_str=err_str[:-2]
+            ioHub.print2err(err_str.format(*ain_counts))
+
+        device_time=0.0
+        iohub_time=0.0
+        delay=0.0
+
+        confidence_interval=start_post-start_pre
+        
+        event =[            
+            0, # exp id
+            0, # session id
+            0, # event id
+            MultiChannelAnalogInputEvent.EVENT_TYPE_ID, # event type
+            device_time, # device time
+            logged_time, # logged time
+            iohub_time, # hub time
+            confidence_interval, # confidence interval
+            delay, # delay
+            0 # filter_id
+            ]
+        
+        for s in range(ain_counts[0]):
+            multi_channel_event=list(event)
+
+            multi_channel_event[2]=Computer._getNextEventID()
+            multi_channel_event[4]=float(self._scan_count)/float(self.channel_sampling_rate)
+            multi_channel_event[6]=multi_channel_event[4]+start_post
+            multi_channel_event[8]=logged_time-multi_channel_event[6]
+
+            multi_channel_event.extend([ain[a][s] for a in channel_index_list])
+            self._addNativeEventToBuffer(multi_channel_event)
+            self._scan_count+=1
+            
+        self._last_callback_time=logged_time
         return True
-
-                #self._device.nextStreamData(convert=False)
-
-
-#                if ljData is not None:
-#                    dataReadTime=Computer.currentSec()
-#
-#                    if ljData['errors'] != 0:
-#                        print "Error: %s ; " % ljData['errors'], Computer.getTime()
-#
-#                    if ljData['numPackets'] != self._device.packetsPerRequest:
-#                        print "----- UNDERFLOW : %s : " % ljData['numPackets'], ()
-#
-#                    if ljData['missed'] != 0:
-#                        self._missedCount += ljData['missed']
-#                        print "+++ Missed ", ljData['missed']
-#
-#                    receivedSamples=[]
-#                    eventSamples=[]
-#                    analogChannelName='AIN{0}'
-#                    minSampleLength=100000000
-#                    for k in xrange(8):
-#                        channelName=analogChannelName.format(k)
-#                        nSamples=len(ljData[channelName])
-#                        if  nSamples&lt;minSampleLength:
-#                            minSampleLength=nSamples
-#                        receivedSamples.append(ljData[channelName])
-#
-#                    # put extra samples in buffer for use in next scan
-#                    for k in xrange(8):
-#                        eventSamples.append(self._scanBuffer[k])
-#                        eventSamples[k].extend(receivedSamples[k][:minSampleLength])
-#                        self._scanBuffer[k]=receivedSamples[k][minSampleLength:]
-#                        #print "CHANNEL {0}: EVENT LENGTH: {1}".format(k,len(eventSamples[k]))
-#
-#                    # createEvents
-#                    events=[]
-#                    nsamples=len(eventSamples[0])
-#                    for si in xrange(nsamples):
-#                        time = (1000.0/self.channel_sample_rate)*self._sampleCount+self._lastStartStreamingTimePost
-#                        self._sampleCount+=1
-#                        event =[
-#                            0, # exp id
-#                            0, # session id
-#                            Computer._getNextEventID(), # event id
-#                            DAMultiChannelInputEvent.EVENT_TYPE_ID, # event type
-#                            0, # device time
-#                            pollTime, # logged time
-#                            time, # hub time
-#                            self._lastStartStreamingTimePost - self._lastStartStreamingTimePre, # confidence interval
-#                            dataReadTime - time, # delay
-#                            0 # filter_id
-#                            ]
-#                        for k in xrange(8):
-#                            event.append(eventSamples[k][si])
-#
-#
-#                        self._addNativeEventToBuffer(event)
-#        except:
-#            ioHub.printExceptionDetailsToStdErr()
-#        pollCompetedTime=Computer.currentSec()
-#        return True
-
-    def _getIOHubEventObject(self,event):
-        return event # already a Gamepad Event
-
-
-
+        
+    def _getIOHubEventObject(self,native_event_data):
+        return native_event_data
 
     def _close(self):
-        #self._device.streamStop()
-        self._device.close()
+        self._data_streaming_thread.running=False
+        self._data_streaming_thread.enableDataStreaming(False)
+        self._data_streaming_thread.enableDataStreaming(True)
+        self._data_streaming_thread.enableDataStreaming(False)
+        self._data_streaming_thread.join()
+        self._labjack.close()
 
 
     def __del__(self):
         try:
             self._close()
         except:
-            pass</pre></div>
+            pass
+        
+# LabJack Stream Reading Thread. I 'dislike' threads in Python, but as a last 
+# nonblocking resort, it is what it is. ;)
+</div>
+import threading,copy
+    
+class LabJackDataReader(threading.Thread):
+    def __init__(self, device,thread_name='LabJackDataStreamingThread'):
+        threading.Thread.__init__(self,group=None, target=None, name=thread_name, args=(), kwargs={})        
+        self.labjack_device = device._labjack
+        self.iohub_device=device
+        self.stream_data_event=threading.Event()
+        self.stream_start_time_pre=None
+        self.stream_start_time_post=None
+        self.stream_stop_time=None
+        self.request_count = 0
+        self.channel_array_read_count = 0
+        self.missed_count = 0
+        self.error_count = 0
+        self.running = False
+        self.enableDataStreaming(False)
+
+    def enableDataStreaming(self,enable):
+        if enable is True:
+           self.stream_data_event.set()
+        else:
+           self.stream_data_event.clear()
+
+    def isStreamingData(self):
+        return self.stream_data_event.is_set()
+        
+    def run(self):
+        getTime=Computer.getTime
+        try:
+            self.running = True
+    
+            while self.running:
+                # wait for threading event to become True
+     
+                self.stream_start_time_pre=None
+                self.stream_start_time_post=None
+                self.stream_stop_time=None
+                self.request_count = 0
+                self.channel_array_read_count = 0
+                self.missed_count = 0
+                self.error_count = 0
+               
+                self.stream_data_event.wait(None)
+                
+                # start streaming
+                self.stream_start_time_pre = getTime()
+                self.labjack_device.streamStart()
+                self.stream_start_time_post = getTime()
+                
+                # Stream until either the ioHub server has set running to False, 
+                # or until threading event is False again
+                while self.running and self.isStreamingData():
+                    # Calling with convert = False, 
+                    # because we are going to convert in the main thread.
+                    returnDict = self.labjack_device.streamData(convert = False).next()
+    
+                    # record and print any errors during streaming
+                    if returnDict['errors'] != 0:
+                        self.error_count+=returnDict['errors']
+                        ioHub.print2err('ERRORS DURING LABJACK STREAMING: current: {0} total: {1}'.format(returnDict['errors'],self.error_count))
+                    if returnDict['missed'] != 0:
+                        self.missed_count+=returnDict['missed']
+                        ioHub.print2err('DROPPED SAMPLES DURING LABJACK STREAMING: current: {0} total: {1}'.format(returnDict['missing'],self.missed_count))
+
+                    # put a copy of the new analog input events in the queue for pickup by the ioHub Device Poll
+                    self.iohub_device._nativeEventCallback([self.stream_start_time_pre,
+                                                            self.stream_start_time_post,
+                                                            copy.deepcopy(self.labjack_device.processStreamData(returnDict['result']))])
+                    
+                    self.request_count += 1
+                
+                self.labjack_device.streamStop()
+                self.stream_stop_time=getTime()
+    
+        
+                total = self.request_count * self.labjack_device.packetsPerRequest * self.labjack_device.streamSamplesPerPacket
+                total -= self.missed_count
+                run_time = self.stream_stop_time-self.stream_start_time_post
+                ioHub.print2err("%s samples / %s seconds = %s Hz" % ( total, run_time, float(total)/run_time ))
+            self.iohub_device=None
+            self.labjack_device=None
+        except:
+            ioHub.print2err("ERROR IN THREAD RUN:")
+            ioHub.printExceptionDetailsToStdErr()
+            </pre>
 
 </div>
 <footer class="footer">

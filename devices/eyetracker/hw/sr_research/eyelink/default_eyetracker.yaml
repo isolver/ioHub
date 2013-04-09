@@ -27,6 +27,65 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
     # following event types. If you would like to exclude certain events from being
     # saved or streamed during runtime, remove them from the list below.
     monitor_event_types: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent, SaccadeStartEvent, SaccadeEndEvent, BlinkStartEvent, BlinkEndEvent]
+    calibration:
+        # eyetracker.hw.sr_research.eyelink.EyeTracker supports the following
+        type: NINE_POINTS
+        # auto_pace can be True or False. If True, the eye tracker will 
+        # automatically progress from one calibration point to the next.
+        # If False, a manual key or button press is needed to progress to
+        # the next point.
+        auto_pace: True
+        # pacing_speed is the number of sec.msec that a calibration point should
+        # be displayed before moving onto the next point when auto_pace is set to true.
+        # If auto_pace is False, pacing_speed is ignored.
+        pacing_speed: 1.5
+        # screen_background_color specifies the r,g,b,a background color to 
+        # set the calibration, validation, etc, screens to. Each element of the color
+        # should be a value between 0 and 255. 0 == black, 255 == white. In general
+        # the last value of the color list (alpha) can be left at 255, indicating
+        # the color not mixed with the background color at all.
+        screen_background_color: [128,128,128,255]
+        # target type defines what form of calibration graphic should be used
+        # during calibration, validation, etc. modes.
+        # eyetracker.hw.sr_research.eyelink.EyeTracker supports the following
+        # target types CIRCLE_TARGET      
+        target_type: CIRCLE_TARGET
+        # The asociated target attributes sub properties must be supplied
+        # for the given target_type. If target type attribute sections are provided
+        # for target types other than the entry associated with the specified target_type value
+        # they will simple be ignored.
+        target_attributes:
+            outer_diameter: 33
+            inner_diameter: 6
+            outer_color: [255,255,255,255]
+            inner_color: [0,0,0,255]
+    # network_settings can be used to specify relevent network settings 
+    # by eye tracker implementations that use a net interface to connect the
+    # ioHub eye tracker interface to the eye tracking system.
+    # The eyetracker.hw.sr_research.eyelink.EyeTracker implementation uses this
+    # setting to specify the Host computer IP address. Normally leaving it set
+    # to the default value is fine.
+    network_settings: 100.1.1.1
+    # The eyetracker.hw.sr_research.eyelink.EyeTracker supports saving a native eye
+    # tracker edf data file, the default_native_data_file_name value is
+    # used to set the default name for the file that will be saved, not including
+    # the .edf file type extension
+    default_native_data_file_name: et_data
+    # simulation_mode can be True or False. This indicates if the eye tracker
+    # should provide simulated eye data instead of sending eye data based on a 
+    # participants actual eye movements. 
+    simulation_mode: False
+    # enable_interface_without_connection is a boolean specifying if the ioHub Device
+    # should be enabled without truely connecting to the underlying eye tracking
+    # hardware. If True, ioHub EyeTracker methods can be called but will
+    # provide no-op results and no eye data will be received by the ioHub Server.
+    # This mode can be useful for working on aspects of an eye tracking experiment when the
+    # actual eye tracking device is not available, for example stimulus presentation
+    # or other non eye tracker dependent experiment functionality.
+    enable_interface_without_connection: False
+    # VOG settings allow you to specify some eye tracker parameters related to
+    # the image processing or data collection procedure used by the eye tracker
+    # device. 
     runtime_settings:
         # eyetracker.hw.sr_research.eyelink.EyeTracker supports, dependent on 
         # model and mode, sampling rates of 250, 500, 1000, and 2000 Hz
@@ -34,39 +93,6 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
         # eyetracker.hw.sr_research.eyelink.EyeTracker supports the 
         # following track_eyes values:  LEFT_EYE, RIGHT_EYE, BINOCULAR
         track_eyes: RIGHT_EYE
-        calibration:
-            # eyetracker.hw.sr_research.eyelink.EyeTracker supports the following
-            # calibration type constants: H3_POINTS, HV3_POINTS, HV5_POINTS, HV9_POINTS, HV13_POINTS
-            type: HV9_POINTS
-            # auto_pace can be True or False. If True, the eye tracker will 
-            # automatically progress from one calibration point to the next.
-            # If False, a manual key or button press is needed to progress to
-            # the next point.
-            auto_pace: True
-            # pacing_speed is the number of sec.msec that a calibration point should
-            # be displayed before moving onto the next point when auto_pace is set to true.
-            # If auto_pace is False, pacing_speed is ignored.
-            pacing_speed: 1.5
-            # screen_background_color specifies the r,g,b,a background color to 
-            # set the calibration, validation, etc, screens to. Each element of the color
-            # should be a value between 0 and 255. 0 == black, 255 == white. In general
-            # the last value of the color list (alpha) can be left at 255, indicating
-            # the color not mixed with the background color at all.
-            screen_background_color: [128,128,128,255]
-            # target type defines what form of calibration graphic should be used
-            # during calibration, validation, etc. modes.
-            # eyetracker.hw.sr_research.eyelink.EyeTracker supports the following
-            # target types CIRCLE_TARGET      
-            target_type: CIRCLE_TARGET
-            # The asociated target attributes sub properties must be supplied
-            # for the given target_type. If target type attribute sections are provided
-            # for target types other than the entry associated with the specified target_type value
-            # they will simple be ignored.
-            circle_attributes:
-                outer_diameter: 33
-                inner_diameter: 6
-                outer_color: [255,255,255,255]
-                inner_color: [0,0,0,255]
         # Sample filtering defines the native eye tracker filtering level to be 
         # applied to the sample event data before it is sent to the specified data stream.
         # The sample filter section can contain multiple key : value entries if 
@@ -80,33 +106,6 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
         # ignored.
         sample_filtering:
             FILTER_ALL: FILTER_LEVEL_OFF
-        # simulation_mode can be True or False. This indicates if the eye tracker
-        # should provide simulated eye data instead of sending eye data based on a 
-        # participants actual eye movements. 
-        simulation_mode: False
-        # enable_interface_without_connection is a boolean specifying if the ioHub Device
-        # should be enabled without truely connecting to the underlying eye tracking
-        # hardware. If True, ioHub EyeTracker methods can be called but will
-        # provide no-op results and no eye data will be received by the ioHub Server.
-        # This mode can be useful for working on aspects of an eye tracking experiment when the
-        # actual eye tracking device is not available, for example stimulus presentation
-        # or other non eye tracker dependent experiment functionality.
-        enable_interface_without_connection: False
-        # network_settings can be used to specify relevent network settings 
-        # by eye tracker implementations that use a net interface to connect the
-        # ioHub eye tracker interface to the eye tracking system.
-        # The eyetracker.hw.sr_research.eyelink.EyeTracker implementation uses this
-        # setting to specify the Host computer IP address. Normally leaving it set
-        # to the default value is fine.
-        network_settings: 100.1.1.1
-        # The eyetracker.hw.sr_research.eyelink.EyeTracker supports saving a native eye
-        # tracker edf data file, the default_native_data_file_name value is
-        # used to set the default name for the file that will be saved, not including
-        # the .edf file type extension
-        default_native_data_file_name: et_data
-        # VOG settings allow you to specify some eye tracker parameters related to
-        # the image processing or data collection procedure used by the eye tracker
-        # device. 
         vog_settings:
             # The eyetracker.hw.sr_research.eyelink.EyeTracker supports one
             # pupil_measure_types parameter that is used for all eyes being tracked. 

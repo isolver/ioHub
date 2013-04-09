@@ -42,7 +42,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         tracker.runSetupProcedure()
         self.hub.clearEvents('all')
-        self.hub.delay(0.050)
+        self.hub.wait(0.050)
 
         current_gaze=[0,0]
 
@@ -67,7 +67,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #self.setProcessAffinities([0,1],[2,3])
 
         tracker.setRecordingState(True)
-        self.hub.delay(0.050)
+        self.hub.wait(0.050)
 
         # Clear all events from the ioHub event buffers.
         self.hub.clearEvents('all')
@@ -107,7 +107,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tracker.setRecordingState(False)
 
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        self.hub.delay(0.250)
+        self.hub.wait(0.250)
         tracker.setConnectionState(False)
 
         # _close neccessary files / objects, 'disable high priority.

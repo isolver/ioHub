@@ -30,27 +30,31 @@ eyetracker.hw.tobii.EyeTracker:
     runtime_settings:
         sampling_rate: [25,30,60,120,400]
         track_eyes: [BINOCULAR,]
-        calibration:
-            type: [ HV9_POINTS,]
-            target_positions: []
-            auto_pace: IOHUB_BOOL
-            pacing_speed:
-                IOHUB_FLOAT:
-                    min: 0.5
-                    max: 2.5
-            screen_background_color: IOHUB_RGBA255_COLOR
-            target_type: [CIRCLE_TARGET,]
-            circle_attributes:
-                outer_diameter:
-                    IOHUB_INT:
-                        min: 8
-                        max: 256
-                inner_diameter: 
-                    IOHUB_INT:
-                        min: 0
-                        max: 255
-                outer_color: IOHUB_RGBA255_COLOR
-                inner_color: IOHUB_RGBA255_COLOR                 
+    calibration:
+        # The Tobii ioHub Common Eye Tracker Interface currently support 
+        # a 3, 5 and 9 point calibration mode.
+        # THREE_POINTS,FIVE_POINTS,NINE_POINTS
+        type: [THREE_POINTS,FIVE_POINTS,NINE_POINTS]
+        randomize: False
+        target_positions: []
+        auto_pace: IOHUB_BOOL
+        pacing_speed:
+            IOHUB_FLOAT:
+                min: 0.5
+                max: 2.5
+        screen_background_color: IOHUB_RGBA255_COLOR
+        target_type: [CIRCLE_TARGET,]
+        target_attributes:
+            outer_diameter:
+                IOHUB_INT:
+                    min: 8
+                    max: 256
+            inner_diameter: 
+                IOHUB_INT:
+                    min: 0
+                    max: 255
+            outer_color: IOHUB_RGBA255_COLOR
+            inner_color: IOHUB_RGBA255_COLOR                 
     device_number: 0
     manufacture_date: IOHUB_DATE
     model_number:

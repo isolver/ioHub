@@ -72,7 +72,7 @@ while True: #continue until keypress
         # treated like a range or 'position'. Here we track the delta wheel pos
         # delta. 
         # TODO: No reason why ioHub can not track both absolution and delta info. 
-        wheelPosY = myMouse.getVerticalScroll()
+        wheelPosY = myMouse.getScroll()
         wheel_dY=wheelPosY-last_wheelPosY
         last_wheelPosY=wheelPosY
         grating.setOri(wheel_dY*5, '+')

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1.2.6.1.2.2. SMI iView EyeTracker Class &mdash; ioHub 0.6rc1 documentation</title>
+    <title>1.2.6.1.2.2. SMI iViewX EyeTracker Implementation &mdash; ioHub 0.6rc1 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -76,7 +76,14 @@
             <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
   <ul class="dropdown-menu localtoc"><ul>
-<li><a class="reference internal" href="#">1.2.6.1.2.2. SMI iView EyeTracker Class</a></li>
+<li><a class="reference internal" href="#">1.2.6.1.2.2. SMI iViewX EyeTracker Implementation</a><ul>
+<li><a class="reference internal" href="#installing-other-necessary-smi-software">1.2.6.1.2.2.1. Installing other Necessary SMI Software</a></li>
+<li><a class="reference internal" href="#smi-iviewx-device-iohub-config-yaml-settings">1.2.6.1.2.2.2. SMI iViewX Device iohub_config.yaml Settings</a></li>
+<li><a class="reference internal" href="#minimal-smi-iviewx-device-iohub-config-yaml-example">1.2.6.1.2.2.3. Minimal SMI iViewX Device iohub_config.yaml Example</a></li>
+<li><a class="reference internal" href="#supported-eyetracker-device-event-types">1.2.6.1.2.2.4. Supported EyeTracker Device Event Types</a></li>
+<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.2.5. General Considerations</a></li>
+</ul>
+</li>
 </ul>
 </ul>
 </li>
@@ -108,9 +115,643 @@
   </div>
 
   
-  <div class="section" id="smi-iview-eyetracker-class">
-<h1>1.2.6.1.2.2. SMI iView EyeTracker Class<a class="headerlink" href="#smi-iview-eyetracker-class" title="Permalink to this headline">¶</a></h1>
-<p>To be completed.</p>
+  <div class="section" id="smi-iviewx-eyetracker-implementation">
+<h1>1.2.6.1.2.2. SMI iViewX EyeTracker Implementation<a class="headerlink" href="#smi-iviewx-eyetracker-implementation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported Platforms:</p>
+<p class="last">Windows (XP SP2, SP3, Windows 7)</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported iViewX Eye Tracker Models:</p>
+<p class="last">iViewX High Speed, iViewX RED, iViewX RED-m, iViewX fMRI, iViewX EEG</p>
+</div>
+<dl class="class">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.eyetracker.hw.smi.iviewx.</tt><tt class="descname">EyeTracker</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../eyetracker.html#ioHub.devices.eyetracker.EyeTrackerDevice" title="ioHub.devices.eyetracker.EyeTrackerDevice"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.eyetracker.EyeTrackerDevice</span></tt></a></p>
+<p>The SMI iViewX implementation of the Common Eye Tracker Interface 
+can be used by providing the following EyeTracker path as the device
+class in the iohub_config.yaml device settings file:</p>
+<blockquote>
+<div>eyetracker.hw.smi.iviewx.EyeTracker</div></blockquote>
+<p>See the configuration options section of the iViewX Common Eye Tracker 
+Interface documentation for a full description and listing of all 
+valid configuration settings for this device.</p>
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.clearEvents">
+<tt class="descname">clearEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.clearEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears any DeviceEvents that have occurred since the last call to the devices getEvents()
+with clearEvents = True, or the devices clearEvents() methods.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>None</dd>
+</dl>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.enableEventReporting">
+<tt class="descname">enableEventReporting</tt><big>(</big><em>enabled=True</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.enableEventReporting" title="Permalink to this definition">¶</a></dt>
+<dd><p>enableEventReporting is the device type independent method that is equivelent
+to the EyeTracker specific setRecordingState method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getConfiguration">
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Return:</dt>
+<dd>dict: dictionary of configuartion settings used when the device was originally created by the ioHub Server process.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getEvents">
+<tt class="descname">getEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve any DeviceEvents that have occurred since the last call to the
+device&#8217;s getEvents() or clearEvents() methods.</p>
+<p>Note that calling the ioHub Server Process level getEvents() or clearEvents() methods
+via the ioHubClientConnection class does <em>not</em> effect device level event buffers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">eventTypeID (int): Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID&#8217;s can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.</p>
+<p>clearEvents (int): If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.</p>
+<p class="last">asType (str): The object type to return events as. Valid values are &#8216;namedtuple&#8217; (default), &#8216;dict&#8217;, &#8216;list&#8217;, or &#8216;object&#8217;.</p>
+</dd>
+<dt>Return (tuple): </dt>
+<dd>A list of event objects, ordered by the ioHub time for each event.
+The event object type is determined by the asType parameter to the method;
+by default a namedtuple object is returned for each event.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getLastGazePosition">
+<tt class="descname">getLastGazePosition</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getLastGazePosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>getLastGazePosition returns the most recent x,y eye position, in Display 
+device coordinate space, received by the ioHub server from the iViewX device.
+In the case of binocular recording, and if both eyes are successfully being tracked,
+then the average of the two eye positions is returned.
+If the eye tracker is not recording or is not connected, then None is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getLastSample">
+<tt class="descname">getLastSample</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.getLastSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>getLastSample returns the most recentBinocularEyeSampleEvent received
+from the iViewX system. Any position fields are in Display 
+device coordinate space. If the eye tracker is not recording or is not 
+connected, then None is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isConnected">
+<tt class="descname">isConnected</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isConnected" title="Permalink to this definition">¶</a></dt>
+<dd><p>isConnected indicates if there is an active connection between the ioHub
+Server and the eye tracking device.</p>
+<p>Note that when the SMI iViewX EyeTracker class is created when the ioHub server starts, 
+a connection is automatically created with the eye tracking device.</p>
+<p>The ioHub must be connected to the eye tracker device for it to be able to receive
+events from the eye tracking system. Eye tracking events are received when 
+isConnected() == True and when isRecordingEnabled() == True.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isRecordingEnabled">
+<tt class="descname">isRecordingEnabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isRecordingEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>isRecordingEnabled returns True if the eye tracking device is currently connected and
+sending eye event data to the ioHub server. If the eye tracker is not recording, or is not
+connected to the ioHub server, False will be returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isReportingEvents">
+<tt class="descname">isReportingEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.isReportingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether a Device is currently report events or whether the device is ignoring any events that occur.</p>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd>None</dd>
+<dt>Return: </dt>
+<dd>bool: current reporting state</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.runSetupProcedure">
+<tt class="descname">runSetupProcedure</tt><big>(</big><em>starting_state=100</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.runSetupProcedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>The SMI iViewX implementation of the runSetupProcedure supports the following 
+starting_state values:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>DEFAULT_SETUP_PROCEDURE: This (default) mode starts by showing a dialog with the various options available during user setup.</li>
+<li>CALIBRATION_STATE: The eye tracker will immediately preform a calibration and then return to the experiment script.</li>
+<li>VALIDATION_STATE: The eye tracker will immediately preform a validation and then return to the experiment script. The return result is a dict containing the validation results.</li>
+<li>TRACKER_FEEDBACK_STATE: The eye tracker will display the eye image window and tracker graphics if either has been enabled in the device config, and then return to the experiment script.</li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.sendCommand">
+<tt class="descname">sendCommand</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sendCommand method is currently not supported by the SMI iViewX 
+implementation of the Common Eye Tracker Interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>message_contents</em>, <em>time_offset=None</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sendMessage method is currently not supported by the SMI iViewX 
+implementation of the Common Eye Tracker Interface. Once native data file
+saving is implemented for the iViewX, this method will become available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.setConnectionState">
+<tt class="descname">setConnectionState</tt><big>(</big><em>enable</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.setConnectionState" title="Permalink to this definition">¶</a></dt>
+<dd><p>setConnectionState connects the ioHub Server to the SMI iViewX device if 
+the enable arguement is True, otherwise an open connection is closed with
+the device. Calling this method multiple times with the same value has no effect.</p>
+<p>Note that when the SMI iViewX EyeTracker class is created when the ioHub server starts, 
+a connection is automatically created with the eye tracking device.</p>
+<p>If the eye tracker is currently recording eye data and sending it to the
+ioHub server, the recording will be stopped prior to closing the connection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.setRecordingState">
+<tt class="descname">setRecordingState</tt><big>(</big><em>recording</em><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.setRecordingState" title="Permalink to this definition">¶</a></dt>
+<dd><p>setRecordingState enables (recording=True) or disables (recording=False)
+the recording of eye data by the eye tracker and the sending of any eye 
+data to the ioHub Server. The eye tracker must be connected to the ioHub Server
+by using the setConnectionState() method for recording to be possible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.trackerSec">
+<tt class="descname">trackerSec</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.trackerSec" title="Permalink to this definition">¶</a></dt>
+<dd><p>trackerSec returns the current iViewX Application or Server time in 
+sec.msec-usec format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.trackerTime">
+<tt class="descname">trackerTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.trackerTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>trackerSec returns the current iViewX Application or Server time in 
+usec format as a long integer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.device_number">
+<tt class="descname">device_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.device_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.event_buffer_length">
+<tt class="descname">event_buffer_length</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.firmware_version">
+<tt class="descname">firmware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.firmware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.hardware_version">
+<tt class="descname">hardware_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.hardware_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.manufacture_date">
+<tt class="descname">manufacture_date</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.manufacture_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.manufacturer_name">
+<tt class="descname">manufacturer_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.manufacturer_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.model_name">
+<tt class="descname">model_name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.model_number">
+<tt class="descname">model_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.model_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.monitor_event_types">
+<tt class="descname">monitor_event_types</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.monitor_event_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.serial_number">
+<tt class="descname">serial_number</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.serial_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.software_version">
+<tt class="descname">software_version</tt><a class="headerlink" href="#ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker.software_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="installing-other-necessary-smi-software">
+<h2>1.2.6.1.2.2.1. Installing other Necessary SMI Software<a class="headerlink" href="#installing-other-necessary-smi-software" title="Permalink to this headline">¶</a></h2>
+<p>The SMI iViewX implementation of the ioHub common eye tracker interface uses the
+SMI C SDK written by SensoMotoric Instruments. SensoMotoric Instruments has been kind
+enough to allow the distribution of the necessary client side C DLLs with the ioHub software
+distribution, so no extra software needs to be downloaded or installed for the
+ioHub API implementation for their eye trackers to work. Any nesessary iViewX
+Application or Server software which directly controls the eye tracking hardware is still
+required of course.</p>
+<p>We would like to thank SMI for allowing the ioHub project to include the necessary client
+side DLLs as part of the ioHub distribution, as it makes the use of the eye tracker implementation
+much easier for end users of their system. This is very thoughtful on their part.</p>
+</div>
+<div class="section" id="smi-iviewx-device-iohub-config-yaml-settings">
+<h2>1.2.6.1.2.2.2. SMI iViewX Device iohub_config.yaml Settings<a class="headerlink" href="#smi-iviewx-device-iohub-config-yaml-settings" title="Permalink to this headline">¶</a></h2>
+<p>To specify the use of an SMI iViewX eye tracking device within your experiment,
+the following can be added to the iohub_config.yaml file of your experiment in
+the devices list section. Note thatthis includes every supported parameter for
+the iViewX eye tracker device in ioHub; most of the parameters can be left out of your
+experiment device listing as any parameters not included at the experiment configuration
+level are filled in with the default value for the device implementation. The values
+listed below are the default values for the iViewX configuration:</p>
+<div class="highlight-python"><pre>eyetracker.hw.smi.iviewx.EyeTracker:
+    # Indicates if the device should actually be loaded at experiment runtime.
+    enable: True
+
+    # The variable name of the device that will be used to access the ioHub Device class
+    # during experiment run-time, via the devices.[name] attribute of the ioHub
+    # connection or experiment runtime class.
+    name: tracker
+
+    # Should eye tracker events be saved to the ioHub DataStore file when the device
+    # is recording data ?
+    save_events: True
+
+    # Should eye tracker events be sent to the Experiment process when the device
+    # is recording data ?
+    stream_events: True
+
+    # The iViewX implementation fo the ioHub eye tracker interface uses the polling method to
+    # check for new events received from the iViewX device. device_timer.interval
+    # specifies the sec.msec time between device polls. 0.002 = 2 msec, so the device will
+    # be polled at a maxximum rate of 500 Hz. This polling rate is a 'target' value,
+    # and may not always be achieved depending on your computer specifications and the
+    # number and type of other devices being used. Valid polling intervals are between
+    # 0.001 and 0.20 seconds.
+    device_timer:
+        interval: 0.002
+
+    # How many eye events (including samples) should be saved in the ioHub event buffer before
+    # old eye events start being replaced my new events when the event buffer reaches
+    # the maximum event length of the buffer defined here.
+    # Valid values are between 32 and 2048 events.
+    event_buffer_length: 1024
+
+    # The iViewX implementation of the common eye tracker interface supports the
+    # following event types:
+    # BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent
+    # If you would like to exclude certain events from being saved or streamed during runtime,
+    # remove them from the list below.
+    monitor_event_types: [ BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent]
+
+    # This section of settings is related to the eye tracker calibration
+    # procedure.
+    calibration:
+        # How many points should be presented during the calibration phase of the
+        # setup method? Different models of the SMI iViewX system support different
+        # numbers of calibration points, as follows:
+        #   RED: TWO_POINTS,FIVE_POINTS,NINE_POINTS
+        #   REDm: NO_POINTS,ONE_PONT,TWO_POINTS,FIVE_POINTS,NINE_POINTS
+        #   High Speed or MRI: FIVE_POINTS, NINE_POINTS, THIRTEEN_POINTS
+        #   HED: FIVE_POINTS, THIRTEEN_POINTS (with HT)
+        type: FIVE_POINTS
+
+        # Should the presentation of the calibration points automatically proceed
+        # when the eye tracking device has detected a period of eye stability?
+        # If False, points will only progress when the SPACE key is pressed.
+        auto_pace: True
+
+        # If auto_pace is True, how fast should the system move to the next point?
+        # Valid options are SLOW and FAST
+        pacing_speed: SLOW
+
+        # The calibration screen background color can be specified as an integer
+        # representing the greyscale value to set the calibration screen background
+        # color to. The value can be between 0 and 255, where 0 is black and 255 is white.
+        screen_background_color: 20
+
+        # What type of target shape should be used for the calibration procedure?
+        # Valid options are currently CIRCLE_TARGET and CROSS_TARGET
+        target_type: CIRCLE_TARGET
+
+        # Define settable attributes of the target......
+        target_attributes:
+            # The pixel radius of the target shape.
+            target_size: 10
+
+            # The target color can be specified as an integer
+            # representing the greyscale color value. Valid values can be
+            # between 0 and 255, where 0 is black and 255 is white.
+            target_color: 239
+
+        # Should a Window showing the validation accuracy as a gaze point
+        # overlay be displayed following a validation procedure?
+        show_validation_accuracy_window: False
+
+    # The iViewX network settings specify the ioHub computer IP and port and the
+    # iViewX Application / Server Computer IP and port. By default the configuration
+    # is set to the popular single PC configuration for the system.
+    network_settings:
+        # IP address of iViewX Apllication or Server computer
+        send_ip_address: 127.0.0.1
+
+        # Port being used by iView X SDK for sending data to iView X
+        send_port: 4444
+
+        # IP address of local computer
+        receive_ip_address: 127.0.0.1
+
+        # port being used by iView X SDK for receiving data from iView X
+        receive_port: 5555
+
+    # The iViewX supports saving a native eye tracker data file, the
+    # default_native_data_file_name value is used to set the name for
+    # the file that will be saved, not including the file type extension.
+    # If no native data file is required, set this value to an empty string, ''
+    default_native_data_file_name: et_data
+
+    # The runtime_settings section of the eye tracker configuration allows the control
+    # settings related to data collection parameters supported by the eye tracker.
+    runtime_settings:
+        # The sampling rate setting in the iViewX implementation is used only to
+        # compare the sampling rate read from the device to ensure it matches
+        # the rate specified here. It is not possible to 'set' the sampling rate
+        # via the SMI API however.
+        sampling_rate: 60
+
+        # The SMI supports enabling or disabling sample filtering. Use the
+        # sample stream type 'FILTER_ALL' with a filter level of either
+        # FILTER_OFF or FILTER_ON
+        sample_filtering:
+            FILTER_ALL: FILTER_OFF
+
+        # The iViewX supports the following track_eyes values:
+        # LEFT_EYE, RIGHT_EYE, BINOCULAR_AVERAGED
+        track_eyes: BINOCULAR_AVERAGED
+
+        # VOG settings allow you to specify some eye tracker parameters related to
+        # the image processing or data collection procedure used by the eye tracker
+        # device.
+        vog_settings:
+            # The iViewX supports one pupil_measure_types parameter that is used
+            # for any eyes being tracked. PUPIL_DIAMETER_MM, PUPIL_DIAMETER are
+            # the valid pupil measure types for the iViewX, depending on the model being used.
+            pupil_measure_types: PUPIL_DIAMETER_MM
+
+    # The model_name setting allows the definition of the eye tracker model being used.
+    # For the iViewX implementation, valid values are:
+    # RED, REDm, HiSpeed, MRI, HED, ETG, or Custom
+    model_name: REDm
+
+    # manufacturer_name is used to store the name of the maker of the eye tracking
+    # device. This is for informational purposes only.
+    manufacturer_name: SensoMotoric Instruments GmbH
+
+    # The below parameters are not used by the SMI iViewX Common Eye Tracker
+    # Interface implementation, however they can be completed for FYI purposes
+    # at this time. Some of these properties will also be filled in at runtime by
+    # the eye tracker interface once a connection as been made to the hardware.
+
+    # The model number of the eye tracker device being used (if any).
+    model_number: N/A
+
+    # The serial number of the eye tracker device being used (if any).
+    serial_number: N/A
+
+    # The date of manufacture of the eye tracker device being used (if any).
+    manufacture_date: DD-MM-YYYY
+
+    # The software version of the eye tracker device being used (if any).
+    software_version: N/A
+
+    # The hardware of the eye tracker device being used (if any).
+    hardware_version: N/A
+
+    # The firmware number of the eye tracker device being used (if any).
+    firmware_version: N/A</pre>
+</div>
+</div>
+<div class="section" id="minimal-smi-iviewx-device-iohub-config-yaml-example">
+<h2>1.2.6.1.2.2.3. Minimal SMI iViewX Device iohub_config.yaml Example<a class="headerlink" href="#minimal-smi-iviewx-device-iohub-config-yaml-example" title="Permalink to this headline">¶</a></h2>
+<p>If the default value for a parameter is sufficient for your use of the device, the parameter
+does not need to be included in your experiment iohub_config.yaml. Here is an example of
+a <em>trimmed down</em> iViewX configuration, only including the parameters that may want to be changed.
+This is just an example, your device configuration may need to be different:</p>
+<div class="highlight-python"><pre>eyetracker.hw.smi.iviewx.EyeTracker:
+    # Indicates if the device should actually be loaded at experiment runtime.
+    enable: True
+
+    # Use the default eye tracker variable name, but keep it here for reminders. ;)
+    name: tracker
+
+    # Given the high frame rate being used in this study, the polling interval has
+    # been adjusted to 1 msec.
+    device_timer:
+        interval: 0.001
+
+    # We only want Sample Events for this experiment.
+    monitor_event_types: [ BinocularEyeSampleEvent,]
+
+    # Keep most of the calibration settings so they can be tweaked for the
+    # current experiments purposes.
+    calibration:
+        # How many points should be presented during the calibration phase of the
+        # setup method?
+        type: NINE_POINTS
+
+        # Should the presentation of the calibration points automatically proceed
+        # when the eye tracking device has detected a period of eye stability?
+        # If False, points will only progress when the SPACE key is pressed.
+        auto_pace: False
+
+        # The calibration screen background color can be specified as an integer
+        # representing the greyscale value to set the calibration screen background
+        # color to. The value can be between 0 and 255, where 0 is black and 255 is white.
+        screen_background_color: 128
+
+        # Define settable attributes of the target......
+        target_attributes:
+            # The pixel radius of the target shape.
+            target_size: 10
+
+            # The target color can be specified as an integer
+            # representing the greyscale color value. Valid values can be
+            # between 0 and 255, where 0 is black and 255 is white.
+            target_color: 244
+
+    # Keep the network settings pulled out so we can switch to a
+    # two computer setup if desired.
+    network_settings:
+        # IP address of iViewX Apllication or Server computer
+        send_ip_address: 127.0.0.1
+
+        # Port being used by iView X SDK for sending data to iView X
+        send_port: 4444
+
+        # IP address of local computer
+        receive_ip_address: 127.0.0.1
+
+        # port being used by iView X SDK for receiving data from iView X
+        receive_port: 5555
+
+    # Do not save a native data file for this experiment.
+    default_native_data_file_name:
+
+    # In this example, an iViewX High Speed 1250 Hz system is being used
+    # in monocular mode.
+    runtime_settings:
+        # The sampling rate setting in the iViewX implementation is used only to
+        # compare the sampling rate read from the device to ensure it matches
+        # the rate specified here. It is not possible to 'set' the sampling rate
+        # via the SMI API however.
+        sampling_rate: 1250
+
+        # The iViewX supports the following track_eyes values:
+        # LEFT_EYE, RIGHT_EYE, BINOCULAR_AVERAGED
+        track_eyes: RIGHT_EYE
+
+    # The model_name setting allows the definition of the eye tracker model being used.
+    # For the iViewX implementation, valid values are:
+    # RED, REDm, HiSpeed, MRI, HED, ETG, or Custom
+    model_name: HiSpeed</pre>
+</div>
+</div>
+<div class="section" id="supported-eyetracker-device-event-types">
+<h2>1.2.6.1.2.2.4. Supported EyeTracker Device Event Types<a class="headerlink" href="#supported-eyetracker-device-event-types" title="Permalink to this headline">¶</a></h2>
+<p>The SMI iViewX implementation of the Common Eye Tracker Interface supports the
+following eye event types, with data being populated for the attributes listed
+with each event type:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><dl class="first docutils">
+<dt>ioHub.devices.eyetracker.BinocularEyeSampleEvent:</dt>
+<dd><ol class="first last arabic">
+<li><dl class="first docutils">
+<dt>Attributes supported:</dt>
+<dd><ol class="first last arabic simple">
+<li>experiment_id</li>
+<li>session_id</li>
+<li>event_id</li>
+<li>event_type</li>
+<li>logged_time</li>
+<li>device_time</li>
+<li>time</li>
+<li>delay</li>
+<li>confidence_interval</li>
+<li>left_gaze_x</li>
+<li>left_gaze_y</li>
+<li>left_eye_cam_x (for remote models only)</li>
+<li>left_eye_cam_y (for remote models only)</li>
+<li>left_eye_cam_z (for remote models only)</li>
+<li>left_pupil_measure_1</li>
+<li>left_pupil_measure1_type</li>
+<li>right_gaze_x</li>
+<li>right_gaze_y</li>
+<li>right_eye_cam_x (for remote models only)</li>
+<li>right_eye_cam_y (for remote models only)</li>
+<li>right_eye_cam_z (for remote models only)</li>
+<li>right_pupil_measure_1</li>
+<li>right_pupil_measure1_type</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p class="first">ioHub.devices.eyetracker.FixationStartEvent:</p>
+<blockquote>
+<div><p>Note that the iViewX system reports fixations when they end, so the FixationStartEvent is created at the same time as the FixationEndEvent in the current implementation.</p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Attributes supported:</dt>
+<dd><ol class="first last arabic simple">
+<li>experiment_id</li>
+<li>session_id</li>
+<li>event_id</li>
+<li>event_type</li>
+<li>logged_time</li>
+<li>device_time</li>
+<li>time</li>
+<li>delay</li>
+<li>confidence_interval</li>
+<li>eye</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+</li>
+<li><dl class="first docutils">
+<dt>ioHub.devices.eyetracker.FixationEndEvent:</dt>
+<dd><ol class="first last arabic">
+<li><dl class="first docutils">
+<dt>Attributes supported:</dt>
+<dd><ol class="first last arabic simple">
+<li>experiment_id</li>
+<li>session_id</li>
+<li>event_id</li>
+<li>event_type</li>
+<li>logged_time</li>
+<li>device_time</li>
+<li>time</li>
+<li>delay</li>
+<li>confidence_interval</li>
+<li>eye</li>
+<li>duration</li>
+<li>average_gaze_x</li>
+<li>average_gaze_y</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="general-considerations">
+<h2>1.2.6.1.2.2.5. General Considerations<a class="headerlink" href="#general-considerations" title="Permalink to this headline">¶</a></h2>
+<p>An example gaze contingent eye tracking project that is preconfigured for the SMI iViewX eye tracker implementation is available in the examples folder, under eyetrackerExamples/smiTrackerTest.</p>
+</div>
 </div>
 
 

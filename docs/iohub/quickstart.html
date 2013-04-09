@@ -122,8 +122,8 @@
 <div class="topic">
 <p class="topic-title first">Overview</p>
 <p>This QuickStart Guide is intended to give a fast introduction to how use the
-ioHub and psychoPy packages together. Not all the functionality of the ioHub
-is covered, nore are all device types. For a more complete review of the ioHub
+ioHub and PsychoPy packages together. Not all the functionality of the ioHub
+is covered, nor are all device types. For a more complete review of the ioHub
 package features and how to use them, see the ioHub User Manual section.</p>
 <p>Obviously the PsychoPy package API is used heavily as well, so it is important
 that you have an understanding of how to use PsychoPy at a <em>coder</em> level.
@@ -133,10 +133,10 @@ if / when needed.</p>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>There are two ways that the ioHub API can be used when creating an experiment with
-PsychoPy. The first way is more inline with the &#8216;standard&#8217; PsychoPy coder examples
+PsychoPy. The first way is more in line with the &#8216;standard&#8217; PsychoPy coder examples
 and can be used when simple devices like the keyboard and mouse are all that is
 needed for the experiment. The second way, while still very easy to use, goes beyond
-&#8216;standard&#8217; PychoPy coder expamples by using YAML configuration files to define
+&#8216;standard&#8217; PsychoPy coder examples by using YAML configuration files to define
 device properties and settings that do not change during an experiment instance,
 and uses a Python class wrapper around the experiment script itself, making access
 to the ioHub API more seamless and saving the coder from having to repeat or
@@ -146,10 +146,10 @@ remember to add some boilerplate code from experiment to experiment.</p>
 <div class="section" id="adding-the-iohub-api-to-a-standard-or-existing-psychopy-coder-experiment">
 <h2>Adding the ioHub API to a &#8216;standard&#8217; or Existing PsychoPy Coder Experiment<a class="headerlink" href="#adding-the-iohub-api-to-a-standard-or-existing-psychopy-coder-experiment" title="Permalink to this headline">¶</a></h2>
 <p>First, let&#8217;s take an example from one of the PsychoPy demo scripts and show how
-to easily use the ioHub keyboard and mouse devices with it.</p>
+to easily use the ioHub keyboard and mouse devices with it using ioHub.quickStartHubServer.</p>
 <p>The original PsychoPy Example (mouse.py taken from a recent version of the
 PsychoPy software installation):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">psychopy</span> <span class="kn">import</span> <span class="n">visual</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">misc</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">psychopy</span> <span class="kn">import</span> <span class="n">visual</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">event</span>
 
 <span class="c">#create a window to draw in</span>
 <span class="n">myWin</span> <span class="o">=</span> <span class="n">visual</span><span class="o">.</span><span class="n">Window</span><span class="p">((</span><span class="mf">600.0</span><span class="p">,</span><span class="mf">600.0</span><span class="p">),</span> <span class="n">allowGUI</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -204,7 +204,7 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
 <span class="sd">Converted PsychoPy mouse.py demo script to use ioHub package for keyboard and</span>
 <span class="sd">mouse input.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">psychopy</span> <span class="kn">import</span> <span class="n">visual</span><span class="p">,</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">psychopy</span> <span class="kn">import</span> <span class="n">visual</span><span class="p">,</span> <span class="n">core</span> <span class="c"># &#39;psychopy.event&#39; no longer needed</span>
 <span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">quickStartHubServer</span>
 <span class="kn">from</span> <span class="nn">ioHub.constants</span> <span class="kn">import</span> <span class="n">EventConstants</span>
 <span class="kn">from</span> <span class="nn">ioHub.util.experiment</span> <span class="kn">import</span> <span class="n">FullScreenWindow</span>
@@ -212,14 +212,14 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="n">io</span><span class="o">=</span><span class="n">quickStartHubServer</span><span class="p">(</span><span class="s">&quot;exp_code&quot;</span><span class="p">,</span><span class="s">&quot;sess_</span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10000</span><span class="p">)))</span>
 
-<span class="c"># get &#39;shortcut&#39; handles to the devices you will be using in the experiment:</span>
-<span class="n">myMouse</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">mouse</span>
+<span class="c"># get &#39;shortcut&#39; handles to the devices you will be using in the experiment.</span>
+<span class="n">myMouse</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">mouse</span> <span class="c"># replaces &#39;myMouse = event.Mouse(win=myWin)&#39;</span>
 <span class="n">display</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">display</span>
 <span class="n">myKeyboard</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">keyboard</span>
 
 <span class="n">myMouse</span><span class="o">.</span><span class="n">setSystemCursorVisibility</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-<span class="n">myWin</span> <span class="o">=</span> <span class="n">FullScreenWindow</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
+<span class="n">myWin</span> <span class="o">=</span> <span class="n">FullScreenWindow</span><span class="p">(</span><span class="n">display</span><span class="p">)</span> <span class="c"># replaces &#39;myWin = visual.Window((600.0,600.0), allowGUI=True)&#39;</span>
 
 <span class="n">screen_resolution</span><span class="o">=</span><span class="n">display</span><span class="o">.</span><span class="n">getPixelResolution</span><span class="p">()</span>
 
@@ -240,7 +240,8 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
 <span class="n">last_wheelPosY</span><span class="o">=</span><span class="mi">0</span>
 
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span> <span class="c">#continue until keypress</span>
-    <span class="c">#handle key presses each frame</span>
+    <span class="c"># Getting key presses from an ioHub keyboard device is comparable to &#39;for key in event.getKeys():&#39; in PsychoPy.</span>
+    <span class="c"># The key name is one of many attributes of the event.</span>
     <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">myKeyboard</span><span class="o">.</span><span class="n">getEvents</span><span class="p">(</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">KEYBOARD_PRESS</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;ESCAPE&#39;</span><span class="p">,</span><span class="s">&#39;q&#39;</span><span class="p">]:</span>
             <span class="n">io</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
@@ -248,12 +249,12 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
 
     <span class="c"># get the &#39;current&#39; mouse position</span>
     <span class="c"># note that this is &#39;not&#39; the same as getting mouse motion events</span>
-    <span class="n">position</span><span class="p">,</span> <span class="n">posDelta</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getPositionAndDelta</span><span class="p">()</span>
+    <span class="n">position</span><span class="p">,</span> <span class="n">posDelta</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getPositionAndDelta</span><span class="p">()</span> <span class="c"># replaces &#39;myMouse.getPos()&#39; and &#39;myMouse.getRel()&#39;</span>
     <span class="n">mouse_dX</span><span class="p">,</span><span class="n">mouse_dY</span><span class="o">=</span><span class="n">posDelta</span>
 
     <span class="c"># get the &#39;current&#39; mouse position</span>
     <span class="c"># note that this is &#39;not&#39; the same as getting mouse button events</span>
-    <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getCurrentButtonStates</span><span class="p">()</span>
+    <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getCurrentButtonStates</span><span class="p">()</span> <span class="c"># replaces &#39;myMouse.getPressed()&#39;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">b1</span><span class="p">):</span>
         <span class="n">grating</span><span class="o">.</span><span class="n">setSF</span><span class="p">(</span><span class="n">mouse_dX</span><span class="o">/</span><span class="n">display</span><span class="o">.</span><span class="n">getPixelsPerDegree</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">20.0</span><span class="p">,</span> <span class="s">&#39;+&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">b3</span><span class="p">):</span>
@@ -266,10 +267,9 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
     <span class="c"># Y is the normal mouse wheel, and is what is supported by ioHub</span>
     <span class="c"># (until OSX is also supported by ioHub I suppose)</span>
     <span class="c"># ioHub tracks the absolute amount of wheel movement made, so it can be</span>
-    <span class="c"># treated like a range or &#39;position&#39;. Here we track the delta wheel pos</span>
-    <span class="c"># delta.</span>
+    <span class="c"># treated like a range or &#39;position&#39;. Here we track the delta wheel pos.</span>
     <span class="c"># TODO: No reason why ioHub can not track both absolution and delta info.</span>
-    <span class="n">wheelPosY</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getVerticalScroll</span><span class="p">()</span>
+    <span class="n">wheelPosY</span> <span class="o">=</span> <span class="n">myMouse</span><span class="o">.</span><span class="n">getVerticalScroll</span><span class="p">()</span> <span class="c"># replaces &#39;myMouse.getWheelRel()&#39;</span>
     <span class="n">wheel_dY</span><span class="o">=</span><span class="n">wheelPosY</span><span class="o">-</span><span class="n">last_wheelPosY</span>
     <span class="n">last_wheelPosY</span><span class="o">=</span><span class="n">wheelPosY</span>
     <span class="n">grating</span><span class="o">.</span><span class="n">setOri</span><span class="p">(</span><span class="n">wheel_dY</span><span class="o">*</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;+&#39;</span><span class="p">)</span>
@@ -284,10 +284,6 @@ code can be found in the ioHub example folder in the ioMouse example:</p>
     <span class="n">myWin</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span><span class="c">#redraw the buffer</span>
 </pre></div>
 </div>
-<div class="topic">
-<p class="topic-title first">Note</p>
-<p>TODO: Go through ioMouse code and explain the additions / subtractions / changes made to the code and why.</p>
-</div>
 <p>With your experiment file saved, you can run this example by running the python
 file script.</p>
 </div>
@@ -296,11 +292,11 @@ file script.</p>
 <p>The second way to create a PsychoPy experiment script that uses the ioHub package
 is to effectively wrap your experiment script in an extension of the
 ioHub.util.experiment.ExperimentIOHubRuntime class and to define the settings for
-your experiment and ioHub devices using an experiment_config.yaml and iohub_config.yaml
-file.Using this approach has advantages regardless of the devices being used,
+your experiment and ioHub devices using experiment_config.yaml and iohub_config.yaml
+files. Using this approach has advantages regardless of the devices being used,
 however it is really the &#8216;required&#8217; approach when your experiment is using more
-complicated device types such as the eye tracker device.</p>
-<p>Lets take another PsychoPy demo script and convert it to use the ioHub package,
+complicated device types such as an eye tracker.</p>
+<p>Let&#8217;s take another PsychoPy demo script and convert it to use the ioHub package,
 this time by using the ExperimentIOHubRuntime class and .yaml configuration files.</p>
 <p>First, the PsychoPy demo script we will &#8216;convert&#8217; is the joystick_universal.py demo:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">psychopy</span> <span class="kn">import</span> <span class="n">visual</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">event</span>
@@ -394,7 +390,7 @@ of wireless versions of the gamepads.</p>
 for the ioHub Gamepad device to work. if you do not, when you run your experiment
 you will get an uniformative stack trace at the start of the experiment.</p>
 <p>TODO: Make the error message informative. ;)</p>
-<p>You can check if you already have xinput 1.3 installed on your Windows system
+<p>You can check if you already have XInput 1.3 installed on your Windows system
 by searching for xinput1_3.dll in the c:Windows directory of your PC. If the file
 is found, you do not need to do anything further. (Windows 7 seems to come with the file
 already, Windows XP SP2 or 3 may not have the file.)</p>
@@ -416,8 +412,8 @@ example are in the ioGamepad directory of the ioHub Examples folder.</p>
 <li>Within the ioXInputGamePad directory, create a file that will hold the experiment configuration for the demo. This file <strong>must</strong> be called experiment_config.yaml</li>
 <li>Within the ioXInputGamePad directory, create a file that will hold the ioHub configuration for the demo. This file can be of any name, but the standard is to call it iohub_config.yaml.</li>
 </ol>
-<p>With the above directory and file structure created, contents can not be added to the
-python source file and the two .yaml config files.</p>
+<p>With the above directory and file structure created, contents can now be added to the
+python source file and the two .yaml config files as described below.</p>
 <div class="topic">
 <p class="topic-title first">Note</p>
 <p>When using the ExperimentIOHubRuntime class approach to creating the experiment,
@@ -451,7 +447,7 @@ being created from scratch.</p>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The run method contains your experiment logic. It is equal to what would</span>
 <span class="sd">        be in your main psychopy experiment script.py file in a standard psychopy</span>
-<span class="sd">        experiment setup. That is all there is too it really.</span>
+<span class="sd">        experiment setup. That is all there is to it really.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c"># PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,</span>
@@ -461,7 +457,10 @@ being created from scratch.</p>
         <span class="c">#</span>
         <span class="c"># RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED.</span>
 
-        <span class="c">#create a window to draw in</span>
+        <span class="c"># Get &#39;shortcut&#39; handles to the devices you will be using in the experiment.</span>
+        <span class="c"># Note the change from &#39;io.devices.[deviceName]&#39; when using ioHub.quickStartHubServer</span>
+        <span class="c"># to &#39;self.devices.[deviceName]&#39; when extending ioHubExperimentRuntime.</span>
+        <span class="c"># Also note that the [deviceName]&#39;s are defined in the iohub_config.yaml (see below).</span>
         <span class="n">mouse</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">mouse</span>
         <span class="n">display</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">display</span>
         <span class="n">keyboard</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">keyboard</span>
@@ -504,8 +503,9 @@ being created from scratch.</p>
 
         <span class="k">while</span> <span class="ow">not</span> <span class="n">END_DEMO</span><span class="p">:</span>
 
-
-            <span class="c">#update stim from joystick</span>
+            <span class="c"># Update stim from joystick</span>
+            <span class="c"># Mapping between raw joystick values and screen coordinates is controlled by the</span>
+            <span class="c"># normalizedValue2Pixel function defined below.</span>
             <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">mag</span><span class="o">=</span><span class="n">gamepad</span><span class="o">.</span><span class="n">getThumbSticks</span><span class="p">()[</span><span class="s">&#39;RightStick&#39;</span><span class="p">]</span> <span class="c"># sticks are 3 item lists (x,y,magnitude)</span>
             <span class="n">xx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalizedValue2Pixel</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">mag</span><span class="p">,</span><span class="n">screen_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">yy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalizedValue2Pixel</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">mag</span><span class="p">,</span><span class="n">screen_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -540,8 +540,6 @@ being created from scratch.</p>
             <span class="n">message</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
             <span class="n">myWin</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span><span class="c">#redraw the buffer</span>
 
-            <span class="c">#print joy.getAllAxes()#to see what your axes are doing!</span>
-
             <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">keyboard</span><span class="o">.</span><span class="n">getEvents</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">,]:</span>
                     <span class="n">END_DEMO</span><span class="o">=</span><span class="bp">True</span>
@@ -561,7 +559,7 @@ being created from scratch.</p>
 
 <span class="c">################################################################################</span>
 <span class="c"># The below code should never need to be changed, unless you want to get command</span>
-<span class="c"># line arguements or something.</span>
+<span class="c"># line arguments or something.</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">configurationDirectory</span><span class="p">):</span>
@@ -584,44 +582,48 @@ being created from scratch.</p>
     <span class="n">main</span><span class="p">(</span><span class="n">configurationDirectory</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="topic">
-<p class="topic-title first">Note</p>
-<p>TODO: Go through above code and explain the additions / subtractions / changes made to the code and why.</p>
-</div>
 </div>
 <div class="section" id="experiment-config-yaml-file-contents">
 <h3>experiment_config.yaml File Contents<a class="headerlink" href="#experiment-config-yaml-file-contents" title="Permalink to this headline">¶</a></h3>
-<p>The experiment configuration settings, including session level information, is
-represented in the experiment_config.yaml. Enter the following into your
-experiment_config.yaml for this example:</p>
+<p>The experiment configuration settings, including session level information, are
+represented in the experiment_config.yaml. There are three main types of experiment
+settings:</p>
+<ol class="arabic simple">
+<li>Custom session variables you want displayed in a dialog for input at the start
+of the experiment. These are defined in the session_defaults: user_variables section.</li>
+<li>Configuration settings related to the local Experiment process.</li>
+<li>Custom experiment preferences can also be added, as long as the preference name is
+not a standard ioHub experiment configuration preference name.</li>
+</ol>
+<p>Enter the following into your experiment_config.yaml for this example:</p>
 <div class="highlight-python"><pre># Experiment level configuration settings in YAML format
-title: ioHub XInput Gamepad Example with PsychoPy
-code: ioXInput
-version: '1.0'
-description: Uses an XInput compatible gamepad within a psychoPy script.
-session_defaults:
-    name: Session Name
-    code: E1S01
-    comments: None
-session_variable_order: [ name, code, comments ]
-ioHub:
-    enable: True
-    config: ioHub_config.yaml</pre>
-</div>
-<div class="topic">
-<p class="topic-title first">Note</p>
-<p>TODO: Go through above config file and explain each line</p>
+title: ioHub XInput Gamepad Example with PsychoPy # appears in the read-only experiment dialog
+code: ioXInput      # experiment code, used by the ioHub DataStore
+version: '1.0'      # experiment version (must be a string)
+description: Uses an XInput compatible gamepad within a PsychoPy script. # brief description for read-only dialog
+session_defaults: # custom variables: defaultValues for the session dialog
+    name: Session Name  # session name
+    code: E1S01         # session code, used by the ioHub DataStore. Must be unique!
+    comments: None      # session comments
+session_variable_order: [ name, code, comments ] # specifies order in session dialog. Unlisted session vars appear at the end.
+ioHub:                        # local Experiment Process config
+    enable: True              # use ioHub? Requires a valid configuration .yaml file
+    config: ioHub_config.yaml # specifies the ioHub configuration file</pre>
 </div>
 </div>
 <div class="section" id="iohub-config-yaml-file-contents">
 <h3>iohub_config.yaml File Contents<a class="headerlink" href="#iohub-config-yaml-file-contents" title="Permalink to this headline">¶</a></h3>
-<p>The ioHub Server and ioDevice configuration settings are represented in the
-iohub_config.yaml. Enter the following into your iohub_config.yaml for this example:</p>
-<div class="highlight-python"><pre>monitor_devices:
-    - Display:
-        name: display
-        reporting_unit_type: pix
-        device_number: 0
+<p>The ioHub configuration settings are represented in the iohub_config.yaml. There are two types of ioHub settings:</p>
+<ol class="arabic simple">
+<li>ioDevice configuration settings.</li>
+<li>ioHub Server configuration settings.</li>
+</ol>
+<p>Enter the following into your iohub_config.yaml for this example:</p>
+<div class="highlight-python"><pre>monitor_devices:    # devices to be monitored
+    - Display:              # display settings
+        name: display       # name, to be accessed using self.devices.[deviceName]
+        reporting_unit_type: pix # currently only pix are supported
+        device_number: 0    # allows for multiple displays
         physical_dimensions:
             width: 500
             height: 281
@@ -632,25 +634,25 @@ iohub_config.yaml. Enter the following into your iohub_config.yaml for this exam
         psychopy_monitor_name: default
         origin: [0.5,0.5]
     - Keyboard:
-        name: keyboard
+        name: keyboard      # name, to be accessed using self.devices.[deviceName]
         save_events: True
         stream_events: True
         auto_report_events: True
         event_buffer_length: 256
     - Mouse:
-        name: mouse
+        name: mouse         # name, to be accessed using self.devices.[deviceName]
         save_events: True
         stream_events: True
         auto_report_events: True
         event_buffer_length: 256
     - Experiment:
-        name: experimentRuntime
+        name: experimentRuntime # name, to be accessed using self.devices.[deviceName]
         save_events: True
         stream_events: True
         auto_report_events: True
         event_buffer_length: 64
     - xinput.Gamepad:
-        name: gamepad
+        name: gamepad       # name, to be accessed using self.devices.[deviceName]
         device_number: -1
         enable: True
         save_events: True
@@ -659,12 +661,8 @@ iohub_config.yaml. Enter the following into your iohub_config.yaml for this exam
         event_buffer_length: 256
         device_timer:
             interval: 0.005
-data_store:
+data_store:         # ioHub server settings for recording events
     enable: True</pre>
-</div>
-<div class="topic">
-<p class="topic-title first">Note</p>
-<p>TODO: Go through above config file and explain each line</p>
 </div>
 <p>With all three files saved, and a supported XInput compatible gamepad connected
 to the computer (powered on if a wireless gamepad), you can run the gamepad example

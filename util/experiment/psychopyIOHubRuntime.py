@@ -21,15 +21,13 @@ except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 
-
-
 import ioHub
 from ioHub.devices import Computer
 
 
 _currentSessionInfo=None
 
-class ioHubExperimentRuntime(object):
+class ioHubExperimentRuntime(object):    
     """
     ioHubExperimentRuntime is a utility class that is used to 'bind' the ioHub framework to the PsychoPy API in an easy to use way,
     hiding many of the internal complexities of the implementation and making it as simple to use within a PsychoPy script
@@ -39,72 +37,72 @@ class ioHubExperimentRuntime(object):
     the actual contents of the main body of the experiment. As an example, a run.py file could be created and contain
     the following code as a minimal implementation of using the ioHubExperimentRuntime to combine psychopy and ioHub functionality
     to display a window and wait for a key press to close the window and terminate the experiment. The source file and .yaml
-    config files for this simple example can be found in ioHub/examples/simple :
+    config files for this simple example can be found in ioHub/examples/simple ::
 
-import ioHub
-from ioHub.experiment import ioHubExperimentRuntime
-
-class ExperimentRuntime(ioHubExperimentRuntime):
-    def __init__(self,configFileDirectory, configFile):
-        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
-
-    def run(self,*args,**kwargs):
-        ###
-        #
-        # Your experiment logic start here. You can do anything you would in a standard psychopy script.
-        # You can even import a psychopy script and just call a function in it to run it if you wanted
-        #
-
-        #
-        # See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
-        #
-
-        print "Starting Experiment Script..."
-
-        # ....
-
-        print "Completed Experiment Script..."
-
-        ### End run method / end of experiment logic
-
-def main(configurationDirectory):
-    #
-    # Main function simply checks for a command line arg and assumes it is the name of the experiment config file if
-    # it was provided, otherwise it uses "experiment_config.yaml" by default
-    # An instance of ExperimentRuntime is created and the start method is called for it, which calls the .run method you
-    # implemented for your experiment.
-
-    import sys
-    if len(sys.argv)>1:
-        configFile=unicode(sys.argv[1])
-        runtime=ExperimentRuntime(configurationDirectory, configFile)
-    else:
-        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-
-    runtime.start()
-
-if __name__ == "__main__":
-    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
-    #
-    # The module_directory function determines what the current directory is of the function that is passed to it. It is
-    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
-    configurationDirectory=ioHub.module_directory(main)
-
-    # run the main function, which starts the experiment runtime
-    main(configurationDirectory)
-
-
-################################## End of Stub Example ioHubExperimentRuntime implementation ###############################
-
-Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
-These files are read by the ioHubExperimentRuntime and the ioHub system and make it much easier for the ioHub and associated devices to be
-configurated than if you needed to do it within a python script. So while at first these files may seem like extra overhead, we hope that they are found to
-actually save time and work in the end. Comments and feedback on this would be highly apprieciated.
-
-The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
-a command prompt at the ioHub/examples/simple folder and type:
-
-    python.exe run.py
+        import ioHub
+        from ioHub.experiment import ioHubExperimentRuntime
+        
+        class ExperimentRuntime(ioHubExperimentRuntime):
+            def __init__(self,configFileDirectory, configFile):
+                ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
+        
+            def run(self,*args,**kwargs):
+                ###
+                #
+                # Your experiment logic start here. You can do anything you would in a standard psychopy script.
+                # You can even import a psychopy script and just call a function in it to run it if you wanted
+                #
+        
+                #
+                # See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
+                #
+        
+                print "Starting Experiment Script..."
+        
+                # ....
+        
+                print "Completed Experiment Script..."
+        
+                ### End run method / end of experiment logic
+        
+        def main(configurationDirectory):
+            #
+            # Main function simply checks for a command line arg and assumes it is the name of the experiment config file if
+            # it was provided, otherwise it uses "experiment_config.yaml" by default
+            # An instance of ExperimentRuntime is created and the start method is called for it, which calls the .run method you
+            # implemented for your experiment.
+        
+            import sys
+            if len(sys.argv)>1:
+                configFile=unicode(sys.argv[1])
+                runtime=ExperimentRuntime(configurationDirectory, configFile)
+            else:
+                runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+        
+            runtime.start()
+        
+        if __name__ == "__main__":
+            # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
+            #
+            # The module_directory function determines what the current directory is of the function that is passed to it. It is
+            # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+            configurationDirectory=ioHub.module_directory(main)
+        
+            # run the main function, which starts the experiment runtime
+            main(configurationDirectory)
+        
+        
+        ################################## End of Stub Example ioHubExperimentRuntime implementation ###############################
+        
+        Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
+        These files are read by the ioHubExperimentRuntime and the ioHub system and make it much easier for the ioHub and associated devices to be
+        configurated than if you needed to do it within a python script. So while at first these files may seem like extra overhead, we hope that they are found to
+        actually save time and work in the end. Comments and feedback on this would be highly apprieciated.
+        
+        The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
+        a command prompt at the ioHub/examples/simple folder and type:
+        
+            python.exe run.py
 
     """
     def __init__(self, configFilePath, configFile):
@@ -168,7 +166,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         self.devices=self.hub.devices
         self.devices.computer=Computer
 
-    def getLoadedExperimentConfiguration(self):
+    def getExperimentConfiguration(self):
         '''
         Returns the full YAML parsing of experiment_config.
         '''
@@ -196,6 +194,11 @@ a command prompt at the ioHub/examples/simple folder and type:
         '''
         return self.sessionUserVariables
 
+
+    def isSessionCodeNotInUse(self,current_sess_code):
+        r=self.hub.sendToHubServer(('RPC','checkIfSessionCodeExists',(current_sess_code,)))
+        return r[2]
+                    
     def _initalizeConfiguration(self):
         global _currentSessionInfo
         """
@@ -203,15 +206,21 @@ a command prompt at the ioHub/examples/simple folder and type:
         configure the experiment environment and ioHub process environments. This mehtod is called by the class init
         and should not be called directly.
         """
+        display_experiment_dialog=self.configuration.get("display_experiment_dialog",False)
+        display_session_dialog=self.configuration.get("display_session_dialog",True)
+        
+        
+        if display_experiment_dialog is True:        
+            # display a read only dialog verifying the experiment parameters
+            # (based on the experiment .yaml file) to be run. User can hit OK to continue,
+            # or Cancel to end the experiment session if the wrong experiment was started.
+            exitExperiment=self._displayExperimentSettingsDialog()
+            if exitExperiment:
+                print "User Cancelled Experiment Launch."
+                self._close()
+                sys.exit(1)
 
-        # display a read only dialog verifying the experiment parameters
-        # (based on the experiment .yaml file) to be run. User can hit OK to continue,
-        # or Cancel to end the experiment session if the wrong experiment was started.
-        exitExperiment=self._displayExperimentSettingsDialog()
-        if exitExperiment:
-            print "User Cancelled Experiment Launch."
-            self._close()
-            sys.exit(1)
+        self.experimentConfig=self.prePostExperimentVariableCallback(self.experimentConfig)
 
         ioHubInfo= self.configuration.get('ioHub',{})
         
@@ -225,6 +234,7 @@ a command prompt at the ioHub/examples/simple folder and type:
             ioHubConfigFileName=unicode(ioHubInfo.get('config','iohub_config.yaml'))
             ioHubConfigAbsPath=os.path.join(self.configFilePath,unicode(ioHubConfigFileName))
             self.hub=ioHubConnection(None,ioHubConfigAbsPath)
+
             #print 'ioHubExperimentRuntime.hub: {0}'.format(self.hub)
             # A circular buffer used to hold events retrieved from self.getEvents() during
             # self.delay() calls. self.getEvents() appends any events in the allEvents
@@ -237,48 +247,59 @@ a command prompt at the ioHub/examples/simple folder and type:
 
             #print 'ioHubExperimentRuntime SENT experiment config.'
            
-            # display session dialog
-            r=True
-            while r is True:
-                # display editable session variable dialog displaying the ioHub required session variables
-                # and any user defined session variables (as specified in the experiment config .yaml file)
-                # User can enter correct values and hit OK to continue, or Cancel to end the experiment session.
-
-                allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
-                sessionVariableOrder=self.configuration['session_variable_order']
-                if 'user_variables' in allSessionDialogVariables:
-                    del allSessionDialogVariables['user_variables']
-     
-                tempdict=self._displayExperimentSessionSettingsDialog(allSessionDialogVariables,sessionVariableOrder)
-                if tempdict is None:
-                    print "User Cancelled Experiment Launch."
-                    self._close()
-                    sys.exit(1)
-            
+            allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
+            sessionVariableOrder=self.configuration['session_variable_order']
+            if 'user_variables' in allSessionDialogVariables:
+                del allSessionDialogVariables['user_variables']
+    
+            if display_session_dialog is True:
+                # display session dialog
+                r=True
+                while r is True:
+                    # display editable session variable dialog displaying the ioHub required session variables
+                    # and any user defined session variables (as specified in the experiment config .yaml file)
+                    # User can enter correct values and hit OK to continue, or Cancel to end the experiment session.
+    
+                    allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
+                    sessionVariableOrder=self.configuration['session_variable_order']
+                    if 'user_variables' in allSessionDialogVariables:
+                        del allSessionDialogVariables['user_variables']
+         
+                    tempdict=self._displayExperimentSessionSettingsDialog(allSessionDialogVariables,sessionVariableOrder)
+                    if tempdict is None:
+                        print "User Cancelled Experiment Launch."
+                        self._close()
+                        sys.exit(1)
+                
+                    tempdict['user_variables']=self.sessionUserVariables
+    
+                    r=self.isSessionCodeNotInUse(tempdict['code'])
+                     
+                    if r is True:
+                        display_device=self.hub.getDevice('display')
+                        display_id=0
+                        if display_device:
+                            display_id=display_device.getIndex()
+                        msg_dialog=ioHub.util.experiment.dialogs.MessageDialog(
+                                        "Session Code {0} is already in use by the experiment.\nPlease enter a new Session Code".format(tempdict['code']),
+                                        "Session Code In Use",
+                                        dialogType=ioHub.util.experiment.dialogs.MessageDialog.ERROR_DIALOG,
+                                        allowCancel=False,
+                                        display_index=display_id)
+                        msg_dialog.show()
+            else:
+                tempdict=allSessionDialogVariables
                 tempdict['user_variables']=self.sessionUserVariables
 
-                r=self.hub.sendToHubServer(('RPC','checkIfSessionCodeExists',(tempdict['code'],)))
-                
-                r=r[2]
-                 
-                if r is True:
-                    display_device=self.hub.getDevice('display')
-                    display_id=0
-                    if display_device:
-                        display_id=display_device.getIndex()
-                    msg_dialog=ioHub.util.experiment.dialogs.MessageDialog(
-                                    "Session Code {0} is already in use by the experiment.\nPlease enter a new Session Code".format(tempdict['code']),
-                                    "Session Code In Use",
-                                    dialogType=ioHub.util.experiment.dialogs.MessageDialog.ERROR_DIALOG,
-                                    allowCancel=False,
-                                    display_index=display_id)
-                    msg_dialog.show()
-                else:                    
-                    for key,value in allSessionDialogVariables.iteritems():
-                        if key in self.experimentSessionDefaults:
-                            self.experimentSessionDefaults[key]=str(value)
-                        elif  key in self.sessionUserVariables:
-                            self.sessionUserVariables[key]=str(value)   
+            for key,value in allSessionDialogVariables.iteritems():
+                if key in self.experimentSessionDefaults:
+                    self.experimentSessionDefaults[key]=value#(u''+value).encode('utf-8')
+                elif  key in self.sessionUserVariables:
+                    self.sessionUserVariables[key]=value#(u''+value).encode('utf-8')      
+
+
+            tempdict=self.prePostSessionVariableCallback(tempdict)
+            tempdict['user_variables']=self.sessionUserVariables
 
             _currentSessionInfo=self.experimentSessionDefaults
 
@@ -356,6 +377,18 @@ a command prompt at the ioHub/examples/simple folder and type:
             self._close()
 
 
+    def prePostExperimentVariableCallback(self,expVarDict):
+        return expVarDict
+
+    def prePostSessionVariableCallback(self,sessionVarDict):
+        sess_code=sessionVarDict['code']
+        scount=1
+        while self.isSessionCodeNotInUse(sess_code) is True:
+            sess_code='%s-%d'%(sessionVarDict['code'],scount)
+            scount+=1
+        sessionVarDict['code']=sess_code
+        return sessionVarDict
+        
     def _close(self):
         """
         Close the experiment runtime and the ioHub server process.
@@ -380,11 +413,7 @@ a command prompt at the ioHub/examples/simple folder and type:
             result= False
         else:
             result= True
-            
-        psychopy_gui_app = getattr(gui,'app')
-        if psychopy_gui_app:
-            psychopy_gui_app.Exit()
-            gui.app=None
+
             
         return result
 
@@ -401,11 +430,7 @@ a command prompt at the ioHub/examples/simple folder and type:
         result=None        
         if sessionDlg.OK:
             result=allSessionDialogVariables
- 
-        psychopy_gui_app = getattr(gui,'app')
-        if psychopy_gui_app:
-            psychopy_gui_app.Exit()
-            gui.app=None
+
             
         return result
         

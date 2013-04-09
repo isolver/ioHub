@@ -146,7 +146,7 @@ print ''
 
 # wait 250 msec before ending the experiment 
 # (makes it feel less abrupt after you press the key)
-actualDelay=io.delay(0.250)
+actualDelay=io.wait(0.250)
 print "Delay requested %.6f, actual delay %.6f, Diff: %.6f"%(
                                         0.250,actualDelay,actualDelay-0.250)
 print ''

@@ -127,11 +127,17 @@ Comments?</p>
 <dl class="class">
 <dt id="ioHub.util.experiment.MessageDialog">
 <em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">MessageDialog</tt><big>(</big><em>msg</em>, <em>title=None</em>, <em>showButtons=4</em>, <em>dialogType=2048</em>, <em>allowCancel=True</em>, <em>display_index=0</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.MessageDialog" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.dialogs.ioHubDialog</span></tt></p>
 <dl class="method">
-<dt id="ioHub.util.experiment.MessageDialog.destroy">
-<tt class="descname">destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.MessageDialog.destroy" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.util.experiment.MessageDialog.Destroy">
+<tt class="descname">Destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.MessageDialog.Destroy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.MessageDialog.set_frame_display">
+<tt class="descname">set_frame_display</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.MessageDialog.set_frame_display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Centers a wx window on the given Display index.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ioHub.util.experiment.MessageDialog.show">
@@ -209,8 +215,8 @@ Comments?</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.util.experiment.MessageDialog.wx">
-<tt class="descname">wx</tt><em class="property"> = &lt;module 'wx' from 'D:\Dropbox\DEV\OpenPsycho\DEV\OpenPsycho2.7.3.1-32bit\python-2.7.3\lib\site-packages\wx-2.8-msw-unicode\wx\__init__.pyc'&gt;</em><a class="headerlink" href="#ioHub.util.experiment.MessageDialog.wx" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.util.experiment.MessageDialog.wxapp">
+<tt class="descname">wxapp</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.MessageDialog.wxapp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -221,8 +227,13 @@ Comments?</p>
 <dl class="class">
 <dt id="ioHub.util.experiment.ProgressBarDialog">
 <em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ProgressBarDialog</tt><big>(</big><em>dialogTitle='Progress Dialog'</em>, <em>dialogText='Percent Complete'</em>, <em>maxValue=100.0</em>, <em>display_index=0</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.dialogs.ioHubDialog</span></tt></p>
 <p>wx based progress bar interface.</p>
+<dl class="method">
+<dt id="ioHub.util.experiment.ProgressBarDialog.Destroy">
+<tt class="descname">Destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ioHub.util.experiment.ProgressBarDialog.close">
 <tt class="descname">close</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog.close" title="Permalink to this definition">¶</a></dt>
@@ -234,8 +245,19 @@ Comments?</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ioHub.util.experiment.ProgressBarDialog.set_frame_display">
+<tt class="descname">set_frame_display</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog.set_frame_display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Centers a wx window on the given Display index.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ioHub.util.experiment.ProgressBarDialog.updateStatus">
 <tt class="descname">updateStatus</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog.updateStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ProgressBarDialog.wxapp">
+<tt class="descname">wxapp</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ProgressBarDialog.wxapp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -245,12 +267,18 @@ Comments?</p>
 <h2>3.5.3. FileDialog<a class="headerlink" href="#filedialog" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ioHub.util.experiment.FileDialog">
-<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">FileDialog</tt><big>(</big><em>message='Select a File'</em>, <em>defaultDir='D:\Dropbox\DEV\OpenPsycho\DEV\OpenPsycho2.7.3.1-32bit\docs'</em>, <em>defaultFile=''</em>, <em>openFile=True</em>, <em>allowMultipleSelections=False</em>, <em>allowChangingDirectories=True</em>, <em>fileTypes='All files (*.*)|*.*'</em>, <em>display_index=0</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.FileDialog" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">FileDialog</tt><big>(</big><em>message='Select a File'</em>, <em>defaultDir='D:\Dropbox\DEV\OpenPsycho\DEV\OpenPsycho2.7.3.1-32bit\ioHub_Docs'</em>, <em>defaultFile=''</em>, <em>openFile=True</em>, <em>allowMultipleSelections=False</em>, <em>allowChangingDirectories=True</em>, <em>fileTypes='All files (*.*)|*.*'</em>, <em>display_index=0</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.FileDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.dialogs.ioHubDialog</span></tt></p>
 <dl class="method">
-<dt id="ioHub.util.experiment.FileDialog.destroy">
-<tt class="descname">destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.FileDialog.destroy" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.util.experiment.FileDialog.Destroy">
+<tt class="descname">Destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.FileDialog.Destroy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.FileDialog.set_frame_display">
+<tt class="descname">set_frame_display</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.FileDialog.set_frame_display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Centers a wx window on the given Display index.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ioHub.util.experiment.FileDialog.show">
@@ -298,8 +326,8 @@ Comments?</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.util.experiment.FileDialog.wx">
-<tt class="descname">wx</tt><em class="property"> = &lt;module 'wx' from 'D:\Dropbox\DEV\OpenPsycho\DEV\OpenPsycho2.7.3.1-32bit\python-2.7.3\lib\site-packages\wx-2.8-msw-unicode\wx\__init__.pyc'&gt;</em><a class="headerlink" href="#ioHub.util.experiment.FileDialog.wx" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.util.experiment.FileDialog.wxapp">
+<tt class="descname">wxapp</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.FileDialog.wxapp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

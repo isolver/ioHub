@@ -130,9 +130,6 @@ from the Experiment process as well as time stamp all Device Events.</p>
 Process affinities to be set to particular processing units of the computer
 if desired. The operating system priority of either process can also be
 increased if desired.</p>
-<p>There is also a long list of methods that can be used to access the current processes
-memory usage, CPU usage, network and disk access, and more, as the Computer
-class provides an interface to the very useful Process class of the <a class="reference external" href="https://code.google.com/p/psutil/">psutil Python package</a>.</p>
 <p>The Computer class only contains static or class level methods, so an instance 
 of the class does <strong>not</strong> need to be created. The Computer device can either be accessed 
 via the ioHub package using &#8216;ioHub.devices.Computer&#8217;, or using the &#8216;devices.computer&#8217;
@@ -271,14 +268,13 @@ Default: True</dd>
 <dl class="staticmethod">
 <dt id="ioHub.devices.Computer.getCurrentProcess">
 <em class="property">static </em><tt class="descname">getCurrentProcess</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices.html#Computer.getCurrentProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Computer.getCurrentProcess" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the current / Local process (as a psutil Process object).
-The psutil Process object has some nice methods you can access. 
-See the <a class="reference external" href="https://code.google.com/p/psutil/wiki/Documentation#Classes">psutil project documentation</a> for details.</p>
+<dd><p>Get the current / Local process On Windows and Linux, this is
+a psutil.Process class instance. On OS X, it is a multiprocessing.Process instance.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd>None</dd>
 <dt>Returns:</dt>
-<dd>psutil.Process object for the current system process.</dd>
+<dd>Process object for the current system process.</dd>
 </dl>
 </dd></dl>
 
@@ -462,23 +458,12 @@ that the process with the provided processID is able to run on.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.Computer.processingUnitCount">
 <tt class="descname">processingUnitCount</tt><em class="property"> = 8</em><a class="headerlink" href="#ioHub.devices.Computer.processingUnitCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attribute representing the number of <em>processing units</em> available on the current computer.
-This includes cpu&#8217;s, cpu cores, and hyperthreads. Notes:</p>
-<blockquote>
-<div><ul class="simple">
-<li>processingUnitCount = num_cpus*num_cores_per_cpu*num_hyperthreads.</li>
-<li>For single core CPU&#8217;s,  num_cores_per_cpu = 1.</li>
-<li>For CPU&#8217;s that do not support hyperthreading,  num_hyperthreads = 1
-otherwise num_hyperthreads = 2.</li>
-</ul>
-</div></blockquote>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ioHub.devices.Computer.system">
-<tt class="descname">system</tt><em class="property"> = 'Windows'</em><a class="headerlink" href="#ioHub.devices.Computer.system" title="Permalink to this definition">¶</a></dt>
-<dd><p>The name of the current operating system Python is running on.
-i.e. Windows or Linux</p>
+<tt class="descname">system</tt><em class="property"> = 'win32'</em><a class="headerlink" href="#ioHub.devices.Computer.system" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the current operating system Python is running on.</p>
 </dd></dl>
 
 </dd></dl>

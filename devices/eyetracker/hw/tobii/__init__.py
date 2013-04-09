@@ -9,5 +9,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: ??
 .. fileauthor:: ??
 """
+from ioHub import addDirectoryToPythonPath
+
+addDirectoryToPythonPath('devices/eyetracker/hw/tobii')
 
 from eyetracker import *

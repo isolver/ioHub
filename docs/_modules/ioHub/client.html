@@ -102,7 +102,7 @@
 <span class="sd">ioHub</span>
 <span class="sd">.. file: ioHub/client.py</span>
 
-<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Copyright (C) 2012-2013 iSolver Software Solutions</span>
 <span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
 
 <span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
@@ -127,7 +127,6 @@
     <span class="kn">from</span> <span class="nn">yaml</span> <span class="kn">import</span> <span class="n">Loader</span><span class="p">,</span> <span class="n">Dumper</span>
 
 <span class="kn">import</span> <span class="nn">ioHub</span>
-<span class="kn">from</span> <span class="nn">ioHub</span> <span class="kn">import</span> <span class="n">EventConstants</span>
 <span class="kn">from</span> <span class="nn">ioHub.devices</span> <span class="kn">import</span> <span class="n">Computer</span><span class="p">,</span> <span class="n">DeviceEvent</span>
 <span class="kn">from</span> <span class="nn">ioHub.devices.experiment</span> <span class="kn">import</span> <span class="n">MessageEvent</span>
 
@@ -140,6 +139,21 @@
 
 <span class="k">class</span> <span class="nc">ioHubConnectionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">ioHubServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span><span class="o">=</span><span class="s">&quot;ioHubServerError:</span><span class="se">\n</span><span class="s">Args: {0}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">r</span><span class="o">+=</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">{0}: {1}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
 
 <span class="n">pack</span> <span class="o">=</span> <span class="bp">None</span>
 
@@ -227,10 +241,12 @@
                 <span class="k">return</span> <span class="n">result</span><span class="p">,</span><span class="n">address</span>
             <span class="k">else</span><span class="p">:</span>   <span class="c"># using ujson</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span><span class="n">address</span>
+        <span class="k">except</span> <span class="n">ioHubServerError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="k">raise</span> <span class="n">e</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">ioHub</span><span class="o">.</span><span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
-            <span class="k">raise</span> <span class="n">ioHubConnectionException</span><span class="p">(</span><span class="s">&quot; IO_HUB_ERROR &quot;</span><span class="p">,</span> <span class="s">&quot; ioHubConnection socket.receive&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-
+            <span class="k">raise</span> <span class="n">e</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -309,14 +325,14 @@
 <span class="sd">    - device:</span>
 <span class="sd">        device_class: Keyboard</span>
 <span class="sd">        name: kb</span>
-<span class="sd">        saveEvents: True</span>
-<span class="sd">        streamEvents: True</span>
+<span class="sd">        save_events: True</span>
+<span class="sd">        stream_events: True</span>
 <span class="sd">        event_buffer_length: 256</span>
 <span class="sd">    - device:</span>
 <span class="sd">        device_class: Mouse</span>
 <span class="sd">        name: mouse</span>
-<span class="sd">        saveEvents: True</span>
-<span class="sd">        streamEvents: True</span>
+<span class="sd">        save_events: True</span>
+<span class="sd">        stream_events: True</span>
 <span class="sd">        event_buffer_length: 256</span>
 
 <span class="sd">    # end .yaml file snippet</span>
@@ -464,7 +480,7 @@
 <span class="sd">            clearEvents</span>
 <span class="sd">            enableEventReporting</span>
 <span class="sd">            getEvents</span>
-<span class="sd">            getStartupConfiguration</span>
+<span class="sd">            getConfiguration</span>
 <span class="sd">            isReportingEvents</span>
 <span class="sd">        --------------</span>
 <span class="sd">        Device Name:  mouse</span>
@@ -476,7 +492,7 @@
 <span class="sd">            getEvents</span>
 <span class="sd">            getPosition</span>
 <span class="sd">            getPositionAndDelta</span>
-<span class="sd">            getStartupConfiguration</span>
+<span class="sd">            getConfiguration</span>
 <span class="sd">            getSystemCursorVisibility</span>
 <span class="sd">            getVerticalScroll</span>
 <span class="sd">            isReportingEvents</span>
@@ -493,22 +509,15 @@
 <span class="sd">            getConfigFileDistance</span>
 <span class="sd">            getConfigFileHeight</span>
 <span class="sd">            getConfigFileWidth</span>
-<span class="sd">            getDisplayCoordinateType</span>
+<span class="sd">            getCoordinateType</span>
 <span class="sd">            getEvents</span>
 <span class="sd">            getMonitorCount</span>
-<span class="sd">            getPPD</span>
 <span class="sd">            getPsychoPyMonitorSettingsName</span>
 <span class="sd">            getScreenInfoList</span>
-<span class="sd">            getStartupConfiguration</span>
-<span class="sd">            getStimulusScreenBounds</span>
-<span class="sd">            getStimulusScreenIndex</span>
-<span class="sd">            getStimulusScreenInfo</span>
-<span class="sd">            getStimulusScreenOrigin</span>
-<span class="sd">            getStimulusScreenReportedRetraceInterval</span>
-<span class="sd">            getStimulusScreenResolution</span>
+<span class="sd">            getConfiguration</span>
+<span class="sd">            getIndex</span>
 <span class="sd">            isReportingEvents</span>
 <span class="sd">            pixel2DisplayCoord</span>
-<span class="sd">            setStimulusScreenIndex</span>
 <span class="sd">        --------------</span>
 <span class="sd">        Device Name:  experimentRuntime</span>
 <span class="sd">        Device Interface:</span>
@@ -516,7 +525,7 @@
 <span class="sd">            clearEvents</span>
 <span class="sd">            enableEventReporting</span>
 <span class="sd">            getEvents</span>
-<span class="sd">            getStartupConfiguration</span>
+<span class="sd">            getConfiguration</span>
 <span class="sd">            isReportingEvents</span>
 <span class="sd">        --------------</span>
 <span class="sd">    </span>
@@ -557,6 +566,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_clock_offset</span><span class="o">=</span><span class="n">ioHub</span><span class="o">.</span><span class="n">highPrecisionTimer</span><span class="p">()</span>
         <span class="n">Computer</span><span class="o">.</span><span class="n">globalClock</span><span class="o">=</span><span class="n">ioHub</span><span class="o">.</span><span class="n">ioClock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_clock_offset</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
 
+        <span class="k">print</span> <span class="s">&quot;TODO: Update ioHubConnection class comments, docs.&quot;</span>
+        
         <span class="k">if</span> <span class="n">ioHubConfig</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ioHubConfig</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">ioHubError</span><span class="p">(</span><span class="s">&quot;The provided ioHub Configuration is not a dictionary.&quot;</span><span class="p">,</span> <span class="n">ioHubConfig</span><span class="p">)</span>
@@ -601,20 +612,18 @@
         <span class="n">session_info</span><span class="o">=</span><span class="bp">None</span>
         
         <span class="n">rootScriptPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        
+
         <span class="k">if</span> <span class="n">ioHubConfigAbsPath</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ioHubConfig</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">ioHubConfig</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">monitor_devices</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">Keyboard</span><span class="o">=</span><span class="p">{}),</span><span class="nb">dict</span><span class="p">(</span><span class="n">Display</span><span class="o">=</span><span class="p">{}),</span><span class="nb">dict</span><span class="p">(</span><span class="n">Mouse</span><span class="o">=</span><span class="p">{})])</span>
         <span class="k">elif</span> <span class="n">ioHubConfig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ioHubConfigAbsPath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="s">&#39;monitor_devices&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ioHubConfig</span><span class="p">:</span>
                 <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;ERROR: ioHubConfig must be provided with &#39;monitor_devices&#39; key.&quot;</span><span class="p">)</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s">&#39;ioDataStore&#39;</span> <span class="ow">in</span> <span class="n">ioHubConfig</span><span class="p">:</span>
-                <span class="n">iods</span><span class="o">=</span><span class="n">ioHubConfig</span><span class="p">[</span><span class="s">&#39;ioDataStore&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;data_store&#39;</span> <span class="ow">in</span> <span class="n">ioHubConfig</span><span class="p">:</span>
+                <span class="n">iods</span><span class="o">=</span><span class="n">ioHubConfig</span><span class="p">[</span><span class="s">&#39;data_store&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="s">&#39;experiment_info&#39;</span> <span class="ow">in</span> <span class="n">iods</span> <span class="ow">and</span> <span class="s">&#39;session_info&#39;</span> <span class="ow">in</span> <span class="n">iods</span><span class="p">:</span>
                     <span class="n">experiment_info</span><span class="o">=</span><span class="n">iods</span><span class="p">[</span><span class="s">&#39;experiment_info&#39;</span><span class="p">]</span>
                     <span class="n">session_info</span><span class="o">=</span><span class="n">iods</span><span class="p">[</span><span class="s">&#39;session_info&#39;</span><span class="p">]</span>
-                    <span class="k">del</span> <span class="n">ioHubConfig</span><span class="p">[</span><span class="s">&#39;ioDataStore&#39;</span><span class="p">][</span><span class="s">&#39;experiment_info&#39;</span><span class="p">]</span>
-                    <span class="k">del</span> <span class="n">ioHubConfig</span><span class="p">[</span><span class="s">&#39;ioDataStore&#39;</span><span class="p">][</span><span class="s">&#39;session_info&#39;</span><span class="p">]</span>
                     
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;ERROR: ioHubConfig:ioDataStore must contain both a &#39;experiment_info&#39; and a &#39;session_info&#39; key with a dict value each.&quot;</span><span class="p">)</span>
@@ -649,7 +658,7 @@
 
 
         <span class="c"># check for existing ioHub Process based on process if saved to file</span>
-        <span class="n">iopFileName</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ioHub</span><span class="o">.</span><span class="n">IO_HUB_DIRECTORY</span><span class="p">,</span><span class="s">&#39;.iohpid&#39;</span><span class="p">)</span>
+        <span class="n">iopFileName</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootScriptPath</span> <span class="p">,</span><span class="s">&#39;.iohpid&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">iopFileName</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">iopFile</span><span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">iopFileName</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
@@ -671,7 +680,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_server_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">subprocessArgList</span><span class="p">,</span><span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
         <span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcessID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_process</span><span class="o">.</span><span class="n">pid</span>
         <span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcess</span><span class="o">=</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcessID</span><span class="p">)</span>
-
+        <span class="c">#print &#39;IOSERVER STARTING UP....&#39;</span>
         <span class="c"># wait for server to send back &#39;IOHUB_READY&#39; text over stdout, indicating it is running</span>
         <span class="c"># and ready to receive network packets</span>
         <span class="n">hubonline</span><span class="o">=</span><span class="bp">False</span>
@@ -686,9 +695,17 @@
                     <span class="n">hubonline</span><span class="o">=</span><span class="bp">True</span>
                     <span class="c">#print &quot;Ending Serving connection attempt due to timeout....&quot;</span>
                     <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">server_output</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;IOHUB_FAILED&#39;</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;ioHub Failed to start, exiting....&quot;</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                    
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
-                
+        
+        <span class="c">#print &#39;Client hubonline: &#39;, hubonline</span>
+        
         <span class="c"># If ioHub server did not repond correctly, terminate process and exit the program.</span>
         <span class="k">if</span> <span class="n">hubonline</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;ioHub could not be contacted, exiting....&quot;</span>
@@ -698,6 +715,8 @@
                 <span class="k">raise</span> <span class="n">ioHubConnectionException</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c">#print &#39;* IOHUB SERVER ONLINE *&#39;        </span>
 
         <span class="c"># save ioHub ProcessID to file so next time it is started, it can be checked and killed if necessary</span>
 
@@ -709,10 +728,14 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">ioHub</span><span class="o">.</span><span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
 
+        
         <span class="k">if</span> <span class="n">experiment_info</span><span class="p">:</span>
+            <span class="c">#print &#39;Sending experiment_info: {0}&#39;.format(experiment_info)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sendExperimentInfo</span><span class="p">(</span><span class="n">experiment_info</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">session_info</span><span class="p">:</span>
+            <span class="c">#print &#39;Sending session_info: {0}&#39;.format(session_info)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sendSessionInfo</span><span class="p">(</span><span class="n">session_info</span><span class="p">)</span>
+
         <span class="c"># create a local &#39;thin&#39; representation of the registered ioHub devices,</span>
         <span class="c"># allowing such things as device level event access (if supported) </span>
         <span class="c"># and transparent IPC calls of public device methods and return value access.</span>
@@ -720,7 +743,13 @@
         <span class="c"># is the name given to the device in the ioHub .yaml config file to be access;</span>
         <span class="c"># i.e. hub.devices.ExperimentPCkeyboard would access the experiment PC keyboard</span>
         <span class="c"># device if the default name was being used.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_createDeviceList</span><span class="p">()</span>
+        <span class="c">#print &#39;Creating Experiment Process Device List.......&#39;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_createDeviceList</span><span class="p">(</span><span class="n">ioHubConfig</span><span class="p">[</span><span class="s">&#39;monitor_devices&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Errror in _createDeviceList: &quot;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>  
+        <span class="c">#print &#39;Created Experiment Process Device List&#39;</span>
                     
     <span class="k">def</span> <span class="nf">_get_maxsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -787,7 +816,7 @@
         <span class="c">#print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)</span>
         <span class="k">return</span> <span class="n">results</span>
 
-    <span class="k">def</span> <span class="nf">_createDeviceList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_createDeviceList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">monitor_devices_config</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Populate the devices attribute object with the registered devices of the ioHub. Each ioHub device becomes an attribute</span>
 <span class="sd">        of the devices instance, with the attribute name == the name give the device in the ioHub configuration file.</span>
@@ -795,14 +824,47 @@
 <span class="sd">        from the expriment process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c"># get the list of devices registered with the ioHub</span>
-        <span class="n">deviceList</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDeviceList</span><span class="p">()</span>
+        <span class="n">deviceList</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">device_config_dict</span> <span class="ow">in</span> <span class="n">monitor_devices_config</span><span class="p">:</span>
+            <span class="n">device_class_name</span><span class="p">,</span> <span class="n">device_config</span> <span class="o">=</span> <span class="n">device_config_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device_config_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>           
+            <span class="n">deviceList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">device_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="n">device_class_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span><span class="n">device_class_name</span><span class="p">))</span>
 
+        <span class="c">#ioHub.print2err(&quot;_createDeviceList deviceList {0}&quot;.format(deviceList))</span>
         <span class="c"># create an experiment process side device object to allow access to the public interface of the</span>
         <span class="c"># ioHub device via transparent IPC.</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">device_class</span> <span class="ow">in</span> <span class="n">deviceList</span><span class="p">:</span>
-            <span class="n">d</span><span class="o">=</span><span class="n">ioHubDeviceView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">device_class</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">d</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">deviceByLabel</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">d</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">device_class_name</span> <span class="ow">in</span> <span class="n">deviceList</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">class_name_start</span><span class="o">=</span><span class="n">device_class_name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">device_module_path</span><span class="o">=</span><span class="s">&#39;ioHub.devices.&#39;</span>
+                <span class="k">if</span> <span class="n">class_name_start</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">device_module_path</span><span class="o">=</span><span class="n">device_module_path</span><span class="o">+</span><span class="n">device_class_name</span><span class="p">[:</span><span class="n">class_name_start</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>     
+                    <span class="n">device_class_name</span><span class="o">=</span><span class="n">device_class_name</span><span class="p">[</span><span class="n">class_name_start</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">device_module_path</span><span class="o">=</span><span class="n">device_module_path</span><span class="o">+</span><span class="n">device_class_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    
+                <span class="c">#ioHub.print2err(&#39;device_module_path: &#39;,device_module_path)</span>
+                <span class="c">#ioHub.print2err(&#39;device_class_name: &#39;,device_class_name)</span>
+                
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">import_device</span><span class="p">(</span><span class="n">device_module_path</span><span class="p">,</span><span class="n">device_class_name</span><span class="p">)</span>
+    
+                <span class="n">name_start</span><span class="o">=</span><span class="n">name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name_start</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">[</span><span class="n">name_start</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                    
+                <span class="c">#ioHub.print2err(&quot;Creating ioHubDeviceView for device name {0}, path {1}, class {1}&quot;.format(name,device_module_path,device_class_name))</span>
+    
+                <span class="n">d</span><span class="o">=</span><span class="n">ioHubDeviceView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">device_class_name</span><span class="p">)</span>
+                <span class="c">#ioHub.print2err(&quot;Created ioHubDeviceView: {0}&quot;.format(d))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">deviceByLabel</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">d</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">print2err</span><span class="p">(</span><span class="s">&quot;_createDeviceList: Error adding class. &quot;</span><span class="p">)</span>
+                <span class="n">ioHub</span><span class="o">.</span><span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+                
+        <span class="n">ioHub</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">addClassMappings</span><span class="p">()</span>
+        <span class="n">ioHub</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">addClassMappings</span><span class="p">()</span>
+        
+        <span class="c">#ioHub.print2err(&quot;Done _createDeviceList&quot;)</span>
 
     <span class="c"># UDP communication with ioHost</span>
 <div class="viewcode-block" id="ioHubConnection.sendToHubServer"><a class="viewcode-back" href="../../iohub/api/iohub_connection.html#ioHub.client.ioHubConnection.sendToHubServer">[docs]</a>    <span class="k">def</span> <span class="nf">sendToHubServer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ioHubMessage</span><span class="p">):</span>
@@ -843,8 +905,7 @@
 <span class="sd">        #. DEV_RPC_RESULT</span>
 <span class="sd">        #. GET_DEV_LIST_RESULT</span>
 <span class="sd">        #. GET_DEV_INTERFACE</span>
-<span class="sd">        #. IOHUB_ERROR</span>
-<span class="sd">        #. RPC_ERROR</span>
+<span class="sd">        #. IOHUB_SERVER_ERROR</span>
 
 <span class="sd">        The ioHubConnection currently blocks until the request is fulfilled and and a response is</span>
 <span class="sd">        received from the ioHub server.</span>
@@ -884,7 +945,7 @@
 </div>
 <div class="viewcode-block" id="ioHubConnection.updateGlobalHubTimeOffset"><a class="viewcode-back" href="../../iohub/api/iohub_connection.html#ioHub.client.ioHubConnection.updateGlobalHubTimeOffset">[docs]</a>    <span class="k">def</span> <span class="nf">updateGlobalHubTimeOffset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">offset</span><span class="p">):</span>
         <span class="n">r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sendToHubServer</span><span class="p">((</span><span class="s">&#39;RPC&#39;</span><span class="p">,</span><span class="s">&#39;updateGlobalTimeOffset&#39;</span><span class="p">,(</span><span class="n">offset</span><span class="p">,)))</span>
-        <span class="k">print</span> <span class="s">&#39;updateGlobalHubTimeOffset client got: &#39;</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="s">&#39; : &#39;</span><span class="p">,</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c">#print &#39;updateGlobalHubTimeOffset client got: &#39;,r,&#39; : &#39;,r[2]</span>
         <span class="k">return</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 </div>
     <span class="nd">@classmethod</span>
@@ -1148,7 +1209,7 @@
 <span class="sd">        Convert an ioHub event that is current represented as an ordered list of values, and return the correct</span>
 <span class="sd">        ioHub.devices.DeviceEvent subclass for the given event type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">eclass</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
+        <span class="n">eclass</span><span class="o">=</span><span class="n">ioHub</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
         <span class="n">combo</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eclass</span><span class="o">.</span><span class="n">CLASS_ATTRIBUTE_NAMES</span><span class="p">,</span><span class="n">eventValueList</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">combo</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">eclass</span><span class="o">.</span><span class="n">createEventAsClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
@@ -1162,12 +1223,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">eventValueList</span>
-            <span class="n">eclass</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
+            <span class="n">eclass</span><span class="o">=</span><span class="n">ioHub</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">eclass</span><span class="o">.</span><span class="n">createEventAsDict</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;---------------&#39;</span>
-            <span class="k">print</span> <span class="s">&quot;ERROR: eventValueList: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
-            <span class="k">print</span> <span class="s">&#39;---------------&#39;</span>
+            <span class="n">ioHub</span><span class="o">.</span><span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">ioHubError</span><span class="p">(</span><span class="s">&quot;Error converting ioHub Server event list response to a dict&quot;</span><span class="p">,</span><span class="n">event_list_response</span><span class="o">=</span><span class="n">eventValueList</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_eventListToNamedTuple</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">):</span>
@@ -1178,17 +1238,15 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">eventValueList</span>
-            <span class="n">eclass</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
+            <span class="n">eclass</span><span class="o">=</span><span class="n">ioHub</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getClass</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_TYPE_ID_INDEX</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">eclass</span><span class="o">.</span><span class="n">createEventAsNamedTuple</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;---------------&#39;</span>
-            <span class="k">print</span> <span class="s">&quot;ERROR: eventValueList: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">eventValueList</span><span class="p">)</span>
             <span class="n">ioHub</span><span class="o">.</span><span class="n">printExceptionDetailsToStdErr</span><span class="p">()</span>
-            <span class="k">print</span> <span class="s">&#39;---------------&#39;</span>
+            <span class="k">raise</span> <span class="n">ioHub</span><span class="o">.</span><span class="n">ioHubError</span><span class="p">(</span><span class="s">&quot;Error converting ioHub Server event list response to a namedtuple&quot;</span><span class="p">,</span><span class="n">event_list_response</span><span class="o">=</span><span class="n">eventValueList</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ioHubConnection.sendEvents"><a class="viewcode-back" href="../../iohub/api/iohub_connection.html#ioHub.client.ioHubConnection.sendEvents">[docs]</a>    <span class="k">def</span> <span class="nf">sendEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">events</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Send 1 - N ExperimentDevice Events (currently MessageEvents are supported) to the ioHub Process</span>
+<span class="sd">        Send 1 - N Experiment Events (currently MessageEvents are supported) to the ioHub Process</span>
 <span class="sd">        for storage. Each object in the events list must be a tuple containing the ordered</span>
 <span class="sd">        attributes of the event constructor.</span>
 
@@ -1244,7 +1302,7 @@
 
     <span class="c"># client utility methods.</span></div>
     <span class="k">def</span> <span class="nf">_getDeviceList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sendToHubServer</span><span class="p">((</span><span class="s">&#39;EXP_DEVICE&#39;</span><span class="p">,</span><span class="s">&#39;GET_DEV_LIST&#39;</span><span class="p">))</span>
+        <span class="n">r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sendToHubServer</span><span class="p">((</span><span class="s">&#39;EXP_DEVICE&#39;</span><span class="p">,</span><span class="s">&#39;GET_DEVICE_LIST&#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
 <div class="viewcode-block" id="ioHubConnection.shutdown"><a class="viewcode-back" href="../../iohub/api/iohub_connection.html#ioHub.client.ioHubConnection.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1253,7 +1311,7 @@
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Same as shutdown, but has same name as psychopy core.quit() so maybe easier for psychopy users to remember.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_shutDownServer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </div>
     <span class="k">def</span> <span class="nf">_shutDownServer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1261,7 +1319,7 @@
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">udp_client</span><span class="o">.</span><span class="n">sendTo</span><span class="p">((</span><span class="s">&#39;RPC&#39;</span><span class="p">,</span><span class="s">&#39;shutDown&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">udp_client</span><span class="o">.</span><span class="n">sendTo</span><span class="p">((</span><span class="s">&#39;STOP_IOHUB_SERVER&#39;</span><span class="p">,))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">udp_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcess</span><span class="p">:</span>
                 <span class="n">r</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">ioHubServerProcess</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -1393,7 +1451,7 @@
                 <span class="k">return</span> <span class="bp">False</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="nb">unicode</span><span class="p">))</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;ERROR&#39;</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">ioHubConnectionException</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">ioHubServerError</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ioHubConnectionException</span><span class="p">(</span><span class="s">&#39;Response from ioHub should always be iterable and have a length &gt; 0&#39;</span><span class="p">)</span>

@@ -66,6 +66,47 @@ class TobiiPsychopyCalibrationGraphics(object):
         if calibrationPointList is not None:
             TobiiPsychopyCalibrationGraphics.CALIBRATION_POINT_LIST=calibrationPointList
 
+        calibration_methods = dict(THREE_POINTS=3,
+                                   FIVE_POINTS=5, 
+                                   NINE_POINTS=9, 
+                                   THIRTEEN_POINTS=13)
+
+        cal_type=self._eyetrackerinterface.getConfiguration()['calibration']['type']
+
+        if cal_type in calibration_methods:
+            num_points=calibration_methods[cal_type]
+            
+            if num_points == 3:
+                TobiiPsychopyCalibrationGraphics.CALIBRATION_POINT_LIST=[(0.5,0.1),
+                                                                         (0.1,0.9),
+                                                                         (0.9,0.9),
+                                                                         (0.5,0.1)]
+            elif num_points == 9:
+                TobiiPsychopyCalibrationGraphics.CALIBRATION_POINT_LIST=[(0.5, 0.5),
+                                                                         (0.1, 0.5),
+                                                                         (0.9, 0.5),
+                                                                         (0.1, 0.1),
+                                                                         (0.5, 0.1),
+                                                                         (0.9, 0.1),
+                                                                         (0.9, 0.9),
+                                                                         (0.5, 0.9),
+                                                                         (0.1, 0.9),
+                                                                         (0.5, 0.5)]
+#            elif num_points == 13:
+#                TobiiPsychopyCalibrationGraphics.CALIBRATION_POINT_LIST=[(x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y),
+#                                                                         (x,y)]
+
         self.window = FullScreenWindow(self._eyetrackerinterface._display_device)
         self.window.setColor(self.WINDOW_BACKGROUND_COLOR,'rgb255')        
         self.window.flip(clearBuffer=True)
@@ -104,11 +145,11 @@ class TobiiPsychopyCalibrationGraphics(object):
      
     def _handleEvent(self,ioe):
         event_type_index=ioHub.devices.DeviceEvent.EVENT_TYPE_ID_INDEX
-        if ioe[event_type_index] == EventConstants.KEYBOARD_PRESS:
-            if ioe[-3] == 'SPACE':
+        if ioe[event_type_index] == EventConstants.KEYBOARD_CHAR:
+            if ioe[-5] == 'SPACE':
                 self._msg_queue.put("SPACE_KEY_ACTION")
                 self.clearAllEventBuffers()
-            if ioe[-3] == 'ESCAPE':
+            if ioe[-5] == 'ESCAPE':
                 self._msg_queue.put("QUIT")
                 self.clearAllEventBuffers()
 
@@ -124,7 +165,7 @@ class TobiiPsychopyCalibrationGraphics(object):
 
     def getNextMsg(self):
         try:
-            msg=self._msg_queue.get(block=True,timeout=0.05)
+            msg=self._msg_queue.get(block=True,timeout=0.02)
             self._msg_queue.task_done()
             return msg
         except Queue.Empty:
@@ -194,20 +235,43 @@ class TobiiPsychopyCalibrationGraphics(object):
             self.MsgPump()
 
         self.clearAllEventBuffers()
-       
+
+
+        auto_pace=self._eyetrackerinterface.getConfiguration()['calibration']['auto_pace']
+        pacing_speed=self._eyetrackerinterface.getConfiguration()['calibration']['pacing_speed']
+
+        randomize_points=self._eyetrackerinterface.getConfiguration()['calibration']['randomize']
+
+        cal_target_list=self.CALIBRATION_POINT_LIST[1:-1]
+        if randomize_points is True:
+            import random
+            random.seed(None)
+            random.shuffle(cal_target_list)
+            
+        cal_target_list.insert(0,self.CALIBRATION_POINT_LIST[0])
+        cal_target_list.append(self.CALIBRATION_POINT_LIST[-1])
+        
         self._tobii.StartCalibration(self.on_start_calibration)   
 
         i=0
-        for pt in self.CALIBRATION_POINT_LIST:
+        for pt in cal_target_list:
             w,h=self.screenSize
             #ioHub.print2err("Screen Size: ",w," ",h)
             self.clearAllEventBuffers()
             pix_pt=int(w*pt[0]-w/2),int(h*(1.0-pt[1])-h/2)
             #ioHub.print2err( "Cal point Mapping: ",pt," == ",pix_pt)
             self.drawCalibrationTarget(pix_pt)
-
+            self.clearAllEventBuffers()
             stime=currentTime()
-            while currentTime()-stime<2.5:
+            
+            def waitingForNextTargetTime():
+                return True
+            
+            if auto_pace is True:
+                def waitingForNextTargetTime():
+                    return currentTime()-stime<float(pacing_speed)
+                
+            while waitingForNextTargetTime():
                 msg=self.getNextMsg()
                 if msg == 'SPACE_KEY_ACTION':
                     break
@@ -226,7 +290,7 @@ class TobiiPsychopyCalibrationGraphics(object):
             self.clearAllEventBuffers()
 
             i+=1
-            if i == len(self.CALIBRATION_POINT_LIST):
+            if i == len(cal_target_list):
                 calibration_sequence_completed=True
         
         if calibration_sequence_completed:

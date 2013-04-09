@@ -22,30 +22,36 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
             valid_values: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent, SaccadeStartEvent, SaccadeEndEvent, BlinkStartEvent, BlinkEndEvent]  
             min_length: 0
             max_length: 8            
+    calibration:
+        type: [ THREE_POINTS, FIVE_POINTS, NINE_POINTS, THIRTEEN_POINTS]
+        auto_pace: IOHUB_BOOL
+        pacing_speed:
+            IOHUB_FLOAT:
+                min: 0.5
+                max: 2.5
+        screen_background_color: IOHUB_RGBA255_COLOR
+        target_type: [CIRCLE_TARGET,]
+        target_attributes:
+            outer_diameter:
+                IOHUB_INT:
+                    min: 8
+                    max: 256
+            inner_diameter: 
+                IOHUB_INT:
+                    min: 0
+                    max: 255
+            outer_color: IOHUB_RGBA255_COLOR
+            inner_color: IOHUB_RGBA255_COLOR                 
+    simulation_mode: IOHUB_BOOL
+    enable_interface_without_connection: IOHUB_BOOL
+    network_settings: IOHUB_IP_ADDRESS_V4
+    default_native_data_file_name: 
+        IOHUB_STRING:
+            min_length: 0
+            max_length: 7
     runtime_settings:
         sampling_rate: [250,500,1000,2000]
         track_eyes: [LEFT_EYE,RIGHT_EYE,BINOCULAR]
-        calibration:
-            type: [ H3_POINTS, V3_POINTS, HV3_POINTS, HV5_POINTS, HV9_POINTS, HV13_POINTS]
-            target_positions: []
-            auto_pace: IOHUB_BOOL
-            pacing_speed:
-                IOHUB_FLOAT:
-                    min: 0.5
-                    max: 2.5
-            screen_background_color: IOHUB_RGBA255_COLOR
-            target_type: [CIRCLE_TARGET,]
-            circle_attributes:
-                outer_diameter:
-                    IOHUB_INT:
-                        min: 8
-                        max: 256
-                inner_diameter: 
-                    IOHUB_INT:
-                        min: 0
-                        max: 255
-                outer_color: IOHUB_RGBA255_COLOR
-                inner_color: IOHUB_RGBA255_COLOR                 
         sample_filtering:
             FILTER_ALL: 
                 IOHUB_LIST:
@@ -62,13 +68,6 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
                     valid_values:  [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2] 
                     min_length: 1
                     max_length: 1            
-        simulation_mode: IOHUB_BOOL
-        enable_interface_without_connection: IOHUB_BOOL
-        network_settings: IOHUB_IP_ADDRESS_V4
-        default_native_data_file_name: 
-            IOHUB_STRING:
-                min_length: 1
-                max_length: 7
         vog_settings:
             pupil_measure_types:
                 IOHUB_LIST:

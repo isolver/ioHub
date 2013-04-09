@@ -188,7 +188,7 @@ and / or save them to the ioDataStore.</p>
 
 <dl class="method">
 <dt id="ioHub.devices.Device.getConfiguration">
-<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.devices.Device.getConfiguration" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getConfiguration</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#Device.getConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.Device.getConfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve the configuration information used when the device was initialized by the ioHub Server Process.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -333,9 +333,14 @@ devices software / API version being used by the ioHub Device</p>
 <em class="property">class </em><tt class="descclassname">ioHub.devices.</tt><tt class="descname">DeviceEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/devices.html#DeviceEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.DeviceEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.ioObject</span></tt></p>
 <p>The DeviceEvent class is the base class for all ioHub DeviceEvent types.</p>
-<p>Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseWheelUpEvent, MouseButtonPressEvent,
+<p>Any ioHub DeviceEvent classes (i.e MouseMoveEvent,MouseScrollEvent, MouseButtonPressEvent,
 KeyboardPressEvent, KeyboardReleaseEvent, etc) also include the methods and attributes of
 the DeviceEvent class.</p>
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.DeviceEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ioHub.devices.DeviceEvent.confidence_interval">
 <tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
@@ -361,6 +366,12 @@ processing. This is often called the real-time end-to-end delay
 of an event. If the delay for an event can not be reasonably estimated
 or is not known, a delay of -1.0 is set. Delays are in sec.msec-usec
 and valid values will range from 0.000000 sec.msec-usec and higher.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.DeviceEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.DeviceEvent.device_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Currently not used.</p>
 </dd></dl>
 
 <dl class="attribute">

@@ -1,6 +1,6 @@
 """
 ioHub
-pyEyeTracker Interface
+ioHub Common Eye Tracker Interface
 .. file: ioHub/devices/eyetracker/eye_events.py
 
 Copyright (C) 2012-2013 iSolver Software Solutions

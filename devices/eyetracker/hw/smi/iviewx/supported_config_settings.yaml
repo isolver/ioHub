@@ -1,119 +1,116 @@
-eyetracker.EyeTrackerDevice:
-    enable: IOHUB_BOOL
-    name:
+eyetracker.hw.smi.iviewx.EyeTracker:
+    name: 
         IOHUB_STRING:
             min_length: 1
             max_length: 32
-            first_char_alpha: True    
+            first_char_alpha: True
+    enable: IOHUB_BOOL
     save_events: IOHUB_BOOL
     stream_events: IOHUB_BOOL
-    auto_report_events: IOHUB_BOOL    
+    auto_report_events: False 
     device_timer:
         interval:
             IOHUB_FLOAT:
                 min: 0.001
                 max: 0.020
-    event_buffer_length:
+    event_buffer_length: 
         IOHUB_INT:
-            min: 1
+            min: 1  
             max: 2048
-    monitor_event_types: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent, SaccadeStartEvent, SaccadeEndEvent, BlinkStartEvent, BlinkEndEvent]            
-    runtime_settings:
-        sampling_rate:
+    monitor_event_types:           
+        IOHUB_LIST:
+            valid_values: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, FixationStartEvent, FixationEndEvent, SaccadeStartEvent, SaccadeEndEvent, BlinkStartEvent, BlinkEndEvent]  
+            min_length: 0
+            max_length: 8            
+    model_name: 
+        IOHUB_LIST:
+            valid_values: [NONE, RED, REDm, HiSpeed, MRI, HED, ETG, Custom]
+            min_length: 1
+            max_length: 1            
+    manufacturer_name: SensoMotoric Instruments GmbH
+    calibration:
+        type: 
+            IOHUB_LIST:
+                valid_values: [ NO_POINTS,ONE_POINT,TWO_POINTS,FIVE_POINTS,NINE_POINTS,THIRTEEN_POINTS ]
+                min_length: 0
+                max_length: 1            
+        graphics_env: INTERNAL                  
+        auto_pace: IOHUB_BOOL
+        pacing_speed: [ SLOW, FAST ]
+        screen_background_color:
             IOHUB_INT:
                 min: 0
-                max: 2000       
-        track_eyes: [LEFT_EYE, RIGHT_EYE, BINOCULAR, UNKNOWN_MONOCULAR, BINOCULAR_AVERAGED]
-        calibration:
-            # type can be H3_POINTS, V3_POINTS, HV3_POINTS, HV5_POINTS, HV9_POINTS, HV13_POINTS, CUSTOM_POINTS
-            # not all implementation will support all calibration types.
-            type: [H3_POINTS, V3_POINTS, HV3_POINTS, HV5_POINTS, HV9_POINTS, HV13_POINTS, CUSTOM_POINTS]
-            target_positions: []
-            auto_pace: IOHUB_BOOL
-            pacing_speed:
-                IOHUB_FLOAT:
-                    min: 0.5
-                    max: 2.5            
-            screen_background_color: IOHUB_RGBA255_COLOR  
-            target_type: [CIRCLE_TARGET, CROSSHAIR_TARGET, IMAGE_TARGET, MOVIE_TARGET]
-            circle_attributes
-                outer_diameter:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-                inner_diameter: 
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-                outer_color: IOHUB_RGBA255_COLOR
-                inner_color: IOHUB_RGBA255_COLOR                 
-            crosshair_attributes:
-                line_length:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-                line_width:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-                line_color: IOHUB_RGBA255_COLOR             
-            image_attributes:
-                name:
-                    IOHUB_STRING:
-                        min_length: 1
-                        max_length: 32
-                width:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-                height: 
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-            movie_attributes:
-                name:
-                    IOHUB_STRING:
-                        min_length: 1
-                        max_length: 32                
-                width:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0            
-                height:
-                    IOHUB_NUMBER:
-                        min: 0.0
-                        max: 2048.0    
-         sample_filtering:
-            FILTER_ALL: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-            FILTER_FILE: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-            FILTER_ONLINE: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-            FILTER_NET: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-            FILTER_SERIAL: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-            FILTER_ANALOG: [FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2, FILTER_LEVEL_3, FILTER_LEVEL_4, FILTER_LEVEL_5]
-        simulation_mode: IOHUB_BOOL
-        enable_interface_without_connection: IOHUB_BOOL
-        network_settings: [IOHUB_IP_ADDRESS_V4,IOHUB_IP_ADDRESS_V4]
-        default_native_data_file_name:
-            IOHUB_STRING:
-                min_length: 1
-                max_length: 16
-        vog_settings:
-            pupil_measure_types: [[ PUPIL_AREA, PUPIL_DIAMETER, PUPIL_RADIUS, PUPIL_WIDTH, PUPIL_HEIGHT, PUPIL_MAJOR_AXIS, PUPIL_MINOR_AXIS], [PUPIL_AREA, PUPIL_DIAMETER, PUPIL_RADIUS, PUPIL_WIDTH, PUPIL_HEIGHT, PUPIL_MAJOR_AXIS, PUPIL_MINOR_AXIS]]
-            tracking_mode: [PUPIL_CR_TRACKING,PUPIL_ONLY_TRACKING]
-            pupil_center_algorithm: [ELLIPSE_FIT, CIRCLE_FIT, CENTROID_FIT]
-    model_name:
+                max: 255
+        target_type: [IMAGE , CIRCLE,  CROSS]
+        target_attributes:
+            target_size:
+                IOHUB_INT:
+                    min: 2
+                    max: 1024             
+            target_color:
+                IOHUB_INT:
+                    min: 0
+                    max: 255
+            target_inner_color: [ BACKGROUND, RED ]
+            file_name:
+                IOHUB_STRING:
+                    min_length: 0
+                    max_length: 32
+            # Should a Window showing the validation accuracy as a gaze point 
+            # overlay be displayed following a validation procedure?
+            show_validation_accuracy_window: IOHUB_BOOL
+
+        network_settings:
+        # IP address of iView X computer
+        send_ip_address: IOHUB_IP_ADDRESS_V4
+        # Port being used by iView X SDK for sending data to iView X 
+        send_port: 
+            IOHUB_INT:
+                min: 1
+                max: 9999
+        # IP address of local computer
+        receive_ip_address: IOHUB_IP_ADDRESS_V4
+        # port being used by iView X SDK for receiving data from iView X
+        receive_port: 	            
+            IOHUB_INT:
+                min: 1
+                max: 9999
+    default_native_data_file_name: 
         IOHUB_STRING:
             min_length: 1
-            max_length: 32
+            max_length: 16
+    runtime_settings:
+        # The sampling rate setting in the iViewX implementation is used only to
+        # compare the sampling rate read from the device to ensure it matches
+        # the rate specified here. 
+        # It is not possible to 'set' the sampling rate via the SMI API however. 
+        sampling_rate: 
+            IOHUB_NUMBER:
+                min: 30
+                max: 1250
+        sample_filtering:
+            FILTER_ALL: 
+                IOHUB_LIST:
+                    valid_values:  [FILTER_LEVEL_OFF, FILTER_OFF, FILTER_LEVEL_1, FILTER_ON] 
+                    min_length: 1
+                    max_length: 1            
+        # The iViewX supports the following track_eyes values:  
+        # LEFT_EYE, RIGHT_EYE, BINOCULAR, BINOCULAR_AVERAGED, BINOCULAR_CUSTOM
+        track_eyes: [LEFT_EYE, RIGHT_EYE, BINOCULAR, BINOCULAR_AVERAGED, BINOCULAR_CUSTOM]
+        # VOG settings allow you to specify some eye tracker parameters related to
+        # the image processing or data collection procedure used by the eye tracker
+        # device. 
+        vog_settings:
+            # The iViewX supports one pupil_measure_types parameter that is used
+            # for any eyes being tracked. PUPIL_AREA, PUPIL_DIAMETER are
+            # valid pupil measure types for the iViewX.
+            # PUPIL_DIAMETER, PUPIL_DIAMETER_MM,
+            pupil_measure_types: [PUPIL_DIAMETER, PUPIL_DIAMETER_MM]
     device_number: 0
     model_number:
         IOHUB_STRING:
             min_length: 1
-            max_length: 16
-    manufacturer_name:
-        IOHUB_STRING:
-            min_length: 1
-            max_length: 64    
+            max_length: 32
     serial_number:
         IOHUB_STRING:
             min_length: 1
@@ -131,3 +128,4 @@ eyetracker.EyeTrackerDevice:
         IOHUB_STRING:
             min_length: 1
             max_length: 8
+

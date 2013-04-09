@@ -102,7 +102,7 @@
 <span class="sd">ioHub</span>
 <span class="sd">.. file: ioHub/devices/experiment/__init__.py</span>
 
-<span class="sd">Copyright (C) 2012 Sol Simpson</span>
+<span class="sd">Copyright (C) 2012-2013 iSolver Software Solutions</span>
 <span class="sd">Distributed under the terms of the GNU General Public License (GPL version 3 or any later version).</span>
 
 <span class="sd">.. moduleauthor:: Sol Simpson &lt;sol@isolver-software.com&gt; + contributors, please see credits section of documentation.</span>
@@ -114,59 +114,42 @@
 
 <span class="n">currentSec</span><span class="o">=</span><span class="n">Computer</span><span class="o">.</span><span class="n">currentSec</span>
 
-<div class="viewcode-block" id="ExperimentDevice"><a class="viewcode-back" href="../../../iohub/api/device_details/experiment.html#ioHub.devices.experiment.ExperimentDevice">[docs]</a><span class="k">class</span> <span class="nc">ExperimentDevice</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+<div class="viewcode-block" id="Experiment"><a class="viewcode-back" href="../../../iohub/api/device_details/experiment.html#ioHub.devices.experiment.Experiment">[docs]</a><span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The ExperimentDevice class represents a virtual device, being the </span>
-<span class="sd">    Experiment / PsychoPy Process that is running the experiment script and </span>
-<span class="sd">    has created the ioHub ioServer Process.</span>
-<span class="sd">    A ExperimentDevice device can generate experiment software related events </span>
-<span class="sd">    that are sent to the ioHub to be saved in the ioDataStore along with all </span>
-<span class="sd">    other device events being saved.</span>
+<span class="sd">    The Experiment class represents a *virtual* device ( the </span>
+<span class="sd">    Experiment / PsychoPy Process that is running the experiment script ), and is unique</span>
+<span class="sd">    in that it is the *client* of the ioHub Server, but can also generate events</span>
+<span class="sd">    itself that are registered with the ioHub Server. Currently the Experiment</span>
+<span class="sd">    supports the creation of general purpose MessageEvent&#39;s, which can effectively</span>
+<span class="sd">    hold any string up to 128 characters in length. Experiment Message events can be</span>
+<span class="sd">    sent to the ioHub Server at any time, and are useful for creating stimulus onset or offset</span>
+<span class="sd">    notifications, or other experiment events of interest that should be associated </span>
+<span class="sd">    with events from other devices for post hoc analysis of the experiments event steam using</span>
+<span class="sd">    the ioDataStore.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">EVENT_CLASS_NAMES</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;MessageEvent&#39;</span><span class="p">]</span>
     
     <span class="n">DEVICE_TYPE_ID</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">EXPERIMENT</span>
-    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="n">DeviceConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">DEVICE_TYPE_ID</span><span class="p">)</span>
+    <span class="n">DEVICE_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;EXPERIMENT&#39;</span>
     <span class="n">__slots__</span><span class="o">=</span><span class="p">[]</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :rtype : object</span>
-<span class="sd">        :param args:</span>
-<span class="sd">        :param kwargs:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ExperimentDevice</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="o">=</span><span class="p">[</span><span class="n">MessageEvent</span><span class="p">,]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">]</span>
-        <span class="n">deviceSettings</span><span class="o">=</span><span class="p">{</span>
-            <span class="s">&#39;type_id&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">DEVICE_TYPE_ID</span><span class="p">,</span>
-            <span class="s">&#39;device_class&#39;</span><span class="p">:</span><span class="n">ExperimentDevice</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
-            <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span>
-            <span class="s">&#39;monitor_event_types&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;monitor_event_types&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ALL_EVENT_CLASSES</span><span class="p">),</span>
-            <span class="s">&#39;_isReportingEvents&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auto_report_events&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span>
-            <span class="s">&#39;os_device_code&#39;</span><span class="p">:</span><span class="s">&#39;OS_DEV_CODE_NOT_SET&#39;</span><span class="p">,</span>
-            <span class="s">&#39;max_event_buffer_length&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_startupConfiguration</span><span class="p">[</span><span class="s">&#39;event_buffer_length&#39;</span><span class="p">]</span>
-            <span class="p">}</span>          
-        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">deviceSettings</span><span class="p">)</span>
-
+        <span class="n">Device</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dconfig&#39;</span><span class="p">])</span>
 
         
-    <span class="k">def</span> <span class="nf">_nativeEventCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
-        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">currentSec</span><span class="p">()</span> <span class="c"># set logged time of event</span>
-
-        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DELAY_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">-</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
-
-        <span class="c"># on windows ioHub and experiment process use same timebase, so device time == hub time</span>
-        <span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_addNativeEventToBuffer</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">_nativeEventCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">native_event_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReportingEvents</span><span class="p">():</span>
+            <span class="n">notifiedTime</span><span class="o">=</span><span class="n">currentSec</span><span class="p">()</span>
+            
+            <span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">notifiedTime</span> <span class="c"># set logged time of event</span>
     
-    <span class="k">def</span> <span class="nf">_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
- 
-
-    <span class="k">def</span> <span class="nf">_getIOHubEventObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">event</span>
+            <span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DELAY_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_LOGGED_TIME_INDEX</span><span class="p">]</span><span class="o">-</span><span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
+    
+            <span class="c"># on windows ioHub and experiment process use same timebase, so device time == hub time</span>
+            <span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_HUB_TIME_INDEX</span><span class="p">]</span><span class="o">=</span><span class="n">native_event_data</span><span class="p">[</span><span class="n">DeviceEvent</span><span class="o">.</span><span class="n">EVENT_DEVICE_TIME_INDEX</span><span class="p">]</span>
+    
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addNativeEventToBuffer</span><span class="p">(</span><span class="n">native_event_data</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_callback_time</span><span class="o">=</span><span class="n">notifiedTime</span>
 
             
 <span class="c">######### Experiment Events ###########</span>
@@ -175,7 +158,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A MessageEvent can be created and sent to the ioHub to record important </span>
 <span class="sd">    marker times during the experiment; for example, when key display changes </span>
-<span class="sd">    occur, when events related to devices not supported by the ioHub have happened, </span>
+<span class="sd">    occur, or when events related to devices not supported by the ioHub have happened, </span>
 <span class="sd">    or simply information about the experiment you want</span>
 <span class="sd">    to store in the ioDataStore along with all the other event data.</span>
 
@@ -189,26 +172,48 @@
 <span class="sd">    Event Type ID: EventConstants.MESSAGE</span>
 <span class="sd">    Event Type String: &#39;MESSAGE&#39;      </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">ExperimentDevice</span>
+    <span class="n">PARENT_DEVICE</span><span class="o">=</span><span class="n">Experiment</span>
     <span class="n">EVENT_TYPE_ID</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">MESSAGE</span>
-    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="n">EventConstants</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">EVENT_TYPE_ID</span><span class="p">)</span>
+    <span class="n">EVENT_TYPE_STRING</span><span class="o">=</span><span class="s">&#39;MESSAGE&#39;</span>
     <span class="n">IOHUB_DATA_TABLE</span><span class="o">=</span><span class="n">EVENT_TYPE_STRING</span>
 
     <span class="n">_newDataTypes</span><span class="o">=</span><span class="p">[</span>
-                <span class="p">(</span><span class="s">&#39;msg_offset&#39;</span><span class="p">,</span><span class="s">&#39;i2&#39;</span><span class="p">),</span> <span class="c"># if you want to send the Experiment *before* or *after* the event time occurred</span>
-                                     <span class="c"># and you know exactly when relative to the event time you are sending the message</span>
-                                     <span class="c"># you can specify an offset that will be applied to the message time to give the</span>
-                                     <span class="c"># true event time and not when the message was sent.</span>
-
-                <span class="p">(</span><span class="s">&#39;prefix&#39;</span><span class="p">,</span><span class="s">&#39;a3&#39;</span><span class="p">),</span> <span class="c"># A 0 - 3 character prefix code that you can assign to messages and use it to</span>
-                                 <span class="c"># do such things as group messages into categories or types when</span>
-                                 <span class="c"># retieving them for analysis.</span>
-
-                <span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span><span class="s">&#39;a128&#39;</span><span class="p">)</span>  <span class="c"># The actual text of the message. This can be any python string</span>
-                                 <span class="c"># up to 128 characters in length.</span>
+                <span class="p">(</span><span class="s">&#39;msg_offset&#39;</span><span class="p">,</span><span class="s">&#39;float32&#39;</span><span class="p">),</span> 
+                <span class="p">(</span><span class="s">&#39;prefix&#39;</span><span class="p">,</span><span class="s">&#39;a3&#39;</span><span class="p">),</span> 
+                <span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span><span class="s">&#39;a128&#39;</span><span class="p">)</span>  
                 <span class="p">]</span>
     <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_newDataTypes</span><span class="p">]</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c">#: The text attribute is used to hold the actual &#39;content&#39; of the message.</span>
+        <span class="c">#: The text attribute string can not be more than 128 characters in length.</span>
+        <span class="c">#: String type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">=</span><span class="bp">None</span>
+        
+        <span class="c">#: The prefix attribute is a 0 - 3 long string used as a &#39;group&#39; or &#39;category&#39; </span>
+        <span class="c">#: code that can be assigned to messages. The prefix attribute may be useful</span>
+        <span class="c">#: for grouping messages into categories or types when retieving them for analysis</span>
+        <span class="c">#: by assigning the same prix string to related Message Event types.</span>
+        <span class="c">#: String type.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span>
+        
+        <span class="c">#: The msg_offset attribute can be used in cases where the Experiment Message</span>
+        <span class="c">#: Evenet needs to be sent *before* or *after* the time the actual event occurred.</span>
+        <span class="c">#: msg offset should be in sec.msec format and in general can be calculated as:</span>
+        <span class="c">#:</span>
+        <span class="c">#: msg_offset=actual_event_iohub_time - iohub_message_time</span>
+        <span class="c">#: </span>
+        <span class="c">#: where actual_event_iohub_time is the time the event occured that is being</span>
+        <span class="c">#: represented by the Message event; and iohub_message_time is either the</span>
+        <span class="c">#: time provided to the Experiment Message creation methods to be used as the </span>
+        <span class="c">#: Message time stamp, or is the time that the Message Event actually requested the</span>
+        <span class="c">#: current time if no message time was provided.</span>
+        <span class="c">#: Both times must be read from Computer.getTime() or one of it&#39;s method aliases. </span>
+        <span class="c">#: Float type.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg_offset</span><span class="o">=</span><span class="bp">None</span>         
+
         <span class="n">DeviceEvent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>

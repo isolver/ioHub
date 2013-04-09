@@ -1,4 +1,5 @@
-﻿"""
+# -*- coding: utf-8 -*-
+"""
 ioHub
 .. file: ioHub/client.py
 
@@ -17,7 +18,6 @@ import struct
 
 from gevent import socket
 import numpy as N
-import psutil
 
 try:
     from yaml import load
@@ -26,12 +26,15 @@ except ImportError:
     print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 
+if sys.platform != 'darwin':
+    import psutil
+    _psutil_available=True
+    
 import ioHub
 from ioHub.devices import Computer, DeviceEvent
 from ioHub.devices.experiment import MessageEvent
 
-if Computer.system=="Windows":
-    from util.experiment import pumpLocalMessageQueue
+from util.experiment import pumpLocalMessageQueue
 
 MAX_PACKET_SIZE=64*1024
 
@@ -554,8 +557,7 @@ class ioHubConnection(object):
                 tfile.close()
 
         run_script=os.path.join(ioHub.IO_HUB_DIRECTORY,'server.py')
-        subprocessArgList=[sys.executable, run_script,"%.6f"%(self._initial_clock_offset,),rootScriptPath,ioHubConfigAbsPath]
-
+        subprocessArgList=[sys.executable,run_script,"%.6f"%self._initial_clock_offset,rootScriptPath,ioHubConfigAbsPath]
 
         # check for existing ioHub Process based on process if saved to file
         iopFileName=os.path.join(rootScriptPath ,'.iohpid')
@@ -567,44 +569,66 @@ class ioHubConnection(object):
                 os.remove(iopFileName)
                 other,iohub_pid=line.split(':')
                 iohub_pid=int(iohub_pid.strip())
-                old_iohub_process=psutil.Process(iohub_pid)
-                if old_iohub_process.name == 'python.exe':
-                    old_iohub_process.kill()
-            except psutil.NoSuchProcess:
-                pass
+                if sys.platform != 'darwin':
+                    try:
+                        old_iohub_process=psutil.Process(iohub_pid)
+                        if old_iohub_process.name == 'python.exe':
+                            old_iohub_process.kill()
+                    except psutil.NoSuchProcess:
+                        pass
+                else:
+                    try:
+                        os.kill(iohub_pid) #code
+                    except Exception:
+                        pass
             except:
                 ioHub.printExceptionDetailsToStdErr()
 
-        #print 'STARTING IOSERVER.....'
         # start subprocess, get pid, and get psutil process object for affinity and process priority setting
-        self._server_process = subprocess.Popen(subprocessArgList,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        self._server_process = subprocess.Popen(subprocessArgList,stdout=subprocess.PIPE)
         Computer.ioHubServerProcessID = self._server_process.pid
-        Computer.ioHubServerProcess=psutil.Process(Computer.ioHubServerProcessID)
-        #print 'IOSERVER STARTING UP....'
-        # wait for server to send back 'IOHUB_READY' text over stdout, indicating it is running
-        # and ready to receive network packets
+        if sys.platform != 'darwin':
+            Computer.ioHubServerProcess=psutil.Process(Computer.ioHubServerProcessID)
+        else:
+            Computer.ioHubServerProcess=self._server_process             
+
         hubonline=False
-        server_output='hi there'
-        ctime = Computer.globalClock.getTime
-        timeout_time=ctime()+10.0 # timeout if ioServer does not reply in 10 seconds
-        while server_output and ctime()<timeout_time:
-            isDataAvail=self._serverStdOutHasData()
-            if isDataAvail is True:
-                server_output=self._readServerStdOutLine().next()
-                if server_output.rstrip() == 'IOHUB_READY':
+
+        if Computer.system == 'win32':
+            #print 'IOSERVER STARTING UP....'
+            # wait for server to send back 'IOHUB_READY' text over stdout, indicating it is running
+            # and ready to receive network packets
+            server_output='hi there'
+            ctime = Computer.globalClock.getTime
+
+            timeout_time=ctime()+10.0 # timeout if ioServer does not reply in 10 seconds
+            while server_output and ctime()<timeout_time:
+                isDataAvail=self._serverStdOutHasData()
+                if isDataAvail is True:
+                    server_output=self._readServerStdOutLine().next()
+                    if server_output.rstrip() == 'IOHUB_READY':
+                        hubonline=True
+                        #print "Ending Serving connection attempt due to timeout...."
+                        break
+                    elif server_output.rstrip() == 'IOHUB_FAILED':
+                        print "ioHub Failed to start, exiting...."
+                        time.sleep(0.25)
+                        sys.exit(1)
+
+                        
+                else:
+                    time.sleep(0.0001)
+        else:
+            r="hi"
+            while r:
+                r=self._server_process.stdout.readline()
+                if r and r.rstrip().strip() == 'IOHUB_READY':
                     hubonline=True
-                    #print "Ending Serving connection attempt due to timeout...."
                     break
-                elif server_output.rstrip() == 'IOHUB_FAILED':
-                    print "ioHub Failed to start, exiting...."
+                elif r and r.rstrip().strip() == 'IOHUB_FAILED':
+                    print "ioHub sent IOHUB_FAILED, exiting...."
                     time.sleep(0.25)
                     sys.exit(1)
-
-                    
-            else:
-                time.sleep(0.0001)
-        
-        #print 'Client hubonline: ', hubonline
         
         # If ioHub server did not repond correctly, terminate process and exit the program.
         if hubonline is False:
@@ -666,7 +690,7 @@ class ioHubConnection(object):
         """
         Used by _startServer pipe reader code. Allows for async check for data on pipe in windows.
         """
-        if Computer.system == 'Windows':        
+        if Computer.system == 'win32':        
             #  >> WIN32_ONLY
             import msvcrt
             from win32pipe import PeekNamedPipe
@@ -686,7 +710,7 @@ class ioHubConnection(object):
             # << WIN32_ONLY
             except Exception as e:
                 raise ioHubConnectionException(e)
-        if Computer.system == 'Linux':
+        else:
             return True
             
     def _readServerStdOutLine(self):
@@ -695,26 +719,6 @@ class ioHubConnection(object):
         """
         for line in iter(self._server_process.stdout.readline, ''):
             yield line
-
-    def _calculateClientServerTimeOffset(self, sampleSize=100):
-        """
-        Calculates 'sampleSize' experimentTime and ioHub Server time process offsets by calling currentSec locally
-        and via IPC to the ioHub server process repeatedly, as ewell as calculating the round trip time it took to get the server process time in each case.
-        Puts the 'sampleSize' calculates in a 2D numpy array, index [i][0] = server_time - local_time offset, index [i][1]
-        = local_time after call to server_time - local_time before call to server_time.
-
-        In Windows, since direct QPC implementation is used, offset should == delay to within 100 usec or so.
-        """
-        results=N.zeros((sampleSize,2),dtype='f4')
-        for i in xrange(sampleSize):     # make multiple calles to local and ioHub times to calculate 'offset' and 'delay' in calling the ioHub server time
-            tc=Computer.currentSec()*1000.0   # get the local time 1
-            ts=self.currentSec()*1000.0        # get the ioHub server time (this results in a RPC call and response from the server)
-            tc2=Computer.currentSec()*1000.0   # get local time 2, to calculate e2e delay for the ioHub server time call
-            results[i][0]=ts-tc          # calculate time difference between returned iohub server time, and 1 read local time (offset)
-            results[i][1]=tc2-tc         # calculate delay / duration it took to make the call to the ioHub server and get reply
-            time.sleep(0.001)            # sleep for a little before going next loop
-        #print N.min(results,axis=0) ,N.max(results,axis=0) , N.average(results,axis=0), N.std(results,axis=0)
-        return results
 
     def _createDeviceList(self,monitor_devices_config):
         """
@@ -841,12 +845,6 @@ class ioHubConnection(object):
 
         #Otherwise return the result
         return result
-
-
-    def updateGlobalHubTimeOffset(self,offset):
-        r=self.sendToHubServer(('RPC','updateGlobalTimeOffset',(offset,)))
-        #print 'updateGlobalHubTimeOffset client got: ',r,' : ',r[2]
-        return r[2]
 
     @classmethod
     def _addResponseToHistory(cls,result,bytes_sent,address):
@@ -1012,9 +1010,10 @@ class ioHubConnection(object):
 
                 if conversionMethod:
                     return [conversionMethod(el) for el in r]
-
+ 
                 return r
-
+        return []
+        
     def clearEvents(self,deviceLabel=None):
         """
         Clears all events from the global event buffer, or if deviceLabel is not None,
@@ -1040,7 +1039,7 @@ class ioHubConnection(object):
                 return True
             return False
 
-    def delay(self,delay,checkHubInterval=0.02):
+    def wait(self,delay,check_hub_interval=0.02):
         """
         Pause the experiment execution for msec.usec interval, while checking the ioHub for
         any new events and retrieving them every 'checkHubInterval' msec during the delay. Any events
@@ -1067,7 +1066,7 @@ class ioHubConnection(object):
         Args:
             delay (float/double): the sec.msec_usec period that the PsychoPy Process should wait
                               before returning from the function call.
-            checkHubInterval (float/double): the sec.msec_usec interval after which any ioHub
+            check_hub_interval (float/double): the sec.msec_usec interval after which any ioHub
                               events will be retrieved (by calling self.getEvents) and stored
                               in a local buffer. This is repeated every checkHubInterval sec.msec_usec until
                               the method completes. Default is every 0.01 sec ( 10.0 msec ).
@@ -1077,16 +1076,16 @@ class ioHubConnection(object):
         stime=Computer.currentTime()
         targetEndTime=stime+delay
 
-        if checkHubInterval < 0:
-            checkHubInterval=0
+        if check_hub_interval < 0:
+            check_hub_interval=0
         
-        if checkHubInterval > 0:
+        if check_hub_interval > 0:
             remainingSec=targetEndTime-Computer.currentTime()
             while remainingSec > 0.001:
-                if remainingSec < checkHubInterval+0.001:
+                if remainingSec < check_hub_interval+0.001:
                     time.sleep(remainingSec)
                 else:
-                    time.sleep(checkHubInterval)
+                    time.sleep(check_hub_interval)
                     events=self.getEvents()
                     if events:
                         self.allEvents.extend(events)
@@ -1218,13 +1217,18 @@ class ioHubConnection(object):
 
         :return:
         """
+        
+        TimeoutError = Exception
+        if sys.platform != 'darwin':
+            TimeoutError=psutil.TimeoutExpired
+            
         try:
             self.udp_client.sendTo(('STOP_IOHUB_SERVER',))
             self.udp_client.close()
             if Computer.ioHubServerProcess:
                 r=Computer.ioHubServerProcess.wait(timeout=5)
                 print 'ioHub Server Process Completed With Code: ',r
-        except psutil.TimeoutExpired:
+        except TimeoutError:
             print "Warning: TimeoutExpired, Killing ioHub Server process."
             Computer.ioHubServerProcess.kill()
         except Exception:
@@ -1237,38 +1241,6 @@ class ioHubConnection(object):
             Computer.ioHubServerProcessID=None
             Computer.ioHubServerProcess=None
         return True
-
-    def currentSec(self):
-        """
-        Returns the sec.msec-usec time retrieved from the ioHub Server process. This method sends a message to
-        the ioHub Process asking for the currentSec time on that process, and returns the result.
-
-        Therefore there will be a small delay in getting the current ioHub Process time, and this means
-        current_ioHub_secs = self.currentSec()-DELAY, where delay is the time from when the
-        ioHub Server Process read the currentSec time to when the PsychoPy process received the reply.
-
-        **Note:** On Windows, both the PsychoPy and ioHub Processes use the same time base
-               if you call one of the ioHub Experiment Runtime time methods, so there is **no need**
-               to call this method to get the current ioHub Process time.
-
-               It will be more accurate to call one of the following time methods, which gives you
-               the current ioHub Process and PsychoPy Process time, as they are the same:
-
-               * ioHub.highPrecisionTimer() : returns sec.msec-usec time
-               * ioHub.devices.Computer.getSec() : returns sec.msec-usec time
-
-
-               If running your experiment within the run() method of a class extended from
-               ioHub.experiment.ioHubExperimentRuntime, you can also use:
-
-               * self.currentSec()
-
-        Args: None
-        Return (float/double): The ioHub Process sec.msec-usec time when the request was processed
-                               by the ioHub Server Process.
-        """
-        r=self.sendToHubServer(('RPC','currentSec'))
-        return r[2]
 
     def enableHighPriority(self,disable_gc=False):
         """        

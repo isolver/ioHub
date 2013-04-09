@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ioHub
 .. file: ioHub/examples/simple/run.py
@@ -70,7 +71,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         currentPosition=mouse.getPosition()
         
         # Create a psychopy window, using settings from Display device config
-        psychoWindow =  FullScreenWindow(display)
+        psychoWindow =  FullScreenWindow(display,fullscr=False,allowGUI=True)
 
         mouse.lockMouseToDisplayID(display.getIndex())
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
@@ -116,19 +117,28 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
             # for each new keyboard character event, check if it matches one of the end example keys.
-            for k in kb.getEvents(EventConstants.KEYBOARD_CHAR):
-                if k.key in ['ESCAPE', ]:
+            for k in kb.getEvents():
+                if k.key.upper() in ['ESCAPE', ]:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
-
+                
+            for e in self.hub.getEvents():
+                if e.type != 151:                
+                    print 'Event: ',e.device_time," ",e.time," ",e.device_time-e.time," "
+                
+            self.hub.clearEvents('all')
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
-        actualDelay=self.hub.delay(0.250)
+        actualDelay=self.hub.wait(0.250)
         print "Delay requested %.6f, actual delay %.6f, Diff: %.6f"%(0.250,actualDelay,actualDelay-0.250)
 
         # for fun, test getting a bunch of events at once, likely causing a mutlipacket getEvents()
         stime = Computer.currentSec()
         events=self.hub.getEvents()
         etime=Computer.currentSec()
+        
+        if events is None:
+            events=[]
+
         print 'event count: ', len(events),' delay (msec): ',(etime-stime)*1000.0
 
         # _close neccessary files / objects, 'disable high priority.

@@ -132,78 +132,82 @@ an experiment during data collection.</p>
 <dt id="ioHub.util.experiment.ioHubExperimentRuntime">
 <em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ioHubExperimentRuntime</tt><big>(</big><em>configFilePath</em>, <em>configFile</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<blockquote>
-<div><p>ioHubExperimentRuntime is a utility class that is used to &#8216;bind&#8217; the ioHub framework to the PsychoPy API in an easy to use way,
+<p>ioHubExperimentRuntime is a utility class that is used to &#8216;bind&#8217; the ioHub framework to the PsychoPy API in an easy to use way,
 hiding many of the internal complexities of the implementation and making it as simple to use within a PsychoPy script
 as possible. That is the <em>intent</em> anyway.</p>
 <p>The ioHubExperimentRuntime class is intended to be extended in a user script, with the .run() method being implemented with
 the actual contents of the main body of the experiment. As an example, a run.py file could be created and contain
 the following code as a minimal implementation of using the ioHubExperimentRuntime to combine psychopy and ioHub functionality
 to display a window and wait for a key press to close the window and terminate the experiment. The source file and .yaml
-config files for this simple example can be found in ioHub/examples/simple :</p>
-</div></blockquote>
-<p>import ioHub
-from ioHub.experiment import ioHubExperimentRuntime</p>
-<dl class="docutils">
-<dt>class ExperimentRuntime(ioHubExperimentRuntime):</dt>
-<dd><dl class="first last docutils">
-<dt>def __init__(self,configFileDirectory, configFile):</dt>
-<dd>ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)</dd>
-<dt>def run(self,*args,**kwargs):</dt>
-<dd><p class="first">###
-#
-# Your experiment logic start here. You can do anything you would in a standard psychopy script.
-# You can even import a psychopy script and just call a function in it to run it if you wanted
-#</p>
-<p>#
-# See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
-#</p>
-<p>print &#8220;Starting Experiment Script...&#8221;</p>
-<p># ....</p>
-<p>print &#8220;Completed Experiment Script...&#8221;</p>
-<p class="last">### End run method / end of experiment logic</p>
-</dd>
-</dl>
-</dd>
-<dt>def main(configurationDirectory):</dt>
-<dd><p class="first">#
-# Main function simply checks for a command line arg and assumes it is the name of the experiment config file if
-# it was provided, otherwise it uses &#8220;experiment_config.yaml&#8221; by default
-# An instance of ExperimentRuntime is created and the start method is called for it, which calls the .run method you
-# implemented for your experiment.</p>
-<p>import sys
-if len(sys.argv)&gt;1:</p>
-<blockquote>
-<div>configFile=unicode(sys.argv[1])
-runtime=ExperimentRuntime(configurationDirectory, configFile)</div></blockquote>
-<dl class="docutils">
-<dt>else:</dt>
-<dd>runtime=ExperimentRuntime(configurationDirectory, &#8220;experiment_config.yaml&#8221;)</dd>
-</dl>
-<p class="last">runtime.start()</p>
-</dd>
-<dt>if __name__ == &#8220;__main__&#8221;:</dt>
-<dd><p class="first"># This code only gets called when the python file is executed, not if it is loaded as a module by another python file
-#
-# The module_directory function determines what the current directory is of the function that is passed to it. It is
-# more reliable when running scripts via IDEs etc in terms of reporting the true file location.
-configurationDirectory=ioHub.module_directory(main)</p>
-<p class="last"># run the main function, which starts the experiment runtime
-main(configurationDirectory)</p>
-</dd>
-</dl>
-<p>################################## End of Stub Example ioHubExperimentRuntime implementation ###############################</p>
-<p>Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
+config files for this simple example can be found in ioHub/examples/simple</p>
+<div class="highlight-python"><pre>import ioHub
+from ioHub.experiment import ioHubExperimentRuntime
+
+class ExperimentRuntime(ioHubExperimentRuntime):
+    def __init__(self,configFileDirectory, configFile):
+        ioHubExperimentRuntime.__init__(self,configFileDirectory,configFile)
+
+    def run(self,*args,**kwargs):
+        ###
+        #
+        # Your experiment logic start here. You can do anything you would in a standard psychopy script.
+        # You can even import a psychopy script and just call a function in it to run it if you wanted
+        #
+
+        #
+        # See ioHub/examples/simple/run.py for an example implementation of the contents for a run method.
+        #
+
+        print "Starting Experiment Script..."
+
+        # ....
+
+        print "Completed Experiment Script..."
+
+        ### End run method / end of experiment logic
+
+def main(configurationDirectory):
+    #
+    # Main function simply checks for a command line arg and assumes it is the name of the experiment config file if
+    # it was provided, otherwise it uses "experiment_config.yaml" by default
+    # An instance of ExperimentRuntime is created and the start method is called for it, which calls the .run method you
+    # implemented for your experiment.
+
+    import sys
+    if len(sys.argv)&gt;1:
+        configFile=unicode(sys.argv[1])
+        runtime=ExperimentRuntime(configurationDirectory, configFile)
+    else:
+        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+
+    runtime.start()
+
+if __name__ == "__main__":
+    # This code only gets called when the python file is executed, not if it is loaded as a module by another python file
+    #
+    # The module_directory function determines what the current directory is of the function that is passed to it. It is
+    # more reliable when running scripts via IDEs etc in terms of reporting the true file location.
+    configurationDirectory=ioHub.module_directory(main)
+
+    # run the main function, which starts the experiment runtime
+    main(configurationDirectory)
+
+
+################################## End of Stub Example ioHubExperimentRuntime implementation ###############################
+
+Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
 These files are read by the ioHubExperimentRuntime and the ioHub system and make it much easier for the ioHub and associated devices to be
 configurated than if you needed to do it within a python script. So while at first these files may seem like extra overhead, we hope that they are found to
-actually save time and work in the end. Comments and feedback on this would be highly apprieciated.</p>
-<p>The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
-a command prompt at the ioHub/examples/simple folder and type:</p>
-<blockquote>
-<div>python.exe run.py</div></blockquote>
+actually save time and work in the end. Comments and feedback on this would be highly apprieciated.
+
+The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.  To run the example simply open
+a command prompt at the ioHub/examples/simple folder and type:
+
+    python.exe run.py</pre>
+</div>
 <dl class="method">
-<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getLoadedExperimentConfiguration">
-<tt class="descname">getLoadedExperimentConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getLoadedExperimentConfiguration" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.getExperimentConfiguration">
+<tt class="descname">getExperimentConfiguration</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.getExperimentConfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the full YAML parsing of experiment_config.</p>
 </dd></dl>
 
@@ -228,6 +232,21 @@ user defined parameters.</p>
 <dd><p>Returns the experiment session user defined parameters saved to the DataStore.
 These are also displayed in the Session Dialog.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.isSessionCodeNotInUse">
+<tt class="descname">isSessionCodeNotInUse</tt><big>(</big><em>current_sess_code</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.isSessionCodeNotInUse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.prePostExperimentVariableCallback">
+<tt class="descname">prePostExperimentVariableCallback</tt><big>(</big><em>expVarDict</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.prePostExperimentVariableCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ioHubExperimentRuntime.prePostSessionVariableCallback">
+<tt class="descname">prePostSessionVariableCallback</tt><big>(</big><em>sessionVarDict</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ioHubExperimentRuntime.prePostSessionVariableCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="staticmethod">
 <dt id="ioHub.util.experiment.ioHubExperimentRuntime.printExceptionDetails">

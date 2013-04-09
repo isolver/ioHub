@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 """
 ioHub
@@ -213,11 +214,11 @@ class ioHubpyTablesFile():
             self.flush()
             self.TABLES['MOUSE_INPUT']=self.emrtFile.createTable(self.emrtFile.root.data_collection.events.mouse,'MouseInputEvent', D.MouseInputEvent.NUMPY_DTYPE, title='Mouse Event Logging.', filters=dfilter.copy())
             self.addClassMapping(D.MouseMoveEvent,self.TABLES['MOUSE_INPUT'])
-            self.addClassMapping(D.MouseWheelUpEvent,self.TABLES['MOUSE_INPUT'])
-            self.addClassMapping(D.MouseWheelDownEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseDragEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseScrollEvent,self.TABLES['MOUSE_INPUT'])
             self.addClassMapping(D.MouseButtonReleaseEvent,self.TABLES['MOUSE_INPUT'])
             self.addClassMapping(D.MouseButtonPressEvent,self.TABLES['MOUSE_INPUT'])
-            self.addClassMapping(D.MouseDoubleClickEvent,self.TABLES['MOUSE_INPUT'])
+            self.addClassMapping(D.MouseMultiClickEvent,self.TABLES['MOUSE_INPUT'])
         
         if 'GAMEPAD' in class_constant_strings:
             self.emrtFile.createGroup(self.emrtFile.root.data_collection.events, 'gamepad', title='GamePad Created Events')

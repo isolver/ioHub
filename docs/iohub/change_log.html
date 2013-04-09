@@ -76,7 +76,7 @@
   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
   <ul class="dropdown-menu localtoc"><ul>
 <li><a class="reference internal" href="#">ioHub Change Log</a><ul>
-<li><a class="reference internal" href="#release-0-6b2">Release 0.6b2</a></li>
+<li><a class="reference internal" href="#release-0-6rc1">Release 0.6rc1</a></li>
 </ul>
 </li>
 </ul>
@@ -112,10 +112,30 @@
   
   <div class="section" id="iohub-change-log">
 <h1>ioHub Change Log<a class="headerlink" href="#iohub-change-log" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="release-0-6b2">
-<h2>Release 0.6b2<a class="headerlink" href="#release-0-6b2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="release-0-6rc1">
+<h2>Release 0.6rc1<a class="headerlink" href="#release-0-6rc1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
+<li><p class="first">TODO: Created first version of the LC Technologies EyeGaze Common Eye Tracker Interface. TODO: See the EyeGaze implementation page for a list of known <em>to-do&#8217;s</em>.</p>
+</li>
+<li><p class="first">Tobii Common Eye Tracker Interface has been updated to support 3, 5 and 9 point calibrations. The target position order can also be randomized. The calibration auto_pace and pacing_speed parameters have also been implemented. TODO: See the Tobii implementation page for a list of known <em>to-do&#8217;s</em></p>
+</li>
+<li><p class="first">Re-wrote the SMI Common Eye Tracker Interface from scratch. TODO: See the SMI implementation page for a list of known <em>to-do&#8217;s</em></p>
+</li>
+<li><p class="first">TODO: (verify) SR Research EyeLink Common Eye Tracker Interface is running. TODO: See the EyeLink implementation page for a list of known <em>to-do&#8217;s</em></p>
+</li>
+<li><p class="first">TODO: Created the first release for the Mac OS X port.</p>
+</li>
+<li><p class="first">TODO: Tested and fixed several issues with the Linux port.</p>
+</li>
+<li><p class="first">TODO: Documented all public ioHub Device and DeviceEvent attributes and methods.</p>
+</li>
+<li><p class="first">TODO: Created the first version of the ioHub documentation using Sphinx.</p>
+</li>
+<li><p class="first">TODO: Created a Python distutils installer for the ioHub source (i.e. python setup.py install)</p>
+</li>
 <li><p class="first">Refactored the Display Device class towards the goal of, well making more  of it being easier to integrate <em>properly</em> with PsychoPy.</p>
+</li>
+<li><p class="first">Added proper conversion logic allowing mapping of any Display Coordinate Space to the Display Screen&#8217;s Pixel Space. Only &#8216;pix&#8217; coord type is still supported, but adding other coord type support will be quite easy now.</p>
 </li>
 <li><dl class="first docutils">
 <dt>Did a major overhaul of the EyeTrackerDevice interface:</dt>
@@ -130,11 +150,15 @@
 </li>
 <li><p class="first">Added a FullScreenWindow class to ioHub.util.experiment, greatly simplifying the creation of a PsychoPy Window with the expected ioHub Display settings.</p>
 </li>
-<li><p class="first">Added support for devices running on the ioHub Server to be able to return exceptions that are then raised by the Experiment Process.</p>
+<li><p class="first">Added support for devices running on the ioHub Server to be able to return exceptions that are then raised by the Experiment Process. (experimental and buggy)</p>
 </li>
 <li><p class="first">Added several new attributes to the Device class, mainly related to being able to optionally specify much more information about the actual device being used (manufacturer, make, model, serial number, etc).</p>
 </li>
+<li><p class="first">Created a framework that allows the definition of what the &#8216;valid&#8217; configuration options and value types and ranges are for each device type, and device model specific implementations where appropriate. (BETA, usability of how errors found are reported to user should be improved, right now it just dumps the list of configuration issues to stderr.)</p>
+</li>
 <li><p class="first">Added ability to lock the Mouse device to a Display region on a multi-monitor computer.</p>
+</li>
+<li><p class="first">Added a &#8216;display_id&#8217; field to the Mouse Device&#8217;s events, so the display device the mouse was on is known, and therefore how the mouse pixel position information reported in an event can be interpreter properly.</p>
 </li>
 <li><p class="first">Changed the MessageEvent.msg_offset attribute to be type float32 so offsets can be represented in the standard sec.msec-usec format.</p>
 </li>
@@ -146,9 +170,7 @@
 </li>
 <li><p class="first">Updated the example scripts folder by moving all eye tracking related examples to a subdirectory.</p>
 </li>
-<li><p class="first">Documented all public ioHub Device and DeviceEvent attributes and methods.</p>
-</li>
-<li><p class="first">Created the first version of the ioHub documentation using Sphinx.</p>
+<li><p class="first">Created a &#8216;headlessEventMonitoring&#8217; example, console based, showing how ioHub can be used to get events from supported devices even when no application   graphics environment is in use.</p>
 </li>
 </ol>
 </div>

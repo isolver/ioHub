@@ -6,7 +6,7 @@ Mouse:
     stream_events: True
     auto_report_events: True
     event_buffer_length: 256
-    monitor_event_types: [MouseMoveEvent, MouseWheelUpEvent, MouseWheelDownEvent, MouseButtonPressEvent, MouseButtonReleaseEvent, MouseDoubleClickEvent]
+    monitor_event_types: [MouseMoveEvent, MouseDragEvent, MouseScrollEvent, MouseButtonPressEvent, MouseButtonReleaseEvent, MouseMultiClickEvent]
     model_name: N/A
     model_number: N/A
     manufacturer_name: N/A

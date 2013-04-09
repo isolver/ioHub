@@ -119,7 +119,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             for r in self.events:
                 if r.type is EventConstants.KEYBOARD_PRESS: #keypress code
-                    self.psychoStim['keytext'].setText(r.key)
+                    self.psychoStim['keytext'].setText(r.key.decode('utf-8'))
 
             self.events=None
 

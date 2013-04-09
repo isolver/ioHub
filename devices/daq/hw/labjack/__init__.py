@@ -1,9 +1,12 @@
+import sys
+import numpy as N
+
 import ioHub
 from ... import AnalogInputDevice, MultiChannelAnalogInputEvent
 from .... import Computer,ioDeviceError
+from ioHub import addDirectoryToPythonPath
+addDirectoryToPythonPath('devices/daq/hw/labjack')
 import pylabjack
-import sys
-import numpy as N
 
 class AnalogInput(AnalogInputDevice):
     """
@@ -103,6 +106,7 @@ class AnalogInput(AnalogInputDevice):
         event =[            
             0, # exp id
             0, # session id
+            0, #device id (not currently used)
             0, # event id
             MultiChannelAnalogInputEvent.EVENT_TYPE_ID, # event type
             device_time, # device time
@@ -116,10 +120,10 @@ class AnalogInput(AnalogInputDevice):
         for s in range(ain_counts[0]):
             multi_channel_event=list(event)
 
-            multi_channel_event[2]=Computer._getNextEventID()
-            multi_channel_event[4]=float(self._scan_count)/float(self.channel_sampling_rate)
-            multi_channel_event[6]=multi_channel_event[4]+start_post
-            multi_channel_event[8]=logged_time-multi_channel_event[6]
+            multi_channel_event[3]=Computer._getNextEventID()
+            multi_channel_event[5]=float(self._scan_count)/float(self.channel_sampling_rate)
+            multi_channel_event[7]=multi_channel_event[4]+start_post
+            multi_channel_event[9]=logged_time-multi_channel_event[6]
 
             multi_channel_event.extend([ain[a][s] for a in channel_index_list])
             self._addNativeEventToBuffer(multi_channel_event)

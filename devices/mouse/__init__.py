@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ioHub
 .. file: ioHub/devices/mouse/__init__.py
@@ -21,22 +22,22 @@ currentSec=Computer.currentSec
 class MouseDevice(Device):
     """
     The Mouse class represents a standard USB or PS2 mouse device that has up to 
-    three buttons and an optional vertical scroll wheel. Mouse position data is 
+    three buttons and an optional scroll wheel (1D on Windows and Linux, 2D on OSX). Mouse position data is 
     mapped to the coordinate space defined in the ioHub configuration file for the Display.
     """
-    EVENT_CLASS_NAMES=['MouseInputEvent','MouseButtonEvent','MouseWheelEvent',
-                       'MouseMoveEvent', 'MouseWheelUpEvent', 'MouseWheelDownEvent',
-                       'MouseButtonPressEvent','MouseButtonReleaseEvent',
-                       'MouseDoubleClickEvent']
+    EVENT_CLASS_NAMES=['MouseInputEvent','MouseButtonEvent','MouseScrollEvent',
+                       'MouseMoveEvent', 'MouseDragEvent','MouseButtonPressEvent','MouseButtonReleaseEvent',
+                       'MouseMultiClickEvent']
                        
     DEVICE_TYPE_ID=DeviceConstants.MOUSE
     DEVICE_TYPE_STRING='MOUSE'
 
-    __slots__=['_lock_mouse_to_display_id','_scrollPositionY','_position',
+    __slots__=['_lock_mouse_to_display_id','_scrollPositionY','_position','_clipRectsForDisplayID',
                '_lastPosition','_display_index','_last_display_index','_isVisible','activeButtons'
                ]
     def __init__(self,*args,**kwargs):     
         Device.__init__(self,*args,**kwargs)
+        self._clipRectsForDisplayID={}
         self._lock_mouse_to_display_id=None
         self._scrollPositionY=0
         self._position=0,0
@@ -50,13 +51,55 @@ class MouseDevice(Device):
             MouseConstants.MOUSE_BUTTON_MIDDLE:0,
                             }
         
+    def getSystemCursorVisibility(self):
+        """
+        Returns whether the system cursor is visible on the currently active Window.
+        
+        Args: 
+            None
+            
+        Returns: 
+            bool: True if system cursor is visible on currently active Window. False otherwise.
+        """
+        return self._nativeGetSystemCursorVisibility()
+ 
+    def setSystemCursorVisibility(self,v):
+        """
+        Set whether the system cursor is visible on the currently active Window.
+        
+        Args:
+            v (bool): True = make system cursor visible. False = Hide system cursor
+        
+        Returns:
+            (bool): True if system cursor is visible on currently active Window. False otherwise.
+
+        """
+        self._nativeSetSystemCursorVisibility(v)
+        return self.getSystemCursorVisibility()
+
     def getCurrentButtonStates(self):
         return (self.activeButtons[MouseConstants.MOUSE_BUTTON_LEFT]!=0,
                 self.activeButtons[MouseConstants.MOUSE_BUTTON_MIDDLE]!=0,
                 self.activeButtons[MouseConstants.MOUSE_BUTTON_RIGHT]!=0)
                 
+
     def lockMouseToDisplayID(self,display_id):
         self._lock_mouse_to_display_id=display_id    
+        if display_id is not None:
+            if display_id not in self._clipRectsForDisplayID:
+                screen=self._display_device.getConfiguration()['runtime_info']              
+                if screen:
+                    left,top,right,bottom=screen['bounds']
+                    clip_rect=ioHub.RectangleBorder(left,top,right,bottom)
+                    native_clip_rect=self._nativeLimitCursorToBoundingRect(clip_rect)
+                self._clipRectsForDisplayID[display_id]=native_clip_rect,clip_rect
+        else:
+            if None not in self._clipRectsForDisplayID:
+                left,top,right,bottom=screen['bounds']
+                clip_rect=ioHub.RectangleBorder(left,top,right,bottom)
+                native_clip_rect=self._nativeLimitCursorToBoundingRect(clip_rect)
+                self._clipRectsForDisplayID[display_id]=native_clip_rect,clip_rect
+        return self._clipRectsForDisplayID[display_id][1]
 
     def getlockedMouseDisplayID(self):
         return self._lock_mouse_to_display_id   
@@ -116,7 +159,7 @@ class MouseDevice(Device):
                 return ((0.0,0.0),(0.0,0.0), self._display_index)       
             return (0.0,0.0),(0.0,0.0)
 
-    def getVerticalScroll(self):
+    def getScroll(self):
         """
         Returns the current vertical scroll value for the mouse. The vertical scroll value changes when the
         scroll wheel on a mouse is moved up or down. The vertical scroll value is in an arbitrary value space
@@ -126,7 +169,7 @@ class MouseDevice(Device):
         """
         return self._scrollPositionY
 
-    def setVerticalScroll(self,s):
+    def setScroll(self,s):
         """
         Sets the current vertical scroll value for the mouse. The vertical scroll value changes when the
         scroll wheel on a mouse is moved up or down. The vertical scroll value is in an
@@ -140,12 +183,106 @@ class MouseDevice(Device):
         if isinstance(s, (int, long, float, complex)):
             self._scrollPositionY=s
         return self._scrollPositionY
+
+    def setPosition(self,pos,display_index=None):
+        """
+        Sets the current position of the ioHub Mouse Device. Mouse position ( pos ) should be specified in
+        Display coordinate units, with 0,0 being the center of the screen. If you would like the OS system
+        mouse position to also be updated, set updateSystemMousePosition to True (the default). Otherwise,
+        set it to False. When the system mouse position is updated, your position ( pos ) is converted
+        to the associated screen pixel position expected by the OS.
+
+        Args:
+             pos ( (x,y) list or tuple ): The position, in Display coordinate space, to set the mouse position too.
+             
+             updateSystemMousePosition (bool): True = the OS mouse position will also be updated, False = it will not.
         
+        Return:
+            tuple: new (x,y) position of mouse in Display coordinate space.
+        """
+        if isinstance(pos[0], (int, long, float, complex)) and isinstance(pos[1], (int, long, float, complex)):
+            display=self._display_device
+            current_display_index=display.getIndex()
+
+            if display_index is None:
+                display_index=current_display_index
+
+            if display_index==-1:
+                ioHub.print2err(" !!! Display Index -1 received by mouse.setPosition. !!!")
+                ioHub.print2err(" mouse.setPos did not update mouse pos")
+                return self._position
+                
+            px,py=display.displayCoord2Pixel(pos[0],pos[1],display_index)
+
+            result=self._validateMousePosition((px,py),display_index)
+            
+            if result !=True:
+                px,py=result
+            
+            mouse_display_index=self.getDisplayIndexForMousePosition((px,py))
+            
+            if mouse_display_index == -1:
+                ioHub.print2err(" !!! getDisplayIndexForMousePosition returned -1 in mouse.setPosition. !!!")
+                ioHub.print2err(" mouse.setPos did not update mouse pos")
+            elif mouse_display_index!=display_index:
+                ioHub.print2err(" !!! requested display_index {0} != mouse_pos_index {1}".format(
+                                display_index,mouse_display_index))
+                ioHub.print2err(" mouse.setPos did not update mouse pos")
+            else:                    
+                self._lastPosition=self._position
+                self._position=px,py
+
+                self._last_display_index=self._display_index
+                self._display_index=mouse_display_index
+            
+                self._nativeSetMousePos(px,py)     
+                
+        return self._position
+            
     def getDisplayIndexForMousePosition(self,system_mouse_pos):
         return self._display_device.getDisplayIndexForNativePixelPosition(system_mouse_pos)
 
+    def _validateMousePosition(self, pixel_pos,display_index):
+        left,top,right,bottom=self._display_device.getRuntimeInfoByIndex(display_index)['bounds']
+        mx,my=pixel_pos
+        mousePositionNeedsUpdate=False
+        
+        if mx < left:
+            mx=left
+            mousePositionNeedsUpdate=True
+        elif mx >= right:
+            mx=right-1
+            mousePositionNeedsUpdate=True
+            
+        if my < top:
+            my=top
+            mousePositionNeedsUpdate=True
+        elif my >= bottom:
+            my=bottom-1
+            mousePositionNeedsUpdate=True
+        
+        if mousePositionNeedsUpdate: 
+            return mx,my
+        
+        return True
 
-if Computer.system == 'Windows':
+    def _nativeSetMousePos(self,px,py):
+        ioHub.print2err("ERROR: _nativeSetMousePos must be overwritten by OS dependent implementation")
+
+    def _nativeGetSystemCursorVisibility(self):
+        ioHub.print2err("ERROR: _nativeGetSystemCursorVisibility must be overwritten by OS dependent implementation")
+        return True
+        
+    def _nativeSetSystemCursorVisibility(self,v):
+        ioHub.print2err("ERROR: _nativeSetSystemCursorVisibility must be overwritten by OS dependent implementation")
+        return True
+
+    def _nativeLimitCursorToBoundingRect(self,clip_rect):
+        ioHub.print2err("ERROR: _nativeLimitCursorToBoundingRect must be overwritten by OS dependent implementation")
+        native_clip_rect=None
+        return native_clip_rect
+        
+if Computer.system == 'win32':
     import ctypes
     
     class RECT(ctypes.Structure):
@@ -190,165 +327,52 @@ if Computer.system == 'Windows':
             WM_RBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_BUTTON_RELEASE, MouseConstants.MOUSE_BUTTON_RIGHT],
             WM_MBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_BUTTON_RELEASE, MouseConstants.MOUSE_BUTTON_MIDDLE],
             WM_LBUTTONUP : [MouseConstants.MOUSE_BUTTON_STATE_RELEASED, EventConstants.MOUSE_BUTTON_RELEASE, MouseConstants.MOUSE_BUTTON_LEFT],
-            WM_RBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_RIGHT],
-            WM_MBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_MIDDLE],
-            WM_LBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_DOUBLE_CLICK, EventConstants.MOUSE_DOUBLE_CLICK, MouseConstants.MOUSE_BUTTON_LEFT],
-            WM_MOUSEWHEEL : [0, EventConstants.MOUSE_WHEEL_DOWN, MouseConstants.MOUSE_BUTTON_NONE]
+            WM_RBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_MULTI_CLICK, EventConstants.MOUSE_MULTI_CLICK, MouseConstants.MOUSE_BUTTON_RIGHT],
+            WM_MBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_MULTI_CLICK, EventConstants.MOUSE_MULTI_CLICK, MouseConstants.MOUSE_BUTTON_MIDDLE],
+            WM_LBUTTONDBLCLK : [MouseConstants.MOUSE_BUTTON_STATE_MULTI_CLICK, EventConstants.MOUSE_MULTI_CLICK, MouseConstants.MOUSE_BUTTON_LEFT],
+            WM_MOUSEWHEEL : [0, EventConstants.MOUSE_SCROLL, MouseConstants.MOUSE_BUTTON_NONE]
         }
     
-        slots=['_user32','_original_system_cursor_clipping_rect','_clipRectsForDisplayID']
+        slots=['_user32','_original_system_cursor_clipping_rect']
         def __init__(self,*args,**kwargs):          
             MouseDevice.__init__(self,*args,**kwargs['dconfig'])
     
             self._user32=ctypes.windll.user32
     
             self.getSystemCursorVisibility()
-            self._clipRectsForDisplayID={}
             self._original_system_cursor_clipping_rect=RECT()
             self._user32.GetClipCursor(ctypes.byref(self._original_system_cursor_clipping_rect))
-
-        def lockMouseToDisplayID(self,display_id):
-            MouseDevice.lockMouseToDisplayID(self,display_id)
-            if display_id is not None:
-                if display_id not in self._clipRectsForDisplayID:
-                    screen=self._display_device.getConfiguration()['runtime_info']              
-                    if screen:
-                        left,top,right,bottom=screen['bounds']
-                        right=ctypes.c_long(right)
-                        bottom=ctypes.c_long(bottom)
-                        left=ctypes.c_long(left)
-                        top=ctypes.c_long(top)
-                        clip_rect=RECT(left,top,right,bottom)
-                    self._clipRectsForDisplayID[display_id]=clip_rect,ioHub.RectangleBorder(clip_rect.left,clip_rect.top,clip_rect.right,clip_rect.bottom)
-
-                clip_rect=self._clipRectsForDisplayID[display_id][0]    
-                self._user32.ClipCursor(ctypes.byref(clip_rect))
+            
+        def _nativeLimitCursorToBoundingRect(self,clip_rect):
+            native_clip_rect=RECT()            
+            if clip_rect:
+                native_clip_rect.right=ctypes.c_long(clip_rect.right)
+                native_clip_rect.bottom=ctypes.c_long(clip_rect.bottom)
+                native_clip_rect.left=ctypes.c_long(clip_rect.left)
+                native_clip_rect.top=ctypes.c_long(clip_rect.top)
+                self._user32.ClipCursor(ctypes.byref(native_clip_rect))
             else:
-                #ioHub.print2err("Setting Mouse ClipRect: None")
                 self._user32.ClipCursor(None)
-                if None not in self._clipRectsForDisplayID:
-                    clip_rect=RECT()
-                    self._user32.GetClipCursor(ctypes.byref(clip_rect))
-                    self._clipRectsForDisplayID[None]=clip_rect,ioHub.RectangleBorder(clip_rect.left,clip_rect.top,clip_rect.right,clip_rect.bottom)
-            return self._clipRectsForDisplayID[display_id][1]
+                self._user32.GetClipCursor(ctypes.byref(native_clip_rect))
+            return native_clip_rect
             
-        def setPosition(self,pos,display_index=None):
-            """
-            Sets the current position of the ioHub Mouse Device. Mouse position ( pos ) should be specified in
-            Display coordinate units, with 0,0 being the center of the screen. If you would like the OS system
-            mouse position to also be updated, set updateSystemMousePosition to True (the default). Otherwise,
-            set it to False. When the system mouse position is updated, your position ( pos ) is converted
-            to the associated screen pixel position expected by the OS.
-    
-            Args:
-                 pos ( (x,y) list or tuple ): The position, in Display coordinate space, to set the mouse position too.
-                 
-                 updateSystemMousePosition (bool): True = the OS mouse position will also be updated, False = it will not.
+        def _nativeSetMousePos(self,px,py):
+            self._user32.SetCursorPos(int(px),int(py))
+            #ioHub.print2err(" mouse.setPos updated to {0}".format((px,py)))
             
-            Return:
-                tuple: new (x,y) position of mouse in Display coordinate space.
-            """
-            if isinstance(pos[0], (int, long, float, complex)) and isinstance(pos[1], (int, long, float, complex)):
-                display=self._display_device
-                current_display_index=display.getIndex()
-
-                if display_index is None:
-                    display_index=current_display_index
-
-                if display_index==-1:
-                    ioHub.print2err(" !!! Display Index -1 received by mouse.setPosition. !!!")
-                    ioHub.print2err(" mouse.setPos did not update mouse pos")
-                    return self._position
-                    
-                px,py=display.displayCoord2Pixel(pos[0],pos[1],display_index)
-
-                result=self._validateMousePosition((px,py),display_index)
-                
-                if result !=True:
-                    px,py=result
-                
-                mouse_display_index=self.getDisplayIndexForMousePosition((px,py))
-                
-                if mouse_display_index == -1:
-                    ioHub.print2err(" !!! getDisplayIndexForMousePosition returned -1 in mouse.setPosition. !!!")
-                    ioHub.print2err(" mouse.setPos did not update mouse pos")
-                elif mouse_display_index!=display_index:
-                    ioHub.print2err(" !!! requested display_index {0} != mouse_pos_index {1}".format(
-                                    display_index,mouse_display_index))
-                    ioHub.print2err(" mouse.setPos did not update mouse pos")
-                else:                    
-                    self._lastPosition=self._position
-                    self._position=px,py
-
-                    self._last_display_index=self._display_index
-                    self._display_index=mouse_display_index
-                
-                    self._user32.SetCursorPos(int(px),int(py))
-                    #ioHub.print2err(" mouse.setPos updated to {0}".format((px,py)))
-                    
-            return self._position
-    
-        def getSystemCursorVisibility(self):
-            """
-            Returns whether the system cursor is visible on the currently active Window.
-            
-            Args: 
-                None
-                
-            Returns: 
-                bool: True if system cursor is visible on currently active Window. False otherwise.
-            """
-            #  >> WIN32_ONLY
+        def _nativeGetSystemCursorVisibility(self):
             self._user32.ShowCursor(False)    
             self._isVisible = self._user32.ShowCursor(True)
-            #  << WIN32_ONLY
             return self._isVisible >= 0
      
-        def setSystemCursorVisibility(self,v):
-            """
-            Set whether the system cursor is visible on the currently active Window.
-            
-            Args:
-                v (bool): True = make system cursor visible. False = Hide system cursor
-            
-            Returns:
-                (bool): True if system cursor is visible on currently active Window. False otherwise.
-    
-            """
-            #  >> WIN32_ONLY
+        def _nativeSetSystemCursorVisibility(self,v):
             self._isVisible=self._user32.ShowCursor(v)
-            #  << WIN32_ONLY
             return self._isVisible >= 0
-
-
-        def _validateMousePosition(self, pixel_pos,display_index):
-            left,top,right,bottom=self._display_device.getRuntimeInfoByIndex(display_index)['bounds']
-            mx,my=pixel_pos
-            mousePositionNeedsUpdate=False
-            
-            if mx < left:
-                mx=left
-                mousePositionNeedsUpdate=True
-            elif mx >= right:
-                mx=right-1
-                mousePositionNeedsUpdate=True
-                
-            if my < top:
-                my=top
-                mousePositionNeedsUpdate=True
-            elif my >= bottom:
-                my=bottom-1
-                mousePositionNeedsUpdate=True
-            
-            if mousePositionNeedsUpdate: 
-                return mx,my
-            
-            return True
             
         def _nativeEventCallback(self,event):
             if self.isReportingEvents():
                 logged_time=currentSec()
-
+                #ioHub.print2err("Received mouse event pos: ", event.Position)
                 self._scrollPositionY+= event.Wheel
                 event.WheelAbsolute=self._scrollPositionY
 
@@ -364,14 +388,15 @@ if Computer.system == 'Windows':
                         return True
                 
                 result=self._validateMousePosition(event.Position,display_index)
+                #ioHub.print2err("_validateMousePosition result: ", result)
                 
                 if result != True:
                     #ioHub.print2err("!!! _validateMousePosition made ajustment: {0} to {1}".format(
-                    #                                    event.Position,result))
-                    self._user32.SetCursorPos(*result)   
+                    #                                   event.Position,result))
+                    self._nativeSetMousePos(*result) 
                     event.Position=result
                     display_index=self.getDisplayIndexForMousePosition(event.Position)
-
+                    
                 mx,my=event.Position                
                 event.DisplayIndex=display_index                
                 p=self._display_device.pixel2DisplayCoord(mx,my,event.DisplayIndex)  
@@ -418,9 +443,8 @@ if Computer.system == 'Windows':
     
             bstate,etype,bnum=self._mouse_event_mapper[event.Message]
     
-            if event.Message == self.WM_MOUSEWHEEL:
-                if event.Wheel > 0:
-                    etype=EventConstants.MOUSE_WHEEL_UP
+            if event.Message == self.WM_MOUSEMOVE and event.ActiveButtons>0:
+                etype=EventConstants.MOUSE_DRAG
     
             confidence_interval=0.0
             delay=0.0
@@ -433,19 +457,37 @@ if Computer.system == 'Windows':
             # first message from the time of the second message.
             device_time = event.Time/1000.0 # convert to sec
             
-            hubTime = logged_time #TODO correct mouse times to factor in offset.
+            hubTime = logged_time
     
-            r= [0,0,Computer._getNextEventID(),etype,device_time,logged_time,hubTime,
-                        confidence_interval, delay,0, event.DisplayIndex, bstate, bnum,event.ActiveButtons,
-                        px, py,event.Wheel,event.WheelAbsolute, event.Window]    
+            r= [0,
+                0,
+                0, #device id
+                Computer._getNextEventID(),
+                etype,
+                device_time,
+                logged_time,
+                hubTime,
+                confidence_interval, 
+                delay,
+                0, 
+                event.DisplayIndex, 
+                bstate, 
+                bnum,
+                event.ActiveButtons,
+                px, 
+                py,
+                0, #scroll_dx not supported
+                0, #scroll_x not supported   
+                event.Wheel,
+                event.WheelAbsolute,                      
+                event.Window]    
             return r
 
         def __del__(self):
             self._user32.ClipCursor(ctypes.byref(self._original_system_cursor_clipping_rect))
             MouseDevice.__del__(self)
             
-elif Computer.system == 'Linux':
-#    global Mouse
+elif Computer.system == 'linux2':
     class Mouse(MouseDevice):
         """
         The Mouse class and related events represent a standard computer mouse device
@@ -454,131 +496,451 @@ elif Computer.system == 'Linux':
         """
         
         def __init__(self,*args,**kwargs):          
+            MouseDevice.__init__(self,*args,**kwargs['dconfig'])            
+
+        def _nativeSetMousePos(self,px,py):
+            pass#ioHub.print2err('_nativeSetMousePos result: ',result)
+                
+        def _nativeGetSystemCursorVisibility(self):
+            return False#CGCursorIsVisible()
+            
+        def _nativeSetSystemCursorVisibility(self,v):
+            pass
+            #if v and not CGCursorIsVisible():
+            #    pass#CGDisplayShowCursor(CGMainDisplayID())
+            #elif not v and CGCursorIsVisible():
+            #    pass#CGDisplayHideCursor(CGMainDisplayID()
+                
+        def _nativeLimitCursorToBoundingRect(self,clip_rect):
+            ioHub.print2err('WARNING: Mouse._nativeLimitCursorToBoundingRect not implemented on OSX yet.')
+            native_clip_rect=None
+            return native_clip_rect
+
+                         
+        def _nativeEventCallback(self,event):
+            try:
+               if self.isReportingEvents():
+                    logged_time=currentSec()
+                    
+                    event_array=event[0]
+                    event_array[3]=Computer._getNextEventID()
+                    
+                    self._addNativeEventToBuffer(event_array)
+                    
+                    self._last_callback_time=logged_time
+            except:
+                ioHub.printExceptionDetailsToStdErr()
+            
+            # Must return original event or no mouse events will get to OSX!
+            return 1
+                
+        def _getIOHubEventObject(self,native_event_data):
+            #ioHub.print2err('Event: ',native_event_data)
+            return native_event_data
+
+
+#          
+#        def _nativeEventCallback(self,event):
+#                if self.isReportingEvents():
+#                    logged_time=currentSec()
+#        
+#                    self._scrollPositionY+= event.Wheel
+#                    print event
+#                    return 1
+#
+#                    event.WheelAbsolute=self._scrollPositionY
+#        
+#                    ioHub.print2err("UPDATE Linux _getIOHubEventObject to include event.DisplayIndex logic.")            
+#                    event.DisplayIndex=0
+#    
+#                    p=self._display_device.pixel2DisplayCoord(event.Position[0],event.Position[1])
+#                    event.Position=p
+#    
+#                    self._lastPosition=self._position
+#                    self._position=event.Position
+#    
+#                    self._last_display_index=self._display_index
+#                    self._display_index=event.DisplayIndex
+#     
+#                    if event.ioHubButtonID is not MouseConstants.MOUSE_BUTTON_NONE:
+#                        self.activeButtons[event.ioHubButtonID]= int(event.ioHubButtonState==MouseConstants.MOUSE_BUTTON_STATE_PRESSED)
+#        
+#                    abuttonSum=0
+#                    for k,v in self.activeButtons.iteritems():
+#                        abuttonSum+=k*v
+#        
+#                    event.ActiveButtons=abuttonSum
+#        
+#                    self._addNativeEventToBuffer((logged_time,event))
+#        
+#                    self._last_callback_time=logged_time
+#        
+#    
+#        def _getIOHubEventObject(self,native_event_data):
+#            logged_time, event=native_event_data
+#            #import ioHub
+#            #ioHub.print2err("Mouse event start....")            
+#            px,py = event.Position
+#    
+#            confidence_interval=0.0
+#            delay=0.0
+#            hubTime = logged_time #TODO correct mouse times to factor in offset.
+#    
+#            r= [0,
+#                0,
+#                0, #device id
+#                Computer._getNextEventID(),
+#                event.ioHubEventID,
+#                event.Time,
+#                logged_time,
+#                hubTime,
+#                confidence_interval, 
+#                delay,
+#                0, # filtered by ID (always 0 right now) 
+#                event.DisplayIndex,
+#                event.ioHubButtonState, 
+#                event.ioHubButtonID,
+#                event.ActiveButtons, 
+#                px, 
+#                py,
+#                0, #scroll_dx not supported
+#                0, #scroll_x not supported
+#                event.Wheel,
+#                event.WheelAbsolute, 
+#                event.Window]
+#             
+#            #ioHub.print2err("Mouse event built.\n-----------------")
+#            
+#            return r
+#
+else: # assume OS X
+    from copy import copy
+    from Quartz import *
+    from AppKit import NSEvent
+    
+    pressID = [None, kCGEventLeftMouseDown, kCGEventRightMouseDown, kCGEventOtherMouseDown]
+    releaseID = [None, kCGEventLeftMouseUp, kCGEventRightMouseUp, kCGEventOtherMouseUp]
+    dragID = [None, kCGEventLeftMouseDragged, kCGEventRightMouseDragged, kCGEventOtherMouseDragged]
+    
+    from ioHub.constants import EventConstants,MouseConstants
+    
+    class Mouse(MouseDevice):
+        """
+        The Mouse class and related events represent a standard computer mouse device
+        and the events a standard mouse can produce. Mouse position data is mapped to
+        the coordinate space defined in the ioHub configuration file for the Display.
+        """
+        __slots__=['_loop_source','_tap','_device_loop','_CGEventTapEnable',
+                   '_loop_mode','_scrollPositionX']
+    
+        _IOHUB_BUTTON_ID_MAPPINGS={
+            kCGEventLeftMouseDown:MouseConstants.MOUSE_BUTTON_LEFT,
+            kCGEventRightMouseDown:MouseConstants.MOUSE_BUTTON_RIGHT,
+            kCGEventOtherMouseDown:MouseConstants.MOUSE_BUTTON_MIDDLE,
+            kCGEventLeftMouseUp:MouseConstants.MOUSE_BUTTON_LEFT,
+            kCGEventRightMouseUp:MouseConstants.MOUSE_BUTTON_RIGHT,
+            kCGEventOtherMouseUp:MouseConstants.MOUSE_BUTTON_MIDDLE
+        }
+        
+        DEVICE_TIME_TO_SECONDS=0.000000001
+        
+        _EVENT_TEMPLATE_LIST=[0, # experiment id
+                            0,  # session id
+                            0, #device id
+                            0,  # Computer._getNextEventID(),
+                            0,  # ioHub Event type
+                            0.0,# event device time,
+                            0.0,# event logged_time,
+                            0.0,# event iohub Time,
+                            0.0,# confidence_interval, 
+                            0.0,# delay,
+                            0,  # filtered by ID (always 0 right now) 
+                            0,  # Display Index,
+                            0,  # ioHub Button State, 
+                            0,  # ioHub Button ID,
+                            0,  # Active Buttons, 
+                            0.0,# x position of mouse in Display device coord's 
+                            0.0,# y position of mouse in Display device coord's
+                            0,  # Wheel dx
+                            0,  # Wheel Absolute x 
+                            0,  # Wheel dy
+                            0,  # Wheel Absolute y 
+                            0 ] # event.Window]            
+    
+        
+        def __init__(self,*args,**kwargs):
             MouseDevice.__init__(self,*args,**kwargs['dconfig'])
             
-            #self.getSystemCursorVisibility()
+            self._tap = CGEventTapCreate(
+                kCGSessionEventTap,
+                kCGHeadInsertEventTap,
+                kCGEventTapOptionDefault,
+                CGEventMaskBit(kCGEventMouseMoved) |
+                CGEventMaskBit(kCGEventLeftMouseDown) |
+                CGEventMaskBit(kCGEventLeftMouseUp) |
+                CGEventMaskBit(kCGEventRightMouseDown) |
+                CGEventMaskBit(kCGEventRightMouseUp) |
+                CGEventMaskBit(kCGEventLeftMouseDragged) |
+                CGEventMaskBit(kCGEventRightMouseDragged) |
+                CGEventMaskBit(kCGEventOtherMouseDragged) |
+                CGEventMaskBit(kCGEventOtherMouseDown) |
+                CGEventMaskBit(kCGEventScrollWheel) |
+                CGEventMaskBit(kCGEventOtherMouseUp),
+                self._nativeEventCallback,
+                None)            
             
+            self._scrollPositionX=0
+            self._CGEventTapEnable=CGEventTapEnable
+            self._loop_source = CFMachPortCreateRunLoopSource(None, self._tap, 0)          
+            self._device_loop = CFRunLoopGetCurrent()
+            self._loop_mode=kCFRunLoopDefaultMode
+            
+            CFRunLoopAddSource(self._device_loop, self._loop_source, self._loop_mode)
 
-        def setPosition(self,pos, updateSystemMousePosition=True):
-            """
-            Sets the current position of the ioHub Mouse Device. Mouse position ( pos ) should be specified in
-            Display coordinate units, with 0,0 being the center of the screen. If you would like the OS system
-            mouse position to also be updated, set updateSystemMousePosition to True (the default). Otherwise,
-            set it to False. When the system mouse position is updated, your position ( pos ) is converted
-            to the associated screen pixel position expected by the OS.
-    
-            Args:
-                 pos: The position, in Display coordinate space, to set the mouse position too.
-                 updateSystemMousePosition: True = the OS mouse position will also be updated,
-                                            False = it will not.
-            Return (tuple): new (x,y) position of mouse in Display coordinate space.
-            """
-            if isinstance(pos[0], (int, long, float, complex)) and isinstance(pos[1], (int, long, float, complex)):
-                self._lastPosition=self._position
-                self._position=pos[0],pos[1]
-    
-            ioHub.print2err('Mouse.setPosition not implemented on Linux yet.')
-            return self._position
+        def _nativeSetMousePos(self,px,py):
+            result=CGWarpMouseCursorPosition(CGPointMake(float(px),float(py)))
+            ioHub.print2err('_nativeSetMousePos result: ',result)
+                
+        def _nativeGetSystemCursorVisibility(self):
+            return CGCursorIsVisible()
             
-        def getSystemCursorVisibility(self):
+        def _nativeSetSystemCursorVisibility(self,v):
+            if v and not CGCursorIsVisible():
+                CGDisplayShowCursor(CGMainDisplayID())
+            elif not v and CGCursorIsVisible():
+                CGDisplayHideCursor(CGMainDisplayID())
+
+                
+        def _nativeLimitCursorToBoundingRect(self,clip_rect):
+            ioHub.print2err('WARNING: Mouse._nativeLimitCursorToBoundingRect not implemented on OSX yet.')
+            native_clip_rect=None
+            return native_clip_rect
+
+        def getScroll(self):
             """
-            Returns whether the system cursor is visible on the currently active Window.
+            TODO: Update docs for OSX
             Args: None
-            Returns (bool): True if system cursor is visible on currently active Window. False otherwise.
+            Returns 
             """
-            #  >> WIN32_ONLY
-            #v=self._user32.ShowCursor(False)    
-            #self._isVisible = self._user32.ShowCursor(True)
-            #  << WIN32_ONLY
-            ioHub.print2err("Mouse.getSystemCursorVisibility is not currently supported on Linux.")
-            return False#self._isVisible >= 0
- 
-        def setSystemCursorVisibility(self,v):
-            """
-            Set whether the system cursor is visible on the currently active Window.
-            Args:
-                v (bool): True = make system cursor visible. False = Hide system cursor
-            Returns (bool): True if system cursor is visible on currently active Window. False otherwise.
+            return self._scrollPositionX,self._scrollPositionY
     
+        def setScroll(self,sp):
             """
-            #  >> WIN32_ONLY
-            #self._isVisible=self._user32.ShowCursor(v)
-            #  << WIN32_ONLY
-            ioHub.print2err("Mouse.setSystemCursorVisibility is not currently supported on Linux.")
-            return False#self._isVisible >= 0    
-       
-       
-        def _nativeEventCallback(self,event):
+            TODO: Update docs for OSX
+            """
+            self._scrollPositionX,self._scrollPositionY=sp
+            return self._scrollPositionX,self._scrollPositionY
+
+        def _poll(self):
+            self._last_poll_time=currentSec()            
+            while CFRunLoopRunInMode(self._loop_mode, 0.0, True) == kCFRunLoopRunHandledSource:
+                pass
+                            
+        def _nativeEventCallback(self,*args):
+            try:
+                proxy, etype, event, refcon = args
                 if self.isReportingEvents():
                     logged_time=currentSec()
-        
-                    self._scrollPositionY+= event.Wheel
-                    event.WheelAbsolute=self._scrollPositionY
-        
-                    ioHub.print2err("UPDATE Linux _getIOHubEventObject to include event.DisplayIndex logic.")            
-                    event.DisplayIndex=0
     
-                    p=self._display_device.pixel2DisplayCoord(event.Position[0],event.Position[1])
-                    event.Position=p
+                    if etype == kCGEventTapDisabledByTimeout:
+                        ioHub.print2err("** WARNING: Mouse Tap Disabled due to timeout. Re-enabling....: ", etype)
+                        CGEventTapEnable(self._tap, True)
+                        return event
+                    else:                
+                        confidence_interval=0.0
+                        delay=0.0
+                        iohub_time = logged_time
+                        device_time=CGEventGetTimestamp(event)*self.DEVICE_TIME_TO_SECONDS      
+                        ioe_type=EventConstants.UNDEFINED
+                        px,py = CGEventGetLocation(event)
+                        multi_click_count=CGEventGetIntegerValueField(event,kCGMouseEventClickState)
+                        mouse_event = NSEvent.eventWithCGEvent_(event)                                  
+                        window_handle=mouse_event.windowNumber()                          
+                                       
+                        # TO DO: Implement multimonitor location based on mouse location support.
+                        # Currently always uses monitor index 0
+                        
+                        display_index=self.getDisplayIndexForMousePosition((px,py))
+                        if display_index == -1:
+                            if self._last_display_index is not None:
+                                display_index=self._last_display_index
+                            else:    
+                                ioHub.print2err("!!! _nativeEventCallback error: mouse event pos {0} not in any display bounds!!!".format(event.Position))
+                                ioHub.print2err("!!!  -> SKIPPING EVENT")
+                                ioHub.print2err("===============")
+                                return event
+                
+                        result=self._validateMousePosition((px,py),display_index)
+                        if result != True:
+                            ioHub.print2err("!!! _validateMousePosition made ajustment: {0} to {1}".format((px,py),result))
+                            nx,ny=result
+                            display_index=self.getDisplayIndexForMousePosition((nx,ny))
+                            ioHub.print2err("Going to Update mousePosition: {0} => {1} on D {2}".format((px,py),(ny,ny),display_index))            
+                            px,py=nx,ny
+                            self._nativeSetMousePos(px,py)   
+                
+                        px,py=self._display_device.pixel2DisplayCoord(px,py,display_index)                          
+                        self._lastPosition=self._position
+                        self._position=px,py
+                        self._last_display_index=self._display_index
+                        self._display_index=display_index
+                        
+                        # TO DO: Supported reporting scroll x info for OSX.
+                        # This also suggests not having scoll up and down events and
+                        # just having the one scroll event type, regardless of direction / dimension 
+                        scroll_dx=0
+                        scroll_dy=0
+                        button_state=0
+                        if etype in pressID:
+                            button_state=MouseConstants.MOUSE_BUTTON_STATE_PRESSED
+                            if multi_click_count>1:
+                                ioe_type=EventConstants.MOUSE_MULTI_CLICK
+                            else:
+                                ioe_type=EventConstants.MOUSE_BUTTON_PRESS
+                        elif etype in releaseID:
+                            button_state=MouseConstants.MOUSE_BUTTON_STATE_RELEASED
+                            ioe_type=EventConstants.MOUSE_BUTTON_RELEASE
+                        elif etype in dragID:
+                            ioe_type=EventConstants.MOUSE_DRAG
+                        elif etype == kCGEventMouseMoved:
+                            ioe_type=EventConstants.MOUSE_MOVE
+                        elif etype == kCGEventScrollWheel:    
+                            ioe_type=EventConstants.MOUSE_SCROLL
+                            scroll_dy= CGEventGetIntegerValueField(event,kCGScrollWheelEventPointDeltaAxis1)
+                            scroll_dx= CGEventGetIntegerValueField(event,kCGScrollWheelEventPointDeltaAxis2)
+                            self._scrollPositionX+= scroll_dx
+                            self._scrollPositionY+= scroll_dy
+                                                
+                        iohub_button_id=self._IOHUB_BUTTON_ID_MAPPINGS.get(etype,0)
     
-                    self._lastPosition=self._position
-                    self._position=event.Position
-    
-                    self._last_display_index=self._display_index
-                    self._display_index=event.DisplayIndex
-     
-                    if event.ioHubButtonID is not MouseConstants.MOUSE_BUTTON_NONE:
-                        self.activeButtons[event.ioHubButtonID]= int(event.ioHubButtonState==MouseConstants.MOUSE_BUTTON_STATE_PRESSED)
-        
-                    abuttonSum=0
-                    for k,v in self.activeButtons.iteritems():
-                        abuttonSum+=k*v
-        
-                    event.ActiveButtons=abuttonSum
-        
-                    self._addNativeEventToBuffer((logged_time,event))
-        
-                    self._last_callback_time=logged_time
-        
-    
-        def _getIOHubEventObject(self,native_event_data):
-            logged_time, event=native_event_data
-            #import ioHub
-            #ioHub.print2err("Mouse event start....")            
-            px,py = event.Position
-    
-            confidence_interval=0.0
-            delay=0.0
-            hubTime = logged_time #TODO correct mouse times to factor in offset.
-    
-            r= [0,
-                0,
-                Computer._getNextEventID(),
-                event.ioHubEventID,
-                event.Time,
-                logged_time,
-                hubTime,
-                confidence_interval, 
-                delay,
-                0, # filtered by ID (always 0 right now) 
-                event.DisplayIndex,
-                event.ioHubButtonState, 
-                event.ioHubButtonID,
-                event.ActiveButtons, 
-                px, 
-                py,
-                event.Wheel,
-                event.WheelAbsolute, 
-                event.Window]
-             
-            #ioHub.print2err("Mouse event built.\n-----------------")
+                        if iohub_button_id in self.activeButtons:
+                            self.activeButtons[iohub_button_id]= int(button_state==MouseConstants.MOUSE_BUTTON_STATE_PRESSED)
             
-            return r
-
-else: # assume OS X
-    import _osx
-    print 'Mouse not implemented on OS X yet.'
-
+                        pressed_buttons=0
+                        for k,v in self.activeButtons.iteritems():
+                            pressed_buttons+=k*v
+                        
+                        # Create Event List
+                        # index 0 and 1 are session and exp. ID's
+                        # index 2 is (yet to be used) device_id
+                        ioe=self._EVENT_TEMPLATE_LIST
+                        ioe[3]=Computer._getNextEventID()
+                        ioe[4]=ioe_type #event type code
+                        ioe[5]=device_time
+                        ioe[6]=logged_time
+                        ioe[7]=iohub_time
+                        ioe[8]=confidence_interval
+                        ioe[9]=delay
+                        # index 10 is filter id, not used at this time
+                        ioe[11]=display_index
+                        ioe[12]=button_state
+                        ioe[13]=iohub_button_id
+                        ioe[14]=pressed_buttons 
+                        ioe[15]=px 
+                        ioe[16]=py
+                        ioe[17]=int(scroll_dx)
+                        ioe[18]=int(self._scrollPositionX) 
+                        ioe[19]=int(scroll_dy)
+                        ioe[20]=int(self._scrollPositionY) 
+                        ioe[21]=window_handle
+                        
+                        self._addNativeEventToBuffer(copy(ioe))
+                        
+                    self._last_callback_time=logged_time
+            except:
+                ioHub.printExceptionDetailsToStdErr()
+                CGEventTapEnable(self._tap, False)
+            
+            # Must return original event or no mouse events will get to OSX!
+            return event
+                
+        def _getIOHubEventObject(self,native_event_data):
+            #ioHub.print2err('Event: ',native_event_data)
+            return native_event_data
+        
+        def _close(self):
+            try:
+                self._nativeSetSystemCursorVisibility(True)
+            except Exception:
+                pass
+            
+            try:
+                CGEventTapEnable(self._tap, False)
+            except:
+                pass
+            
+            try:
+                if CFRunLoopContainsSource(self._device_loop,self._loop_source,self._loop_mode) is True:    
+                    CFRunLoopRemoveSource(self._device_loop,self._loop_source,self._loop_mode)
+            finally:
+                self._loop_source=None
+                self._tap=None
+                self._device_loop=None
+                self._loop_mode=None
+            
+            MouseDevice._close(self)
+    # END OF OSX MOUSE CLASS
+    
+        """
+        CGEventTapInformation
+        Defines the structure used to report information about event taps.
+        typedef struct CGEventTapInformation
+           {
+           uint32_t            eventTapID;
+           CGEventTapLocation  tapPoint;
+           CGEventTapOptions   options;
+           CGEventMask         eventsOfInterest;
+           pid_t               tappingProcess;
+           pid_t               processBeingTapped;
+           bool                enabled;
+           float               minUsecLatency;
+           float               avgUsecLatency;
+           float               maxUsecLatency;
+        } CGEventTapInformation;
+        Fields
+        
+        eventTapID
+        The unique identifier for the event tap.
+        
+        tapPoint
+        The location of the event tap. See "Event Tap Locations."
+        
+        options
+        The type of event tap (passive listener or active filter).
+        
+        eventsOfInterest
+        The mask that identifies the set of events to be observed.
+        
+        tappingProcess
+        The process ID of the application that created the event tap.
+        
+        processBeingTapped
+        The process ID of the target application (non-zero only if the 
+        event tap was created using the function CGEventTapCreateForPSN.
+        
+        enabled
+        TRUE if the event tap is currently enabled; otherwise FALSE.
+        
+        minUsecLatency
+        Minimum latency in microseconds. In this data structure, 
+        latency is defined as the time in microseconds it takes 
+        for an event tap to process and respond to an event passed to it.
+        
+        avgUsecLatency
+        Average latency in microseconds. This is a weighted average
+        that gives greater weight to more recent events.
+        
+        maxUsecLatency
+        Maximum latency in microseconds.
+        
+        Discussion
+        To learn how to obtain information about event taps, see the 
+        function CGGetEventTapList.
+        Availability
+        Available in OS X v10.4 and later.
+        Declared In
+        CGEventTypes.h        
+        """
 ############# OS Independent Mouse Event Classes ####################
 
 from .. import DeviceEvent
@@ -603,8 +965,10 @@ class MouseInputEvent(DeviceEvent):
                      ('x_position',N.int16),    # x position of the position when the event occurred
                      ('y_position',N.int16),    # y position of the position when the event occurred
 
-                     ('wheel_change', N.int8),  # vertical scroll wheel position change when the event occurred
-                     ('wheel_value', N.int16),  # vertical scroll wheel abs. position when the event occurred
+                     ('scroll_dx', N.int8),  # horizontal scroll wheel position change when the event occurred (OS X only)
+                     ('scroll_x', N.int16),  # horizontal scroll wheel abs. position when the event occurred (OS X only)
+                     ('scroll_dy', N.int8),  # vertical scroll wheel position change when the event occurred
+                     ('scroll_y', N.int16),  # vertical scroll wheel abs. position when the event occurred
 
                      ('window_id',N.uint64)      # window ID that the mouse was over when the event occurred
                                                 # (window does not need to have focus)
@@ -634,12 +998,18 @@ class MouseInputEvent(DeviceEvent):
         #: y position of the position when the event occurred; in display coordinate space
         self.y_position=None
         
+        #: horizontal scroll wheel position change when the event occurred
+        self.scroll_dx=None
+
+        #: horizontal scroll wheel absolute position when the event occurred
+        self.scroll_x=None
+
         #: vertical scroll wheel position change when the event occurred
-        self.wheel_change=None
+        self.scroll_dy=None
 
         #: vertical scroll wheel absolute position when the event occurred
-        self.wheel_value=None
-
+        self.scroll_y=None
+        
         #: window ID that the mouse was over when the event occurred
         #: (window does not need to have focus)
         self.window_id=None
@@ -662,71 +1032,46 @@ class MouseMoveEvent(MouseInputEvent):
     def __init__(self, *args, **kwargs):
         MouseInputEvent.__init__(self, *args, **kwargs)
 
-class MouseWheelEvent(MouseInputEvent):
-    EVENT_TYPE_STRING='MOUSE_WHEEL'
-    EVENT_TYPE_ID=EventConstants.MOUSE_WHEEL
+class MouseDragEvent(MouseMoveEvent):
+    """
+    MouseDragEvents occur when the mouse position changes and at least one mouse
+    button is pressed. Mouse position is mapped to the coordinate space defined
+    in the ioHub configuration file for the Display.
+    
+    Event Type ID: EventConstants.MOUSE_DRAG
+    Event Type String: 'MOUSE_DRAG'
+    """
+    EVENT_TYPE_STRING='MOUSE_DRAG'
+    EVENT_TYPE_ID=EventConstants.MOUSE_DRAG
+    IOHUB_DATA_TABLE=MouseMoveEvent.IOHUB_DATA_TABLE
+    __slots__=[]
+    def __init__(self, *args, **kwargs):
+        MouseMoveEvent.__init__(self, *args, **kwargs)
+
+class MouseScrollEvent(MouseInputEvent):
+    """
+    MouseScrollEvent's are generated when the scroll wheel on the 
+    Mouse Device (if it has one) is moved. Vertical scrolling is supported
+    on all operating systems, horizontal scrolling is only supported on OS X.
+    Each MouseScrollEvent provides the number of units the wheel was turned 
+    in each supported dimension, as well as the absolute scroll value for 
+    of each supported dimension.
+
+    Event Type ID: EventConstants.MOUSE_SCROLL
+    Event Type String: 'MOUSE_SCROLL'
+    """
+    EVENT_TYPE_STRING='MOUSE_SCROLL'
+    EVENT_TYPE_ID=EventConstants.MOUSE_SCROLL
     IOHUB_DATA_TABLE=MouseInputEvent.IOHUB_DATA_TABLE
     __slots__=[]
     def __init__(self, *args, **kwargs):
         """
 
-        :rtype : MouseWheelEvent
+        :rtype : MouseScrollEvent
         :param args:
         :param kwargs:
         """
         MouseInputEvent.__init__(self, *args, **kwargs)
-
-class MouseWheelUpEvent(MouseWheelEvent):
-    """
-    MouseWheelUpEvent's are generated when the vertical scroll wheel on the 
-    Mouse Device (if it has one) is turned in the direction toward the front 
-    of the mouse. Horizontal scrolling is not currently supported.
-    Each MouseWheelUpEvent provides the number of units the wheel was turned 
-    ( +1 ) as well as the absolute scroll value for the mouse, which is an 
-    ioHub Mouse attribute that is simply modified by the change value of
-    MouseWheelUpEvent and MouseWheelDownEvent types.
-
-    Event Type ID: EventConstants.MOUSE_WHEEL_UP
-    Event Type String: 'MOUSE_WHEEL_UP'
-    """
-    EVENT_TYPE_STRING='MOUSE_WHEEL_UP'
-    EVENT_TYPE_ID=EventConstants.MOUSE_WHEEL_UP
-    IOHUB_DATA_TABLE=MouseInputEvent.IOHUB_DATA_TABLE
-    __slots__=[]
-    def __init__(self, *args, **kwargs):
-        """
-
-        :rtype : MouseWheelUpEvent
-        :param args:
-        :param kwargs:
-        """
-        MouseWheelEvent.__init__(self, *args, **kwargs)
-
-class MouseWheelDownEvent(MouseWheelEvent):
-    """
-    MouseWheelDownEvent's are generated when the vertical scroll wheel on the 
-    Mouse Device (if it has one) is turned in the direction toward the back
-    of the mouse. Horizontal scrolling is not currently supported.
-    Each MouseWheelDownEvent provides the number of units the wheel was turned 
-    as a negative value ( -1 ) as well as the absolute scroll value for the mouse,
-    which is an ioHub Mouse attribute that is simply modified by the change value
-    of MouseWheelUpEvent and MouseWheelDownEvent types.
-    
-    Event Type ID: EventConstants.MOUSE_WHEEL_DOWN
-    Event Type String: 'MOUSE_WHEEL_DOWN'    
-    """
-    EVENT_TYPE_STRING='MOUSE_WHEEL_DOWN'
-    EVENT_TYPE_ID=EventConstants.MOUSE_WHEEL_DOWN
-    IOHUB_DATA_TABLE=MouseInputEvent.IOHUB_DATA_TABLE
-    __slots__=[]
-    def __init__(self, *args, **kwargs):
-        """
-
-        :rtype : MouseWheelDownEvent
-        :param args:
-        :param kwargs:
-        """
-        MouseWheelEvent.__init__(self, *args, **kwargs)
 
 class MouseButtonEvent(MouseInputEvent):
     EVENT_TYPE_STRING='MOUSE_BUTTON'
@@ -815,19 +1160,19 @@ class MouseButtonReleaseEvent(MouseButtonEvent):
     def __init__(self, *args, **kwargs):
         MouseButtonEvent.__init__(self, *args, **kwargs)
 
-class MouseDoubleClickEvent(MouseButtonEvent):
+class MouseMultiClickEvent(MouseButtonEvent):
     """
-    MouseDoubleClickEvent's are created when you rapidly press and release a 
+    MouseMultiClickEvent's are created when you rapidly press and release a 
     mouse button twice. This event may never get triggered if your OS does not support it.
-    The button that was double clicked (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+    The button that was multi clicked (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
     MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
     assuming you have a 3 button mouse.
 
-    Event Type ID: EventConstants.MOUSE_DOUBLE_CLICK
-    Event Type String: 'MOUSE_DOUBLE_CLICK'    
+    Event Type ID: EventConstants.MOUSE_MULTI_CLICK
+    Event Type String: 'MOUSE_MULTI_CLICK'    
     """
-    EVENT_TYPE_STRING='MOUSE_DOUBLE_CLICK'
-    EVENT_TYPE_ID=EventConstants.MOUSE_DOUBLE_CLICK
+    EVENT_TYPE_STRING='MOUSE_MULTI_CLICK'
+    EVENT_TYPE_ID=EventConstants.MOUSE_MULTI_CLICK
     IOHUB_DATA_TABLE=MouseInputEvent.IOHUB_DATA_TABLE
     __slots__=[]
     def __init__(self, *args, **kwargs):
