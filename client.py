@@ -468,8 +468,6 @@ class ioHubConnection(object):
     def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):
         self._initial_clock_offset=ioHub.highPrecisionTimer()
         Computer.globalClock=ioHub.ioClock(self,self._initial_clock_offset,False)
-
-        print "TODO: Update ioHubConnection class comments, docs."
         
         if ioHubConfig:
             if not isinstance(ioHubConfig,dict):

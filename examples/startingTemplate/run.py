@@ -1,4 +1,4 @@
-"""
+f"""
 ioHub
 .. file: ioHub/examples/startingTemplate/run.py
 """

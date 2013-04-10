@@ -3,8 +3,10 @@
 ioHub
 .. file: ioHub/examples/simple/run.py
 """
-
-from psychopy import visual
+try:
+    from psychopy import visual
+except:
+    pass
 
 import ioHub
 from ioHub import OrderedDict
@@ -71,7 +73,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         currentPosition=mouse.getPosition()
         
         # Create a psychopy window, using settings from Display device config
-        psychoWindow =  FullScreenWindow(display,fullscr=False,allowGUI=True)
+        psychoWindow =  FullScreenWindow(display)
 
         mouse.lockMouseToDisplayID(display.getIndex())
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
@@ -117,7 +119,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
             # for each new keyboard character event, check if it matches one of the end example keys.
-            for k in kb.getEvents():
+            for k in kb.getEvents(EventConstants.KEYBOARD_CHAR):
                 if k.key.upper() in ['ESCAPE', ]:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True

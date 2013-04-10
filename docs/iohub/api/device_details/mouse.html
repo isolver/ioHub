@@ -707,129 +707,127 @@ Event Type String: &#8216;MOUSE_MOVE&#8217;</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent">
-<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseButtonReleaseEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseButtonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
-<p>MouseButtonUpEvent&#8217;s are created when a button on the mouse is released. 
-The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_RELEASED,
-and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
-MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
-assuming you have a 3 button mouse.</p>
-<p>Event Type ID: EventConstants.MOUSE_BUTTON_RELEASE
-Event Type String: &#8216;MOUSE_BUTTON_RELEASE&#8217;</p>
+<dt id="ioHub.devices.mouse.MouseDragEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseDragEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ioHub.devices.mouse.MouseMoveEvent" title="ioHub.devices.mouse.MouseMoveEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseMoveEvent</span></tt></a></p>
+<p>MouseDragEvents occur when the mouse position changes and at least one mouse
+button is pressed. Mouse position is mapped to the coordinate space defined
+in the ioHub configuration file for the Display.</p>
+<p>Event Type ID: EventConstants.MOUSE_DRAG
+Event Type String: &#8216;MOUSE_DRAG&#8217;</p>
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.DEVICE_ID_INDEX">
-<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_id">
-<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.button_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_state">
-<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.button_state" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval">
-<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.delay">
-<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.delay" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.device_id">
-<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.device_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.device_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.device_time">
-<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.device_time" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.display_id">
-<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.display_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.event_id">
-<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.event_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id">
-<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id">
-<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.filter_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time">
-<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.logged_time" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons">
-<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dx">
-<tt class="descname">scroll_dx</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dx" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.scroll_dx">
+<tt class="descname">scroll_dx</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.scroll_dx" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dy">
-<tt class="descname">scroll_dy</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dy" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.scroll_dy">
+<tt class="descname">scroll_dy</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.scroll_dy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_x">
-<tt class="descname">scroll_x</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_x" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.scroll_x">
+<tt class="descname">scroll_x</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.scroll_x" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_y">
-<tt class="descname">scroll_y</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_y" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.scroll_y">
+<tt class="descname">scroll_y</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.scroll_y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.session_id">
-<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.session_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.time">
-<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.time" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.time" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.type">
-<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.type" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.window_id">
-<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.window_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.x_position">
-<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.x_position" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.y_position">
-<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dt id="ioHub.devices.mouse.MouseDragEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseDragEvent.y_position" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -992,6 +990,391 @@ Event Type String: &#8216;MOUSE_BUTTON_PRESS&#8217;</p>
 <dl class="attribute">
 <dt id="ioHub.devices.mouse.MouseButtonPressEvent.y_position">
 <tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonPressEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseButtonReleaseEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/ioHub/devices/mouse.html#MouseButtonReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
+<p>MouseButtonUpEvent&#8217;s are created when a button on the mouse is released. 
+The button_state of the event will equal MouseConstants.MOUSE_BUTTON_STATE_RELEASED,
+and the button that was pressed (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
+assuming you have a 3 button mouse.</p>
+<p>Event Type ID: EventConstants.MOUSE_BUTTON_RELEASE
+Event Type String: &#8216;MOUSE_BUTTON_RELEASE&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.device_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dx">
+<tt class="descname">scroll_dx</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dy">
+<tt class="descname">scroll_dy</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_x">
+<tt class="descname">scroll_x</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_y">
+<tt class="descname">scroll_y</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.scroll_y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseButtonReleaseEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseButtonReleaseEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseMultiClickEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseButtonEvent</span></tt></p>
+<p>MouseMultiClickEvent&#8217;s are created when you rapidly press and release a 
+mouse button twice. This event may never get triggered if your OS does not support it.
+The button that was multi clicked (button_id) will be MouseConstants.MOUSE_BUTTON_ID_LEFT,
+MouseConstants.MOUSE_BUTTON_ID_RIGHT, or MouseConstants.MOUSE_BUTTON_ID_MIDDLE, 
+assuming you have a 3 button mouse.</p>
+<p>Event Type ID: EventConstants.MOUSE_MULTI_CLICK
+Event Type String: &#8216;MOUSE_MULTI_CLICK&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.device_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.scroll_dx">
+<tt class="descname">scroll_dx</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.scroll_dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.scroll_dy">
+<tt class="descname">scroll_dy</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.scroll_dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.scroll_x">
+<tt class="descname">scroll_x</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.scroll_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.scroll_y">
+<tt class="descname">scroll_y</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.scroll_y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseMultiClickEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseMultiClickEvent.y_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ioHub.devices.mouse.MouseScrollEvent">
+<em class="property">class </em><tt class="descclassname">ioHub.devices.mouse.</tt><tt class="descname">MouseScrollEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ioHub.devices.mouse.MouseInputEvent" title="ioHub.devices.mouse.MouseInputEvent"><tt class="xref py py-class docutils literal"><span class="pre">ioHub.devices.mouse.MouseInputEvent</span></tt></a></p>
+<p>MouseScrollEvent&#8217;s are generated when the scroll wheel on the 
+Mouse Device (if it has one) is moved. Vertical scrolling is supported
+on all operating systems, horizontal scrolling is only supported on OS X.
+Each MouseScrollEvent provides the number of units the wheel was turned 
+in each supported dimension, as well as the absolute scroll value for 
+of each supported dimension.</p>
+<p>Event Type ID: EventConstants.MOUSE_SCROLL
+Event Type String: &#8216;MOUSE_SCROLL&#8217;</p>
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.DEVICE_ID_INDEX">
+<tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.button_id">
+<tt class="descname">button_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.button_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.button_state">
+<tt class="descname">button_state</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.button_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.confidence_interval">
+<tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.device_id">
+<tt class="descname">device_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.device_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.device_time">
+<tt class="descname">device_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.device_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.display_id">
+<tt class="descname">display_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.display_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.event_id">
+<tt class="descname">event_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.event_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.experiment_id">
+<tt class="descname">experiment_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.experiment_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.filter_id">
+<tt class="descname">filter_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.filter_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.logged_time">
+<tt class="descname">logged_time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.logged_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.pressed_buttons">
+<tt class="descname">pressed_buttons</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.pressed_buttons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.scroll_dx">
+<tt class="descname">scroll_dx</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.scroll_dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.scroll_dy">
+<tt class="descname">scroll_dy</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.scroll_dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.scroll_x">
+<tt class="descname">scroll_x</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.scroll_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.scroll_y">
+<tt class="descname">scroll_y</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.scroll_y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.session_id">
+<tt class="descname">session_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.session_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.time">
+<tt class="descname">time</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.type">
+<tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.window_id">
+<tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.window_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.x_position">
+<tt class="descname">x_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.x_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.mouse.MouseScrollEvent.y_position">
+<tt class="descname">y_position</tt><a class="headerlink" href="#ioHub.devices.mouse.MouseScrollEvent.y_position" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

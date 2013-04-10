@@ -150,7 +150,6 @@ class ioHubKeyboardDevice(Device):
         [self._addNativeEventToBuffer(e) for e in cEvents]
 
 ###### recast based on OS ##########
-print2err( 'Computer.system ',Computer.system)
 if Computer.system == 'win32':
     import pyHook
     import ctypes
@@ -227,9 +226,8 @@ if Computer.system == 'win32':
             confidence_interval=0.0 # since this is a keyboard device using a callback method, confidence_interval is not applicable
             delay=0.0 # since this is a keyboard, we 'know' there is a delay, but until we support setting a delay in the device properties based on external testing for a given keyboard, we will leave at 0.
     
-            key,mods=KeyboardConstants._getKeyNameAndModsForEvent(event)
-            if mods is not None:
-               mods=json.dumps(event.ModifierNames)
+            key,_=KeyboardConstants._getKeyNameAndModsForEvent(event)
+
             
             uchar=0
             if key is None or len(key)==0:            
@@ -277,7 +275,7 @@ if Computer.system == 'win32':
                     event.KeyID,
                     uchar,
                     key,
-                    mods,
+                    event.Modifiers,
                     event.Window
                     ]
 
@@ -542,24 +540,6 @@ else: # assume OS X
                             except Exception,e:
                                 print2err("Create NSEvent failed: ",e)
                         
-                        # TO DO: Change keyboard table (for all OS's) as follows:
-                        #   1) Remove columns:
-                        #       a) scan_code
-                        #       b) ascii
-                        #   2) Change these columns:
-                        #       a) the mods column should be an int and just store the | together
-                        #           mod masks taht were active for the event. No string. This will
-                        #           save lots of space and the mods can be turned into the string list
-                        #           on the client side before handng the evnt views to the useer script.
-                        #       b) The key column should hold the ASCII SAFE name for the key based on the utf-8
-                        #           standards.
-                        #   3) Add these columns:
-                        #       a) A 'utf8_code' column, which would be an unsigned 32 bit int, each byte being
-                        #          a part of the utf-8 encoding for the char. Start with the LSB, so how ever many
-                        #           bytes are needed for a given utf8 code can just be added together by shifting
-                        #           each one in a utf8 code over by one byte to build up the int. The hex rep can then
-                        #           be regenerated from the 32bit int rep of the utf8 val.
-                        
                         if ioe_type: 
                             # The above logic resulted in finding a key press or release event
                             # from the expected events OR from modifier state changes. So,
@@ -668,50 +648,35 @@ class KeyboardInputEvent(DeviceEvent):
         #: The scan code for the keyboard event.
         #: This represents the physical key id on the keyboard layout.
         #: int value
-        self.scan_code=None
+        self.scan_code=0
         
         #: The translated key ID, based on the keyboard local settings of the OS.
         #: int value.
-        self.key_id=None
+        self.key_id=0
         
         #: The unicode utf-8 encoded int value for teh char.
         #: int value between 0 and 2**16.
-        self.ucode=None
+        self.ucode=''
 
         #: A string representation of what key was pressed. For standard character
-        #: keys like a-z,A-Z,0-9, and some punctuation values, *key* will be the
+        #: ascii keys (a-z,A-Z,0-9, some punctuation values), and 
+        #: unicode utf-8 encoded characters that have been successfully detected,
+        #: *key* will be the
         #: the actual key value pressed. For other keys, like the *up arrow key*
         #: or key modifiers like the left or right *shift key*, a string representation
-        #: of the key press is given, for example 'UP', 'LSHIFT', and 'RSHIFT' for
+        #: of the key press is given, for example 'UP', 'SHIFT_LEFT', and 'SHIFT_RIGHT' for
         #: the examples given here. 
-        self.key=None
+        self.key=''
         
         #: Logical & of all modifier keys pressed just before the event was created.
-        self.modifiers=None
+        self.modifiers=0
 
         #: The id or handle of the window that had focus when the key was pressed.
         #: long value.
-        self.window_id=None
+        self.window_id=0
 
         DeviceEvent.__init__(self,*args,**kwargs)
         
-#    @classmethod
-#    def createEventAsDict(cls,values):
-#        ed=super(KeyboardInputEvent,cls).createEventAsDict(values)
-#        return ed['modifiers'] is None:
-#            return ed
-#        ed['modifiers']=json.loads(ed['modifiers'])
-#        return ed
-
-    #noinspection PyUnresolvedReferences
-#    @classmethod
-#    def createEventAsNamedTuple(cls,valueList):
-#        if valueList[-2] is None:
-#            return cls.namedTupleClass(*valueList)
-#        valueList[-2]=json.loads(valueList[-2])
-#        return cls.namedTupleClass(*valueList)
-
-
 class KeyboardKeyEvent(KeyboardInputEvent):
     EVENT_TYPE_ID=EventConstants.KEYBOARD_KEY
     EVENT_TYPE_STRING='KEYBOARD_KEY'
@@ -795,21 +760,6 @@ class KeyboardCharEvent(KeyboardReleaseEvent):
         #: The ioHub time deifference between the press and release events which
         #: constitute the KeyboardCharEvent.
         #: float type. seconds.msec-usec format
-        self.duration=None
+        self.duration=0
         
         KeyboardReleaseEvent.__init__(self,*args,**kwargs)
-
-#    @classmethod
-#    def createEventAsDict(cls,values):
-#        ed=super(KeyboardInputEvent,cls).createEventAsDict(values)
-#        if ed['pressEvent'] is None:
-#            return ed
-#        ed['pressEvent']=KeyboardPressEvent.createEventAsDict(ed['pressEvent'])
-#        return ed
-
-#    @classmethod
-#    def createEventAsNamedTuple(cls,valueList):
-#        if valueList[-2] is None:
-#            return cls.namedTupleClass(*valueList)
-#        valueList[-2]=KeyboardPressEvent.createEventAsNamedTuple(valueList[-2])
-#        return cls.namedTupleClass(*valueList)

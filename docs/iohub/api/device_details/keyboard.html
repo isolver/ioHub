@@ -332,13 +332,6 @@ Keyboard related event types.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ioHub.devices.keyboard.KeyboardInputEvent.ascii_code">
-<tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
-<dd><p>The ASCII byte value for the key.
-int value between 0 and 255.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.confidence_interval">
 <tt class="descname">confidence_interval</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.confidence_interval" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -377,10 +370,12 @@ int value between 0 and 255.</p>
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.key">
 <tt class="descname">key</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.key" title="Permalink to this definition">¶</a></dt>
 <dd><p>A string representation of what key was pressed. For standard character
-keys like a-z,A-Z,0-9, and some punctuation values, <em>key</em> will be the
+ascii keys (a-z,A-Z,0-9, some punctuation values), and
+unicode utf-8 encoded characters that have been successfully detected,
+<em>key</em> will be the
 the actual key value pressed. For other keys, like the <em>up arrow key</em>
 or key modifiers like the left or right <em>shift key</em>, a string representation
-of the key press is given, for example &#8216;UP&#8217;, &#8216;LSHIFT&#8217;, and &#8216;RSHIFT&#8217; for
+of the key press is given, for example &#8216;UP&#8217;, &#8216;SHIFT_LEFT&#8217;, and &#8216;SHIFT_RIGHT&#8217; for
 the examples given here.</p>
 </dd></dl>
 
@@ -399,8 +394,7 @@ int value.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.modifiers">
 <tt class="descname">modifiers</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.modifiers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates what modifier keys were active when the key was pressed.
-list value, each element being a modifier name. An empty list indicates no modifiers were pressed.</p>
+<dd><p>Logical &amp; of all modifier keys pressed just before the event was created.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -427,6 +421,13 @@ int value</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardInputEvent.ucode">
+<tt class="descname">ucode</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.ucode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unicode utf-8 encoded int value for teh char.
+int value between 0 and 2**16.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardInputEvent.window_id">
 <tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardInputEvent.window_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>The id or handle of the window that had focus when the key was pressed.
@@ -448,11 +449,6 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardPressEvent.DEVICE_ID_INDEX">
 <tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ioHub.devices.keyboard.KeyboardPressEvent.ascii_code">
-<tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -531,6 +527,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardPressEvent.ucode">
+<tt class="descname">ucode</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.ucode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardPressEvent.window_id">
 <tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardPressEvent.window_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -547,11 +548,6 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.DEVICE_ID_INDEX">
 <tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.ascii_code">
-<tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -630,6 +626,11 @@ on your OS and the OS&#8217;s settings for key repeat event creation.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.ucode">
+<tt class="descname">ucode</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.ucode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardReleaseEvent.window_id">
 <tt class="descname">window_id</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardReleaseEvent.window_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -650,11 +651,6 @@ created by the OS keyboard driver is ignored.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardCharEvent.DEVICE_ID_INDEX">
 <tt class="descname">DEVICE_ID_INDEX</tt><em class="property"> = 2</em><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.DEVICE_ID_INDEX" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ioHub.devices.keyboard.KeyboardCharEvent.ascii_code">
-<tt class="descname">ascii_code</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.ascii_code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -749,6 +745,11 @@ KeyboardPressEvent class type.</p>
 <dl class="attribute">
 <dt id="ioHub.devices.keyboard.KeyboardCharEvent.type">
 <tt class="descname">type</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.devices.keyboard.KeyboardCharEvent.ucode">
+<tt class="descname">ucode</tt><a class="headerlink" href="#ioHub.devices.keyboard.KeyboardCharEvent.ucode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

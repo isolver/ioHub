@@ -51,8 +51,9 @@ global IO_HUB_DIRECTORY
 IO_HUB_DIRECTORY=module_directory(module_path)
 
 def print2err(*args):
-    import pprint
-    pprint.pprint(args, stream=sys.stderr, indent=1, width=80, depth=None)
+    for a in args:
+        sys.stderr.write("{0}".format(a))        
+    sys.stderr.write("\n") 
     sys.stderr.flush()
    
 def printExceptionDetailsToStdErr():

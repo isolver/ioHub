@@ -102,6 +102,7 @@ def generatedPointGrid(pixel_width,pixel_height,width_scalar=1.0,
 ## Returns the rotated point list.
 #
 # FROM: http://gis.stackexchange.com/questions/23587/how-do-i-rotate-the-polygon-about-an-anchor-point-using-python-script
+
 def Rotate2D(pts,origin,ang=pi/4):
     '''pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian'''
     return dot(pts-origin,ar([[cos(ang),sin(ang)],[-sin(ang),cos(ang)]]))+origin
@@ -111,6 +112,7 @@ def Rotate2D(pts,origin,ang=pi/4):
 #
 ## A couple date / time related utility functions
 #
+
 getCurrentDateTime = datetime.datetime.now
 getCurrentDateTimeString = lambda : getCurrentDateTime().strftime("%Y-%m-%d %H:%M")
 

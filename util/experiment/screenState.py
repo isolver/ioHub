@@ -326,7 +326,7 @@ class ScreenState(object):
             return self._start_time, currentSec()-self._start_time, None
 
         elif self.timeout is not None:
-            ER.hub.delay(self.timeout-0.002)
+            ER.hub.wait(self.timeout-0.002)
             localClearEvents('all')
 
             while currentSec()<endTime:
@@ -357,10 +357,16 @@ class ScreenState(object):
             mtime=Computer.currentSec()
         mtext=text
         try:
-            tracker=self.experimentRuntime().devices.tracker
-            if tracker is not None:
-                mtext="%s : tracker_time [%.6f]"%(mtext, tracker.trackerTime())
+            tracker=self.experimentRuntime().getDevice('tracker')
+            if tracker is not None and tracker.isConnected() is True:
+                mtext="%s : tracker_time [%.6f]"%(mtext, tracker.trackerSec())
                 tracker.sendMessage(mtext)
+            else:
+                print '----------------------'
+                print 'Warning: eyetracker is not connected.'
+                print 'Msg not sent to eyetracker datafile: '
+                print mtext
+                print '----------------------'
         except:
             pass
         self.experimentRuntime().hub.sendMessageEvent(mtext,sec_time=mtime)
@@ -430,7 +436,7 @@ class ImageScreen(ScreenState):
                                 pos=imagePos, size=imageSize,name=imageName)
                                 
         self.stim['IMAGE'].imageName=imageName        
-        self.stimNames.append('IMAGE')
+        self.stimNames.append('IMAGE')cv
 
     def setImage(self, imageName):
         self.stim['IMAGE'].setImage(imageName)

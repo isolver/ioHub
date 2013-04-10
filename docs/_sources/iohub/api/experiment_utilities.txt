@@ -11,15 +11,13 @@ utilities provided by the ioHub package are *in progress* higher level experimen
 building blocks for use when scripting an experiment. 
 The API for these utilities may change in the future and backwards compatibility is 
 not yet a consern of this area of the API. Through more actual use and feedback the
-utilities classes will likely evelve into, what will hopefully be, a better, more
+utilities classes will likely evolve into, what will hopefully be, a better, more
 complete and more consistent, set of code.
 
 .. toctree::
     :maxdepth: 2
     
     ioHubExperimentRuntime Class <experiment_utilities/ioHubExperimentRuntime>
-    Screen State Classes <experiment_utilities/screenStates>
     ExperimentVariableProvider <experiment_utilities/variableProvider>
     Misc. Visual Stimulus Utilities <experiment_utilities/visualStimUtil>
     Dialog GUI Windows <experiment_utilities/dialogs>
-    Creating System Information Logs <experiment_utilities/systemInformation>

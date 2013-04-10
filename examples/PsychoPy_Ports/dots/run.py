@@ -16,7 +16,7 @@ ioHub integration.
 from psychopy import visual, core
 from ioHub import quickStartHubServer
 from ioHub.client import Computer
-
+from ioHub.util.experiment import FullScreenWindow
 DOT_COUNT=1000
 
 # Example where ioHub does not use yaml config files specified by user.
@@ -32,12 +32,7 @@ keyboard=io.devices.keyboard
 # Create a psychopy window, full screen resolution, full screen mode, pix units,
 # with no boarder, using the monitor default profile name used by ioHub,
 # which is created on the fly right now by the script. (ioHubDefault)
-myWin = visual.Window(display.getPixelResolution(),
-                        monitor=display.getPsychopyMonitorName(),
-                        units=display.getCoordinateType(),
-                        fullscr=True,
-                        allowGUI=False,
-                        screen=display.getIndex())
+myWin= FullScreenWindow(display)
 
 #INITIALISE SOME STIMULI
 dotPatch =visual.DotStim(myWin,

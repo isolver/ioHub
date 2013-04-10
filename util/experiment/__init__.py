@@ -41,7 +41,7 @@ class FullScreenWindow(Window):
     def __init__(self,iohub_display,color=[128,128,128], colorSpace='rgb255',
                  winType='pyglet',gamma=1.0,fullscr=True,allowGUI=False,
                  waitBlanking=True):
-        Window.__init__(self,(1000,800),#iohub_display.getPixelResolution(),
+        Window.__init__(self,iohub_display.getPixelResolution(),
                                     monitor=iohub_display.getPsychopyMonitorName(),
                                     units=iohub_display.getCoordinateType(),
                                     color=color, colorSpace=colorSpace,
@@ -135,6 +135,7 @@ from variableProvider import ExperimentVariableProvider
 
 from psychopyIOHubRuntime import ioHubExperimentRuntime
 
+from screenState import TimeTrigger,DeviceEventTrigger,ScreenState,ClearScreen,InstructionScreen,ImageScreen
 from dialogs import ProgressBarDialog, MessageDialog, FileDialog, ioHubDialog
 
 try:
