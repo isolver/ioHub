@@ -283,7 +283,6 @@ class EyeTracker(EyeTrackerDevice):
                     monoSample=[
                                 0,                            # experiment_id (filled in by ioHub)
                                 0,                            # session_id (filled in by ioHub)
-                                0, #device id (not currently used)
                                 Computer._getNextEventID(),
                                 event_type,
                                 device_event_timestamp,
@@ -338,7 +337,6 @@ class EyeTracker(EyeTrackerDevice):
                     binocSample=[
                                  0,                            # experiment_id (filled in by ioHub)
                                  0,                            # session_id (filled in by ioHub)
-                                 0, #device id (not currently used)
                                  Computer._getNextEventID(),
                                  event_type,
                                  device_event_timestamp,

@@ -216,3 +216,109 @@ To do so:
 #. Rename the folder in the zip, which is likely called something like 'iohub-master', to just 'ioHub'.
 #. Copy the 'ioHub' folder to a directory in your Python path. sudo access may be needed.
 
+
+OSX 10.6 +:
+############
+
+For OS X 10.6 + the OpenPsycho distribution can not be used. Instead the necessary
+packages must be installed using the OS's package manager and the Python pip utility
+as well as manually building packages
+
+Manually Installing ioHub
+==========================
+
+The following software must be installed on the computer before proceeding with 
+the ioHub dependency installation list and installation of ioHub itself: 
+
+    #. Python 2.6.8 or 2.7.3 32 bit is required as the Python interpreter. The 32 bit version of Python can be installed on a supported 64 bit OS.
+
+    #. Psychopy 1.74.03 or higher and all of it's dependencies. See the `PsychoPy installation <http://www.psychopy.org/installation.html>`_ page for details. 
+
+    #. For the NumPy package, please ensure 1.6.2 or greater is installed.
+
+ioHub Dependency List Installation
+-----------------------------------
+
+The following Python packages need to be installed on the system you plan to run
+ioHub on. Some apckages can be installed using *pip*, while other should be installed 
+by downloading the package from the provided URL, unpacking the tarball, and 
+installing the package by typing::
+
+    > python setup.py install
+
+in a terminal session where you have cd to the location of the uncompressed 
+python package source that contains the setup.py script.
+
+Note that for both 'pip' and manual 'python setup.py install', depending on your
+OS X settings and system configuration, you may need to run pip or 
+'python setup.py install' with root priveledges.
+
+If your user has admin rights, this can be done by running the command with 'sudo'
+at the start of the command and entering your password when prompted. For example::
+
+    > sudo pip install package_name
+
+where package_name is the name of one of the required python packages.
+
+Installing pip if it is not Already on the System
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+If you type:: 
+
+    > pip
+
+in a console and are told the program does not exist, then you can install pip using::
+
+    > sudo apt-get install pip
+
+
+Packages to install using pip
+++++++++++++++++++++++++++++++
+
+#. **ujson**: Ultra fast JSON encoder and decoder for Python ( pip install ujson )
+#. **msgpack**: It’s like JSON. but fast and small. ( pip install msgpack-python )
+#. **greenlet**: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called “tasklets”. ( pip install greenlet )
+#. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST ENSURE TO INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
+
+Packages To Download
++++++++++++++++++++++
+
+#. `pyobjc <https://pypi.python.org/packages/source/p/pyobjc/pyobjc-2.5.1.tar.gz#md5=f242cff4a25ce397bb381c21a35db885>`_ : A  Python ObjectiveC binding.    
+#. **gevent**: A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop::
+
+    pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent
+
+#. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.    
+#. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python::
+
+    First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
+
+ioHub Package Installation
+--------------------------
+
+To install the ioHub package itself the source should be downloaded from github, 
+as currently no python package installer exists. 
+
+To do so:
+
+#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_    
+#. Open the zip file    
+#. Rename the folder in the zip, which is likely called something like 'iohub-master', to just 'ioHub'.    
+#. Copy the 'ioHub' folder to a directory in your Python path. sudo access may be needed.    
+
+
+Running Example Scripts
+#########################
+
+Running example scripts using ioHub should now work. All examples are in the *examples* folder of the ioHub distribution. For example
+
+**Demo dir** (relative to the ioHub root folder): ioHub\examples\ioHubAccessDelayTest         
+
+**Run with**: python run.py
+
+or
+
+**Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
+
+**Run with**: python ioMouse.py
+

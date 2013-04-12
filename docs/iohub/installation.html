@@ -102,6 +102,20 @@
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#osx-10-6">OSX 10.6 +:</a><ul>
+<li><a class="reference internal" href="#id22">Manually Installing ioHub</a><ul>
+<li><a class="reference internal" href="#id24">ioHub Dependency List Installation</a><ul>
+<li><a class="reference internal" href="#id25">Installing pip if it is not Already on the System</a></li>
+<li><a class="reference internal" href="#id26">Packages to install using pip</a></li>
+<li><a class="reference internal" href="#id27">Packages To Download</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id30">ioHub Package Installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-example-scripts">Running Example Scripts</a></li>
 </ul>
 </li>
 </ul>
@@ -344,6 +358,99 @@ as currently no python package installer exists.</p>
 </ol>
 </div>
 </div>
+</div>
+<div class="section" id="osx-10-6">
+<h2>OSX 10.6 +:<a class="headerlink" href="#osx-10-6" title="Permalink to this headline">¶</a></h2>
+<p>For OS X 10.6 + the OpenPsycho distribution can not be used. Instead the necessary
+packages must be installed using the OS&#8217;s package manager and the Python pip utility
+as well as manually building packages</p>
+<div class="section" id="id22">
+<h3>Manually Installing ioHub<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<p>The following software must be installed on the computer before proceeding with
+the ioHub dependency installation list and installation of ioHub itself:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Python 2.6.8 or 2.7.3 32 bit is required as the Python interpreter. The 32 bit version of Python can be installed on a supported 64 bit OS.</li>
+<li>Psychopy 1.74.03 or higher and all of it&#8217;s dependencies. See the <a class="reference external" href="http://www.psychopy.org/installation.html">PsychoPy installation</a> page for details.</li>
+<li>For the NumPy package, please ensure 1.6.2 or greater is installed.</li>
+</ol>
+</div></blockquote>
+<div class="section" id="id24">
+<h4>ioHub Dependency List Installation<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
+<p>The following Python packages need to be installed on the system you plan to run
+ioHub on. Some apckages can be installed using <em>pip</em>, while other should be installed
+by downloading the package from the provided URL, unpacking the tarball, and
+installing the package by typing:</p>
+<div class="highlight-python"><pre>&gt; python setup.py install</pre>
+</div>
+<p>in a terminal session where you have cd to the location of the uncompressed
+python package source that contains the setup.py script.</p>
+<p>Note that for both &#8216;pip&#8217; and manual &#8216;python setup.py install&#8217;, depending on your
+OS X settings and system configuration, you may need to run pip or
+&#8216;python setup.py install&#8217; with root priveledges.</p>
+<p>If your user has admin rights, this can be done by running the command with &#8216;sudo&#8217;
+at the start of the command and entering your password when prompted. For example:</p>
+<div class="highlight-python"><pre>&gt; sudo pip install package_name</pre>
+</div>
+<p>where package_name is the name of one of the required python packages.</p>
+<div class="section" id="id25">
+<h5>Installing pip if it is not Already on the System<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h5>
+<p>If you type:</p>
+<div class="highlight-python"><pre>&gt; pip</pre>
+</div>
+<p>in a console and are told the program does not exist, then you can install pip using:</p>
+<div class="highlight-python"><pre>&gt; sudo apt-get install pip</pre>
+</div>
+</div>
+<div class="section" id="id26">
+<h5>Packages to install using pip<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h5>
+<ol class="arabic simple">
+<li><strong>ujson</strong>: Ultra fast JSON encoder and decoder for Python ( pip install ujson )</li>
+<li><strong>msgpack</strong>: It?s like JSON. but fast and small. ( pip install msgpack-python )</li>
+<li><strong>greenlet</strong>: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called ?tasklets?. ( pip install greenlet )</li>
+<li><strong>pytables</strong>: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST ENSURE TO INSTALL &#8216;numexpr&#8217; from the list below, as it is a dependency of tables)</li>
+</ol>
+</div>
+<div class="section" id="id27">
+<h5>Packages To Download<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h5>
+<ol class="arabic">
+<li><p class="first"><a class="reference external" href="https://pypi.python.org/packages/source/p/pyobjc/pyobjc-2.5.1.tar.gz#md5=f242cff4a25ce397bb381c21a35db885">pyobjc</a> : A  Python ObjectiveC binding.</p>
+</li>
+<li><p class="first"><strong>gevent</strong>: A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop:</p>
+<div class="highlight-python"><pre>pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent</pre>
+</div>
+</li>
+<li><p class="first"><a class="reference external" href="http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&amp;can=2&amp;q=">numexpr:</a> Fast numerical array expression evaluator for Python and NumPy.</p>
+</li>
+<li><p class="first"><a class="reference external" href="http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz">pyYAML:</a> PyYAML is a YAML parser and emitter for Python:</p>
+<div class="highlight-python"><pre>First install the C side package `LibYAML &lt;http://pyyaml.org/wiki/LibYAML&gt;`_, before installing ptYAML.</pre>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="id30">
+<h4>ioHub Package Installation<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
+<p>To install the ioHub package itself the source should be downloaded from github,
+as currently no python package installer exists.</p>
+<p>To do so:</p>
+<ol class="arabic simple">
+<li>Get a <a class="reference external" href="https://github.com/isolver/ioHub/zipball/master/">zip download</a> of the <a class="reference external" href="https://www.github.com/isolver/ioHub/">ioHub project source</a></li>
+<li>Open the zip file</li>
+<li>Rename the folder in the zip, which is likely called something like &#8216;iohub-master&#8217;, to just &#8216;ioHub&#8217;.</li>
+<li>Copy the &#8216;ioHub&#8217; folder to a directory in your Python path. sudo access may be needed.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="running-example-scripts">
+<h2>Running Example Scripts<a class="headerlink" href="#running-example-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Running example scripts using ioHub should now work. All examples are in the <em>examples</em> folder of the ioHub distribution. For example</p>
+<p><strong>Demo dir</strong> (relative to the ioHub root folder): ioHubexamplesioHubAccessDelayTest</p>
+<p><strong>Run with</strong>: python run.py</p>
+<p>or</p>
+<p><strong>Demo dir</strong> (relative to the ioHub root folder):  examplesPsychoPy_PortsioMouse</p>
+<p><strong>Run with</strong>: python ioMouse.py</p>
 </div>
 </div>
 

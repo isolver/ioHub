@@ -19,5 +19,6 @@ complete and more consistent, set of code.
     
     ioHubExperimentRuntime Class <experiment_utilities/ioHubExperimentRuntime>
     ExperimentVariableProvider <experiment_utilities/variableProvider>
+    Screen State Classes <experiment_utilities/screenStates>
     Misc. Visual Stimulus Utilities <experiment_utilities/visualStimUtil>
-    Dialog GUI Windows <experiment_utilities/dialogs>
+    GUI Dialogs <experiment_utilities/dialogs>

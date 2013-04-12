@@ -488,6 +488,8 @@ if Computer.system == 'win32':
             MouseDevice.__del__(self)
             
 elif Computer.system == 'linux2':
+    from ctypes import cdll
+    
     class Mouse(MouseDevice):
         """
         The Mouse class and related events represent a standard computer mouse device
@@ -495,24 +497,37 @@ elif Computer.system == 'linux2':
         the coordinate space defined in the ioHub configuration file for the Display.
         """
         
+        _xdll=None
+        _xdisplay=None
+        _xscreen_count=None
+        
         def __init__(self,*args,**kwargs):          
-            MouseDevice.__init__(self,*args,**kwargs['dconfig'])            
+            MouseDevice.__init__(self,*args,**kwargs['dconfig'])      
+            
+            if Mouse._xdll is None:
+                Mouse._xdll = cdll.LoadLibrary('libX11.so') 
+                Mouse._xdisplay = self._xdll.XOpenDisplay(None) 
+                Mouse._xscreen_count = self._xdll.XScreenCount(self._xdisplay)  
+                
+            if self._display_device and self._display_device._xwindow is None:
+                self._display_device._xwindow= self._xdll.XRootWindow(Mouse._xdisplay, self._display_device.getIndex())
 
         def _nativeSetMousePos(self,px,py):
-            pass#ioHub.print2err('_nativeSetMousePos result: ',result)
-                
+            Mouse._xdll.XWarpPointer(Mouse._xdisplay,None,self._display_device._xwindow,0,0,0,0,px,py) 
+            Mouse._xdll.XFlush(Mouse._xdisplay);   
+             
         def _nativeGetSystemCursorVisibility(self):
-            return False#CGCursorIsVisible()
+            return True#CGCursorIsVisible()
             
         def _nativeSetSystemCursorVisibility(self,v):
-            pass
+            ioHub.print2err('WARNING: Mouse._nativeSetSystemCursorVisibility not implemented on Linux yet.')
             #if v and not CGCursorIsVisible():
             #    pass#CGDisplayShowCursor(CGMainDisplayID())
             #elif not v and CGCursorIsVisible():
             #    pass#CGDisplayHideCursor(CGMainDisplayID()
                 
         def _nativeLimitCursorToBoundingRect(self,clip_rect):
-            ioHub.print2err('WARNING: Mouse._nativeLimitCursorToBoundingRect not implemented on OSX yet.')
+            ioHub.print2err('WARNING: Mouse._nativeLimitCursorToBoundingRect not implemented on Linux yet.')
             native_clip_rect=None
             return native_clip_rect
 

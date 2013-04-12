@@ -14,6 +14,9 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 import ctypes, os, sys
 from ctypes import *
 
+_EYEGAZE_DIR='C:\\EyeGaze\\'
+os.environ['PATH'] = _EYEGAZE_DIR + ';' + os.environ['PATH']
+
 _int_types = (c_int16, c_int32)
 if hasattr(ctypes, 'c_int64'):
     # Some builds of ctypes apparently do not have c_int64
@@ -585,8 +588,6 @@ load_library = loader.load_library
 del loaderclass
 
 # End loader
-
-add_library_search_dirs([_EYEGAZE_BIN_DIR,])
 
 # Begin libraries
 

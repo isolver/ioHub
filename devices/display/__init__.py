@@ -14,6 +14,7 @@ Distributed under the terms of the GNU General Public License
 
 import numpy as np
 import wx
+import sys
 
 from .. import Device,Computer
 import ioHub
@@ -36,10 +37,13 @@ class Display(Device):
     DEVICE_TYPE_ID=ioHub.constants.DeviceConstants.DISPLAY
     DEVICE_TYPE_STRING='DISPLAY'
     
-    __slots__=['_pixels_per_degree','_pix2coord','_coord2pix']
+    __slots__=['_pixels_per_degree','_pix2coord','_coord2pix','_xwindow']
     def __init__(self,*args,**kwargs):
         Device.__init__(self,*args,**kwargs['dconfig'])
 
+        if sys.platform == 'linux2':
+            self._xwindow=None
+            
         if Display._computer_display_runtime_info_list is None:
             Display._computer_display_runtime_info_list=\
                                         Display._createAllRuntimeInfoDicts()

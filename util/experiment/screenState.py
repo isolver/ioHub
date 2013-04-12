@@ -436,7 +436,7 @@ class ImageScreen(ScreenState):
                                 pos=imagePos, size=imageSize,name=imageName)
                                 
         self.stim['IMAGE'].imageName=imageName        
-        self.stimNames.append('IMAGE')cv
+        self.stimNames.append('IMAGE')
 
     def setImage(self, imageName):
         self.stim['IMAGE'].setImage(imageName)

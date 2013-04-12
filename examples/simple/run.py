@@ -13,6 +13,7 @@ from ioHub import OrderedDict
 from ioHub.devices import Computer
 from ioHub.constants import EventConstants
 from ioHub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
+import numpy as np
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
@@ -58,6 +59,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #
         # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
+        ENABLE_NOISY_MOUSE=True
+        
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
         mouse=self.devices.mouse
         display=self.devices.display
@@ -95,9 +98,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
 
             # and update the mouse contingent gaussian based on the current mouse location
-            currentPosition,currentDisplayIndex=mouse.getPosition(return_display_index=True)
-            if currentDisplayIndex == display_index:       
-                psychoStim['mouseDot'].setPos(currentPosition)
+            mx,my=mouse.getPosition()
+            if ENABLE_NOISY_MOUSE:
+                mx=np.random.random_integers(mx-10,mx+10)
+                my=np.random.random_integers(my-10,my+10)
+            psychoStim['mouseDot'].setPos((mx,my))
 
 
             # redraw the stim
@@ -124,9 +129,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
                 
-            for e in self.hub.getEvents():
-                if e.type != 151:                
-                    print 'Event: ',e.device_time," ",e.time," ",e.device_time-e.time," "
+            for e in mouse.getEvents():
+                print 'Event: ',e
                 
             self.hub.clearEvents('all')
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)

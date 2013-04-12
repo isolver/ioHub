@@ -57,21 +57,6 @@ class EyeTracker(EyeTrackerDevice):
 
         EyeTrackerDevice.__init__(self,*args,**kwargs)
         try:             
-            
-            ioHub.print2err("######################################")   
-            ioHub.print2err("iViewX TODO List:")   
-            ioHub.print2err("\t* __init__: ensure screen physical settings are sent to tracker.")   
-            ioHub.print2err("\t* __init__: handle 'track_eyes' param. See pg 58 of SDK Manual.pdf")     
-            ioHub.print2err("\t* __init__: handle pupil_measure_types setting. (if possible)")   
-            ioHub.print2err("\t* __init__: handle model_name setting (different logic may be needed for diff models.")   
-            ioHub.print2err("\t* _poll: correctly set the pupil measure type and eyes_tracked setting.")             
-            ioHub.print2err("\t* Add support for fixation parsing criteria: SetEventDetectionParameter.")   
-            ioHub.print2err("\t* Add native data file saving support.")   
-            ioHub.print2err("\t* Implement sendCommand functionality.")
-            ioHub.print2err("\n Known Issues: ")              
-            ioHub.print2err("\t* In RED-m, getTrackerTime function in C API returns last sample time, not current eye tracker time.")              
-            ioHub.print2err("######################################")   
-            ioHub.print2err()   
              
             ####
             # Get network config (used in setConnectionState(True).
