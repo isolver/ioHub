@@ -72,6 +72,7 @@ class udpServer(DatagramServer):
             request = self.unpack() 
         else: #using ujson
             request=self.unpack(request[:-2])    
+
         request_type= request.pop(0)
         
         if request_type == 'GET_EVENTS':
@@ -453,7 +454,7 @@ class ioServer(object):
                     if device_instance_and_config:
                         device_instance_list.append(device_instance_and_config)
                     else:
-                        #ioHub.print2err('## Device was not started by the ioHub Server: ',device_class_name)
+                        ioHub.print2err('## Device was not started by the ioHub Server: ',device_class_name)
                         raise ioHub.ioHubError("Device config validation failed")
             DeviceConstants.addClassMappings()
             EventConstants.addClassMappings()
@@ -889,7 +890,12 @@ def run(initial_time_offset,rootScriptPathDir,configFilePath):
     except Exception,e:
         ioHub.printExceptionDetailsToStdErr()
         sys.stdout.flush()
-
+        
+        try:
+            s.shutdown()
+        except:
+            pass
+        
         return -1
     
     try:
@@ -913,6 +919,11 @@ def run(initial_time_offset,rootScriptPathDir,configFilePath):
 
         sys.stdout.write("IOHUB_FAILED\n\r\n\r")
         sys.stdout.flush()
+        
+        try:
+            s.shutdown()
+        except:
+            pass
     
     return -1
     

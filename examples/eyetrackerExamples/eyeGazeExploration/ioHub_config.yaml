@@ -62,10 +62,10 @@ monitor_devices:
         # Options are UPPER_RIGHT or UPPER_LEFT
         camera_image_screen_position: UPPER_RIGHT
         # connection_type: Possible values for the EyeGaze are one of three config lists:
-        # [LOCAL]
-        # [SOCKET, 127.0.0.1] : eyegaze server ip address
-        # [SERIAL, COM1] : COM address of serial port to use.
-        connection_settings: [ LOCAL ]
+        # [LOCAL, SOCKET, SERIAL]
+        # If type != LOCAL, a 'parameter' setting must also be provided.
+        host_connection:
+            type: LOCAL       
         # The EyeGaze supports saving a native eye tracker text data file, 
         # the default_native_data_file_name value is used to set the default name for the file
         # that will be saved. NOTE: Especially on single PC configurations, having EyeGaze save a 

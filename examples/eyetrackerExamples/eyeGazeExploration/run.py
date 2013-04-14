@@ -8,7 +8,11 @@ from psychopy import visual
 import ioHub
 from ioHub.devices import Computer
 from ioHub.constants import EventConstants
-from ioHub.util.experiment import ioHubExperimentRuntime, FullScreenWindow, pumpLocalMessageQueue
+from ioHub.util.experiment import ioHubExperimentRuntime
+from ioHub.util import getCurrentDateTimeString
+from ioHub.util.experiment import (DeviceEventTrigger, 
+                                   ClearScreen, InstructionScreen, 
+                                   FullScreenWindow)
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     def run(self,*args,**kwargs):
@@ -24,14 +28,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         trial_count=self.getExperimentConfiguration()['trial_count']
         image_names=self.getExperimentConfiguration()['image_names']
+        
+
 
         # eye trackers, like other devices, should be conected to when the
         # ioHub Server starts, so this next call is not needed, but should not
         # hurt anythnig either:
         tracker.setConnectionState(True)
         
+        # run the eye tracker calibration routine before starting trials
+        tracker.runSetupProcedure()
+
         # Create a psychopy window, full screen resolution, full screen mode, pix units.
-        window = FullScreenWindow(display)
+        self.window = FullScreenWindow(display)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
@@ -39,63 +48,84 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         image_cache=dict()
         for i in image_names:
             iname='./images/{0}'.format(i)
-            image_cache[i]=visual.ImageStim(window, image=iname, name=iname) 
+            image_cache[i]=visual.ImageStim(self.window, image=iname, name=iname) 
             image_cache[i].draw()
         image_count=len(image_cache)
-        window.clearBuffer()
+        self.window.clearBuffer()
         
+        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(-2000,-2000),size=(100,100),color='green')
+
+        # screen state that can be used to just clear the screen to blank.
+        self.clearScreen=ClearScreen(self)
+        self.clearScreen.setScreenColor((128,128,128))
+
+        self.clearScreen.flip(text='EXPERIMENT_INIT')
+
+        self.clearScreen.sendMessage("IO_HUB EXPERIMENT_INFO START")
+        self.clearScreen.sendMessage("ioHub Experiment started {0}".format(getCurrentDateTimeString()))
+        self.clearScreen.sendMessage("Experiment ID: {0}, Session ID: {1}".format(self.hub.experimentID,self.hub.experimentSessionID))
+        self.clearScreen.sendMessage("Stimulus Screen ID: {0}, Size (pixels): {1}, CoordType: {2}".format(display.getIndex(),display.getPixelResolution(),display.getCoordinateType()))
+        self.clearScreen.sendMessage("Calculated Pixels Per Degree: {0} x, {1} y".format(*display.getPixelsPerDegree()))        
+        self.clearScreen.sendMessage("IO_HUB EXPERIMENT_INFO END")
+
+        # Screen for showing text and waiting for a keyboard response or something
+        instuction_text="Press Space Key".center(32)+'\n'+"to Start Experiment.".center(32)
+        dtrigger=DeviceEventTrigger(keyboard,EventConstants.KEYBOARD_CHAR,{'key':'SPACE'})
+        timeout=5*60.0
+        self.instructionScreen=InstructionScreen(self,instuction_text,dtrigger,timeout)
+        self.instructionScreen.setScreenColor((128,128,128))
+        #flip_time,time_since_flip,event=self.instructionScreen.switchTo("CALIBRATION_WAIT")
+
+        self.instructionScreen.setText(instuction_text)        
+        self.instructionScreen.switchTo("START_EXPERIMENT_WAIT")
+
         self.experiment_running=True
-        # run the eye tracker calibration routine before starting trials
-        tracker.runSetupProcedure()
         
         for t in range(trial_count):
-            if self.experiment_running is False:
-                print 'User Terminated Experiment. Quiting....'
-                break
-            # draw an image for this trial
-            image_cache[image_names[t%image_count]].draw() 
+            self.hub.clearEvents('all')
+            instuction_text="Press Space Key To Start Trial %d"%t
+            self.instructionScreen.setText(instuction_text)        
+            self.instructionScreen.switchTo("START_TRIAL")
 
-            # start recording eye data
             tracker.setRecordingState(True)
-            
-            # flip and clear all events up to flip time (approx.)
-            flip_time=window.flip()
+            self.clearScreen.flip()
             self.hub.clearEvents('all')
-            
-            # send and Experiment Message Event to the DataStore
-            self.hub.sendMessageEvent("SYNCTIME %s"%(image_names[t%image_count],),sec_time=flip_time)
-            
-            # loop intil trial end condition is met
-            self.trial_running=True            
-            while self.experiment_running and self.trial_running:
-                for ke in tracker.getEvents(EventConstants.KEYBOARD_CHAR):
-                    self.handleKeyboardEvent(ke)    
-            # a key was pressed so the loop was exited. We are clearing the event buffers to avoid an event overflow ( currently known issue)
-            self.hub.clearEvents('all')
+    
+            # Loop until we get a keyboard event
+            runtrial=True
+            while runtrial:
+                gpos=tracker.getLastGazePosition()
+                if gpos:
+                    gaze_dot.setPos(gpos)
+                    image_cache[i].draw()
+                    gaze_dot.draw()
+                else:
+                    image_cache[i].draw()
+                    
+                flip_time=self.window.flip()          
+                self.hub.sendMessageEvent("SYNCTIME %s"%(image_cache[i].name,),sec_time=flip_time)
+                
+                keys=keyboard.getEvents(EventConstants.KEYBOARD_CHAR)
+                for key in keys:
+                    if key.key == 'SPACE':
+                       runtrial=False
+                       break
+                   
+            self.clearScreen.flip(text='TRIAL_%d_DONE'%t)
             tracker.setRecordingState(False)
 
+        self.clearScreen.flip(text='EXPERIMENT_COMPLETE')
+        instuction_text="Experiment Finished".center(32)+'\n'+"Press 'SPACE' to Quit.".center(32)+'\n'+"Thank You.".center(32)
+        self.instructionScreen.setText(instuction_text)        
+        self.instructionScreen.switchTo("EXPERIMENT_COMPLETE_WAIT")
 
-        # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
+        # A key was pressed so exit experiment.
+        # Wait 250 msec before ending the experiment 
+        # (makes it feel less abrupt after you press the key to quit IMO)
         self.hub.wait(0.250)
 
         tracker.setConnectionState(False)
-
-        ### End of experiment logic
-
-    def handleKeyboardEvent(self,kb_event):
-        print 'Exp Got keyboard char event:', kb_event
         
-        if kb_event.key in ['q','ESCAPE']:
-            # end experiment now!
-            self.trial_running=False
-            self.experiment_running =False
-        elif kb_event.key == 'SPACE':
-            # goto next trial
-            self.trial_running=False
-        elif kb_event.key == 'p':
-            self.tracker.sendCommand('print_status')
-        
-        return True
 ##################################################################
 
 # The below code should never need to be changed, unless you want to get command

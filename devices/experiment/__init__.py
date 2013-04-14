@@ -51,6 +51,8 @@ class Experiment(Device):
             
             self._last_callback_time=notifiedTime
 
+    def _close(self):
+        Device._close(self)
             
 ######### Experiment Events ###########
 

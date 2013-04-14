@@ -1241,8 +1241,15 @@ class Device(ioObject):
 
         
     def _close(self):
-        pass
-
+        try:
+            self.__class__._iohub_server=None
+            self.__class__._display_device=None
+        except:
+            pass
+        
+    def __del__(self):
+        self._close()
+        
 ########### Base Device Event that all other Device Events inherit from ##########
 
 class DeviceEvent(ioObject):

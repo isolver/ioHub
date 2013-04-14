@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1.2.6.1.2.1. LC Technologies EyeGaze EyeTracker Class &mdash; ioHub 0.6rc1 documentation</title>
+    <title>1.2.6.1.2.1. LC EyeGaze EyeTracker Implementation &mdash; ioHub 0.6rc1 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -31,7 +31,7 @@
     <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
     <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../../index.html" />
     <link rel="up" title="1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice" href="../eyetracker.html" />
-    <link rel="next" title="1.2.6.1.2.2. SMI iView EyeTracker Class" href="SMI_Implementation_Notes.html" />
+    <link rel="next" title="1.2.6.1.2.2. SMI iViewX EyeTracker Implementation" href="SMI_Implementation_Notes.html" />
     <link rel="prev" title="1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice" href="../eyetracker.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -76,7 +76,17 @@
             <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
   <ul class="dropdown-menu localtoc"><ul>
-<li><a class="reference internal" href="#">1.2.6.1.2.1. LC Technologies EyeGaze EyeTracker Class</a></li>
+<li><a class="reference internal" href="#">1.2.6.1.2.1. LC EyeGaze EyeTracker Implementation</a><ul>
+<li><a class="reference internal" href="#installing-other-necessary-lc-eyegaze-software">1.2.6.1.2.1.1. Installing other Necessary LC EyeGaze Software</a></li>
+<li><a class="reference internal" href="#lc-eyegaze-device-iohub-config-yaml-settings">1.2.6.1.2.1.2. LC EyeGaze Device iohub_config.yaml Settings</a></li>
+<li><a class="reference internal" href="#minimal-lc-eyegaze-device-iohub-config-yaml-example">1.2.6.1.2.1.3. Minimal LC EyeGaze Device iohub_config.yaml Example</a></li>
+<li><a class="reference internal" href="#supported-eyetracker-device-event-types">1.2.6.1.2.1.4. Supported EyeTracker Device Event Types</a></li>
+<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.1.5. General Considerations</a><ul>
+<li><a class="reference internal" href="#known-issues">1.2.6.1.2.1.5.1. Known Issues:</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </ul>
 </li>
@@ -86,7 +96,7 @@
   <li><a href="../eyetracker.html"
          title="previous chapter">&laquo; 1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice</a></li>
   <li><a href="SMI_Implementation_Notes.html"
-         title="next chapter">1.2.6.1.2.2. SMI iView EyeTracker Class &raquo;</a></li>
+         title="next chapter">1.2.6.1.2.2. SMI iViewX EyeTracker Implementation &raquo;</a></li>
           
           
             <li>
@@ -108,9 +118,226 @@
   </div>
 
   
-  <div class="section" id="lc-technologies-eyegaze-eyetracker-class">
-<h1>1.2.6.1.2.1. LC Technologies EyeGaze EyeTracker Class<a class="headerlink" href="#lc-technologies-eyegaze-eyetracker-class" title="Permalink to this headline">¶</a></h1>
-<p>To be completed.</p>
+  <div class="section" id="lc-eyegaze-eyetracker-implementation">
+<h1>1.2.6.1.2.1. LC EyeGaze EyeTracker Implementation<a class="headerlink" href="#lc-eyegaze-eyetracker-implementation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported Platforms:</p>
+<p class="last">Windows (XP SP2, SP3, Windows 7)</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Supported LC EyeGaze Eye Tracker Models:</p>
+<p class="last">All LC EyeGaze Eye Tracking Systems sould work.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">An example gaze contingent eye tracking project that is preconfigured for the LC EyeGaze eye tracker implementation is available in the examples folder, under eyetrackerExamples/eyeGazeExploration.</p>
+</div>
+<div class="section" id="installing-other-necessary-lc-eyegaze-software">
+<h2>1.2.6.1.2.1.1. Installing other Necessary LC EyeGaze Software<a class="headerlink" href="#installing-other-necessary-lc-eyegaze-software" title="Permalink to this headline">¶</a></h2>
+<p>The LC EyeGaze implementation of the ioHub common eye tracker interface uses the
+LC EyeGaze C API written by LC Technologies.</p>
+<p>All the necessary files are already in your LC EyeGaze software directory, which
+<strong>must</strong> be located at C:EyeGaze on the computer you are running the ioHub software
+on.</p>
+<p>Please note that the minimum version of the LC EyeGaze client software supported by the ioHub
+imperface is <strong>??????</strong>.</p>
+</div>
+<div class="section" id="lc-eyegaze-device-iohub-config-yaml-settings">
+<h2>1.2.6.1.2.1.2. LC EyeGaze Device iohub_config.yaml Settings<a class="headerlink" href="#lc-eyegaze-device-iohub-config-yaml-settings" title="Permalink to this headline">¶</a></h2>
+<p>To specify the use of an LC EyeGaze eye tracking device within your experiment,
+the following can be added to the iohub_config.yaml file of your experiment in
+the devices list section. Note that this includes every supported parameter for
+the LC EyeGaze eye tracker device in ioHub; most of the parameters can be left out of your
+experiment device listing as any parameters not included at the experiment configuration
+level are filled in with the default value for the device implementation. The values
+listed below are the default values for the LC EyeGaze configuration:</p>
+<div class="highlight-python"><pre>eyetracker.hw.lc_technologies.eyegaze.EyeTracker:
+    # Indicates if the device should actually be loaded at experiment runtime.
+    enable: True
+
+    # The variable name of the device that will be used to access the ioHub Device class
+    # during experiment run-time, via the devices.[name] attribute of the ioHub
+    # connection or experiment runtime class.
+    name: tracker
+
+    # Should eye tracker events be saved to the ioHub DataStore file when the device
+    # is recording data ?
+    save_events: True
+
+    # Should eye tracker events be sent to the Experiment process when the device
+    # is recording data ?
+    stream_events: True
+
+    # The LC EyeGaze implementation fo the ioHub eye tracker interface uses the polling method to
+    # check for new events received from the LC EyeGaze device. device_timer.interval
+    # specifies the sec.msec time between device polls. 0.002 = 2 msec, so the device will
+    # be polled at a maxximum rate of 500 Hz. This polling rate is a 'target' value,
+    # and may not always be achieved depending on your computer specifications and the
+    # number and type of other devices being used. Valid polling intervals are between
+    # 0.001 and 0.20 seconds.
+    device_timer:
+        interval: 0.002
+
+    # How many eye events (including samples) should be saved in the ioHub event buffer before
+    # old eye events start being replaced my new events when the event buffer reaches
+    # the maximum event length of the buffer defined here.
+    # Valid values are between 32 and 2048 events.
+    event_buffer_length: 1024
+
+    # The LC EyeGaze implementation of the common eye tracker interface supports the
+    # following event types:
+    # MonocularEyeSampleEvent, BinocularEyeSampleEvent
+    # The sample type used depends on the model of LC EyeGaze system being used.
+    monitor_event_types: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent]
+
+    # This section of settings is related to the eye tracker calibration
+    # procedure.
+    calibration:
+        # TBC
+
+    # The LC EyeGaze connection settings ... TBC ....
+
+    # The LC EyeGaze supports saving a native eye tracker data file, the
+    # default_native_data_file_name value is used to set the name for
+    # the file that will be saved, not including the file type extension.
+    # If no native data file is required, set this value to an empty string, ''
+    default_native_data_file_name: et_data
+
+    # The model_name setting allows the definition of the eye tracker model being used.
+    # For the LC EyeGaze implementation, valid values are:
+    #
+    model_name: TBC
+
+    # manufacturer_name is used to store the name of the maker of the eye tracking
+    # device. This is for informational purposes only.
+    manufacturer_name: LC Technologies
+
+    # The below parameters are not used by the LC EyeGaze Common Eye Tracker
+    # Interface implementation, however they can be completed for FYI purposes
+    # at this time. Some of these properties will also be filled in at runtime by
+    # the eye tracker interface once a connection as been made to the hardware.
+
+    # The model number of the eye tracker device being used (if any).
+    model_number: N/A
+
+    # The serial number of the eye tracker device being used (if any).
+    serial_number: N/A
+
+    # The date of manufacture of the eye tracker device being used (if any).
+    manufacture_date: DD-MM-YYYY
+
+    # The software version of the eye tracker device being used (if any).
+    software_version: N/A
+
+    # The hardware of the eye tracker device being used (if any).
+    hardware_version: N/A
+
+    # The firmware number of the eye tracker device being used (if any).
+    firmware_version: N/A</pre>
+</div>
+</div>
+<div class="section" id="minimal-lc-eyegaze-device-iohub-config-yaml-example">
+<h2>1.2.6.1.2.1.3. Minimal LC EyeGaze Device iohub_config.yaml Example<a class="headerlink" href="#minimal-lc-eyegaze-device-iohub-config-yaml-example" title="Permalink to this headline">¶</a></h2>
+<p>If the default value for a parameter is sufficient for your use of the device, the parameter
+does not need to be included in your experiment iohub_config.yaml. Here is an example of
+a <em>trimmed down</em> LC EyeGaze configuration, only including the parameters that may want to be changed.
+This is just an example, your device configuration may need to be different:</p>
+<div class="highlight-python"><pre>eyetracker.hw.hw.lc_technologies.eyegaze.EyeTracker:
+    # Indicates if the device should actually be loaded at experiment runtime.
+    enable: True
+
+    # Use the default eye tracker variable name, but keep it here for reminders. ;)
+    name: tracker
+
+    # Given the high frame rate being used in this study, the polling interval has
+    # been adjusted to 1 msec.
+    device_timer:
+        interval: 0.001
+
+**Section To Be Completed**</pre>
+</div>
+</div>
+<div class="section" id="supported-eyetracker-device-event-types">
+<h2>1.2.6.1.2.1.4. Supported EyeTracker Device Event Types<a class="headerlink" href="#supported-eyetracker-device-event-types" title="Permalink to this headline">¶</a></h2>
+<p>The LC EyeGaze implementation of the Common Eye Tracker Interface supports the
+following eye event types, with data being populated for the attributes listed
+with each event type:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><dl class="first docutils">
+<dt>ioHub.devices.eyetracker.MonocularEyeSampleEvent:</dt>
+<dd><ol class="first last arabic">
+<li><dl class="first docutils">
+<dt>Attributes supported:</dt>
+<dd><ol class="first last arabic simple">
+<li>experiment_id</li>
+<li>session_id</li>
+<li>event_id</li>
+<li>event_type</li>
+<li>logged_time</li>
+<li>device_time</li>
+<li>time</li>
+<li>delay</li>
+<li>confidence_interval</li>
+<li>TBC</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ioHub.devices.eyetracker.BinocularEyeSampleEvent:</dt>
+<dd><ol class="first last arabic">
+<li><dl class="first docutils">
+<dt>Attributes supported:</dt>
+<dd><ol class="first last arabic simple">
+<li>experiment_id</li>
+<li>session_id</li>
+<li>event_id</li>
+<li>event_type</li>
+<li>logged_time</li>
+<li>device_time</li>
+<li>time</li>
+<li>delay</li>
+<li>confidence_interval</li>
+<li>TBC</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="general-considerations">
+<h2>1.2.6.1.2.1.5. General Considerations<a class="headerlink" href="#general-considerations" title="Permalink to this headline">¶</a></h2>
+<p>** Last Updated:** April 11th, 2013</p>
+<p>The following is a list of known limitations, issues, or untested areas of
+functionality in the LC EyeGaze Common Eye Tracker Interface implementation.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The calibration window that appears when eyetracker.runSetupProcedure() is called can only be displayed on the primary monitor of a multimonitor setup. Please factor this into your monitor configuration.</li>
+<li>The LC EyeGaze software <strong>must</strong> be installed on the computer running PsychoPy and ioHub in the C:EyeGaze folder.</li>
+<li>Currently only monocular EyeGaze systems in a single PC configuration have been tested and are known to work. If you have an Eye Follower system, or use a two computer setup, please contact me if you would like to help test and work with me to fix any issues with binocular or dual PC setups for the EyeGaze.</li>
+</ol>
+</div></blockquote>
+<div class="section" id="known-issues">
+<h3>1.2.6.1.2.1.5.1. Known Issues:<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The eyetracker.runSetupProcedure() should be called &#8216;before&#8217; creating the PsychoPy full screen window, otherwise the calibration screen may be blocked by the PsychoPy Window. This means that calibration can only be done at the start of the experiment. This issue is being looked into and will be resolved as soon as possible.</li>
+</ol>
+</div></blockquote>
+</div>
+</div>
 </div>
 
 

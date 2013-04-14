@@ -3,7 +3,9 @@
 Created on Thu Nov 08 15:13:55 2012
 
 @author: Sol
+
 """
+
 try:
     
     class Constants(object):
@@ -535,80 +537,80 @@ try:
     
     if sys.platform == 'darwin':
         class UnicodeChars(Constants):
-            TAB= u"\u0009" # "Tab"
-            ESCAPE= u"\u001b" # "Escape"
-            UP= u"\uf700" # "Up"
-            DOWN= u"\uF701" # "Down"
-            LEFT= u"\uF702" # "Left"
-            RIGHT= u"\uF703" # "Right"
-            F1= u"\uF704" # "F1"
-            F2= u"\uF705" # "F2"
-            F3= u"\uF706" # "F3"
-            F4= u"\uF707" # "F4"
-            F5= u"\uF708" # "F5"
-            F6= u"\uF709" # "F6"
-            F7= u"\uF70A" # "F7"
-            F8= u"\uF70B" # "F8"
-            F9= u"\uF70C" # "F9"
-            F10= u"\uF70D" # "F10"
-            F11= u"\uF70E" # "F11"
-            F12= u"\uF70F" # "F12"
-            F13= u"\uF710" # "F13"
-            F14= u"\uF711" # "F14"
-            F15= u"\uF712" # "F15"
-            F16= u"\uF713" # "F16"
-            F17= u"\uF714" # "F17"
-            F18= u"\uF715" # "F18"
-            F19= u"\uF716" # "F19"
-            F20= u"\uF717" # "F20"
-            F21= u"\uF718" # "F21"
-            F22= u"\uF719" # "F22"
-            F23= u"\uF71A" # "F23"
-            F24= u"\uF71B" # "F24"
-            F25= u"\uF71C" # "F25"
-            F26= u"\uF71D" # "F26"
-            F27= u"\uF71E" # "F27"
-            F28= u"\uF71F" # "F28"
-            F29= u"\uF720" # "F29"
-            F30= u"\uF721" # "F30"
-            F31= u"\uF722" # "F31"
-            F32= u"\uF723" # "F32"
-            F33= u"\uF724" # "F33"
-            F34= u"\uF725" # "F34"
-            F35= u"\uF726" # "F35"
-            INSERT= u"\uF727" # "Insert"
-            DELETE= u"\uF728" # "Delete"
-            HOME= u"\uF729" # "Home"
-            BEGIN= u"\uF72A" # "Begin"
-            END= u"\uF72B" # "End"
-            PAGE_UP= u"\uF72C" # "PageUp"
-            PAGE_DOWN= u"\uF72D" # "PageDown"
-            PRINT= u"\uF72E" # "PrintScreen"
-            SCROLL_LOCK= u"\uF72F" # "ScrollLock"
-            PAUSE= u"\uF730" # "Pause"
-            SYSREQ= u"\uF731" # "SysReq"
-            BREAK= u"\uF732" # "Break"
-            RESET= u"\uF733" # "Reset"
-            STOP= u"\uF734" # "Stop"
-            MENU= u"\uF735" # "Menu"
-            USER= u"\uF736" # "User"
-            SYSTEM= u"\uF737" # "System"
-            PRINT= u"\uF738" # "Print"
-            CLEAR_LINE= u"\uF739" # "ClearLine"
-            CLEAR= u"\uF73A" # "ClearDisplay"
-            INSERT_LINE= u"\uF73B" # "InsertLine"
-            DELETE_LINE= u"\uF73C" # "DeleteLine"
-            INSERT= u"\uF73D" # "InsertChar"
-            DELETE= u"\uF73E" # "DeleteChar"
-            PREV= u"\uF73F" # "Prev"
-            NEXT= u"\uF740" # "Next"
-            SELECT= u"\uF741" # "Select"
-            EXECUTE= u"\uF742" # "Execute"
-            UNDO= u"\uF743" # "Undo"
-            REDO= u"\uF744" # "Redo"
-            FIND= u"\uF745" # "Find"
-            HELP= u"\uF746" # "Help"
-            MODE= u"\uF747" # "ModeSwitch"
+            TAB= "\u0009" # "Tab"
+            ESCAPE= "\u001b" # "Escape"
+            UP= "\uf700" # "Up"
+            DOWN= "\uF701" # "Down"
+            LEFT= "\uF702" # "Left"
+            RIGHT= "\uF703" # "Right"
+            F1= "\uF704" # "F1"
+            F2= "\uF705" # "F2"
+            F3= "\uF706" # "F3"
+            F4= "\uF707" # "F4"
+            F5= "\uF708" # "F5"
+            F6= "\uF709" # "F6"
+            F7= "\uF70A" # "F7"
+            F8= "\uF70B" # "F8"
+            F9= "\uF70C" # "F9"
+            F10= "\uF70D" # "F10"
+            F11= "\uF70E" # "F11"
+            F12= "\uF70F" # "F12"
+            F13= "\uF710" # "F13"
+            F14= "\uF711" # "F14"
+            F15= "\uF712" # "F15"
+            F16= "\uF713" # "F16"
+            F17= "\uF714" # "F17"
+            F18= "\uF715" # "F18"
+            F19= "\uF716" # "F19"
+            F20= "\uF717" # "F20"
+            F21= "\uF718" # "F21"
+            F22= "\uF719" # "F22"
+            F23= "\uF71A" # "F23"
+            F24= "\uF71B" # "F24"
+            F25= "\uF71C" # "F25"
+            F26= "\uF71D" # "F26"
+            F27= "\uF71E" # "F27"
+            F28= "\uF71F" # "F28"
+            F29= "\uF720" # "F29"
+            F30= "\uF721" # "F30"
+            F31= "\uF722" # "F31"
+            F32= "\uF723" # "F32"
+            F33= "\uF724" # "F33"
+            F34= "\uF725" # "F34"
+            F35= "\uF726" # "F35"
+            INSERT= "\uF727" # "Insert"
+            DELETE= "\uF728" # "Delete"
+            HOME= "\uF729" # "Home"
+            BEGIN= "\uF72A" # "Begin"
+            END= "\uF72B" # "End"
+            PAGE_UP= "\uF72C" # "PageUp"
+            PAGE_DOWN= "\uF72D" # "PageDown"
+            PRINT= "\uF72E" # "PrintScreen"
+            SCROLL_LOCK= "\uF72F" # "ScrollLock"
+            PAUSE= "\uF730" # "Pause"
+            SYSREQ= "\uF731" # "SysReq"
+            BREAK= "\uF732" # "Break"
+            RESET= "\uF733" # "Reset"
+            STOP= "\uF734" # "Stop"
+            MENU= "\uF735" # "Menu"
+            USER= "\uF736" # "User"
+            SYSTEM= "\uF737" # "System"
+            PRINT= "\uF738" # "Print"
+            CLEAR_LINE= "\uF739" # "ClearLine"
+            CLEAR= "\uF73A" # "ClearDisplay"
+            INSERT_LINE= "\uF73B" # "InsertLine"
+            DELETE_LINE= "\uF73C" # "DeleteLine"
+            INSERT= "\uF73D" # "InsertChar"
+            DELETE= "\uF73E" # "DeleteChar"
+            PREV= "\uF73F" # "Prev"
+            NEXT= "\uF740" # "Next"
+            SELECT= "\uF741" # "Select"
+            EXECUTE= "\uF742" # "Execute"
+            UNDO= "\uF743" # "Undo"
+            REDO= "\uF744" # "Redo"
+            FIND= "\uF745" # "Find"
+            HELP= "\uF746" # "Help"
+            MODE= "\uF747" # "ModeSwitch"
     
             @classmethod
             def getName(cls,id):
@@ -664,6 +666,10 @@ try:
         VirtualKeyCodes.initialize()
     
     class ModifierKeyCodes(Constants):
+        _mod_names=['CONTROL_LEFT','CONTROL_RIGHT','SHIFT_LEFT',
+                   'SHIFT_RIGHT','ALT_LEFT','ALT_RIGHT',
+                   'COMMAND_LEFT','COMMAND_RIGHT','CAPLOCKS',
+                   'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD']
         CONTROL_LEFT = 1
         CONTROL_RIGHT = 2
         SHIFT_LEFT = 4
@@ -677,7 +683,7 @@ try:
         MOD_ALT=1024
         MOD_CTRL=2048
         MOD_CMD=4096
-        
+                    
     ModifierKeyCodes.initialize()
     ModifierKeyCodes._keys.remove(ModifierKeyCodes.getID('UNDEFINED'))
     
@@ -723,7 +729,10 @@ try:
     
         @classmethod
         def getModifiersForEvent(cls,event):
-            mods = event.Modifiers
+            return cls._modifierCodes2Labels(event.Modifiers)
+
+        @classmethod
+        def _modifierCodes2Labels(cls,mods):
             if mods == 0:
                 return None
     

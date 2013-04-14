@@ -35,11 +35,14 @@
 #   January 2013: File modified by
 #      Sol Simpson (sol@isolver-software.com), with some cleanup done and
 #      modifications made so it integrated with the ioHub module more effecively
-#     ( but therefore baccking this version not useful for general application usage) 
+#     ( but therefore making this version not useful for general application usage) 
 #
 # March, 2013: -Fixed an existing bug that caused CAPLOCKS not to have an effect,
 #              -Added tracking of what keys are pressed and how many auto repeat
 #              press events each has received.
+# April, 2013: - Modified to directly return ioHub device event arrays
+#             - optimized keysym lookup by loading into a dict cache
+#             - started adding support for reporting unicode keys
 
 import re
 import time
@@ -106,7 +109,7 @@ class HookManager(threading.Thread):
                                  3:'MOUSE_BUTTON_RIGHT'
                                 }        
         self.pressedMouseButtons=0
-        
+
         self.create_runtime_keysym_maps()
         
     def run(self):
@@ -151,13 +154,13 @@ class HookManager(threading.Thread):
     def HookMouse(self):
         pass
 
-    def isKeyPressed(self,key):
+    def isKeyPressed(self,keysym):
         """
         Returns 0 if key is not pressed, otherwise a
         possitive int, representing the auto repeat count ( return val - 1) 
         of key press events that have occurred for the key. 
         """
-        return self.key_states(key.upper(),0)
+        return self.key_states.get(keysym,0)
 
     def getPressedKeys(self,repeatCounts=False):
         """
@@ -212,47 +215,43 @@ class HookManager(threading.Thread):
                 self.MouseAllMotion(hookevent)
         
     def keypressevent(self, event):
-        matchto = self.lookup_keysym(self.local_dpy.keycode_to_keysym(event.detail, 0))        
-        if self.key_states.get(matchto.upper(),None):
-            self.key_states[matchto.upper()]+=1
+        key_state_sym=self.local_dpy.keycode_to_keysym(event.detail, 0)
+        matchto = self.lookup_keysym(key_state_sym)        
+        if self.key_states.get(key_state_sym,None) is not None:
+            self.key_states[key_state_sym]+=1
         else:
-            self.key_states[matchto.upper()]=1
-            
-        if self.shiftablechar.match(self.lookup_keysym(self.local_dpy.keycode_to_keysym(event.detail, 0))): ## This is a character that can be typed.
-            if self.ison["SHIFT"] == False:
-                keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)
-
-                return self.makekeyhookevent(keysym, event)
-            else:
-                keysym = self.local_dpy.keycode_to_keysym(event.detail, 1)
-        else: ## Not a typable character.
-            keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)
-            if self.isshift.match(matchto):
+            self.key_states[key_state_sym]=1
+        
+        if self.isshift.match(matchto.upper()):
+            self.ison["SHIFT"] = self.ison["SHIFT"] + 1
+        elif self.iscaps.match(matchto.upper()):
+            if self.ison["CAPLOCKS"] == False:
                 self.ison["SHIFT"] = self.ison["SHIFT"] + 1
-            elif self.iscaps.match(matchto):
-                if self.ison["CAPLOCKS"] == False:
-                    self.ison["SHIFT"] = self.ison["SHIFT"] + 1
-                    self.ison["CAPLOCKS"] = True
-                elif self.ison["CAPLOCKS"] == True:
-                    self.ison["SHIFT"] = self.ison["SHIFT"] - 1
-                    self.ison["CAPLOCKS"] = False
+                self.ison["CAPLOCKS"] = True
+            elif self.ison["CAPLOCKS"] == True:
+                self.ison["SHIFT"] = self.ison["SHIFT"] - 1
+                self.ison["CAPLOCKS"] = False
+
+        if self.ison["SHIFT"] == False:
+            keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)
+        else:
+            keysym = self.local_dpy.keycode_to_keysym(event.detail, 1)
+
         return self.makekeyhookevent(keysym, event)
     
-    def keyreleaseevent(self, event):
-        if self.shiftablechar.match(self.lookup_keysym(self.local_dpy.keycode_to_keysym(event.detail, 0))):
-            if self.ison["SHIFT"] == False:
-                keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)
-            else:
-                keysym = self.local_dpy.keycode_to_keysym(event.detail, 1)
-        else:
+    def keyreleaseevent(self, event):        
+        if self.ison["SHIFT"] == False:
             keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)
-        matchto = self.lookup_keysym(keysym)
-        
-        if self.key_states.get(matchto.upper(),None):
-            del self.key_states[matchto.upper()]
-        
-        if self.isshift.match(matchto):
+        else:
+            keysym = self.local_dpy.keycode_to_keysym(event.detail, 1)
+
+        matchto_sym=self.local_dpy.keycode_to_keysym(event.detail, 0)
+        matchto = self.lookup_keysym(matchto_sym) 
+        if self.key_states.get(matchto_sym,None):
+            del self.key_states[matchto_sym]        
+        if self.isshift.match(matchto.upper()):
             self.ison["SHIFT"] = self.ison["SHIFT"] - 1
+            
         return self.makekeyhookevent(keysym, event)
 
     def buttonpressevent(self, event):
@@ -309,14 +308,6 @@ class HookManager(threading.Thread):
 
     def code2iokeysym(self,keysym):
         return self._XK_CODE2NAMES.get(keysym,["[%d]"%(keysym),])[0]
-        
-
-    def asciivalue(self, keysym):
-        asciinum = self.keysym2code(keysym)
-        if asciinum < 256:
-            return asciinum
-        return 0
-
     
     def makekeyhookevent(self, keysym, event):
         """
@@ -357,22 +348,27 @@ class HookManager(threading.Thread):
         For ButtonPress and ButtonRelease, this is the button of the event.
         For MotionNotify, this is either X.NotifyNormal or X.NotifyHint.
         """
-        
-        char_string=u''
-        uchar=keysym2ucs(keysym)
-        if uchar==-1:
-            uchar=self.asciivalue(keysym)
-            char_string=unicode(self.lookup_keysym(keysym)).encode('utf-8')
+
+        # See if there is a unicode mapping for the character....
+        key=''
+        ucode=keysym2ucs(keysym)
+        if ucode!=-1:
+            key=unichr(ucode).encode('utf-8')
         else:
-            char_string=unichr(uchar).encode('utf-8')
+            # If not, use the generated mapping tables to get a key label
+            ucode=0
+            key=unicode(self.lookup_keysym(keysym),encoding='utf-8')
         
         storewm = self.xwindowinfo()
         
+        auto_repeat=0
         if event.type == X.KeyPress:
             ioHubEventID=EventConstants.KEYBOARD_PRESS
+            auto_repeat=self.isKeyPressed(self.local_dpy.keycode_to_keysym(event.detail, 0))-1
         elif event.type == X.KeyRelease:
             ioHubEventID =EventConstants.KEYBOARD_RELEASE
 
+        
         return [[0,
                 0,
                 0, #device id (not currently used)
@@ -384,10 +380,11 @@ class HookManager(threading.Thread):
                 0.0, # confidence interval not set for keybaord or mouse devices.
                 0.0, # delay not set for keybaord or mouse devices.
                 0,   # filter level not used
+                auto_repeat,
                 event.detail, #scan / Keycode of event.
                 keysym, # KeyID / VK code for key pressed
-                uchar,  # unicode or ascii int value for char
-                char_string, # unicode char or label for the key. (depending on whether it is a visible char or not)
+                ucode,  # unicode value for char, otherwise, 0
+                key, # utf-8 encoded char or label for the key. (depending on whether it is a visible char or not)
                 event.state,  # The logical state of the button and modifier keys just before the event. 
                 int(storewm["handle"], base=16)
                 ],]

@@ -8,6 +8,7 @@
     save_events: IOHUB_BOOL
     stream_events: IOHUB_BOOL
     auto_report_events: IOHUB_BOOL    
+    report_auto_repeat_press_events: IOHUB_BOOL    
     event_buffer_length:
         IOHUB_INT:
             min: 1

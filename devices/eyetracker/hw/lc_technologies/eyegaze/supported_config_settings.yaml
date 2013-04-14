@@ -22,18 +22,18 @@ eyetracker.hw.lc_technologies.eyegaze.EyeTracker:
             valid_values:  [UPPER_RIGHT, UPPER_LEFT] 
             min_length: 1
             max_length: 1            
-    connection_type:
-        IOHUB_LIST:
-            valid_values:  [LOCAL, SOCKET, SERIAL] 
-            min_length: 1
-            max_length: 1            
-    # [SOCKET, 127.0.0.1] : eyegaze server ip address
-    # [SERIAL, COM1] : COM address of serial port to use.
-    connection_settings:
-        IOHUB_STRING:
-            min_length: 0
-            max_length: 16            
-
+    host_connection:
+        type:        
+            IOHUB_LIST:
+                valid_values:  [LOCAL, SOCKET, SERIAL] 
+                min_length: 1
+                max_length: 1            
+        # [SOCKET, 127.0.0.1] : eyegaze server ip address
+        # [SERIAL, COM1] : COM address of serial port to use.
+        parameter:
+            IOHUB_STRING:
+                min_length: 0
+                max_length: 16            
     default_native_data_file_name:
         IOHUB_STRING:
             min_length: 0

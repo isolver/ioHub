@@ -32,7 +32,7 @@
     <link rel="top" title="ioHub 0.6rc1 documentation" href="../../../../index.html" />
     <link rel="up" title="1.2.6. ioHub.devices.eyetracker.EyeTrackerDevice" href="../eyetracker.html" />
     <link rel="next" title="1.2.6.1.2.3. SR Research EyeLink EyeTracker Class" href="SR_Research_Implementation_Notes.html" />
-    <link rel="prev" title="1.2.6.1.2.1. LC Technologies EyeGaze EyeTracker Class" href="LC_Technologies_Implementation_Notes.html" />
+    <link rel="prev" title="1.2.6.1.2.1. LC EyeGaze EyeTracker Implementation" href="LC_Technologies_Implementation_Notes.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -81,7 +81,10 @@
 <li><a class="reference internal" href="#smi-iviewx-device-iohub-config-yaml-settings">1.2.6.1.2.2.2. SMI iViewX Device iohub_config.yaml Settings</a></li>
 <li><a class="reference internal" href="#minimal-smi-iviewx-device-iohub-config-yaml-example">1.2.6.1.2.2.3. Minimal SMI iViewX Device iohub_config.yaml Example</a></li>
 <li><a class="reference internal" href="#supported-eyetracker-device-event-types">1.2.6.1.2.2.4. Supported EyeTracker Device Event Types</a></li>
-<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.2.5. General Considerations</a></li>
+<li><a class="reference internal" href="#general-considerations">1.2.6.1.2.2.5. General Considerations</a><ul>
+<li><a class="reference internal" href="#known-issues">1.2.6.1.2.2.5.1. Known Issues:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -91,7 +94,7 @@
           
             
   <li><a href="LC_Technologies_Implementation_Notes.html"
-         title="previous chapter">&laquo; 1.2.6.1.2.1. LC Technologies EyeGaze EyeTracker Class</a></li>
+         title="previous chapter">&laquo; 1.2.6.1.2.1. LC EyeGaze EyeTracker Implementation</a></li>
   <li><a href="SR_Research_Implementation_Notes.html"
          title="next chapter">1.2.6.1.2.3. SR Research EyeLink EyeTracker Class &raquo;</a></li>
           
@@ -126,6 +129,10 @@
 <p class="first admonition-title">Note</p>
 <p>Supported iViewX Eye Tracker Models:</p>
 <p class="last">iViewX High Speed, iViewX RED, iViewX RED-m, iViewX fMRI, iViewX EEG</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">An example gaze contingent eye tracking project that is preconfigured for the SMI iViewX eye tracker implementation is available in the examples folder, under eyetrackerExamples/smiTrackerTest.</p>
 </div>
 <dl class="class">
 <dt id="ioHub.devices.eyetracker.hw.smi.iviewx.EyeTracker">
@@ -750,7 +757,30 @@ with each event type:</p>
 </div>
 <div class="section" id="general-considerations">
 <h2>1.2.6.1.2.2.5. General Considerations<a class="headerlink" href="#general-considerations" title="Permalink to this headline">¶</a></h2>
-<p>An example gaze contingent eye tracking project that is preconfigured for the SMI iViewX eye tracker implementation is available in the examples folder, under eyetrackerExamples/smiTrackerTest.</p>
+<p>** Last Updated:** April 11th, 2013</p>
+<p>The following is a list of known limitations, issues, or untested areas of
+functionality in the iViewX Common Eye Tracker Interface</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Dual tracker setup has noty been tested.</li>
+<li>Ensure screen physical settings are sent to tracker.</li>
+<li>Handle the &#8216;track_eyes&#8217; param. See pg 58 of SDK Manual.pdf.</li>
+<li>Handle pupil_measure_types setting. (if possible)</li>
+<li>Use model_name setting (different logic may be needed for diff models.</li>
+<li>Correctly set the pupil measure type and eyes_tracked setting. Currently set to constants.</li>
+<li>Add support for fixation parsing criteria: SetEventDetectionParameter.</li>
+<li>Add native data file saving support.</li>
+<li>Implement sendCommand functionality.</li>
+</ol>
+</div></blockquote>
+<div class="section" id="known-issues">
+<h3>1.2.6.1.2.2.5.1. Known Issues:<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ol class="arabic simple">
+<li>In RED-m, getTrackerTime function in C API returns last sample time, not current eye tracker time.</li>
+</ol>
+</div></blockquote>
+</div>
 </div>
 </div>
 

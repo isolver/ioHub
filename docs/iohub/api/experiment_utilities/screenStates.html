@@ -127,18 +127,603 @@ to the participant and waiting for a specific reaction or a timeout for each sli
 the experiment will continue to the next ScreenState in the experiment.</p>
 <div class="section" id="screenstate-class">
 <h2>3.3.1. ScreenState Class<a class="headerlink" href="#screenstate-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.ScreenState">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ScreenState</tt><big>(</big><em>experimentRuntime=None</em>, <em>eventTriggers=None</em>, <em>timeout=None</em>, <em>background_color=(255</em>, <em>255</em>, <em>255)</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.addEventTrigger">
+<tt class="descname">addEventTrigger</tt><big>(</big><em>trigger</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.addEventTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.build">
+<tt class="descname">build</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.flip">
+<tt class="descname">flip</tt><big>(</big><em>text=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.flip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.util.experiment.ScreenState.getCurrentScreenState">
+<em class="property">classmethod </em><tt class="descname">getCurrentScreenState</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.getCurrentScreenState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.getEventTriggers">
+<tt class="descname">getEventTriggers</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.getEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.getStateStartTime">
+<tt class="descname">getStateStartTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.getStateStartTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>text</em>, <em>mtime=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.setEventTriggers">
+<tt class="descname">setEventTriggers</tt><big>(</big><em>triggers</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.setEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.setScreenColor">
+<tt class="descname">setScreenColor</tt><big>(</big><em>rgbColor</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.setScreenColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.setTimeout">
+<tt class="descname">setTimeout</tt><big>(</big><em>timeout</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.setTimeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ScreenState.switchTo">
+<tt class="descname">switchTo</tt><big>(</big><em>clearEvents=True</em>, <em>msg=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ScreenState.switchTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches to the screen state defined by the class instance. The screen
+stim and built and a flip occurs.</p>
+<p>Three conditions can cause the switchTo method to then return, 
+based on whether a timeout and / or DeviceEventTriggers
+have been set with the Screen state when switchTo is called. In all cases 
+a tuple of three values is returned, some elements of which may be None
+depending on what resulted in the state exit. The three conditions are:</p>
+<blockquote>
+<div><p>1) If no timeout or DeviceEventTriggers have been specified with
+the ScreenState, switchto() returns after the window.flip() with:</p>
+<blockquote>
+<div>(stateStartTime, None, None)
+where stateStartTime is the time the call to flip() returned.</div></blockquote>
+<p>2) If a timeout has been specified, and that amount of time
+elapses from the startStartTime, then switchTo() returns with:</p>
+<blockquote>
+<div><p>(stateStartTime, stateDuration, None)
+where stateStartTime is the time the call to flip() returned.</p>
+<blockquote>
+<div>stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.</div></blockquote>
+</div></blockquote>
+<p>3) If 1 - N DeviceEventTriggers have been set with the ScreenState, 
+they are monitored to determine if any have triggered. 
+If a DeviceEventTrigger has triggered, the triggering event and 
+the triggers callback function are retrieved. 
+The deviceEventTrigger is then reset, and the callback is called.</p>
+<p>If a callback returns True, the ScreenState is exited, returning: 
+(stateStartTime, stateDuration, exitTriggeringEvent).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>where -stateStartTime is the time the call to flip() returned.</dt>
+<dd>-stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.
+-exitTriggeringEvent is the Device event (in dict form)
+that caused the ScreenState to exit.</dd>
+</dl>
+</div></blockquote>
+<p>If the callback returns False, the ScreenState is not exited, and
+the the timeout period and DeviceEventTriggers cintinue to be
+checked.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ScreenState.experimentRuntime">
+<tt class="descname">experimentRuntime</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ScreenState.experimentRuntime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ScreenState.window">
+<tt class="descname">window</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ScreenState.window" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="clearscreen-state">
 <h2>3.3.2. ClearScreen State<a class="headerlink" href="#clearscreen-state" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.ClearScreen">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ClearScreen</tt><big>(</big><em>experimentRuntime</em>, <em>eventTriggers=None</em>, <em>timeout=None</em>, <em>background_color=(255</em>, <em>255</em>, <em>255)</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.screenState.ScreenState</span></tt></p>
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.addEventTrigger">
+<tt class="descname">addEventTrigger</tt><big>(</big><em>trigger</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.addEventTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.build">
+<tt class="descname">build</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.flip">
+<tt class="descname">flip</tt><big>(</big><em>text=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.flip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.util.experiment.ClearScreen.getCurrentScreenState">
+<em class="property">classmethod </em><tt class="descname">getCurrentScreenState</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.getCurrentScreenState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.getEventTriggers">
+<tt class="descname">getEventTriggers</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.getEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.getStateStartTime">
+<tt class="descname">getStateStartTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.getStateStartTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>text</em>, <em>mtime=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.setEventTriggers">
+<tt class="descname">setEventTriggers</tt><big>(</big><em>triggers</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.setEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.setScreenColor">
+<tt class="descname">setScreenColor</tt><big>(</big><em>rgbColor</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.setScreenColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.setTimeout">
+<tt class="descname">setTimeout</tt><big>(</big><em>timeout</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.setTimeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ClearScreen.switchTo">
+<tt class="descname">switchTo</tt><big>(</big><em>clearEvents=True</em>, <em>msg=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.switchTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches to the screen state defined by the class instance. The screen
+stim and built and a flip occurs.</p>
+<p>Three conditions can cause the switchTo method to then return, 
+based on whether a timeout and / or DeviceEventTriggers
+have been set with the Screen state when switchTo is called. In all cases 
+a tuple of three values is returned, some elements of which may be None
+depending on what resulted in the state exit. The three conditions are:</p>
+<blockquote>
+<div><p>1) If no timeout or DeviceEventTriggers have been specified with
+the ScreenState, switchto() returns after the window.flip() with:</p>
+<blockquote>
+<div>(stateStartTime, None, None)
+where stateStartTime is the time the call to flip() returned.</div></blockquote>
+<p>2) If a timeout has been specified, and that amount of time
+elapses from the startStartTime, then switchTo() returns with:</p>
+<blockquote>
+<div><p>(stateStartTime, stateDuration, None)
+where stateStartTime is the time the call to flip() returned.</p>
+<blockquote>
+<div>stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.</div></blockquote>
+</div></blockquote>
+<p>3) If 1 - N DeviceEventTriggers have been set with the ScreenState, 
+they are monitored to determine if any have triggered. 
+If a DeviceEventTrigger has triggered, the triggering event and 
+the triggers callback function are retrieved. 
+The deviceEventTrigger is then reset, and the callback is called.</p>
+<p>If a callback returns True, the ScreenState is exited, returning: 
+(stateStartTime, stateDuration, exitTriggeringEvent).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>where -stateStartTime is the time the call to flip() returned.</dt>
+<dd>-stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.
+-exitTriggeringEvent is the Device event (in dict form)
+that caused the ScreenState to exit.</dd>
+</dl>
+</div></blockquote>
+<p>If the callback returns False, the ScreenState is not exited, and
+the the timeout period and DeviceEventTriggers cintinue to be
+checked.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ClearScreen.experimentRuntime">
+<tt class="descname">experimentRuntime</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.experimentRuntime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ClearScreen.window">
+<tt class="descname">window</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ClearScreen.window" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="instructionscreen-state">
 <h2>3.3.3. InstructionScreen State<a class="headerlink" href="#instructionscreen-state" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.InstructionScreen">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">InstructionScreen</tt><big>(</big><em>experimentRuntime, text='Default Text', eventTriggers=None, timeout=None, text_color=[0, 0, 0], text_pos=[0, 0], text_height=32, background_color=(255, 255, 255)</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.screenState.ScreenState</span></tt></p>
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.addEventTrigger">
+<tt class="descname">addEventTrigger</tt><big>(</big><em>trigger</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.addEventTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.build">
+<tt class="descname">build</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.flip">
+<tt class="descname">flip</tt><big>(</big><em>text=''</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.flip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.util.experiment.InstructionScreen.getCurrentScreenState">
+<em class="property">classmethod </em><tt class="descname">getCurrentScreenState</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.getCurrentScreenState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.getEventTriggers">
+<tt class="descname">getEventTriggers</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.getEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.getStateStartTime">
+<tt class="descname">getStateStartTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.getStateStartTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>text</em>, <em>mtime=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setEventTriggers">
+<tt class="descname">setEventTriggers</tt><big>(</big><em>triggers</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setScreenColor">
+<tt class="descname">setScreenColor</tt><big>(</big><em>rgbColor</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setScreenColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setText">
+<tt class="descname">setText</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setTextColor">
+<tt class="descname">setTextColor</tt><big>(</big><em>rgbColor</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setTextColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setTextPosition">
+<tt class="descname">setTextPosition</tt><big>(</big><em>pos</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setTextPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setTextSize">
+<tt class="descname">setTextSize</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setTextSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.setTimeout">
+<tt class="descname">setTimeout</tt><big>(</big><em>timeout</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.setTimeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.InstructionScreen.switchTo">
+<tt class="descname">switchTo</tt><big>(</big><em>clearEvents=True</em>, <em>msg=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.switchTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches to the screen state defined by the class instance. The screen
+stim and built and a flip occurs.</p>
+<p>Three conditions can cause the switchTo method to then return, 
+based on whether a timeout and / or DeviceEventTriggers
+have been set with the Screen state when switchTo is called. In all cases 
+a tuple of three values is returned, some elements of which may be None
+depending on what resulted in the state exit. The three conditions are:</p>
+<blockquote>
+<div><p>1) If no timeout or DeviceEventTriggers have been specified with
+the ScreenState, switchto() returns after the window.flip() with:</p>
+<blockquote>
+<div>(stateStartTime, None, None)
+where stateStartTime is the time the call to flip() returned.</div></blockquote>
+<p>2) If a timeout has been specified, and that amount of time
+elapses from the startStartTime, then switchTo() returns with:</p>
+<blockquote>
+<div><p>(stateStartTime, stateDuration, None)
+where stateStartTime is the time the call to flip() returned.</p>
+<blockquote>
+<div>stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.</div></blockquote>
+</div></blockquote>
+<p>3) If 1 - N DeviceEventTriggers have been set with the ScreenState, 
+they are monitored to determine if any have triggered. 
+If a DeviceEventTrigger has triggered, the triggering event and 
+the triggers callback function are retrieved. 
+The deviceEventTrigger is then reset, and the callback is called.</p>
+<p>If a callback returns True, the ScreenState is exited, returning: 
+(stateStartTime, stateDuration, exitTriggeringEvent).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>where -stateStartTime is the time the call to flip() returned.</dt>
+<dd>-stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.
+-exitTriggeringEvent is the Device event (in dict form)
+that caused the ScreenState to exit.</dd>
+</dl>
+</div></blockquote>
+<p>If the callback returns False, the ScreenState is not exited, and
+the the timeout period and DeviceEventTriggers cintinue to be
+checked.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.InstructionScreen.experimentRuntime">
+<tt class="descname">experimentRuntime</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.experimentRuntime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.InstructionScreen.window">
+<tt class="descname">window</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.InstructionScreen.window" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="imagescreen-state">
 <h2>3.3.4. ImageScreen State<a class="headerlink" href="#imagescreen-state" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.ImageScreen">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">ImageScreen</tt><big>(</big><em>experimentRuntime</em>, <em>imageName</em>, <em>imagePos=(0</em>, <em>0)</em>, <em>imageSize=None</em>, <em>eventTriggers=None</em>, <em>timeout=None</em>, <em>background_color=(255</em>, <em>255</em>, <em>255)</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.screenState.ScreenState</span></tt></p>
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.addEventTrigger">
+<tt class="descname">addEventTrigger</tt><big>(</big><em>trigger</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.addEventTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.build">
+<tt class="descname">build</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.flip">
+<tt class="descname">flip</tt><big>(</big><em>text=''</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.flip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ioHub.util.experiment.ImageScreen.getCurrentScreenState">
+<em class="property">classmethod </em><tt class="descname">getCurrentScreenState</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.getCurrentScreenState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.getEventTriggers">
+<tt class="descname">getEventTriggers</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.getEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.getStateStartTime">
+<tt class="descname">getStateStartTime</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.getStateStartTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.sendMessage">
+<tt class="descname">sendMessage</tt><big>(</big><em>text</em>, <em>mtime=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.sendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setEventTriggers">
+<tt class="descname">setEventTriggers</tt><big>(</big><em>triggers</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setEventTriggers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setImage">
+<tt class="descname">setImage</tt><big>(</big><em>imageName</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setImagePosition">
+<tt class="descname">setImagePosition</tt><big>(</big><em>pos</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setImagePosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setImageSize">
+<tt class="descname">setImageSize</tt><big>(</big><em>size=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setImageSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setScreenColor">
+<tt class="descname">setScreenColor</tt><big>(</big><em>rgbColor</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setScreenColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.setTimeout">
+<tt class="descname">setTimeout</tt><big>(</big><em>timeout</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.setTimeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.ImageScreen.switchTo">
+<tt class="descname">switchTo</tt><big>(</big><em>clearEvents=True</em>, <em>msg=None</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.switchTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches to the screen state defined by the class instance. The screen
+stim and built and a flip occurs.</p>
+<p>Three conditions can cause the switchTo method to then return, 
+based on whether a timeout and / or DeviceEventTriggers
+have been set with the Screen state when switchTo is called. In all cases 
+a tuple of three values is returned, some elements of which may be None
+depending on what resulted in the state exit. The three conditions are:</p>
+<blockquote>
+<div><p>1) If no timeout or DeviceEventTriggers have been specified with
+the ScreenState, switchto() returns after the window.flip() with:</p>
+<blockquote>
+<div>(stateStartTime, None, None)
+where stateStartTime is the time the call to flip() returned.</div></blockquote>
+<p>2) If a timeout has been specified, and that amount of time
+elapses from the startStartTime, then switchTo() returns with:</p>
+<blockquote>
+<div><p>(stateStartTime, stateDuration, None)
+where stateStartTime is the time the call to flip() returned.</p>
+<blockquote>
+<div>stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.</div></blockquote>
+</div></blockquote>
+<p>3) If 1 - N DeviceEventTriggers have been set with the ScreenState, 
+they are monitored to determine if any have triggered. 
+If a DeviceEventTrigger has triggered, the triggering event and 
+the triggers callback function are retrieved. 
+The deviceEventTrigger is then reset, and the callback is called.</p>
+<p>If a callback returns True, the ScreenState is exited, returning: 
+(stateStartTime, stateDuration, exitTriggeringEvent).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>where -stateStartTime is the time the call to flip() returned.</dt>
+<dd>-stateDuration is the time switchTo() returned minus
+stateStartTime; so it should be close to the timeout
+specified. It may be rounded to the next flip() time 
+interval if something in the state is causing the screen
+to be updated each frame.
+-exitTriggeringEvent is the Device event (in dict form)
+that caused the ScreenState to exit.</dd>
+</dl>
+</div></blockquote>
+<p>If the callback returns False, the ScreenState is not exited, and
+the the timeout period and DeviceEventTriggers cintinue to be
+checked.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ImageScreen.experimentRuntime">
+<tt class="descname">experimentRuntime</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.experimentRuntime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.ImageScreen.window">
+<tt class="descname">window</tt><em class="property"> = None</em><a class="headerlink" href="#ioHub.util.experiment.ImageScreen.window" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="deviceeventtrigger-for-use-with-screenstate-classes">
 <h2>3.3.5. DeviceEventTrigger for use with ScreenState classes<a class="headerlink" href="#deviceeventtrigger-for-use-with-screenstate-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ioHub.util.experiment.DeviceEventTrigger">
+<em class="property">class </em><tt class="descclassname">ioHub.util.experiment.</tt><tt class="descname">DeviceEventTrigger</tt><big>(</big><em>device</em>, <em>event_type</em>, <em>event_attribute_conditions={}</em>, <em>repeat_count=-1</em>, <em>trigger_function=&lt;function &lt;lambda&gt; at 0x07AE2570&gt;</em>, <em>user_kwargs={}</em><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ioHub.util.experiment.screenState.Trigger</span></tt></p>
+<p>DeviceEventTrigger are used by SCreenState objects. A DeviceEventTrigger
+associates a set of conditions for a DeviceEvent that must be met before
+the classes triggered() method returns True.</p>
+<dl class="classmethod">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.clearEventHistory">
+<em class="property">classmethod </em><tt class="descname">clearEventHistory</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.clearEventHistory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.getTriggeredStateCallback">
+<tt class="descname">getTriggeredStateCallback</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.getTriggeredStateCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.getTriggeringEvent">
+<tt class="descname">getTriggeringEvent</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.getTriggeringEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.resetLastTriggeredInfo">
+<tt class="descname">resetLastTriggeredInfo</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.resetLastTriggeredInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.resetTrigger">
+<tt class="descname">resetTrigger</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.resetTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.triggered">
+<tt class="descname">triggered</tt><big>(</big><big>)</big><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.triggered" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.device">
+<tt class="descname">device</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.event_attribute_conditions">
+<tt class="descname">event_attribute_conditions</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.event_attribute_conditions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.event_type">
+<tt class="descname">event_type</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.event_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.repeat_count">
+<tt class="descname">repeat_count</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.repeat_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.trigger_function">
+<tt class="descname">trigger_function</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.trigger_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.triggerred_count">
+<tt class="descname">triggerred_count</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.triggerred_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ioHub.util.experiment.DeviceEventTrigger.user_kwargs">
+<tt class="descname">user_kwargs</tt><a class="headerlink" href="#ioHub.util.experiment.DeviceEventTrigger.user_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 

@@ -774,9 +774,8 @@ class ioHubConnection(object):
         General purpose message sending routine,  used to send a message from the PsychoPy Process
         to the ioHub Process, and then wait for the reply from the ioHub Process before returning.
 
-        The ioHub Server accepts data send either encoded using the [msgpack](https://github.com/msgpack/msgpack-python)
-        library or json encoded using the [ujson](https://github.com/esnme/ultrajson) library
-        ( it is **fast** ).
+        The ioHub Server accepts data send encoded using the [msgpack](https://github.com/msgpack/msgpack-python)
+        library.
 
         Which encoding type is used is specified in the ioHub configuration file by the ipcCoder: parameter.
         By default *msgpack* is selected, as it seems to be as fast as ujson, but it also compresses

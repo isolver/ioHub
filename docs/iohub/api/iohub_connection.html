@@ -458,9 +458,8 @@ so you can have N messages created and sent at once.</p>
 <tt class="descname">sendToHubServer</tt><big>(</big><em>ioHubMessage</em><big>)</big><a class="reference internal" href="../../_modules/ioHub/client.html#ioHubConnection.sendToHubServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ioHub.client.ioHubConnection.sendToHubServer" title="Permalink to this definition">¶</a></dt>
 <dd><p>General purpose message sending routine,  used to send a message from the PsychoPy Process
 to the ioHub Process, and then wait for the reply from the ioHub Process before returning.</p>
-<p>The ioHub Server accepts data send either encoded using the [msgpack](<a class="reference external" href="https://github.com/msgpack/msgpack-python">https://github.com/msgpack/msgpack-python</a>)
-library or json encoded using the [ujson](<a class="reference external" href="https://github.com/esnme/ultrajson">https://github.com/esnme/ultrajson</a>) library
-( it is <strong>fast</strong> ).</p>
+<p>The ioHub Server accepts data send encoded using the [msgpack](<a class="reference external" href="https://github.com/msgpack/msgpack-python">https://github.com/msgpack/msgpack-python</a>)
+library.</p>
 <p>Which encoding type is used is specified in the ioHub configuration file by the ipcCoder: parameter.
 By default <em>msgpack</em> is selected, as it seems to be as fast as ujson, but it also compresses
 event data by up to 40 - 50% for transmission.</p>

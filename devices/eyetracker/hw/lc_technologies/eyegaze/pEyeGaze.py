@@ -1195,21 +1195,23 @@ def initializeEyeGazeDevice(iohub_display, iohub_device_config):
     # stEgControl.pszCommName = "127.0.0.1"; // Eyegaze server IP address
     # for EG_COMM_TYPE_SOCKET
 
-    com_type=iohub_device_config.get('connection_type','LOCAL')
-    comm_name=iohub_device_config.get('connection_settings',None)
+    host_conn=iohub_device_config.get('host_connection',None)
+    if host_conn:    
+        conn_type=host_conn.get('type',None)
+        conn_param=host_conn.get('parameter',None)
             
-    if com_type not in _COMM_CHANNEL_TYPES:
-        print2err("ERROR: EyeGaze connection_settings comm_type (first list element) must be one of {0}. Received: {1}.".format(_COMM_CHANNEL_TYPES,com_type))
-        print2err("..... USING DEFAULT SETTING OF [ 'LOCAL', ]")
-        com_type='LOCAL'
+    if conn_type not in _COMM_CHANNEL_TYPES:
+        print2err("ERROR: EyeGaze connection_settings comm_type (first list element) must be one of {0}. Received: {1}.".format(_COMM_CHANNEL_TYPES,conn_type))
+        print2err("..... USING DEFAULT SETTING OF LOCAL")
+        conn_type='LOCAL'
         
-    stEgControl.iCommType = _COMM_CHANNEL_TYPES[com_type]; 
+    stEgControl.iCommType = _COMM_CHANNEL_TYPES[conn_type]; 
     
-    if com_type not in ['SOCKET','SERIAL']:
-        if comm_name is None or len(comm_name)==0:
+    if conn_type not in ['SOCKET','SERIAL']:
+        if conn_param is None or len(conn_param)==0:
             stEgControl.pszCommName=None 
         else:
-            stEgControl.pszCommName=UnicodeBuffer(comm_name)
+            stEgControl.pszCommName=UnicodeBuffer(conn_param)
             
     # Create the Eyegaze image processing thread
     result=EgInit(byref(stEgControl))

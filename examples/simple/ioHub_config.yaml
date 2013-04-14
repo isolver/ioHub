@@ -23,6 +23,7 @@ monitor_devices:
         stream_events: True
     - Experiment:
         name: experimentRuntime
+        enable: True
         save_events: True
         stream_events: True
 data_store:

@@ -67,16 +67,16 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         kb=self.devices.kb
 
         #Computer.enableHighPriority()
+        
+        # Create a psychopy window, using settings from Display device config
+        psychoWindow =  FullScreenWindow(display,fullscr=False,allowGUI=True)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
-        mouse.setSystemCursorVisibility(False)
+        mouse.setSystemCursorVisibility(True)
         # Set the mouse position to 0,0, which means the 'center' of the screen.
         mouse.setPosition((0.0,0.0))
         # Read the current mouse position (should be 0,0)  ;)
         currentPosition=mouse.getPosition()
-        
-        # Create a psychopy window, using settings from Display device config
-        psychoWindow =  FullScreenWindow(display)
 
         mouse.lockMouseToDisplayID(display.getIndex())
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
@@ -89,7 +89,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # Clear all events from the global and device level event buffers.
         self.hub.clearEvents('all')
 
-        display_index=display.getIndex()
         QUIT_EXP=False
         # Loop until we get a keyboard event with the space, Enter (Return), or Escape key is pressed.
         while QUIT_EXP is False:
@@ -124,13 +123,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
             # for each new keyboard character event, check if it matches one of the end example keys.
-            for k in kb.getEvents(EventConstants.KEYBOARD_CHAR):
-                if k.key.upper() in ['ESCAPE', ]:
+            for k in kb.getEvents():
+                if k.key.upper() in ['ESCAPE', ] and k.type==EventConstants.KEYBOARD_CHAR:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
-                
-            for e in mouse.getEvents():
-                print 'Event: ',e
+                print u'{0}: time: {1}\tord: {2}.\tKey: [{3}]'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key)
+            #for e in mouse.getEvents():
+            #    print 'Event: ',e
                 
             self.hub.clearEvents('all')
         # wait 250 msec before ending the experiment (makes it feel less abrupt after you press the key)
