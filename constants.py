@@ -669,7 +669,7 @@ try:
         _mod_names=['CONTROL_LEFT','CONTROL_RIGHT','SHIFT_LEFT',
                    'SHIFT_RIGHT','ALT_LEFT','ALT_RIGHT',
                    'COMMAND_LEFT','COMMAND_RIGHT','CAPLOCKS',
-                   'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD']
+                   'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD','NUMLOCK']
         CONTROL_LEFT = 1
         CONTROL_RIGHT = 2
         SHIFT_LEFT = 4
@@ -683,7 +683,7 @@ try:
         MOD_ALT=1024
         MOD_CTRL=2048
         MOD_CMD=4096
-                    
+        NUMLOCK=MOD_CMD*2            
     ModifierKeyCodes.initialize()
     ModifierKeyCodes._keys.remove(ModifierKeyCodes.getID('UNDEFINED'))
     

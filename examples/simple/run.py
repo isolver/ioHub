@@ -84,6 +84,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         psychoStim=OrderedDict()
         psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
         psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
+        psychoStim['keytext'] = visual.TextStim(psychoWindow, text=u'?', pos = [100,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
+        psychoStim['ucodetext'] = visual.TextStim(psychoWindow, text=u'?', pos = [-100,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
+        psychoStim['mods'] = visual.TextStim(psychoWindow, text=u'?', pos = [0,-300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
         psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
         # Clear all events from the global and device level event buffers.
@@ -128,6 +131,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
                 print u'{0}: time: {1}\tord: {2}.\tKey: [{3}]'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key)
+                psychoStim['keytext'].setText(k.key)
+                psychoStim['ucodetext'].setText(unichr(k.ucode))
+                psychoStim['mods'].setText(str(k.modifiers))
             #for e in mouse.getEvents():
             #    print 'Event: ',e
                 

@@ -10,6 +10,10 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 """
 from __future__ import division
+from util import fix_encoding
+
+fix_encoding.fix_encoding()
+
 import numpy as N
 import inspect
 import sys
@@ -52,8 +56,8 @@ IO_HUB_DIRECTORY=module_directory(module_path)
 
 def print2err(*args):
     for a in args:
-        sys.stderr.write("{0}".format(a))        
-    sys.stderr.write("\n") 
+        sys.stderr.write(u"{0}".format(a))        
+    sys.stderr.write(u"\n") 
     sys.stderr.flush()
    
 def printExceptionDetailsToStdErr():
