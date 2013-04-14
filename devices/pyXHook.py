@@ -37,7 +37,7 @@
 #      modifications made so it integrated with the ioHub module more effecively
 #     ( but therefore making this version not useful for general application usage) 
 #
-# March, 2013: -Fixed an existing bug that caused CAPLOCKS not to have an effect,
+# March, 2013: -Fixed an existing bug that caused CAPS_LOCK not to have an effect,
 #              -Added tracking of what keys are pressed and how many auto repeat
 #              press events each has received.
 # April, 2013: - Modified to directly return ioHub device event arrays
@@ -75,7 +75,7 @@ class HookManager(threading.Thread):
         # Give these some initial values
         self.mouse_position_x = 0
         self.mouse_position_y = 0
-        self.ison = {"SHIFT":False, "CAPLOCKS":False}
+        self.ison = {"SHIFT":False, "CAPS_LOCK":False}
         
         # Used to hold any keys currently pressed and the repeat count
         # of each key.
@@ -87,7 +87,7 @@ class HookManager(threading.Thread):
 
         # Compile our regex statements.
         self.isshift = re.compile('^SHIFT')
-        self.iscaps = re.compile('^CAPLOCKS')                                                                                                       
+        self.iscaps = re.compile('^CAPS_LOCK')                                                                                                       
         self.shiftablechar = re.compile('^[a-z0-9]$|^minus$|^equal$|^bracketleft$|^bracketright$|^semicolon$|^backslash$|^apostrophe$|^comma$|^period$|^slash$|^grave$')
         self.logrelease = re.compile('.*')
         self.isspace = re.compile('^SPACE$')
@@ -225,12 +225,12 @@ class HookManager(threading.Thread):
         if self.isshift.match(matchto.upper()):
             self.ison["SHIFT"] = self.ison["SHIFT"] + 1
         elif self.iscaps.match(matchto.upper()):
-            if self.ison["CAPLOCKS"] == False:
+            if self.ison["CAPS_LOCK"] == False:
                 self.ison["SHIFT"] = self.ison["SHIFT"] + 1
-                self.ison["CAPLOCKS"] = True
-            elif self.ison["CAPLOCKS"] == True:
+                self.ison["CAPS_LOCK"] = True
+            elif self.ison["CAPS_LOCK"] == True:
                 self.ison["SHIFT"] = self.ison["SHIFT"] - 1
-                self.ison["CAPLOCKS"] = False
+                self.ison["CAPS_LOCK"] = False
 
         if self.ison["SHIFT"] == False:
             keysym = self.local_dpy.keycode_to_keysym(event.detail, 0)

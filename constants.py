@@ -277,6 +277,7 @@ try:
             VK_CONTROL  =  0x11
             VK_MENU  =  0x12
             VK_PAUSE  =  0x13
+            VK_CAPS_LOCK  =  0x14
             VK_CAPITAL  =  0x14
             VK_HANGUL  =  0x15
             VK_JUNJA  =  0x17
@@ -668,7 +669,7 @@ try:
     class ModifierKeyCodes(Constants):
         _mod_names=['CONTROL_LEFT','CONTROL_RIGHT','SHIFT_LEFT',
                    'SHIFT_RIGHT','ALT_LEFT','ALT_RIGHT',
-                   'COMMAND_LEFT','COMMAND_RIGHT','CAPLOCKS',
+                   'COMMAND_LEFT','COMMAND_RIGHT','CAPS_LOCK',
                    'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD','NUMLOCK']
         CONTROL_LEFT = 1
         CONTROL_RIGHT = 2
@@ -678,7 +679,7 @@ try:
         ALT_RIGHT = 32
         COMMAND_LEFT = 64
         COMMAND_RIGHT = 128
-        CAPLOCKS = 256
+        CAPS_LOCK = 256
         MOD_SHIFT=512
         MOD_ALT=1024
         MOD_CTRL=2048

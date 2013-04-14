@@ -36,7 +36,7 @@ class Keyboard(ioHubKeyboardDevice):
                     (0x00002,'SHIFT_LEFT'),(0x00004,'SHIFT_RIGHT'),
                     (0x00020,'ALT_LEFT'),(0x00040,'ALT_RIGHT'),
                     (0x000008, 'COMMAND_LEFT'),(0x000010,'COMMAND_RIGHT'),
-                    (Qz.kCGEventFlagMaskAlphaShift, 'CAPLOCKS')])
+                    (Qz.kCGEventFlagMaskAlphaShift, 'CAPS_LOCK')])
 #                    (Qz.kCGEventFlagMaskHelp ,             "MOD_HELP"),         # 0x400000   
 #                    (Qz.kCGEventFlagMaskSecondaryFn ,      "MOD_FUNC2"),        # 0x800000   
    

@@ -33,7 +33,7 @@ class Keyboard(ioHubKeyboardDevice):
                  win32_vk.VK_RMENU  : 'ALT_RIGHT', 
                  win32_vk.VK_LWIN : 'COMMAND_LEFT', 
                  win32_vk.VK_RWIN : 'COMMAND_RIGHT', 
-                 win32_vk.VK_CAPITAL : 'CAPLOCKS', 
+                 win32_vk.VK_CAPITAL : 'CAPS_LOCK', 
                  win32_vk.VK_SHIFT : 'MOD_SHIFT', 
                  win32_vk.VK_MENU : 'MOD_ALT', 
                  win32_vk.VK_CONTROL : 'MOD_CTRL', 
@@ -96,11 +96,12 @@ class Keyboard(ioHubKeyboardDevice):
             modKeyName=Keyboard._win32_modifier_mapping.get(keyID,None)
             if modKeyName:
                 if  keyID == win32_vk.VK_CAPITAL and etype==EventConstants.KEYBOARD_PRESS:
-                    #print2err("CAPLOCKS STATE: ",pyHook.GetKeyState(keyID))
                     if self._keyboard_state[keyID] > 0:
                         self._keyboard_state[keyID]=0
+                        self._modifier_value-=KeyboardConstants._modifierCodes.getID(modKeyName)
                     else:
-                        self._keyboard_state[keyID] = 0x80
+                        self._keyboard_state[keyID] = 0x01
+                        self._modifier_value+=KeyboardConstants._modifierCodes.getID(modKeyName)
                         
                 elif etype==EventConstants.KEYBOARD_PRESS and self._keyboard_state[keyID]==0:
                     self._keyboard_state[keyID] = 0x80
@@ -118,7 +119,7 @@ class Keyboard(ioHubKeyboardDevice):
                         self._keyboard_state[win32_vk.VK_MENU] = 0x80
                         #print2err("SETTING  VK_MENU: ",keyID)
                         
-                elif etype==EventConstants.KEYBOARD_RELEASE:
+                elif etype==EventConstants.KEYBOARD_RELEASE and keyID != win32_vk.VK_CAPITAL:
                     if self._keyboard_state[keyID]!=0 and keyID != win32_vk.VK_CAPITAL:
                         self._modifier_value-=KeyboardConstants._modifierCodes.getID(modKeyName)
                         self._keyboard_state[keyID] = 0
@@ -133,7 +134,7 @@ class Keyboard(ioHubKeyboardDevice):
                         elif modKeyName.find('ALT')>=0 and self._keyboard_state[win32_vk.VK_LMENU]==0 and self._keyboard_state[win32_vk.VK_RMENU]==0:
                             self._keyboard_state[win32_vk.VK_MENU] = 0
                             #print2err("CLEAR  VK_MENU: ",keyID)
-                   
+            
             #
             # End Tracking Modifiers that are pressed
             #
@@ -213,7 +214,11 @@ class Keyboard(ioHubKeyboardDevice):
                 if lookupkey and len(lookupkey)>0:
                     key=lookupkey
             
-            #print2err("ScanCode: {0}\tKeyID: {1}\tucode: {2}\tkey: {3}\tresult: {4}\tcategory: {5}".format(event.ScanCode,event.KeyID,uchar,key,result,ucat))
+            #import ctypes
+            #_dll=ctypes.windll.user32   
+            #kstatus=ctypes.c_short(_dll.GetAsyncKeyState(ctypes.c_int(k.key_id)))
+            #print k.key, ' status is %x pressed=%d was_pressed=%d'%(kstatus.value,(kstatus.value&0x80)>0,(kstatus.value&0x01)>0)
+        
                         
             return [0,
                     0,

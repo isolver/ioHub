@@ -60,6 +60,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
         ENABLE_NOISY_MOUSE=True
+     
         
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
         mouse=self.devices.mouse
@@ -130,11 +131,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 if k.key.upper() in ['ESCAPE', ] and k.type==EventConstants.KEYBOARD_CHAR:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
-                print u'{0}: time: {1}\tord: {2}.\tKey: [{3}]'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key)
+                print u'{0}: time: {1}\t\tord: {2}.\tKey: [{3}]\tMods: {4}'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key,k.modifiers)
                 psychoStim['keytext'].setText(k.key)
                 psychoStim['ucodetext'].setText(unichr(k.ucode))
                 psychoStim['mods'].setText(str(k.modifiers))
-            #for e in mouse.getEvents():
+                
+
+             #for e in mouse.getEvents():
             #    print 'Event: ',e
                 
             self.hub.clearEvents('all')
