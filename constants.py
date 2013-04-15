@@ -141,392 +141,269 @@ try:
     
     MouseConstants.initialize()
     
-    class AsciiConstants(Constants):
-        # Mainly from the pyHook lookup Table, some from Pyglet
-    
-        BACKSPACE = 0x08
-        TAB = 0x09
-        LINEFEED = 0x0A
-        CLEAR = 0x0B
-        RETURN = 0x0D
-        SYSREQ = 0x15
-        ESCAPE = 0x1B
-    
-        SPACE = 0x20
-        EXCLAMATION = 0x21
-        DOUBLEQUOTE = 0x22
-        POUND = 0x23
-        DOLLAR = 0x24
-        PERCENT = 0x25
-        AMPERSAND = 0x26
-        APOSTROPHE = 0x27
-        PARENLEFT = 0x28
-        PARENRIGHT = 0x29
-        ASTERISK = 0x2A
-        PLUS = 0x2B
-        COMMA = 0x2C
-        MINUS = 0x2D
-        PERIOD = 0x2E
-        SLASH = 0x2F
-    
-        n0_=0x30
-        n1_=0x31
-        n2_=0x32
-        n3_=0x33
-        n4_=0x34
-        n5_=0x35
-        n6_=0x36
-        n7_=0x37
-        n8_=0x38
-        n9_=0x39
-    
-        COLON = 0x3A
-        SEMICOLON = 0x3B
-        LESS = 0x3C
-        EQUAL = 0x3D
-        GREATER = 0x3E
-        QUESTION = 0x3F
-        AT = 0x40
-    
-        A=0x41
-        B=0x42
-        C=0x43
-        D=0x44
-        E=0x45
-        F=0x46
-        G=0x47
-        H=0x48
-        I=0x49
-        J=0x4A
-        K=0x4B
-        L=0x4C
-        M=0x4D
-        N=0x4E
-        O=0x4F
-        P=0x50
-        Q=0x51
-        R=0x52
-        S=0x53
-        T=0x54
-        U=0x55
-        V=0x56
-        W=0x57
-        X=0x58
-        Y=0x59
-        Z=0x5A
-    
-        BRACKETLEFT = 0x5B
-        BACKSLASH = 0x5C
-        BRACKETRIGHT = 0x5D
-        ASCIICIRCUM = 0x5E
-        UNDERSCORE = 0x5F
-        GRAVE = 0x60
-    
-        a = 0x61
-        b = 0x62
-        c = 0x63
-        d = 0x64
-        e = 0x65
-        f = 0x66
-        g = 0x67
-        h = 0x68
-        i = 0x69
-        j = 0x6A
-        k = 0x6B
-        l = 0x6C
-        m = 0x6D
-        n = 0x6E
-        o = 0x6F
-        p = 0x70
-        q = 0x71
-        r = 0x72
-        s = 0x73
-        t = 0x74
-        u = 0x75
-        v = 0x76
-        w = 0x77
-        x = 0x78
-        y = 0x79
-        z = 0x7A
-    
-        BRACELEFT = 0x7B
-        BAR = 0x7C
-        BRACERIGHT = 0x7D
-        ASCIITILDE = 0x7E
-    
-        @classmethod
-        def getName(cls,id):
-            return cls._names.get(id,None)
-    
-    AsciiConstants.initialize()
+
     
     import sys
     print sys.platform
     
     if sys.platform == 'win32':
         
-        class VirtualKeyCodes(Constants):
+        class AsciiConstants(Constants):
             # Mainly from the pyHook lookup Table, some from Pyglet
-            VK_CANCEL  =  0x03
-            VK_BACK  =  0x08
-            VK_TAB  =  0x09
-            VK_CLEAR  =  0x0C
-            VK_RETURN  =  0x0D
         
-            VK_SHIFT  =  0x10
-            VK_CONTROL  =  0x11
-            VK_MENU  =  0x12
-            VK_PAUSE  =  0x13
-            VK_CAPS_LOCK  =  0x14
-            VK_CAPITAL  =  0x14
-            VK_HANGUL  =  0x15
-            VK_JUNJA  =  0x17
-            VK_FINAL  =  0x18
-            VK_HANJA  =  0x19
-            VK_ESCAPE  =  0x1B
-            VK_CONVERT  =  0x1C
-            VK_NONCONVERT  =  0x1D
-            VK_ACCEPT  =  0x1E
-            VK_MODECHANGE  =  0x1F
+            BACKSPACE = 0x08
+            TAB = 0x09
+            LINEFEED = 0x0A
+            CLEAR = 0x0B
+            RETURN = 0x0D
+            SYSREQ = 0x15
+            ESCAPE = 0x1B
         
-            VK_SPACE  =  0x20
-            VK_PAGE_UP  =  0x21
-            VK_PAGE_DOWN  =  0x22
-            VK_END  =  0x23
-            VK_HOME  =  0x24
-            VK_LEFT  =  0x25
-            VK_UP  =  0x26
-            VK_RIGHT  =  0x27
-            VK_DOWN  =  0x28
-            VK_SELECT  =  0x29
-            VK_PRINT  =  0x2A
-            VK_EXECUTE  =  0x2B
-            VK_PRINT_SCREEN  =  0x2C
-            VK_INSERT  =  0x2D
-            VK_DELETE  =  0x2E
-            VK_HELP  =  0x2F
+            SPACE = 0x20
+            EXCLAMATION = 0x21
+            DOUBLEQUOTE = 0x22
+            POUND = 0x23
+            DOLLAR = 0x24
+            PERCENT = 0x25
+            AMPERSAND = 0x26
+            APOSTROPHE = 0x27
+            PARENLEFT = 0x28
+            PARENRIGHT = 0x29
+            ASTERISK = 0x2A
+            PLUS = 0x2B
+            COMMA = 0x2C
+            MINUS = 0x2D
+            PERIOD = 0x2E
+            SLASH = 0x2F
         
-            VK_LEFT_CMD  =  0x5B
-            VK_RIGHT_CMD  =  0x5C
-            VK_APPS  =  0x5D
+            n0_=0x30
+            n1_=0x31
+            n2_=0x32
+            n3_=0x33
+            n4_=0x34
+            n5_=0x35
+            n6_=0x36
+            n7_=0x37
+            n8_=0x38
+            n9_=0x39
         
-            VK_NUMPAD0  =  0x60
-            VK_NUMPAD1  =  0x61
-            VK_NUMPAD2  =  0x62
-            VK_NUMPAD3  =  0x63
-            VK_NUMPAD4  =  0x64
-            VK_NUMPAD5  =  0x65
-            VK_NUMPAD6  =  0x66
-            VK_NUMPAD7  =  0x67
-            VK_NUMPAD8  =  0x68
-            VK_NUMPAD9  =  0x69
-            VK_MULTIPLY  =  0x6A
-            VK_ADD  =  0x6B
-            VK_SEPARATOR  =  0x6C
-            VK_SUBTRACT  =  0x6D
-            VK_DECIMAL  =  0x6E
-            VK_DIVIDE  =  0x6F
+            COLON = 0x3A
+            SEMICOLON = 0x3B
+            LESS = 0x3C
+            EQUAL = 0x3D
+            GREATER = 0x3E
+            QUESTION = 0x3F
+            AT = 0x40
         
-            VK_F1  =  0x70
-            VK_F2  =  0x71
-            VK_F3  =  0x72
-            VK_F4  =  0x73
-            VK_F5  =  0x74
-            VK_F6  =  0x75
-            VK_F7  =  0x76
-            VK_F8  =  0x77
-            VK_F9  =  0x78
-            VK_F10  =  0x79
-            VK_F11  =  0x7A
-            VK_F12  =  0x7B
-            VK_F13  =  0x7C
-            VK_F14  =  0x7D
-            VK_F15  =  0x7E
-            VK_F16  =  0x7F
-            VK_F17  =  0x80
-            VK_F18  =  0x81
-            VK_F19  =  0x82
-            VK_F20  =  0x83
-            VK_F21  =  0x84
-            VK_F22  =  0x85
-            VK_F23  =  0x86
-            VK_F24  =  0x87
+            A=0x41
+            B=0x42
+            C=0x43
+            D=0x44
+            E=0x45
+            F=0x46
+            G=0x47
+            H=0x48
+            I=0x49
+            J=0x4A
+            K=0x4B
+            L=0x4C
+            M=0x4D
+            N=0x4E
+            O=0x4F
+            P=0x50
+            Q=0x51
+            R=0x52
+            S=0x53
+            T=0x54
+            U=0x55
+            V=0x56
+            W=0x57
+            X=0x58
+            Y=0x59
+            Z=0x5A
         
-            VK_NUMLOCK  =  0x90
-            VK_SCROLL  =  0x91
+            BRACKETLEFT = 0x5B
+            BACKSLASH = 0x5C
+            BRACKETRIGHT = 0x5D
+            ASCIICIRCUM = 0x5E
+            UNDERSCORE = 0x5F
+            GRAVE = 0x60
         
-            VK_LEFT_SHIFT  =  0xA0
-            VK_RIGHT_SHIFT  =  0xA1
-            VK_LEFT_CTRL  =  0xA2
-            VK_RIGHT_CTRL  =  0xA3
-            VK_LEFT_ALT  =  0xA4
-            VK_RIGHT_ALT  =  0xA5
-            VK_BROWSER_BACK  =  0xA6
-            VK_BROWSER_FORWARD  =  0xA7
-            VK_BROWSER_REFRESH  =  0xA8
-            VK_BROWSER_STOP  =  0xA9
-            VK_BROWSER_SEARCH  =  0xAA
-            VK_BROWSER_FAVORITES  =  0xAB
-            VK_BROWSER_HOME  =  0xAC
-            VK_VOLUME_MUTE  =  0xAD
-            VK_VOLUME_DOWN  =  0xAE
-            VK_VOLUME_UP  =  0xAF
+            a = 0x61
+            b = 0x62
+            c = 0x63
+            d = 0x64
+            e = 0x65
+            f = 0x66
+            g = 0x67
+            h = 0x68
+            i = 0x69
+            j = 0x6A
+            k = 0x6B
+            l = 0x6C
+            m = 0x6D
+            n = 0x6E
+            o = 0x6F
+            p = 0x70
+            q = 0x71
+            r = 0x72
+            s = 0x73
+            t = 0x74
+            u = 0x75
+            v = 0x76
+            w = 0x77
+            x = 0x78
+            y = 0x79
+            z = 0x7A
         
-            VK_MEDIA_NEXT_TRACK  =  0xB0
-            VK_MEDIA_PREV_TRACK  =  0xB1
-            VK_MEDIA_STOP  =  0xB2
-            VK_MEDIA_PLAY_PAUSE  =  0xB3
-            VK_LAUNCH_MAIL  =  0xB4
-            VK_LAUNCH_MEDIA_SELECT  =  0xB5
-            VK_LAUNCH_APP1  =  0xB6
-            VK_LAUNCH_APP2  =  0xB7
-        
-            VK_PROCESSKEY  =  0xE5
-            VK_PACKET  =  0xE7
-            VK_ATTN  =  0xF6
-            VK_CRSEL  =  0xF7
-            VK_EXSEL  =  0xF8
-            VK_EREOF  =  0xF9
-            VK_PLAY  =  0xFA
-            VK_ZOOM  =  0xFB
-            VK_NONAME  =  0xFC
-            VK_PA1  =  0xFD
-            VK_OEM_CLEAR  =  0xFE
+            BRACELEFT = 0x7B
+            BAR = 0x7C
+            BRACERIGHT = 0x7D
+            ASCIITILDE = 0x7E
         
             @classmethod
             def getName(cls,id):
                 return cls._names.get(id,None)
         
+        AsciiConstants.initialize()
+    
+        class VirtualKeyCodes(Constants):
+                # Mainly from the pyHook lookup Table, some from Pyglet
+                VK_CANCEL  =  0x03
+                VK_BACK  =  0x08
+                VK_TAB  =  0x09
+                VK_CLEAR  =  0x0C
+                VK_RETURN  =  0x0D
+            
+                VK_SHIFT  =  0x10
+                VK_CONTROL  =  0x11
+                VK_MENU  =  0x12
+                VK_PAUSE  =  0x13
+                VK_CAPS_LOCK  =  0x14
+                VK_CAPITAL  =  0x14
+                VK_HANGUL  =  0x15
+                VK_JUNJA  =  0x17
+                VK_FINAL  =  0x18
+                VK_HANJA  =  0x19
+                VK_ESCAPE  =  0x1B
+                VK_CONVERT  =  0x1C
+                VK_NONCONVERT  =  0x1D
+                VK_ACCEPT  =  0x1E
+                VK_MODECHANGE  =  0x1F
+            
+                VK_SPACE  =  0x20
+                VK_PAGE_UP  =  0x21
+                VK_PAGE_DOWN  =  0x22
+                VK_END  =  0x23
+                VK_HOME  =  0x24
+                VK_LEFT  =  0x25
+                VK_UP  =  0x26
+                VK_RIGHT  =  0x27
+                VK_DOWN  =  0x28
+                VK_SELECT  =  0x29
+                VK_PRINT  =  0x2A
+                VK_EXECUTE  =  0x2B
+                VK_PRINT_SCREEN  =  0x2C
+                VK_INSERT  =  0x2D
+                VK_DELETE  =  0x2E
+                VK_HELP  =  0x2F
+            
+                VK_LEFT_CMD  =  0x5B
+                VK_RIGHT_CMD  =  0x5C
+                VK_APPS  =  0x5D
+            
+                VK_NUMPAD0  =  0x60
+                VK_NUMPAD1  =  0x61
+                VK_NUMPAD2  =  0x62
+                VK_NUMPAD3  =  0x63
+                VK_NUMPAD4  =  0x64
+                VK_NUMPAD5  =  0x65
+                VK_NUMPAD6  =  0x66
+                VK_NUMPAD7  =  0x67
+                VK_NUMPAD8  =  0x68
+                VK_NUMPAD9  =  0x69
+                VK_MULTIPLY  =  0x6A
+                VK_ADD  =  0x6B
+                VK_SEPARATOR  =  0x6C
+                VK_SUBTRACT  =  0x6D
+                VK_DECIMAL  =  0x6E
+                VK_DIVIDE  =  0x6F
+            
+                VK_F1  =  0x70
+                VK_F2  =  0x71
+                VK_F3  =  0x72
+                VK_F4  =  0x73
+                VK_F5  =  0x74
+                VK_F6  =  0x75
+                VK_F7  =  0x76
+                VK_F8  =  0x77
+                VK_F9  =  0x78
+                VK_F10  =  0x79
+                VK_F11  =  0x7A
+                VK_F12  =  0x7B
+                VK_F13  =  0x7C
+                VK_F14  =  0x7D
+                VK_F15  =  0x7E
+                VK_F16  =  0x7F
+                VK_F17  =  0x80
+                VK_F18  =  0x81
+                VK_F19  =  0x82
+                VK_F20  =  0x83
+                VK_F21  =  0x84
+                VK_F22  =  0x85
+                VK_F23  =  0x86
+                VK_F24  =  0x87
+            
+                VK_NUMLOCK  =  0x90
+                VK_SCROLL  =  0x91
+            
+                VK_LEFT_SHIFT  =  0xA0
+                VK_RIGHT_SHIFT  =  0xA1
+                VK_LEFT_CTRL  =  0xA2
+                VK_RIGHT_CTRL  =  0xA3
+                VK_LEFT_ALT  =  0xA4
+                VK_RIGHT_ALT  =  0xA5
+                VK_BROWSER_BACK  =  0xA6
+                VK_BROWSER_FORWARD  =  0xA7
+                VK_BROWSER_REFRESH  =  0xA8
+                VK_BROWSER_STOP  =  0xA9
+                VK_BROWSER_SEARCH  =  0xAA
+                VK_BROWSER_FAVORITES  =  0xAB
+                VK_BROWSER_HOME  =  0xAC
+                VK_VOLUME_MUTE  =  0xAD
+                VK_VOLUME_DOWN  =  0xAE
+                VK_VOLUME_UP  =  0xAF
+            
+                VK_MEDIA_NEXT_TRACK  =  0xB0
+                VK_MEDIA_PREV_TRACK  =  0xB1
+                VK_MEDIA_STOP  =  0xB2
+                VK_MEDIA_PLAY_PAUSE  =  0xB3
+                VK_LAUNCH_MAIL  =  0xB4
+                VK_LAUNCH_MEDIA_SELECT  =  0xB5
+                VK_LAUNCH_APP1  =  0xB6
+                VK_LAUNCH_APP2  =  0xB7
+            
+                VK_PROCESSKEY  =  0xE5
+                VK_PACKET  =  0xE7
+                VK_ATTN  =  0xF6
+                VK_CRSEL  =  0xF7
+                VK_EXSEL  =  0xF8
+                VK_EREOF  =  0xF9
+                VK_PLAY  =  0xFA
+                VK_ZOOM  =  0xFB
+                VK_NONAME  =  0xFC
+                VK_PA1  =  0xFD
+                VK_OEM_CLEAR  =  0xFE
+            
+                @classmethod
+                def getName(cls,id):
+                    return cls._names.get(id,None)
+    
         VirtualKeyCodes.initialize()
-
-    if sys.platform == 'linux2':
+            
+    elif sys.platform == 'linux2':
         
         class VirtualKeyCodes(Constants):
-            # Mainly from the pyHook lookup Table, some from Pyglet
-#            VK_CANCEL  =  0x03
-#            VK_BACK  =  0x08
-#            VK_TAB  =  0x09
-#            VK_CLEAR  =  0x0C
-#            VK_RETURN  =  0x0D
-#        
-#            VK_SHIFT  =  0x10
-#            VK_CONTROL  =  0x11
-#            VK_MENU  =  0x12
-#            VK_PAUSE  =  0x13
-#            VK_CAPITAL  =  0x14
-#            VK_HANGUL  =  0x15
-#            VK_JUNJA  =  0x17
-#            VK_FINAL  =  0x18
-#            VK_HANJA  =  0x19
-#            VK_ESCAPE  =  0x1B
-#            VK_CONVERT  =  0x1C
-#            VK_NONCONVERT  =  0x1D
-#            VK_ACCEPT  =  0x1E
-#            VK_MODECHANGE  =  0x1F
-#        
-#            VK_SPACE  =  0x20
-#            VK_PAGE_UP  =  0x21
-#            VK_PAGE_DOWN  =  0x22
-#            VK_END  =  0x23
-#            VK_HOME  =  0x24
-#            VK_LEFT  =  0x25
-#            VK_UP  =  0x26
-#            VK_RIGHT  =  0x27
-#            VK_DOWN  =  0x28
-#            VK_SELECT  =  0x29
-#            VK_PRINT  =  0x2A
-#            VK_EXECUTE  =  0x2B
-#            VK_PRINT_SCREEN  =  0x2C
-#            VK_INSERT  =  0x2D
-#            VK_DELETE  =  0x2E
-#            VK_HELP  =  0x2F
-#        
-#            VK_LEFT_CMD  =  0x5B
-#            VK_RIGHT_CMD  =  0x5C
-#            VK_APPS  =  0x5D
-#        
-#            VK_NUMPAD0  =  0x60
-#            VK_NUMPAD1  =  0x61
-#            VK_NUMPAD2  =  0x62
-#            VK_NUMPAD3  =  0x63
-#            VK_NUMPAD4  =  0x64
-#            VK_NUMPAD5  =  0x65
-#            VK_NUMPAD6  =  0x66
-#            VK_NUMPAD7  =  0x67
-#            VK_NUMPAD8  =  0x68
-#            VK_NUMPAD9  =  0x69
-#            VK_MULTIPLY  =  0x6A
-#            VK_ADD  =  0x6B
-#            VK_SEPARATOR  =  0x6C
-#            VK_SUBTRACT  =  0x6D
-#            VK_DECIMAL  =  0x6E
-#            VK_DIVIDE  =  0x6F
-#        
-#            VK_F1  =  0x70
-#            VK_F2  =  0x71
-#            VK_F3  =  0x72
-#            VK_F4  =  0x73
-#            VK_F5  =  0x74
-#            VK_F6  =  0x75
-#            VK_F7  =  0x76
-#            VK_F8  =  0x77
-#            VK_F9  =  0x78
-#            VK_F10  =  0x79
-#            VK_F11  =  0x7A
-#            VK_F12  =  0x7B
-#            VK_F13  =  0x7C
-#            VK_F14  =  0x7D
-#            VK_F15  =  0x7E
-#            VK_F16  =  0x7F
-#            VK_F17  =  0x80
-#            VK_F18  =  0x81
-#            VK_F19  =  0x82
-#            VK_F20  =  0x83
-#            VK_F21  =  0x84
-#            VK_F22  =  0x85
-#            VK_F23  =  0x86
-#            VK_F24  =  0x87
-#        
-#            VK_NUMLOCK  =  0x90
-#            VK_SCROLL  =  0x91
-#        
-#            VK_LEFT_SHIFT  =  0xA0
-#            VK_RIGHT_SHIFT  =  0xA1
-#            VK_LEFT_CTRL  =  0xA2
-#            VK_RIGHT_CTRL  =  0xA3
-#            VK_LEFT_ALT  =  0xA4
-#            VK_RIGHT_ALT  =  0xA5
-#            VK_BROWSER_BACK  =  0xA6
-#            VK_BROWSER_FORWARD  =  0xA7
-#            VK_BROWSER_REFRESH  =  0xA8
-#            VK_BROWSER_STOP  =  0xA9
-#            VK_BROWSER_SEARCH  =  0xAA
-#            VK_BROWSER_FAVORITES  =  0xAB
-#            VK_BROWSER_HOME  =  0xAC
-#            VK_VOLUME_MUTE  =  0xAD
-#            VK_VOLUME_DOWN  =  0xAE
-#            VK_VOLUME_UP  =  0xAF
-#        
-#            VK_MEDIA_NEXT_TRACK  =  0xB0
-#            VK_MEDIA_PREV_TRACK  =  0xB1
-#            VK_MEDIA_STOP  =  0xB2
-#            VK_MEDIA_PLAY_PAUSE  =  0xB3
-#            VK_LAUNCH_MAIL  =  0xB4
-#            VK_LAUNCH_MEDIA_SELECT  =  0xB5
-#            VK_LAUNCH_APP1  =  0xB6
-#            VK_LAUNCH_APP2  =  0xB7
-#        
-#            VK_PROCESSKEY  =  0xE5
-#            VK_PACKET  =  0xE7
-#            VK_ATTN  =  0xF6
-#            VK_CRSEL  =  0xF7
-#            VK_EXSEL  =  0xF8
-#            VK_EREOF  =  0xF9
-#            VK_PLAY  =  0xFA
-#            VK_ZOOM  =  0xFB
-#            VK_NONAME  =  0xFC
-#            VK_PA1  =  0xFD
-#            VK_OEM_CLEAR  =  0xFE
         
             @classmethod
             def getName(cls,id):
@@ -536,141 +413,276 @@ try:
 
 
     
-    if sys.platform == 'darwin':
+    elif sys.platform == 'darwin':
+        class AnsiKeyCodes(Constants):
+            ANSI_Equal    = 0x18 
+            ANSI_Minus    = 0x1B 
+            ANSI_RightBracket         = 0x1E 
+            ANSI_LeftBracket          = 0x21 
+            ANSI_Quote    = 0x27 
+            ANSI_Semicolon            = 0x29 
+            ANSI_Backslash            = 0x2A 
+            ANSI_Comma    = 0x2B 
+            ANSI_Slash    = 0x2C 
+            ANSI_Period   = 0x2F 
+            ANSI_Grave    = 0x32 
+            ANSI_KeypadDecimal        = 0x41 
+            ANSI_KeypadMultiply       = 0x43 
+            ANSI_KeypadPlus           = 0x45 
+            ANSI_KeypadClear          = 0x47 
+            ANSI_KeypadDivide         = 0x4B 
+            ANSI_KeypadEnter          = 0x4C 
+            ANSI_KeypadMinus          = 0x4E 
+            ANSI_KeypadEquals         = 0x51 
+            ANSI_Keypad0  = 0x52 
+            ANSI_Keypad1  = 0x53 
+            ANSI_Keypad2  = 0x54 
+            ANSI_Keypad3  = 0x55 
+            ANSI_Keypad4  = 0x56 
+            ANSI_Keypad5  = 0x57 
+            ANSI_Keypad6  = 0x58 
+            ANSI_Keypad7  = 0x59 
+            ANSI_Keypad8  = 0x5B
+            ANSI_Keypad9  = 0x5C
+
+            @classmethod
+            def getName(cls,id):
+                return cls._names.get(id,None)
+        
+        AnsiKeyCodes.initialize()
+        AnsiKeyCodes._keys.remove(AnsiKeyCodes.getID('UNDEFINED'))
+
         class UnicodeChars(Constants):
-            TAB= "\u0009" # "Tab"
-            ESCAPE= "\u001b" # "Escape"
-            UP= "\uf700" # "Up"
-            DOWN= "\uF701" # "Down"
-            LEFT= "\uF702" # "Left"
-            RIGHT= "\uF703" # "Right"
-            F1= "\uF704" # "F1"
-            F2= "\uF705" # "F2"
-            F3= "\uF706" # "F3"
-            F4= "\uF707" # "F4"
-            F5= "\uF708" # "F5"
-            F6= "\uF709" # "F6"
-            F7= "\uF70A" # "F7"
-            F8= "\uF70B" # "F8"
-            F9= "\uF70C" # "F9"
-            F10= "\uF70D" # "F10"
-            F11= "\uF70E" # "F11"
-            F12= "\uF70F" # "F12"
-            F13= "\uF710" # "F13"
-            F14= "\uF711" # "F14"
-            F15= "\uF712" # "F15"
-            F16= "\uF713" # "F16"
-            F17= "\uF714" # "F17"
-            F18= "\uF715" # "F18"
-            F19= "\uF716" # "F19"
-            F20= "\uF717" # "F20"
-            F21= "\uF718" # "F21"
-            F22= "\uF719" # "F22"
-            F23= "\uF71A" # "F23"
-            F24= "\uF71B" # "F24"
-            F25= "\uF71C" # "F25"
-            F26= "\uF71D" # "F26"
-            F27= "\uF71E" # "F27"
-            F28= "\uF71F" # "F28"
-            F29= "\uF720" # "F29"
-            F30= "\uF721" # "F30"
-            F31= "\uF722" # "F31"
-            F32= "\uF723" # "F32"
-            F33= "\uF724" # "F33"
-            F34= "\uF725" # "F34"
-            F35= "\uF726" # "F35"
-            INSERT= "\uF727" # "Insert"
-            DELETE= "\uF728" # "Delete"
-            HOME= "\uF729" # "Home"
-            BEGIN= "\uF72A" # "Begin"
-            END= "\uF72B" # "End"
-            PAGE_UP= "\uF72C" # "PageUp"
-            PAGE_DOWN= "\uF72D" # "PageDown"
-            PRINT= "\uF72E" # "PrintScreen"
-            SCROLL_LOCK= "\uF72F" # "ScrollLock"
-            PAUSE= "\uF730" # "Pause"
-            SYSREQ= "\uF731" # "SysReq"
-            BREAK= "\uF732" # "Break"
-            RESET= "\uF733" # "Reset"
-            STOP= "\uF734" # "Stop"
-            MENU= "\uF735" # "Menu"
-            USER= "\uF736" # "User"
-            SYSTEM= "\uF737" # "System"
-            PRINT= "\uF738" # "Print"
-            CLEAR_LINE= "\uF739" # "ClearLine"
-            CLEAR= "\uF73A" # "ClearDisplay"
-            INSERT_LINE= "\uF73B" # "InsertLine"
-            DELETE_LINE= "\uF73C" # "DeleteLine"
-            INSERT= "\uF73D" # "InsertChar"
-            DELETE= "\uF73E" # "DeleteChar"
-            PREV= "\uF73F" # "Prev"
-            NEXT= "\uF740" # "Next"
-            SELECT= "\uF741" # "Select"
-            EXECUTE= "\uF742" # "Execute"
-            UNDO= "\uF743" # "Undo"
-            REDO= "\uF744" # "Redo"
-            FIND= "\uF745" # "Find"
-            HELP= "\uF746" # "Help"
-            MODE= "\uF747" # "ModeSwitch"
-    
+            VK_RETURN=0x0003
+            RETURN=0x000D
+            VK_DELETE= 0x007F # "Delete"
+            TAB= 0x0009 # "Tab"
+            ESCAPE= 0x001b # "Escape"
+            UP= 0xf700 # "Up"
+            DOWN= 0xF701 # "Down"
+            LEFT= 0xF702 # "Left"
+            RIGHT= 0xF703 # "Right"
+            F1= 0xF704 # "F1"
+            F2= 0xF705 # "F2"
+            F3= 0xF706 # "F3"
+            F4= 0xF707 # "F4"
+            F5= 0xF708 # "F5"
+            F6= 0xF709 # "F6"
+            F7= 0xF70A # "F7"
+            F8= 0xF70B # "F8"
+            F9= 0xF70C # "F9"
+            F10= 0xF70D # "F10"
+            F11= 0xF70E # "F11"
+            F12= 0xF70F # "F12"
+            F13= 0xF710 # "F13"
+            F14= 0xF711 # "F14"
+            F15= 0xF712 # "F15"
+            F16= 0xF713 # "F16"
+            F17= 0xF714 # "F17"
+            F18= 0xF715 # "F18"
+            F19= 0xF716 # "F19"
+            F20= 0xF717 # "F20"
+            F21= 0xF718 # "F21"
+            F22= 0xF719 # "F22"
+            F23= 0xF71A # "F23"
+            F24= 0xF71B # "F24"
+            F25= 0xF71C # "F25"
+            F26= 0xF71D # "F26"
+            F27= 0xF71E # "F27"
+            F28= 0xF71F # "F28"
+            F29= 0xF720 # "F29"
+            F30= 0xF721 # "F30"
+            F31= 0xF722 # "F31"
+            F32= 0xF723 # "F32"
+            F33= 0xF724 # "F33"
+            F34= 0xF725 # "F34"
+            F35= 0xF726 # "F35"
+            INSERT= 0xF727 # "Insert"
+            DELETE= 0xF728 # "Delete"
+            HOME= 0xF729 # "Home"
+            BEGIN= 0xF72A # "Begin"
+            END= 0xF72B # "End"
+            PAGE_UP= 0xF72C # "PageUp"
+            PAGE_DOWN= 0xF72D # "PageDown"
+            PRINT= 0xF72E # "PrintScreen"
+            SCROLL_LOCK= 0xF72F # "ScrollLock"
+            PAUSE= 0xF730 # "Pause"
+            SYSREQ= 0xF731 # "SysReq"
+            BREAK= 0xF732 # "Break"
+            RESET= 0xF733 # "Reset"
+            STOP= 0xF734 # "Stop"
+            MENU= 0xF735 # "Menu"
+            VK_MENU = 0x0010 # Menu key on non-apple US keyboards
+            USER= 0xF736 # "User"
+            SYSTEM= 0xF737 # "System"
+            PRINT= 0xF738 # "Print"
+            CLEAR_LINE= 0xF739 # "ClearLine"
+            CLEAR= 0xF73A # "ClearDisplay"
+            INSERT_LINE= 0xF73B # "InsertLine"
+            DELETE_LINE= 0xF73C # "DeleteLine"
+            INSERT= 0xF73D # "InsertChar"
+            DELETE= 0xF73E # "DeleteChar"
+            PREV= 0xF73F # "Prev"
+            NEXT= 0xF740 # "Next"
+            SELECT= 0xF741 # "Select"
+            EXECUTE= 0xF742 # "Execute"
+            UNDO= 0xF743 # "Undo"
+            REDO= 0xF744 # "Redo"
+            FIND= 0xF745 # "Find"
+            HELP= 0xF746 # "Help"
+            MODE= 0xF747 # "ModeSwitch"
+            SHIFT     = 0x21E7 # Unicode UPWARDS WHITE ARROW*/
+            CONTROL   = 0x2303 # Unicode UP ARROWHEAD*/
+            OPTION    = 0x2325 # Unicode OPTION KEY*/
+            COMMAND   = 0x2318 # Unicode PLACE OF INTEREST SIGN*/
+            PENCIL_RIGHT    = 0x270E # Unicode LOWER RIGHT PENCIL; actually pointed left until Mac OS X 10.3*/
+            PENCIL_LEFT= 0xF802 # Unicode LOWER LEFT PENCIL; available in Mac OS X 10.3 and later*/
+            CHECK     = 0x2713 # Unicode CHECK MARK*/
+            DIAMOND   = 0x25C6 #  Unicode BLACK DIAMOND*/
+            BULLET   = 0x2022 # Unicode BULLET*/
+            APPLE_LOGO = 0xF8FF# Unicode APPLE LOGO*/    
+            
             @classmethod
             def getName(cls,id):
                 return cls._names.get(id,None)
         
         UnicodeChars.initialize()
+        UnicodeChars._keys.remove(UnicodeChars.getID('UNDEFINED'))
+
 
         class VirtualKeyCodes(Constants):
-            VK_RETURN                    = 0x24
-            VK_TAB                       = 0x30
-            VK_SPACE                     = 0x31
-            VK_BACK                      = 0x33
-            VK_ESCAPE                    = 0x35
-            VK_FUNCTION                  = 0x3F
-            VK_F17                       = 0x40
-            VK_VOLUME_UP                 = 0x48
-            VK_VOLUME_DOWN               = 0x49
-            VK_VOLUME_MUTE               = 0x4A
-            VK_F18                       = 0x4F
-            VK_F19                       = 0x50
-            VK_F20                       = 0x5A
-            VK_F5                        = 0x60
-            VK_F6                        = 0x61
-            VK_F7                        = 0x62
-            VK_F3                        = 0x63
-            VK_F8                        = 0x64
-            VK_F9                        = 0x65
-            VK_F11                       = 0x67
-            VK_F13                       = 0x69
-            VK_F16                       = 0x6A
-            VK_F14                       = 0x6B
-            VK_F10                       = 0x6D
-            VK_F12                       = 0x6F
-            VK_F15                       = 0x71
-            VK_HELP                      = 0x72
-            VK_HOME                      = 0x73
-            VK_PAGE_UP                   = 0x74
-            VK_DELETE                    = 0x75
-            VK_F4                        = 0x76
-            VK_END                       = 0x77
-            VK_F2                        = 0x78
-            VK_PAGE_DOWN                 = 0x7D
-            VK_LEFT                      = 0x7B
-            VK_UP                        = 0x7E
-            VK_RIGHT                     = 0x7C
-            VK_DOWN                      = 0x7D      
-            VK_F1                        = 0x7A
-    
+            F1=145 #Keycode on Apple wireless kb
+            F2=144 #Keycode on Apple wireless kb
+            F3=160 #Keycode on Apple wireless kb
+            F4=131 #Keycode on Apple wireless kb
+            VK_ISO_SECTION   = 0x0A
+            VK_JIS_YEN  = 0x5D
+            VK_JIS_UNDERSCORE = 0x5E,
+            VK_JIS_KEYPAD_COMMA  = 0x5F,
+            VK_JIS_EISU = 0x66,
+            VK_JIS_KANA = 0x68
+            VK_RETURN   = 0x24
+            VK_TAB      = 0x30
+            VK_SPACE    = 0x31
+            VK_DELETE    = 0x33
+            VK_ESCAPE   = 0x35
+            VK_COMMAND  = 0x37
+            VK_SHIFT    = 0x38
+            VK_CAPS_LOCK      = 0x39
+            VK_OPTION   = 0x3A
+            VK_CONTROL  = 0x3B
+            VK_SHIFT_RIGHT    = 0x3C
+            VK_OPTION_RIGHT   = 0x3D
+            VK_CONTROL_RIGHT  = 0x3E
+            VK_FUNCTION      = 0x3F
+            VK_F17      = 0x40
+            VK_VOLUME_UP     = 0x48
+            VK_VOLUME_DOWN   = 0x49
+            VK_VOLUME_MUTE   = 0x4A
+            VK_F18      = 0x4F
+            VK_F19      = 0x50
+            VK_F20      = 0x5A
+            VK_F5       = 0x60
+            VK_F6       = 0x61
+            VK_F7       = 0x62
+            VK_F3       = 0x63
+            VK_F8       = 0x64
+            VK_F9       = 0x65
+            VK_F11      = 0x67
+            VK_F13      = 0x69
+            VK_F16      = 0x6A
+            VK_F14      = 0x6B
+            VK_F10      = 0x6D
+            VK_MENU     = 0x6E
+            VK_F12      = 0x6F
+            VK_F15      = 0x71
+            VK_HELP     = 0x72
+            VK_HOME     = 0x73
+            VK_PAGE_UP  = 0x74
+            VK_DEL   = 0x75
+            VK_F4       = 0x76
+            VK_END      = 0x77
+            VK_F2       = 0x78
+            VK_PAGE_DOWN     = 0x79
+            VK_LEFT     = 0x7B
+            VK_UP       = 0x7E
+            VK_RIGHT    = 0x7C
+            VK_DOWN     = 0x7D      
+            VK_F1       = 0x7A
+            KEY_EQUAL = 24 
+            KEY_MINUS = 27 
+            KEY_RIGHT_SQUARE_BRACKET = 30 
+            KEY_LEFT_SQUARE_BRACKET = 33 
+            KEY_RETURN = 36 
+            KEY_SINGLE_QUOTE = 39 
+            KEY_SEMICOLAN  = 41 
+            KEY_BACKSLASH = 42 
+            KEY_COMMA = 43 
+            KEY_FORWARD_SLASH = 44 
+            KEY_PERIOD = 47 
+            KEY_TAB = 48 
+            KEY_SPACE = 49 
+            KEY_LEFT_SINGLE_QUOTE = 50 
+            KEY_DELETE = 51 
+            KEY_ENTER = 52 
+            KEY_ESCAPE = 53 
+            KEYPAD_PERIOD = 65 
+            KEYPAD_MULTIPLY = 67 
+            KEYPAD_PLUS = 69 
+            KEYPAD_CLEAR = 71 
+            KEYPAD_DIVIDE = 75 
+            KEYPAD_ENTER = 76   # numberpad on full kbd
+            KEYPAD_EQUALS = 78 	
+            KEYPAD_EQUAL = 81 
+            KEYPAD_0 = 82 
+            KEYPAD_1 = 83 
+            KEYPAD_2 = 84 
+            KEYPAD_3 = 85 
+            KEYPAD_4 = 86 
+            KEYPAD_5 = 87 
+            KEYPAD_6 = 88 
+            KEYPAD_7 = 89 	
+            KEYPAD_8 = 91 
+            KEYPAD_9 = 92 
+            KEY_F5 = 96 
+            KEY_F6 = 97 
+            KEY_F7 = 98 
+            KEY_F3 = 99 
+            KEY_F8 = 100 
+            KEY_F9 = 101 	
+            KEY_F11 = 103 	
+            KEY_F13 = 105 	
+            KEY_F14 = 107 	
+            KEY_F10 = 109	
+            KEY_F12 = 111 
+            KEY_F15 = 113 
+            KEY_HELP = 114 
+            KEY_HOME = 115 
+            KEY_PGUP = 116 
+            KEY_DELETE = 117 
+            KEY_F4 = 118 
+            KEY_END = 119 
+            KEY_F2 = 120 
+            KEY_PGDN = 121 
+            KEY_F1 = 122 
+            KEY_LEFT = 123 
+            KEY_RIGHT = 124 
+            KEY_DOWN = 125 
+            KEY_UP = 126 
+	
+	        
             @classmethod
             def getName(cls,id):
                 return cls._names.get(id,None)
         
         VirtualKeyCodes.initialize()
+        VirtualKeyCodes._keys.remove(VirtualKeyCodes.getID('UNDEFINED'))
     
     class ModifierKeyCodes(Constants):
         _mod_names=['CONTROL_LEFT','CONTROL_RIGHT','SHIFT_LEFT',
                    'SHIFT_RIGHT','ALT_LEFT','ALT_RIGHT',
                    'COMMAND_LEFT','COMMAND_RIGHT','CAPS_LOCK',
-                   'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD','NUMLOCK']
+                   'MOD_SHIFT','MOD_ALT','MOD_CTRL','MOD_CMD','NUMLOCK','MOD_FUNCTION','MOD_HELP']
         CONTROL_LEFT = 1
         CONTROL_RIGHT = 2
         SHIFT_LEFT = 4
@@ -684,7 +696,9 @@ try:
         MOD_ALT=1024
         MOD_CTRL=2048
         MOD_CMD=4096
-        NUMLOCK=MOD_CMD*2            
+        NUMLOCK=8192
+        MOD_FUNCTION=16384
+        MOD_HELP=32768            
     ModifierKeyCodes.initialize()
     ModifierKeyCodes._keys.remove(ModifierKeyCodes.getID('UNDEFINED'))
     
@@ -700,6 +714,7 @@ try:
             _asciiKeyCodes=AsciiConstants()
         if sys.platform == 'darwin':
             _unicodeChars=UnicodeChars()
+            _ansiKeyCodes=AnsiKeyCodes()
             
         _modifierCodes=ModifierKeyCodes()
           

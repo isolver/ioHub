@@ -44,7 +44,7 @@ class ioHubKeyboardDevice(Device):
     def __init__(self,*args,**kwargs):
         self._key_states=dict()
         self._lastProcessedEventID=0
-        self._modifier_states=dict(zip(ModifierKeyCodes._mod_names,(False,False,False,False,False,False,False,False,False)))
+        self._modifier_states=dict(zip(ModifierKeyCodes._mod_names,[False]*len(ModifierKeyCodes._mod_names)))
         self._modifier_value=0
         self._report_auto_repeats=kwargs.get('report_auto_repeat_press_events',False)
         Device.__init__(self,*args,**kwargs)

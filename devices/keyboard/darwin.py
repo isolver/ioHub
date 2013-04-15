@@ -21,6 +21,8 @@ from ioHub import print2err,printExceptionDetailsToStdErr
 from ioHub.constants import KeyboardConstants, DeviceConstants, EventConstants
 from .. import Computer
 
+from unicodedata import category as ucategory
+
 getTime = Computer.getTime
 
 eventHasModifiers = lambda v: Qz.kCGEventFlagMaskNonCoalesced - v != 0     
@@ -36,9 +38,9 @@ class Keyboard(ioHubKeyboardDevice):
                     (0x00002,'SHIFT_LEFT'),(0x00004,'SHIFT_RIGHT'),
                     (0x00020,'ALT_LEFT'),(0x00040,'ALT_RIGHT'),
                     (0x000008, 'COMMAND_LEFT'),(0x000010,'COMMAND_RIGHT'),
-                    (Qz.kCGEventFlagMaskAlphaShift, 'CAPS_LOCK')])
-#                    (Qz.kCGEventFlagMaskHelp ,             "MOD_HELP"),         # 0x400000   
-#                    (Qz.kCGEventFlagMaskSecondaryFn ,      "MOD_FUNC2"),        # 0x800000   
+                    (Qz.kCGEventFlagMaskAlphaShift, 'CAPS_LOCK'),
+                    (Qz.kCGEventFlagMaskSecondaryFn, "MOD_FUNCTION"),
+                    (Qz.kCGEventFlagMaskHelp , "MOD_HELP")])        # 0x400000   
    
     DEVICE_TIME_TO_SECONDS=0.000000001
     
@@ -86,7 +88,8 @@ class Keyboard(ioHubKeyboardDevice):
             Qz.CGEventMaskBit(Qz.kCGEventFlagsChanged),
             self._nativeEventCallback,
             None)            
-            
+        
+        stime=getTime()
         self._CGEventTapEnable=Qz.CGEventTapEnable
         self._loop_source = Qz.CFMachPortCreateRunLoopSource(None, self._tap, 0)
         
@@ -98,33 +101,123 @@ class Keyboard(ioHubKeyboardDevice):
         self._ring_buffer=NumPyRingBuffer(100)
         Qz.CFRunLoopAddSource(self._device_loop, self._loop_source, self._loop_mode)
     
-    def getKeyNameForEvent(self,ns_event):
+        etime=getTime()
+        print2err("Quartz Tap setup time: ",etime-stime)
+    
+    def _handleModifierChangeEvent(self,event):
+        flags=Qz.CGEventGetFlags(event)
         key_name=None
-        key_code=ns_event.keyCode()
+        ioe_type=None
+        self._mods_sum,mod_str_list=Keyboard._checkForLeftRightModifiers(flags)
+        mod_presses=[]
+        mod_releases=[]
+        for mod_name, mod_state in self._modifier_states.iteritems():
+            if mod_name in mod_str_list and not mod_state:
+                self._modifier_states[mod_name]=True
+                mod_presses.append(mod_name)
+            elif mod_name not in mod_str_list and mod_state:   
+                self._modifier_states[mod_name]=False
+                mod_releases.append(mod_name)                                
+
+        if (len(mod_presses) + len(mod_releases)) > 1:
+            print2err("\nWARNING: Multiple modifiers reported a state change in one event. BUG??:", mod_presses, mod_releases)
+            print2err("Using ONLY first change detected for event.\n")
         
-        ucode=ord(ns_event.characters())#.encode('utf-8')
+        # OK, so if there is an element in mod presses or releases, then
+        # we know the mod key that changed the state transition is a left_*,
+        # or right_* or the cap locks key and we have the key we need.
+        if len(mod_presses) > 0:
+            ioe_type=EventConstants.KEYBOARD_PRESS
+            key_name=mod_presses[0]
+        elif len(mod_releases) > 0:
+            key_name=mod_releases[0]
+            ioe_type=EventConstants.KEYBOARD_RELEASE
         
-        if ucode:
-            key_name=KeyboardConstants._unicodeChars.getName(unichr(ucode))
-            
-        if key_name is None or len(key_name) == 0:
-            ucode=ord(ns_event.charactersIgnoringModifiers())#.encode('utf-8')      
-            key_name= KeyboardConstants._unicodeChars.getName(unichr(ucode))
+        #TODO: What keyCode should we use for each modifier events?
+        # key_code = ???
         
         if key_name is None:
-            key_name=KeyboardConstants._virtualKeyCodes.getName(key_code)
-                        
-            if key_name is None:    
-                ucode=ord(ns_event.characters())#.encode('utf-8')
-                key_name=unichr(ucode)
-            elif key_name.startswith('VK_'):
-                key_name=key_name[3:]
-                ucode=0
+            # So no modifiers matching the left_, right_ mod codes were found,
+            # so lets check the generic non position based mode codes that are 'officially'
+            # defined by OS X
+            shift_on=shiftModifierActive(flags)
+            alt_on=altModifierActive(flags)
+            ctrl_on=controlModifierActive(flags)
+            cmd_on=commandModifierActive(flags)    
+
+            if shift_on != self._last_general_mod_states['shift_on']:
+                if shift_on is True:
+                    ioe_type=EventConstants.KEYBOARD_PRESS
+                else:
+                    ioe_type=EventConstants.KEYBOARD_RELEASE
+                self._last_general_mod_states['shift_on']=shift_on
+                key_name=u'MOD_SHIFT'
+            elif alt_on != self._last_general_mod_states['alt_on']:
+                if alt_on is True:
+                    ioe_type=EventConstants.KEYBOARD_PRESS
+                else:
+                    ioe_type=EventConstants.KEYBOARD_RELEASE
+                self._last_general_mod_states['alt_on']=alt_on
+                key_name=u'MOD_ALT'
+            elif ctrl_on != self._last_general_mod_states['ctrl_on']:
+                if ctrl_on is True:
+                    ioe_type=EventConstants.KEYBOARD_PRESS
+                else:
+                    ioe_type=EventConstants.KEYBOARD_RELEASE
+                self._last_general_mod_states['ctrl_on']=ctrl_on
+                key_name=u'MOD_CTRL'
+            elif cmd_on != self._last_general_mod_states['cmd_on']:
+                if cmd_on is True:
+                    ioe_type=EventConstants.KEYBOARD_PRESS
+                else:
+                    ioe_type=EventConstants.KEYBOARD_RELEASE
+                key_name=u'MOD_CMD'
+                self._last_general_mod_states['cmd_on']=cmd_on
+        return ioe_type,key_name
+            
+    def _getKeyNameForEvent(self,ns_event):
+        key_code=ns_event.keyCode()  
+        ucode=0
+
+        key_name=ns_event.characters()
+        if key_name and len(key_name)>0:
+            ucode=ord(key_name)
+            #print2err('characters hit: [',key_name, '] ', ucode, ' ', len(key_name))                 
+            #print2err("characters ucategory: ",ucategory(unichr(ucode)))
+        
+        if ucode == 0 or ucategory(unichr(ucode))[0] == 'C':
+            key_name=ns_event.charactersIgnoringModifiers()
+            if key_name and len(key_name)>0:
+                ucode=ord(key_name)   
+                #print2err(" charactersIgnoringModifiers ucategory: ",ucategory(unichr(ucode)))
+                #print2err('charactersIgnoringModifiers hit: [',key_name, '] ', ord(key_name[-1]), ' ', len(key_name))                 
+        
+        if ucode != 0:                     
+            umac_key_name=KeyboardConstants._unicodeChars.getName(ucode)
+            if umac_key_name and len(umac_key_name)>0:
+                if umac_key_name.startswith('VK_'):
+                    umac_key_name=umac_key_name[3:]
+                key_name=u''+umac_key_name 
+                #ucode=ord(key_name[-1]) 
+#                print2err('mac ucode hit: [',key_name, '] ', ucode, ' ', len(key_name))
                 
-        if isinstance(key_name,unicode):
-            key_name=key_name.encode('utf-8')
-                 
-        return key_name,ucode
+        if key_name is None or len(key_name)==0:# or ucategory(unichr(ucode))[0] == 'C':
+                            
+            key_name=KeyboardConstants._virtualKeyCodes.getName(key_code)
+            if key_name:
+                if key_name.startswith('VK_'):
+                    key_name=key_name[3:]
+                key_name=(u''+key_name)            
+        
+            if not key_name:
+                amac_key_name=KeyboardConstants._ansiKeyCodes.getName(key_code)
+                if amac_key_name and len(amac_key_name)>0:
+                    key_name=amac_key_name 
+                    if key_name.startswith('ANSI_'):
+                        key_name=key_name[5:]
+                    key_name=u''+key_name
+                    
+        return key_name,ucode,key_code
 
     
     def _poll(self):
@@ -144,133 +237,63 @@ class Keyboard(ioHubKeyboardDevice):
                     print2err("** WARNING: Keyboard Tap Disabled due to timeout. Re-enabling....: ", etype)
                     Qz.CGEventTapEnable(self._tap, True)
                     return event
-                else:                
-                    confidence_interval=logged_time-self._last_poll_time
-                    delay=0.0 # No point trying to guess for the keyboard or mouse.
-                              # May add a 'default_delay' prefernce to the device config settings,
-                              # so if a person knows the average delay for something like the kb or mouse
-                              # they are using, then they could specify it in the config file and it could be used here.
-                    iohub_time = logged_time-delay
-                    device_time=Qz.CGEventGetTimestamp(event)*self.DEVICE_TIME_TO_SECONDS                        
-                    key_code = Qz.CGEventGetIntegerValueField(event, Qz.kCGKeyboardEventKeycode)                    
+               
+                confidence_interval=logged_time-self._last_poll_time
+                delay=0.0 # No point trying to guess for the keyboard or mouse.
+                            # May add a 'default_delay' prefernce to the device config settings,
+                            # so if a person knows the average delay for something like the kb or mouse
+                            # they are using, then they could specify it in the config file and it could be used here.
+                iohub_time = logged_time-delay
+                device_time=Qz.CGEventGetTimestamp(event)*self.DEVICE_TIME_TO_SECONDS                        
+                key_code = Qz.CGEventGetIntegerValueField(event, Qz.kCGKeyboardEventKeycode)                    
+                key_name=None
+                window_number=0       
+                ioe_type=None
+                ucode=0 # the int version of the unicode utf-8 ichar
+                is_auto_repeat= Qz.CGEventGetIntegerValueField(event, Qz.kCGKeyboardEventAutorepeat)
+                #np_key=keyFromNumpad(flags)     
+                                        
+                # This is a modifier state change event, so we need to manually determine
+                # which mod key was either pressed or released that resulted in the state change....
+                if etype == Qz.kCGEventFlagsChanged:
+                    try:
+                        ioe_type, key_name=self._handleModifierChangeEvent(event)
+#                        print2err('_handleModifierChangeEvent: ',ioe_type, ' ',key_name)
+                    except Exception, e:
+                        print2err("kCGEventFlagsChanged failed: ",e)
+                        printExceptionDetailsToStdErr()                            
+                else:
+                    # This is an actual button press / release event, so handle it....
+                    try:
+                        keyEvent = NSEvent.eventWithCGEvent_(event)
+                        key_name,ucode,key_code=self._getKeyNameForEvent(keyEvent)
+                        window_number=keyEvent.windowNumber()
 
-                    window_number=0       
-                    event_mod=None
-                    ioe_type=None
-                    ucode=0 # the int version of the unicode utf-8 ichar
-                    is_auto_repeat= Qz.CGEventGetIntegerValueField(event, Qz.kCGKeyboardEventAutorepeat)
-                    flags=Qz.CGEventGetFlags(event)
-                    np_key=keyFromNumpad(flags)     
-                                            
-                    # This is a modifier state change event, so we need to manually determine
-                    # which mod key was either pressedor released that resulted in the state change....
-                    if etype == Qz.kCGEventFlagsChanged:
-                        self._mods_sum,mod_str_list=Keyboard._checkForLeftRightModifiers(flags)
-                        mod_presses=[]
-                        mod_releases=[]
-                        for mod_name, mod_state in self._modifier_states.iteritems():
-                            if mod_name in mod_str_list and not mod_state:
-                                self._modifier_states[mod_name]=True
-                                mod_presses.append(mod_name)
-                            elif mod_name not in mod_str_list and mod_state:   
-                                self._modifier_states[mod_name]=False
-                                mod_releases.append(mod_name)                                
-
-                        if (len(mod_presses) + len(mod_releases)) > 1:
-                            print2err("\nWARNING: Multiple modifiers reported a state change in one event. BUG??:", mod_presses, mod_releases)
-                            print2err("Using ONLY first change detected for event.\n")
-                        
-                        # OK, so if there is an element in mod presses or releases, then
-                        # we know the mod key that changed the state transition is a left_*,
-                        # or right_* or the cap locks key and we have the key we need.
-                        if len(mod_presses) > 0:
-                            ioe_type=EventConstants.KEYBOARD_PRESS
-                            event_mod=mod_presses[0]
-                        elif len(mod_releases) > 0:
-                            event_mod=mod_releases[0]
+                        if etype == Qz.kCGEventKeyUp:
                             ioe_type=EventConstants.KEYBOARD_RELEASE
-                        
-                        #TODO: What keyCode should we use for each modifier events?
-                        # key_code = ???
-                        
-                        if event_mod != None:
-                            # TODO: These modifier 'unistrs' are just the unqiue value assigned by ioHub for each
-                            # modifier. They are not ' official unicode reps for the mod key in question.
-                            # They should be. ;) SO determine what the valid unicode hex value is for each mod key and use that for
-                            # the ioHub constant value for each.
-                            key_name=event_mod
-                        else:
-                            # So no modifiers matching the left_, right_ mod codes were found,
-                            # so lets check the generic non position based mode codes that are 'officially'
-                            # defined by OS X
-                            shift_on=shiftModifierActive(flags)
-                            alt_on=altModifierActive(flags)
-                            ctrl_on=controlModifierActive(flags)
-                            cmd_on=commandModifierActive(flags)    
+                        elif etype == Qz.kCGEventKeyDown:
+                            ioe_type=EventConstants.KEYBOARD_PRESS
+                    except Exception,e:
+                        print2err("Create NSEvent failed: ",e)
+                        printExceptionDetailsToStdErr()
+                if ioe_type: 
+                    # The above logic resulted in finding a key press or release event
+                    # from the expected events OR from modifier state changes. So,
+                    # send the iohub event version to ioHub.
+                    #
+                    # FILL IN AND CREATE EVENT
+                    # index 0 and 1 are session and exp. ID's
+                    # index 3 is device id (not yet supported)
+                    #key_name='£'
+                    if ioe_type == EventConstants.KEYBOARD_PRESS:                       
+                        if is_auto_repeat > 0 and self._report_auto_repeats is False:
+                            return event
 
-                            if shift_on != self._last_general_mod_states['shift_on']:
-                                if shift_on is True:
-                                    ioe_type=EventConstants.KEYBOARD_PRESS
-                                else:
-                                    ioe_type=EventConstants.KEYBOARD_RELEASE
-                                self._last_general_mod_states['shift_on']=shift_on
-                                event_mod='MOD_SHIFT'
-                                key_name=event_mod
-                            elif alt_on != self._last_general_mod_states['alt_on']:
-                                if alt_on is True:
-                                    ioe_type=EventConstants.KEYBOARD_PRESS
-                                else:
-                                    ioe_type=EventConstants.KEYBOARD_RELEASE
-                                self._last_general_mod_states['alt_on']=alt_on
-                                event_mod='MOD_ALT'
-                                key_name=event_mod
-                            elif ctrl_on != self._last_general_mod_states['ctrl_on']:
-                                if ctrl_on is True:
-                                    ioe_type=EventConstants.KEYBOARD_PRESS
-                                else:
-                                    ioe_type=EventConstants.KEYBOARD_RELEASE
-                                self._last_general_mod_states['ctrl_on']=ctrl_on
-                                event_mod='MOD_CTRL'
-                                key_name=event_mod
-                            elif cmd_on != self._last_general_mod_states['cmd_on']:
-                                if cmd_on is True:
-                                    ioe_type=EventConstants.KEYBOARD_PRESS
-                                else:
-                                    ioe_type=EventConstants.KEYBOARD_RELEASE
-                                event_mod='MOD_CTRL'
-                                key_name=event_mod
-                                self._last_general_mod_states['cmd_on']=cmd_on
-                    else:
-                        # This is an actual button press / release event, so handle it....
-                        try:
-                            keyEvent = NSEvent.eventWithCGEvent_(event)
-                            key_name,ucode=self.getKeyNameForEvent(keyEvent)
-                            key_code=keyEvent.keyCode()
-                            window_number=keyEvent.windowNumber()
-
-                            if etype == Qz.kCGEventKeyUp:
-                                ioe_type=EventConstants.KEYBOARD_RELEASE
-                            elif etype == Qz.kCGEventKeyDown:
-                                ioe_type=EventConstants.KEYBOARD_PRESS
-
-                        except Exception,e:
-                            print2err("Create NSEvent failed: ",e)
-                    
-                    #Todo implement auto repeat count.
-
-                    
-                    if ioe_type: 
-                        # The above logic resulted in finding a key press or release event
-                        # from the expected events OR from modifier state changes. So,
-                        # send the iohub event version to ioHub.
-                        #
-                        # FILL IN AND CREATE EVENT
-                        # index 0 and 1 are session and exp. ID's
-                        # index 3 is device id (not yet supported)
-                        if key_name is None or len(key_name)==0:
-                            # TO DO: dead char we need to deal with??
-                            key_name=u'DEAD_KEY?'.encode('utf-8')
-                            print2err("DEAD KEY KIT?")
+                    if key_name is None or len(key_name)==0:
+                        # TO DO: dead char we need to deal with??
+                        key_name=u'DEAD_KEY?'
+                        print2err("DEAD KEY HIT?")
+                    else:    
                         ioe=self._EVENT_TEMPLATE_LIST
                         ioe[3]=Computer._getNextEventID()
                         ioe[4]=ioe_type #event type code
@@ -281,24 +304,20 @@ class Keyboard(ioHubKeyboardDevice):
                         ioe[9]=delay
                         # index 10 is filter id, not used at this time                        
                         ioe[11]=is_auto_repeat
-                        
-                        
-                        ioe[12]=0 # Quartz does not give the scancode
+
+                        ioe[12]=key_code # Quartz does not give the scancode, so fill this with keycode
                         ioe[13]=key_code #key_code
                         ioe[14]=ucode
-                        ioe[15]=key_name 
+                        ioe[15]=key_name.encode('utf-8') 
                         ioe[16]=self._mods_sum
                         ioe[17]=window_number
                         
                         self._addNativeEventToBuffer(copy(ioe))
-                    else:
-                        # So we did not find a key event out of the logic above,
-                        # likely due to a state change event that had no modifier
-                        # changes in it??? Spit out a warning for now so we can see
-                        # if this ever actually happens.
-                        print2err("\nWARNING: KEYBOARD RECEIVED A [ {0} ] KB EVENT, BUT COULD NOT GENERATE AN IOHUB EVENT FROM IT !!".format(etype))
-                        
-                    self._last_callback_time=logged_time                
+                        #print2err("**Final values:key_name [",key_name,"] ucode: ",ucode, ' key_code: ',key_code)
+                else:
+                    print2err("\nWARNING: KEYBOARD RECEIVED A [ {0} ] KB EVENT, BUT COULD NOT GENERATE AN IOHUB EVENT FROM IT !!".format(etype)," [",key_name,"] ucode: ",ucode, ' key_code: ',key_code)
+                    
+                self._last_callback_time=logged_time                
             
                 #cdur=getTime()-logged_time
                 #print2err('callback dur: ',cdur)        

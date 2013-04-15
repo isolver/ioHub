@@ -38,11 +38,12 @@ else:
 # 
 
 class FullScreenWindow(Window):
-    def __init__(self,iohub_display,color=[128,128,128], colorSpace='rgb255',
+    def __init__(self,iohub_display,res=None,color=[128,128,128], colorSpace='rgb255',
                  winType='pyglet',gamma=1.0,fullscr=True,allowGUI=False,
                  waitBlanking=True):
-        Window.__init__(self,iohub_display.getPixelResolution(),
-                                    monitor=iohub_display.getPsychopyMonitorName(),
+        if res == None:
+            res=iohub_display.getPixelResolution()
+        Window.__init__(self,res,monitor=iohub_display.getPsychopyMonitorName(),
                                     units=iohub_display.getCoordinateType(),
                                     color=color, colorSpace=colorSpace,
                                     fullscr=fullscr,

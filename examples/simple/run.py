@@ -17,39 +17,34 @@ import numpy as np
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
-    all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
+    Create an experiment using psychopy and the ioHub framework by extending the 
+    ioHubExperimentRuntime class. At minimum all that is needed in the __init__ 
+    for the new class, here called ExperimentRuntime, is the a call to the
     ioHubExperimentRuntime __init__ itself.
+    
+    April, 2013 Updates:
+        - Example now works as a Unicode char handling test. 
+            > In the upper left of the display, the saved utf-8 code point for 
+              the key pressed is displayed by converting the number to a 
+              unicode char using the python unichr() function.
+              NOTE: On the Mac, there are several 'non standard' code points defined and used
+                as the utf-8 encoding for the key in question. For such keys, this field
+                will be blank, as unichar() fails to convert the code point to utf-8 encoded 
+                string. The upper right hand kext on the screen should show the correct
+                value for the key (and modifiers) though.
+            > The upper right displays the Unicode value for the key pressed. This is
+               done by just passsnig the key event 'key' attribude, which  is a unicode string,
+               to the psychopy text stim's setText.
+            > The bottom middle of the screen displays the list of active modifiers. This 
+              is the key.modifiers attribute, which is a list of modifier string labels used 
+              by ioHub. Left and Right handed modifiers should be reported independently.
+        - The Mouse cursor position is now updated on each frame with a random amount of noise
+          if the 'ENABLE_NOISY_MOUSE' valiable defined at the start of the run() method is True. 
+          This allows testing of udating mouse position and checking on how doing so
+          effects the mouse position sample stream.
     """
     def run(self,*args,**kwargs):
         """
-        The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
-        script.py file in a standard psychopy experiment setup. That is all there is too it really.
-
-        By running your script within an extension of the ioHubExperimentRuntime class's run method, you automatically
-        get access to some nice features:
-
-        #. The ioHub Client class is accessible by calling self.hub . So to get all currently available events from the
-         ioHub event buffer, simply call events = self.hub.getEvents(). There is also a shortcut method, so you can simply call self.getEvents()
-         to achieve the same thing, or self.getEvents('kb') to get keyboard events if you named your keyboard device 'kb'.
-        #. To clear an event buffer, call getEvents(), as it also clears the buffer, or call self.clearEvents() to clear the global
-        event buffer, or self.clearEvents('kb') to clear the keyboard devices event buffer only, assuming you named your keyboard 'kb'.
-        #. All devices that have been specified in the iohub .yaml config file are available via self.hub.devices.[device_name]
-        where [device_name] is the name of the device you sepified in the config file. So to get all keyboard events since
-        the last call to the keyboard device event buffer, you can call kb_events=self.hub.devices.keyboard.getEvents(),
-        assuming you named the keyboard device 'keyboard'
-        #. As long as the ioHub server is running on the same computer as your experiment, you can access a shared timebase that
-        is common between the two processes. self.getSec(), self.getMsec(), or self.getUsec() all will do that.
-        #. If you need to pause the execution of your program for a period of time, but want events to be occasionally sent from the
-        ioHub server process to your experiment process so nothing is lost when the delay returns, you can use self.msecDelay(), which also
-        has built in cpu hogging near the end of the delay so it is quite precise (seems to be within 10's of usec on the i5 I have been testing with)
-        #. There are lots of other goodies in the ioHubExperimentRuntime utility class, so check out that classes docs, as well as
-        the docs for the ioHubConnection class, which is what is at the end of self.hub.
-
-        Have fun! Please report any issues you find on the bug tracker at github.com/isolver/iohub. Any suggestions for
-        improvement are very welcome too, please email me at sds-git@isolver-software.com .
-
-        Thank you. Sol
         """
 
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
@@ -70,10 +65,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #Computer.enableHighPriority()
         
         # Create a psychopy window, using settings from Display device config
-        psychoWindow =  FullScreenWindow(display,fullscr=False,allowGUI=True)
+        psychoWindow =  FullScreenWindow(display)#,res=(500,500),fullscr=False,allowGUI=True)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
-        mouse.setSystemCursorVisibility(True)
+        #mouse.setSystemCursorVisibility(False)
         # Set the mouse position to 0,0, which means the 'center' of the screen.
         mouse.setPosition((0.0,0.0))
         # Read the current mouse position (should be 0,0)  ;)
@@ -85,9 +80,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         psychoStim=OrderedDict()
         psychoStim['grating'] = visual.PatchStim(psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
         psychoStim['fixation'] =visual.PatchStim(psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        psychoStim['keytext'] = visual.TextStim(psychoWindow, text=u'?', pos = [100,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
-        psychoStim['ucodetext'] = visual.TextStim(psychoWindow, text=u'?', pos = [-100,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
-        psychoStim['mods'] = visual.TextStim(psychoWindow, text=u'?', pos = [0,-300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
+        psychoStim['keytext'] = visual.TextStim(psychoWindow, text=u'?', pos = [100,200], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
+        psychoStim['ucodetext'] = visual.TextStim(psychoWindow, text=u'?', pos = [-100,200], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
+        psychoStim['mods'] = visual.TextStim(psychoWindow, text=u'?', pos = [0,-200], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=400.0)
         psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
 
         # Clear all events from the global and device level event buffers.
@@ -131,7 +126,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 if k.key.upper() in ['ESCAPE', ] and k.type==EventConstants.KEYBOARD_CHAR:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
-                print u'{0}: time: {1}\t\tord: {2}.\tKey: [{3}]\tMods: {4}'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key,k.modifiers)
+                print u'{0}: time: {1}\t\tord: {2}.\t\tKey: [{3}]\t\tMods: {4}'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key,k.modifiers)
                 psychoStim['keytext'].setText(k.key)
                 psychoStim['ucodetext'].setText(unichr(k.ucode))
                 psychoStim['mods'].setText(str(k.modifiers))
