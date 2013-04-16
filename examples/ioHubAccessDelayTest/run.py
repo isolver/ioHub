@@ -9,7 +9,7 @@ from psychopy import visual
 import ioHub
 from ioHub.devices import Computer
 from ioHub.constants import EventConstants
-from ioHub.util.experiment import ioHubExperimentRuntime
+from ioHub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
 from ioHub import OrderedDict
 from numpy import zeros
 
@@ -89,7 +89,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
     def createPsychoGraphicsWindow(self):
         #create a window
-        self.psychoWindow = ioHub.util.experiment.FullScreenWindow(self.display)
+        self.psychoWindow = FullScreenWindow(self.display)
         
         currentPosition=self.mouse.setPosition((0,0))
         self.mouse.setSystemCursorVisibility(False)

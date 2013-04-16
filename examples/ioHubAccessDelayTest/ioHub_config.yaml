@@ -2,7 +2,7 @@
 # experiment.
 #
 monitor_devices:
-    - Display: &DisplaySettings
+    - Display:
         name: display
         reporting_unit_type: pix
         device_number: 0

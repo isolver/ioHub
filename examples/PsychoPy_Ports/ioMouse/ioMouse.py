@@ -7,7 +7,7 @@ from psychopy import visual, core
 from ioHub import quickStartHubServer
 from ioHub.constants import EventConstants
 from ioHub.util.experiment import FullScreenWindow
-
+import sys
 import random
 io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
 
@@ -66,15 +66,19 @@ while True: #continue until keypress
             fixSpot.setPos(position)
             
         # Handle the wheel(s):
-        # Y is the normal mouse wheel, and is what is supported by ioHub 
-        # (until OSX is also supported by ioHub I suppose)
+        # ioHub now supports 2 dimensional scroll data when used on OSX., so
+        # msx,msy=myMouse.getScroll() returns the ioHub scroll position in x and y dimensions.
         # ioHub tracks the absolute amount of wheel movement made, so it can be
         # treated like a range or 'position'. Here we track the delta wheel pos
         # delta. 
         # TODO: No reason why ioHub can not track both absolution and delta info. 
-        wheelPosY = myMouse.getScroll()
+        if sys.platform == 'darwin':
+            wheelPosX,wheelPosY = myMouse.getScroll()
+        else:
+            wheelPosY = myMouse.getScroll()
         wheel_dY=wheelPosY-last_wheelPosY
         last_wheelPosY=wheelPosY
+
         grating.setOri(wheel_dY*5, '+')
     
     io.clearEvents()#get rid of other, unprocessed events

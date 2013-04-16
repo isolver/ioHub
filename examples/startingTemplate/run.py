@@ -1,4 +1,4 @@
-f"""
+"""
 ioHub
 .. file: ioHub/examples/startingTemplate/run.py
 """
@@ -26,6 +26,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
 
         print "Hello World. Press any key to quit."
+        self.hub.clearEvents('all')
         kb=self.devices.kb
         while not kb.getEvents():
             self.hub.wait(0.010)
