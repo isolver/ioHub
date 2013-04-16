@@ -45,34 +45,22 @@ class udpServer(DatagramServer):
         self.iohub=ioHubServer
         self.feed=None
         self._running=True
-        if coder=='ujson':
-            self.iohub.log(" ioHub Server configuring ujson...")
-            import ujson
-            self.coder=ujson
-            self.pack=ujson.encode
-            self.unpack=ujson.decode
-        elif coder == 'msgpack':
+        if coder == 'msgpack':
             self.iohub.log("ioHub Server configuring msgpack...")
             self.coder=msgpack
             self.packer=msgpack.Packer()
             self.unpacker=msgpk_unpacker
             self.pack=self.packer.pack
             self.feed=msgpk_unpacker.feed
-            self.unpack=msgpk_unpack
-
-        
+            self.unpack=msgpk_unpack       
         DatagramServer.__init__(self,address)
          
     def handle(self, request, replyTo):
         if self._running is False:
             return False
-            
-        if self.feed: # using msgpack
-            self.feed(request[:-2])
-            request = self.unpack() 
-        else: #using ujson
-            request=self.unpack(request[:-2])    
-
+        
+        self.feed(request[:-2])
+        request = self.unpack()   
         request_type= request.pop(0)
         
         if request_type == 'GET_EVENTS':
@@ -433,8 +421,7 @@ class ioServer(object):
         try:
             expJsonPath=os.path.join(rootScriptPathDir,'exp.paths')
             f=open(expJsonPath,'r')
-            import ujson
-            ioHub.data_paths=ujson.loads(f.read())
+            ioHub.data_paths=msgpack.loads(f.read())
             f.flush()
             f.close()
             os.remove(expJsonPath)

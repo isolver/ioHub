@@ -18,7 +18,8 @@ import struct
 
 from gevent import socket
 import numpy as N
-
+import msgpack
+                
 try:
     from yaml import load
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -93,15 +94,7 @@ class SocketConnection(object):
         global pack
         #print "** In configCoder...", coder
         if coder:
-            if coder == 'ujson':
-                import ujson
-                self.coder=ujson
-                self.pack=ujson.encode
-                pack=ujson.encode
-                self.unpack=ujson.decode
-                #print 'ujson:', self.pack
-            elif coder =='msgpack':
-                import msgpack
+            if coder =='msgpack':
                 self.coder=msgpack
                 self.packer=msgpack.Packer()
                 self.unpacker=msgpack.Unpacker(use_list=True)
@@ -111,7 +104,7 @@ class SocketConnection(object):
                 self.unpack=self.unpacker.unpack
                 #print 'msgpack:', self.pack
             else:
-                raise Exception ("Unknown coder type: %s. Must be either 'ujson' or 'msgpack'"%(str(coder),))
+                raise Exception ("Unknown coder type: %s. Must be 'msgpack'"%(str(coder),))
 
     def sendTo(self,data,address=None):
         #print 'DATA [%s] %s %s'%(data,self._remote_host, str(self._remote_port))
@@ -128,22 +121,19 @@ class SocketConnection(object):
         try:
             data, address = self.sock.recvfrom(self._rcvBufferLength)
             self.lastAddress=address
-            if self.feed: # using msgpack
+            self.feed(data[:-2])
+            result=self.unpack()
+            if result[0] == 'IOHUB_MULTIPACKET_RESPONSE':
+                num_packets=result[1]
+
+                for p in xrange(num_packets-1):
+                    data, address = self.sock.recvfrom(self._rcvBufferLength)
+                    self.feed(data)
+
+                data, address = self.sock.recvfrom(self._rcvBufferLength)
                 self.feed(data[:-2])
                 result=self.unpack()
-                if result[0] == 'IOHUB_MULTIPACKET_RESPONSE':
-                    num_packets=result[1]
-
-                    for p in xrange(num_packets-1):
-                        data, address = self.sock.recvfrom(self._rcvBufferLength)
-                        self.feed(data)
-
-                    data, address = self.sock.recvfrom(self._rcvBufferLength)
-                    self.feed(data[:-2])
-                    result=self.unpack()
-                return result,address
-            else:   # using ujson
-                return self.unpack(data[:-2]),address
+            return result,address
         except ioHubServerError as e:
             print e
             raise e
@@ -777,9 +767,8 @@ class ioHubConnection(object):
         The ioHub Server accepts data send encoded using the [msgpack](https://github.com/msgpack/msgpack-python)
         library.
 
-        Which encoding type is used is specified in the ioHub configuration file by the ipcCoder: parameter.
-        By default *msgpack* is selected, as it seems to be as fast as ujson, but it also compresses
-        event data by up to 40 - 50% for transmission.
+        Which encoding type is used is specified in the ioHub configuration file by the ipcCoder:  
+        *msgpack* is the only supported encoder now.
 
         All messages sent to the ioHub (a.k.a the ioHubMessage param) have the following simple format:
 
@@ -893,12 +882,13 @@ class ioHubConnection(object):
         if 'user_variables' not in sessionInfoDict:
             sessionInfoDict['user_variables']={}
 
-        import ujson
-        sessionInfoDict['user_variables']=ujson.encode(sessionInfoDict['user_variables'])
-
+        org_session_info=sessionInfoDict['user_variables']
+        
+        sessionInfoDict['user_variables']=msgpack.dumps(sessionInfoDict['user_variables'])
         r=self.sendToHubServer(('RPC','createExperimentSessionEntry',(sessionInfoDict,)))
-
         self.experimentSessionID=r[2]
+
+        sessionInfoDict['user_variables']=org_session_info
         return r[2]
 
     def initializeConditionVariableTable(self, conditionVariablesProvider):

@@ -561,14 +561,14 @@ class PathMapping(object):
         return self._fileTypeToPath['*']
 
     def saveToJson(self):
-        import ujson
+        import msgpack
         mappings={}
         for v in self._FILE_TYPES.values():
             if v in self._fileTypeToPath:
                 mappings[v]=self._fileTypeToPath[v]._path
 
         f=open(os.path.join(self.experimentSourceDir,'exp.paths'),'w')
-        f.write(ujson.dumps(mappings))
+        f.write(msgpack.dumps(mappings))
         f.flush()
         f.close()
        

@@ -460,9 +460,8 @@ so you can have N messages created and sent at once.</p>
 to the ioHub Process, and then wait for the reply from the ioHub Process before returning.</p>
 <p>The ioHub Server accepts data send encoded using the [msgpack](<a class="reference external" href="https://github.com/msgpack/msgpack-python">https://github.com/msgpack/msgpack-python</a>)
 library.</p>
-<p>Which encoding type is used is specified in the ioHub configuration file by the ipcCoder: parameter.
-By default <em>msgpack</em> is selected, as it seems to be as fast as ujson, but it also compresses
-event data by up to 40 - 50% for transmission.</p>
+<p>Which encoding type is used is specified in the ioHub configuration file by the ipcCoder:  
+<em>msgpack</em> is the only supported encoder now.</p>
 <p>All messages sent to the ioHub (a.k.a the ioHubMessage param) have the following simple format:</p>
 <p>(msg_type, [callable_name_for_IPC], ( [optional_list_of_args], {optional_dict_of_kw_args} ) )</p>
 <p>The currently supported message types are:</p>

@@ -6,7 +6,7 @@ from ioHub import OrderedDict
 import numpy as np
 import sys
 
-import ujson
+import json
 
 #### Experiment Variable (IV and DV) Condition Management
 #
@@ -159,7 +159,7 @@ class ExperimentVariableProvider(object):
                 # need to check if string should be considered a color or a string
                 if (rvalue[0] in ('[','(')) and (rvalue[-1] in (']',')')) and (rvalue.count(',') in (2,3)):
                     try:
-                        rgbList=ujson.loads(rvalue)
+                        rgbList=json.loads(rvalue)
                         if len(rgbList) == 3:
                             np_dtype.append((cname,[('r','u1'),('g','u1'),('b','u1')]))
                         else:
@@ -186,7 +186,7 @@ class ExperimentVariableProvider(object):
             rowValues=[r,]
             rowValues.extend(worksheet.row_values(r))
             for i in color_column_indexes:
-                rowValues[i]=tuple(ujson.loads(rowValues[i]))
+                rowValues[i]=tuple(json.loads(rowValues[i]))
             temp_rows.append(tuple(rowValues))
 
         self._numpyConditionVariableDescriptor=np_dtype
