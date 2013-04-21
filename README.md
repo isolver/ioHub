@@ -1,26 +1,30 @@
 # ioHub
 
-ioHub is a [Python](http://www.python.org) package providing a cross-platform 
-computer device event monitoring and storage framework. 
+ioHub is a [Python](http://www.python.org) package providing a cross-platform computer device event monitoring and storage framework. ioHub is free to use and is GLP version 3 licensed. 
 
-ioHub is not a complete experiment design and runtime API, but is instead 
-intended to be used with existing Python experiment runtime packages,
-primarily [the most excellent PsychoPy](http://www.psychopy.org). 
+ioHub is not a complete experiment design and runtime API, but is instead intended to be used with existing Python experiment runtime packages,primarily [the most excellent PsychoPy](http://www.psychopy.org). 
 
 ioHub supports the following high level functionality:
 
-*  Monitoring of events from computer devices such as the keyboard, mouse, analog to digital converters, XInput compatible gamepads, and eye trackers via a common eye tracking interface that provides the same user level API regardless of the eye tracking hardware used.
+*  Monitoring of events from computer devices such as the keyboard, mouse, analog to digital converters, XInput compatible gamepads, and eye trackers via a Common Eye Tracking Interface that provides the same user level API regardless of the eye tracking hardware used.
+*  The Common Eye Tracking Interface currently supports the following eye tracking systems:
+    *  [LC Technologies](http://www.eyegaze.com/) EyeGaze and EyeFollower models
+    *  [SensoMotoric Instruments](http://www.smivision.com/) iViewX models
+    *  [SR Research](http://www.sr-research.com) EyeLink models
+    *  [Tobii Technologies](http://www.tobii.com) Tobii models
 *  Support for Windows XP and 7, Apple OS X 10.6, 10.7, and Linux 2.6+  
-*  Device event monitoring is done completely independently from the experiment runtime graphics environment and allows for device inputs to be captured system wide, not just for events targeted to the stimulus presentation window. In fact, no graphical window in needed at all to collect inputs from the majority of supported devices.
-*  Device input monitoring is run as a seperate process from the experiment runtime itself, called the ioHub Server Process. This allows for input event monitoring and device event callback processing to occur very quickly and regardless of what state the experiment runtime process is in (i.e. even when the experiment runtime process is blocked and would not be able to monitor for new events itself).
-*  Device inputs can be saved by the ioHub Server Process for post hoc analysis. Assuming a multicore CPU is being used, in general *all* device events can be saved during the experiment without effecting the performance of the experiment runtime logic itself.
-*  Events can be accessed by the experiment script during runtime either at a global, device independent manner, or for a specific device type alone. 
-*  Text Messages can be registered with ioHub Server, allowing easy integration of experiment runtime events (such as important stimuli onsets, etc.)
-*  A common time base is provided for all device input events, and between the experiment runtime and ioHub Server processes, making it easy to syncronize experiment and device input events. Events are time stamped when it is not done by the source device itself, or existing device event time stamps are converted to the common ioHub time base. 
+*  Device event monitoring is done completely independently from the experiment runtime graphics environment and allows for device inputs to be captured system wide, not just for events targeted to the stimulus presentation / forground application window. In fact, no graphical window in needed at all to collect inputs from supported devices.
+*  The ioHub Server, responsible for the monitoring, translation, storage, and online transmission of device events,  runs in a seperate OS process from the main application / experiment runtime process. This allows for event monitoring and device event callback processing to occur very quickly, regardless of what state the experiment runtime process is in (i.e. even when the experiment runtime process is blocked and would not be able to monitor for new events itself).
+*  Device inputs can be saved by the ioHub Server Process for post hoc analysis. Assuming a multicore CPU is being used, in general *all* device events can be saved during the experiment without effecting the performance of the experiment runtime logic itself. Event data is saved in a structured format using the HDF5 standard. Event data retrieved from a data file is provided as numpy ndarray's, providing the ability to directly use retrieved data in several scientific Python models such as [Scipy](http://scipy.org/) and [MatPlotLib](http://matplotlib.org/).   
+*  Events can be accessed by the experiment script during runtime either in a global, chronologically ordered, device independent manner or for a specific device type alone. 
+*  Text Messages can be sent to ioHub Server as Experiment Runtime Events, allowing the easy integration of important experiment information (such as stimulus onsets, etc.), each timestamped with microsecond level precision with the ioHub timebase.
+*  A common time base is provided for all device events, making it easy to syncronize data from multiple physical devices and virtual devices, such as the Experiment Runtime itself. Events are time stamped by ioHub when it is not done by the source device itself, or existing device event time stamps are converted to the common ioHub time base. 
 *  Device inputs are converted into common event types based on device type, regardless of the underlying supported hardware. 
 
     
 ## Download
+
+**Note that the provided setup.py file is currently broken, and will be fixed ASAP. For now simply download the source distribution and copy the internal 'iohub' folder (all lower case folder name) to your python path; for example your site-packages folder. Sorry for the inconvience.**
 
 ioHub source is hosted on GitHub [here](https://www.github.com/isolver/ioHub/).
 
