@@ -274,7 +274,9 @@ class EyeLinkCoreGraphicsIOHubPsychopy(EyeLinkCustomDisplay):
                         s.draw()
                         
         self.calStim=StimSet()
-                
+        
+        coord_type=self._eyetrackerinterface._display_device.getCoordinateType()
+        
         self.calStim.calibrationPoint=OrderedDict()
         self.calStim.calibrationPoint['OUTER'] = visual.Circle(self.window,pos=(0,0),
                     lineWidth=1.0, lineColor=self.CALIBRATION_POINT_OUTER_COLOR, lineColorSpace='rgb255',
@@ -311,7 +313,8 @@ class EyeLinkCoreGraphicsIOHubPsychopy(EyeLinkCustomDisplay):
         self.window.flip(clearBuffer=True)
         
     def draw_cal_target(self, x, y):
-        self.calStim.updateStim('calibrationPoint',setPos=(x,y))  
+        self.width/2
+        self.calStim.updateStim('calibrationPoint',setPos=(x-self.width/2,-(y-self.height/2)))  
         self.calStim.draw()
         self.window.flip(clearBuffer=True)
         

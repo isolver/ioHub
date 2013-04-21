@@ -546,12 +546,12 @@ class EyeTracker(EyeTrackerDevice):
                         leftPupilSize=leftData.getPupilSize()
                         leftRawPupil=leftData.getRawPupil()
                         leftHref=leftData.getHREF()
-                        leftGaze=leftData.getGaze()
+                        leftGaze=self._eyeTrackerToDisplayCoords(leftData.getGaze())
 
                         rightPupilSize=rightData.getPupilSize()
                         rightRawPupil=rightData.getRawPupil()
                         rightHref=rightData.getHREF()
-                        rightGaze=rightData.getGaze()
+                        rightGaze=self._eyeTrackerToDisplayCoords(rightData.getGaze())
 
                         # TO DO: EyeLink pyLink does not expose sample velocity fields. Patch and fix.
                         vel_x=-1.0
@@ -643,7 +643,7 @@ class EyeTracker(EyeTrackerDevice):
                         pupilSize=eyeData.getPupilSize()
                         rawPupil=eyeData.getRawPupil()
                         href=eyeData.getHREF()
-                        gaze=eyeData.getGaze()
+                        gaze=self._eyeTrackerToDisplayCoords(eyeData.getGaze())
 
                         # TO DO: EyeLink pyLink does not expose sample velocity fields. Patch and fix.
                         vel_x=-1.0
@@ -703,19 +703,19 @@ class EyeTracker(EyeTrackerDevice):
                     end_event_time = ne.event_timestamp
                     event_duration = end_event_time-start_event_time
 
-                    s_gaze=ne.getStartGaze()
+                    s_gaze=self._eyeTrackerToDisplayCoords(ne.getStartGaze())
                     s_href=ne.getStartHREF()
                     s_vel=ne.getStartVelocity()
                     s_pupilsize=ne.getStartPupilSize()
                     s_ppd=ne.getStartPPD()
 
-                    e_gaze=ne.getEndGaze()
+                    e_gaze=self._eyeTrackerToDisplayCoords(ne.getEndGaze())
                     e_href=ne.getEndHREF()
                     e_pupilsize=ne.getEndPupilSize()
                     e_vel=ne.getEndVelocity()
                     e_ppd=ne.getEndPPD()
 
-                    a_gaze=ne.getAverageGaze()
+                    a_gaze=self._eyeTrackerToDisplayCoords(ne.getAverageGaze())
                     a_href=ne.getAverageHREF()
                     a_pupilsize=ne.getAveragePupilSize()
                     a_vel=ne.getAverageVelocity()
@@ -809,13 +809,13 @@ class EyeTracker(EyeTrackerDevice):
                     e_amp = ne.getAmplitude()
                     e_angle = ne.getAngle()
 
-                    s_gaze=ne.getStartGaze()
+                    s_gaze=self._eyeTrackerToDisplayCoords(ne.getStartGaze())
                     s_href=ne.getStartHREF()
                     s_vel=ne.getStartVelocity()
                     s_pupilsize=-1.0
                     s_ppd=ne.getStartPPD()
 
-                    e_gaze=ne.getEndGaze()
+                    e_gaze=self._eyeTrackerToDisplayCoords(ne.getEndGaze())
                     e_href=ne.getEndHREF()
                     e_pupilsize=-1.0
                     e_vel=ne.getEndVelocity()
@@ -930,7 +930,7 @@ class EyeTracker(EyeTrackerDevice):
                     pupil_size=-1
                     if etype == EventConstants.FIXATION_START:
                         pupil_size=ne.getStartPupilSize()
-                    gaze=ne.getStartGaze()
+                    gaze=self._eyeTrackerToDisplayCoords(ne.getStartGaze())
                     href=ne.getStartHREF()
                     velocity=ne.getStartVelocity()
                     ppd=ne.getStartPPD()
@@ -1008,7 +1008,14 @@ class EyeTracker(EyeTrackerDevice):
         """
         """
         try:
-            return eyetracker_point
+            cl,ct,cr,cb=self._display_device.getCoordBounds()
+            cw,ch=cr-cl,ct-cb
+            
+            dl,dt,dr,db=self._display_device.getBounds()
+            dw,dh=dr-dl,db-dt
+
+            gxn,gyn=eyetracker_point[0]/dw,eyetracker_point[1]/dh                        
+            return cl+cw*gxn,cb+ch*(1.0-gyn)   
         except Exception,e:
             return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
@@ -1018,13 +1025,22 @@ class EyeTracker(EyeTrackerDevice):
     def _displayToEyeTrackerCoords(self,display_x,display_y):
         """
         """
-        try:            
-            return display_x,display_y
+        try:                        
+            cl,ct,cr,cb=self._display_device.getCoordBounds()
+            cw,ch=cr-cl,ct-cb
+            
+            dl,dt,dr,db=self._display_device.getBounds()
+            dw,dh=dr-dl,db-dt
+            
+            cxn,cyn=(display_x+cw/2)/cw , 1.0-(display_y-ch/2)/ch       
+            return cxn*dw,  cyn*dh          
+           
         except Exception,e:
             return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
                     method="EyeTracker._displayToEyeTrackerCoords", 
-                    error=e)            
+                    error=e)
+       
 
     def _setRuntimeSettings(self,runtimeSettings):
         for pkey,v in runtimeSettings.iteritems():
@@ -1254,11 +1270,16 @@ class EyeTracker(EyeTrackerDevice):
                 return False
     
             # calibration coord space
-            l,t,r,b=self._display_device.getCoordBounds()
-            eyelink.sendCommand("screen_pixel_coords %.5f %.5f %.5f %.5f" %(l,t,r,b))
-            eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(l,t,r,b))
+            l,t,r,b=self._display_device.getBounds()
+            w=r-l
+            h=b-t
+            eyelink.sendCommand("screen_pixel_coords %.2f %.2f %.2f %.2f" %(0,0,w,h))
+            eyelink.sendMessage("DISPLAY_COORDS  %.2f %.2f %.2f %.2f" %(0,0,w,h))
     
             sleep(0.001)
+            
+            eyelink.sendCommand("screen_write_prescale = 100")
+            
         except Exception:
             print2err("EYELINK Error during _eyelinkSetScreenPhysicalData:")
             printExceptionDetailsToStdErr()

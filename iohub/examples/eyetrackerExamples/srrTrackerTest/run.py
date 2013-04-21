@@ -35,17 +35,22 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             print "NOTE: Exiting application due to failed calibration."
             return
 
+        display_coord_type=display.getCoordinateType()
+        
         # Create a psychopy window, full screen resolution, full screen mode...
         self.window = FullScreenWindow(display)
 
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
 
+        cl,ct,cr,cb=display.getCoordBounds()
+        w=cr-cl
+        h=ct-cb
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
         image_name='./images/party.png'
-        imageStim = visual.ImageStim(self.window, image=image_name, name='image_stim')
-        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(-2000,-2000),size=(100,100),color='green')
+        imageStim = visual.ImageStim(self.window, image=image_name, name='image_stim',units=display_coord_type)
+        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(-2000,-2000),size=(w/25,w/25),color='green',units=display_coord_type)
 
         # create screen states
 
@@ -58,7 +63,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.clearScreen.sendMessage("IO_HUB EXPERIMENT_INFO START")
         self.clearScreen.sendMessage("ioHub Experiment started {0}".format(getCurrentDateTimeString()))
         self.clearScreen.sendMessage("Experiment ID: {0}, Session ID: {1}".format(self.hub.experimentID,self.hub.experimentSessionID))
-        self.clearScreen.sendMessage("Stimulus Screen ID: {0}, Size (pixels): {1}, CoordType: {2}".format(display.getIndex(),display.getPixelResolution(),display.getCoordinateType()))
+        self.clearScreen.sendMessage("Stimulus Screen ID: {0}, Size (pixels): {1}".format(display.getIndex(),display.getPixelResolution()))
+        self.clearScreen.sendMessage("DIsplay CoordType: {0} Coord Bounds: {1}".format(display_coord_type,(cl,ct,cr,cb)))
         self.clearScreen.sendMessage("Calculated Pixels Per Degree: {0} x, {1} y".format(*display.getPixelsPerDegree()))        
         self.clearScreen.sendMessage("IO_HUB EXPERIMENT_INFO END")
 
