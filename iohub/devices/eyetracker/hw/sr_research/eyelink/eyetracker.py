@@ -91,8 +91,11 @@ class EyeTracker(EyeTrackerDevice):
             # Connect to the eye tracker; setting the EyeTracker._eyelink class
             # attribute to a pylink.EYELINK device class if EyeTracker._eyelink
             # is None.
-            self.setConnectionState(True)
-            
+            if self.setConnectionState(True) != EyeTrackerConstants.EYETRACKER_OK:
+                print2err(" ** EyeLink Error: Could not connect to EyeLink Eye Tracker. EyeLink Eye tracker device will run in 'dummy' mode.")
+                tracker_config['enable_interface_without_connection']=True
+                self.setConnectionState(True)
+                
             self._addCommandFunctions()
 
             # Sets the physical ini settings, like default screen distance,
@@ -100,7 +103,7 @@ class EyeTracker(EyeTrackerDevice):
             self._eyelinkSetScreenPhysicalData()
 
             # Set whether to run in mouse simulation mode or not.
-            simulation_mode=host_pc_ip_address=tracker_config.get('simulation_mode',False)
+            simulation_mode=tracker_config.get('simulation_mode',False)
             if simulation_mode is True:
                 self._eyelink.sendCommand("aux_mouse_simulation = YES")
             else:
@@ -172,7 +175,6 @@ class EyeTracker(EyeTrackerDevice):
             # Creates a fileTransferDialog class that will be used when a connection is closed and
             # a native EDF file needs to be transfered from Host to Experiment PC.
             EyeTracker._eyelink.progressUpdate=self._fileTransferProgressUpdate
-
         except:
             print2err(" ---- Error during EyeLink EyeTracker Initialization ---- ")
             printExceptionDetailsToStdErr()
@@ -205,7 +207,7 @@ class EyeTracker(EyeTrackerDevice):
         ioHub server, the recording will be stopped prior to closing the connection.
         """
         try:
-            
+            tracker_config=self.getConfiguration()
             dummyModeEnabled=tracker_config.get('enable_interface_without_connection',False)    
             host_pc_ip_address=tracker_config.get('network_settings','100.1.1.1')
 
@@ -239,7 +241,7 @@ class EyeTracker(EyeTrackerDevice):
                     return EyeTrackerConstants.EYETRACKER_OK
             else:
                 return createErrorResult("INVALID_METHOD_ARGUMENT_VALUE",error_message="The enable arguement value provided is not recognized",method="EyeTracker.setConnectionState",arguement='enable', value=enable)            
-        except Exception,e:
+        except Exception, e:
                 return createErrorResult("IOHUB_DEVICE_EXCEPTION",error_message="An unhandled exception occurred on the ioHub Server Process.",method="EyeTracker.setConnectionState",arguement='enable', value=enable, error=e)            
             
             
@@ -283,17 +285,19 @@ class EyeTracker(EyeTrackerDevice):
         """
         try:
             if key in EyeTracker._COMMAND_TO_FUNCTION:
-                yield EyeTracker._COMMAND_TO_FUNCTION[key](*value)
+                return EyeTracker._COMMAND_TO_FUNCTION[key](*value)
             else:
                 cmdstr=''
                 if value is None:
                     cmdstr="{0}".format(key)
                 else:
                     cmdstr="{0} = {1}".format(key,value)
-    
-                yield self._readResultFromTracker(cmdstr)
+                self._eyelink.sendCommand(cmdstr)    
+                r= self._readResultFromTracker(cmdstr)
+                print2err("[%s] result: %s"%(cmdstr,r))
+                return EyeTrackerConstants.EYETRACKER_OK
         except Exception, e:
-            yield createErrorResult("IOHUB_DEVICE_EXCEPTION",
+            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
                     method="EyeTracker.sendCommand", key=key,value=value, error=e)            
         
@@ -312,7 +316,7 @@ class EyeTracker(EyeTrackerDevice):
     
             if r == 0:
                 return EyeTrackerConstants.EYETRACKER_OK
-            return r
+            return EyeTrackerConstants.EYETRACKER_ERROR
         except Exception, e:
             return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
@@ -1042,7 +1046,7 @@ class EyeTracker(EyeTrackerDevice):
                 for vog_key,vog_val in v.iteritems():
                     sleep(0.001)
                     if vog_key == 'pupil_measure_types':
-                        self._eyelink.sendCommand("pupil_size_diameter %s"%(vog_val.split('_')[1]))
+                        self._eyelink.sendCommand("pupil_size_diameter = %s"%(vog_val.split('_')[1]))
                     elif vog_key == 'pupil_center_algorithm':
                         self._setPupilDetection(vog_val)
                     elif vog_key == 'tracking_mode':
@@ -1085,7 +1089,7 @@ class EyeTracker(EyeTrackerDevice):
                 track_eyes='RIGHT'
             elif track_eyes in ['LEFT', EyeTrackerConstants.getName(EyeTrackerConstants.LEFT_EYE)]:
                 track_eyes='LEFT'
-            elif r in ['BOTH', EyeTrackerConstants.getName(EyeTrackerConstants.BINOCULAR)]:
+            elif track_eyes in ['BOTH', EyeTrackerConstants.getName(EyeTrackerConstants.BINOCULAR)]:
                 track_eyes='BOTH'
             else:
                 print2err("** Warning: UNKNOWN EYE CONSTANT, SETTING EYE TO TRACK TO RIGHT. UNKNOWN EYE CONSTANT: ",track_eyes)
@@ -1094,11 +1098,12 @@ class EyeTracker(EyeTrackerDevice):
             srate=self._getSamplingRate()
     
             self._eyelink.sendCommand("lock_active_eye = NO")
-    
+            sleep(0.001)
             if track_eyes == "BOTH":
                 if self._eyelink.getTrackerVersion() == 3:
                     if srate>=1000:
                         print2err("ERROR: setEyesToTrack: EyeLink can not record binocularly over 500 hz.")
+                        return EyeTrackerConstants.EYETRACKER_ERROR
                     else:
                         trackerVersion =self._eyelink.getTrackerVersionString().strip()
                         trackerVersion = trackerVersion.split(' ')
@@ -1106,14 +1111,16 @@ class EyeTracker(EyeTrackerDevice):
                         if tv <= 3:
                             if srate>500:
                                 print2err("ERROR: setEyesToTrack: Selected sample rate is not supported in binocular mode")
+                                return EyeTrackerConstants.EYETRACKER_ERROR
                             else:
                                 self._eyelink.sendCommand("binocular_enabled = YES")
-                                return True
+                                return EyeTrackerConstants.EYETRACKER_OK
                         else:
                             rts = []
                             modes = self._readResultFromTracker("read_mode_list")
                             if modes is None or modes.strip() == 'Unknown Variable Name':
                                 print2err("ERROR: setEyesToTrack: Failed to get supported modes. ")
+                                return EyeTrackerConstants.EYETRACKER_ERROR
                             modes = modes.strip().split()
     
                             for x in modes:
@@ -1125,18 +1132,17 @@ class EyeTracker(EyeTrackerDevice):
                                 return True
                             else:
                                 print2err("ERROR: setEyesToTrack: Selected sample rate is not supported!")
-            elif track_eyes in ("LEFT", 'RIGHT'):
-                self.sendCommand("binocular_enabled = NO")
-                return True
+                                return EyeTrackerConstants.EYETRACKER_ERROR
             else:
-                self.sendCommand("binocular_enabled = NO")
-                self.sendCommand("active_eye = %s"%(track_eyes))
-                self.sendCommand("lock_active_eye = YES")
-        except Exception, e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker.setEyesToTrack", error=e)            
-
+                self._eyelink.sendCommand("binocular_enabled = NO")
+                self._eyelink.sendCommand("current_camera = %s"%(track_eyes))
+                self._eyelink.sendCommand("active_eye = %s"%(track_eyes))
+                self._eyelink.sendCommand("lock_active_eye = YES")
+                return EyeTrackerConstants.EYETRACKER_OK
+        except Exception:
+            print2err("EYELINK Error during _setEyesToTrack:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _setSamplingRate(self,sampling_rate):
         """
@@ -1176,10 +1182,10 @@ class EyeTracker(EyeTrackerDevice):
                             self.sendCommand("sample_rate = %d"%(srate))
                 return self._getSamplingRate()
             return EyeTrackerConstants.EYETRACKER_ERROR
-        except Exception, e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._getSamplingRate", error=e)            
+        except Exception:
+            print2err("EYELINK Error during _setSamplingRate:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _setSampleFilterLevel(self,filter_settings_dict):
         """
@@ -1187,7 +1193,7 @@ class EyeTracker(EyeTrackerDevice):
         try:
             if len(filter_settings_dict)>0:
                 supportedTypes='FILTER_ALL','FILTER_FILE','FILTER_ONLINE'
-                supportedLevels= 'FILTER_LEVEL_OFF','FILTER_LEVEL_1','FILTER_LEVEL_2'
+                supportedLevels= 'FILTER_OFF','FILTER_LEVEL_OFF','FILTER_LEVEL_1','FILTER_LEVEL_2'
 
                 ffilter=0
                 lfilter=0
@@ -1211,14 +1217,14 @@ class EyeTracker(EyeTrackerDevice):
                                 supported_levels=supportedLevels)            
                         
                 if update_filter:  
-                    self._eyelink.setHeuristicLinkAndFileFilter(ffilter,lfilter)
+                    self._eyelink.setHeuristicLinkAndFileFilter(lfilter,ffilter)
                     return EyeTrackerConstants.EYETRACKER_OK
                     
             return EyeTrackerConstants.EYETRACKER_ERROR
-        except Exception, e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker.setDataFilterLevel", error=e)            
+        except Exception:
+            print2err("EYELINK Error during _setSampleFilterLevel:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _eyelinkSetScreenPhysicalData(self):
         try:        
@@ -1253,11 +1259,10 @@ class EyeTracker(EyeTrackerDevice):
             eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(l,t,r,b))
     
             sleep(0.001)
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._eyelinkSetScreenPhysicalData", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _eyelinkSetScreenPhysicalData:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
 
     def _eyeLinkHardwareAndSoftwareVersion(self):
@@ -1271,11 +1276,10 @@ class EyeTracker(EyeTrackerDevice):
                 tracker_software_ver = int(float(tvstr[(vindex + len("EYELINK CL")):].strip()))
     
             return eyelink_ver, tracker_software_ver
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._eyeLinkHardwareAndSoftwareVersion", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _eyeLinkHardwareAndSoftwareVersion:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _eyelinkSetLinkAndFileContents(self):
         try:
@@ -1303,11 +1307,10 @@ class EyeTracker(EyeTrackerDevice):
                 eyelink.sendCommand("link_sample_data = GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT , HTARGET")
             else:
                 eyelink.sendCommand("link_sample_data = GAZE, GAZERES, HREF , PUPIL , AREA ,STATUS, BUTTON, INPUT")
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._eyelinkSetLinkAndFileContents", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _eyelinkSetLinkAndFileContents:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _addCommandFunctions(self):
         try:
@@ -1320,11 +1323,10 @@ class EyeTracker(EyeTrackerDevice):
             self._COMMAND_TO_FUNCTION['setIPAddress']=_setIPAddress
             self._COMMAND_TO_FUNCTION['setLockEye']=_setLockEye
             self._COMMAND_TO_FUNCTION['setLocalResultsDir']=_setNativeRecordingFileSaveDir
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._addCommandFunctions", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _addCommandFunctions:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _readResultFromTracker(self,cmd,timeout=200):
         try:
@@ -1336,24 +1338,29 @@ class EyeTracker(EyeTrackerDevice):
                 rv = self._eyelink.readReply()
                 if rv and len(rv) >0:
                     return rv
+                sleep(0.001)
             return None
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._readResultFromTracker", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _readResultFromTracker:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
     def _setPupilDetection(self,pmode):
         try:
-            if(pmode.upper() == "ELLIPSE"):
-                self.sendCommand("use_ellipse_fitter = YES")
+            sleep(0.001)
+            if(pmode.upper() == "ELLIPSE_FIT"):
+                self._eyelink.sendCommand("use_ellipse_fitter = YES")
+            elif(pmode.upper() == "CENTROID_FIT"):
+                self._eyelink.sendCommand("force_ellipse_fitter -1")
+                self._eyelink.sendCommand("use_ellipse_fitter = NO")
             else:
-                self.sendCommand("use_ellipse_fitter = NO")
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._setPupilDetection", 
-                    error=e)            
+                print2err("** EyeLink Warning: _setPupilDetection: Unrecofnized pupil fitting type: ",pmode)
+                return EyeTrackerConstants.EYETRACKER_ERROR
+            return EyeTrackerConstants.EYETRACKER_OK    
+        except Exception:
+            print2err("EYELINK Error during _setPupilDetection:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
         
     def _getPupilDetectionModel(self):
         try:
@@ -1362,28 +1369,30 @@ class EyeTracker(EyeTrackerDevice):
                 return "ELLIPSE"
             else:
                 return "CENTROID"
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._getPupilDetectionModel", 
-                    error=e)            
+        except Exception:
+            print2err("EYELINK Error during _getPupilDetectionModel:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
-    def _setEyeTrackingMode(self,r=0):
+    def _setEyeTrackingMode(self,r=-1):
         try:
-            ri=-1
-            if r is "PUPIL-ONLY":
-                ri=0
-            elif r.upper is "PUPIL-CR":
-                ri=1
-            if ri>=0:
-                self.sendCommand("corneal_mode %d"%(ri))
-                return True
-            return False
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._setEyeTrackingMode", 
-                    error=e)            
+            if r == "PUPIL_CR_TRACKING":
+                r=1
+            elif r == "PUPIL_ONLY_TRACKING":
+                r=0
+            else:
+                print2err("EYELINK Error during _setEyeTrackingMode: Unknown Trackiong Mode: ",r)
+                return EyeTrackerConstants.EYETRACKER_ERROR
+            sleep(0.001)
+            if r == 0:                
+                self._eyelink.sendCommand("force_corneal_reflection = OFF")
+            self._eyelink.sendCommand("corneal_mode %d"%(r))
+            return EyeTrackerConstants.EYETRACKER_OK
+
+        except Exception:
+            print2err("EYELINK Error during _setEyeTrackingMode:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
         
     def _getSamplingRate(self):
         """
@@ -1392,10 +1401,10 @@ class EyeTracker(EyeTrackerDevice):
             if self.isConnected():
                 return self._eyelink.getSampleRate()
             return EyeTrackerConstants.EYETRACKER_ERROR
-        except Exception, e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker.getSamplingRate", error=e)            
+        except Exception:
+            print2err("EYELINK Error during _getSamplingRate:")
+            printExceptionDetailsToStdErr()
+            return EyeTrackerConstants.EYETRACKER_ERROR
 
 #================= Command Functions ==========================================
 

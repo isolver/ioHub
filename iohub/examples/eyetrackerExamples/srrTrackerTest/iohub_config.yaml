@@ -97,7 +97,7 @@ monitor_devices:
         runtime_settings:
             # eyetracker.hw.sr_research.eyelink.EyeTracker supports, dependent on 
             # model and mode, sampling rates of 250, 500, 1000, and 2000 Hz
-            sampling_rate: 1000
+            sampling_rate: 500
             # eyetracker.hw.sr_research.eyelink.EyeTracker supports the 
             # following track_eyes values:  LEFT_EYE, RIGHT_EYE, BINOCULAR
             track_eyes: RIGHT_EYE
@@ -109,11 +109,13 @@ monitor_devices:
             # eyetracker.hw.sr_research.eyelink.EyeTracker supported stream 
             # types are: FILTER_ALL, FILTER_FILE, FILTER_ONLINE
             # Supported eyetracker.hw.sr_research.eyelink.EyeTracker filter levels are:
-            # FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2
+            # FILTER_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2
             # Note that if FILTER_ALL is specified, and other sample data stream values are
             # ignored.
             sample_filtering:
-                FILTER_ALL: FILTER_LEVEL_OFF
+#                FILTER_ALL: FILTER_LEVEL_1
+#                FILTER_FILE: FILTER_LEVEL_2
+                FILTER_ONLINE: FILTER_OFF
             # VOG settings allow you to specify some eye tracker parameters related to
             # the image processing or data collection procedure used by the eye tracker
             # device. 
@@ -124,6 +126,7 @@ monitor_devices:
                 # eyetracker.hw.sr_research.eyelink.EyeTracker:
                 # PUPIL_AREA, PUPIL_DIAMETER,
                 pupil_measure_types: PUPIL_AREA
+
                 # tracking_mode defines whether the eye tracker should run in a pupil only
                 # mode or run in a pupil-cr mode. Valid options are: 
                 # PUPIL_CR_TRACKING, PUPIL_ONLY_TRACKING
@@ -131,13 +134,23 @@ monitor_devices:
                 # eye tracker being used, this parameter may not be able to set the
                 # specified tracking mode. CHeck the mode listed on the camera setup
                 # screen of the Host PC after the experiment has started to confirm if
-                # the requested tracking mode was enabled.
+                # the requested tracking mode was enabled. IMPORTANT: only use
+                # PUPIL_ONLY_TRACKING mode if using an EyeLink II system, or using
+                # the EyeLink 1000 is a head **fixed** setup. Any head movement
+                # when using PUPIL_ONLY_TRACKING will result in eye position signal drift.
                 tracking_mode: PUPIL_CR_TRACKING
+
                 # The pupil_center_algorithm defines what type of image processing approach should
-                # be used to determine the pupil center during image processing. 
-                # Valid possible values are for eyetracker.hw.sr_research.eyelink.EyeTracker are:
+                # be used to determine the pupil center during image processing. This feature
+                # is only supported in *later* versions of the EyeLink 1000 system.
+                # If no settings related to this parameter are visible on your EyeLink 1000 Host
+                # Camera setup screen, then it is likely your system does not support
+                # the Ellipse Fitting mode and is using a Centroid pupil center detection algorithm.
+                # If this feature is supported by your EyeLink 1000 system,
+                # valid possible options are:
                 # ELLIPSE_FIT, or CENTROID_FIT
                 pupil_center_algorithm: CENTROID_FIT
+
         calibration:
             # eyetracker.hw.sr_research.eyelink.EyeTracker supports the following
             type: NINE_POINTS

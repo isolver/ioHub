@@ -102,8 +102,10 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
         # types are: FILTER_ALL, FILTER_FILE, FILTER_ONLINE
         # Supported eyetracker.hw.sr_research.eyelink.EyeTracker filter levels are:
         # FILTER_LEVEL_OFF, FILTER_LEVEL_1, FILTER_LEVEL_2
-        # Note that if FILTER_ALL is specified, and other sample data stream values are
-        # ignored.
+        # Note that if FILTER_ALL is specified, then other sample data stream values are
+        # ignored. If FILTER_ALL is not provided, ensure to specify the setting
+        # for both FILTER_FILE and FILTER_ONLINE as in this case if  either is not provided then
+        # the missing filter type will have filter level set to FILTER_OFF.
         sample_filtering:
             FILTER_ALL: FILTER_LEVEL_OFF
         vog_settings:
@@ -120,7 +122,10 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
             # eye tracker being used, this parameter may not be able to set the
             # specified tracking mode. CHeck the mode listed on the camera setup
             # screen of the Host PC after the experiment has started to confirm if
-            # the requested tracking mode was enabled.
+            # the requested tracking mode was enabled. IMPORTANT: only use
+            # PUPIL_ONLY_TRACKING mode if using an EyeLink II system, or using
+            # the EyeLink 1000 is a head **fixed** setup. Any head movement
+            # when using PUPIL_ONLY_TRACKING will result in eye position signal drift.
             tracking_mode: PUPIL_CR_TRACKING
             # The pupil_center_algorithm defines what type of image processing approach should
             # be used to determine the pupil center during image processing. 
