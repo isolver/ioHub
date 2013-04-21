@@ -69,7 +69,7 @@ monitor_devices:
         # simulation_mode can be True or False. This indicates if the eye tracker
         # should provide simulated eye data instead of sending eye data based on a 
         # participants actual eye movements. 
-        simulation_mode: False
+        simulation_mode: True
 
         # enable_interface_without_connection is a boolean specifying if the ioHub Device
         # should be enabled without truely connecting to the underlying eye tracking
