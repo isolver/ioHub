@@ -1278,7 +1278,8 @@ class EyeTracker(EyeTrackerDevice):
     
             sleep(0.001)
             
-            eyelink.sendCommand("screen_write_prescale = 100")
+            #bug in pylink makes this not work; must use default setting of 10
+            #eyelink.sendCommand("screen_write_prescale = 100")
             
         except Exception:
             print2err("EYELINK Error during _eyelinkSetScreenPhysicalData:")
