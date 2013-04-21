@@ -39,17 +39,20 @@ except:
     pass
 
 class EyeTracker(EyeTrackerDevice):
-    """The EyeLink EyeTracker class implements support of the SR Research EyeLink 1000 and EyeLink II
-    for the ioHub Common Eye Tracker Interface. 
-    
-    Please see the  eyetracker/hw/sr_research/eyelink/eyetracker/EyeTracker.py documentation page for 
-    details on the supported ioHub configuration settings, implementation notes regarding 
-    the EyeLink implementation of the Common Eye Tracker Interface API, and other
-    useful information.
-    
-    The EyeLink implementation of the ioHub Common Eye Tracker Interface is currently supported under
-    Windows XP and Windows 7. Linux support is likely also available, 
-    however it has not been tested at this time.
+    """  
+    The SR Research EyeLink implementation of the Common Eye Tracker Interface 
+    can be used by providing the following EyeTracker path as the device
+    class in the iohub_config.yaml device settings file:
+        
+        eyetracker.hw.sr_research.eyelink
+        
+    See the configuration options section of the EyeLink Common Eye Tracker 
+    Interface documentation for a full description and listing of all 
+    valid configuration settings for this device.
+
+    The EyeLink implementation of the ioHub Common Eye Tracker Interface is 
+    currently supported under Windows XP and Windows 7. Linux and OSX support 
+    is likely also available, however it has not been tested at this time.
     """
 
     # >>> Constants:
@@ -76,23 +79,6 @@ class EyeTracker(EyeTrackerDevice):
 
     def __init__(self, *args,**kwargs):
         """
-        EyeTracker class. This class is to be extended by each eye tracker specific implemetation
-        of the pyEyeTrackerInterface.
-
-        Please review the documentation page for the specific eye tracker model that you are using the
-        pyEyeTrackerInterface with to get the appropriate module path for that eye tracker; for example,
-        if you are using an interface that supports eye trackers developed by EyeTrackingCompanyET, you
-        may initialize the eye tracker object for that manufacturer something similar too :
-
-           eyeTracker = hub.eyetrackers.EyeTrackingCompanyET.EyeTracker(**kwargs)
-
-        where hub is the instance of the ioHubConnection class that has been created for your experiment.
-
-        **kwargs are an optional set of named parameters.
-
-        **If an instance of EyeTracker has already been created, trying to create a second will raise an exception.
-        Either destroy the first instance and then create the new instance, or use the class method
-        EyeTracker.getInstance() to access the existing instance of the eye tracker object.**
         """
 
         EyeTrackerDevice.__init__(self,*args,**kwargs)
@@ -102,23 +88,16 @@ class EyeTracker(EyeTrackerDevice):
         try:                
             tracker_config=self.getConfiguration()
 
-            dummyModeEnabled=tracker_config.get('enable_interface_without_connection')
-            if dummyModeEnabled:
-                self._eyelink.dummy_open()
-    
-            host_pc_ip_address=tracker_config.get('network_settings')
-
-            EyeTracker._eyelink=pylink.EyeLink(host_pc_ip_address)
+            # Connect to the eye tracker; setting the EyeTracker._eyelink class
+            # attribute to a pylink.EYELINK device class if EyeTracker._eyelink
+            # is None.
+            self.setConnectionState(True)
             
-            self._eyelink.setOfflineMode()
-
-            EyeTracker._eyelink.progressUpdate=self._fileTransferProgressUpdate
-
             self._addCommandFunctions()
 
+            # Sets the physical ini settings, like default screen distance,
+            # monitor size, and display coordinate bounds.
             self._eyelinkSetScreenPhysicalData()
-
-            self._eyelink.sendCommand("button_function 5 'accept_target_fixation'")
 
             # Set whether to run in mouse simulation mode or not.
             simulation_mode=host_pc_ip_address=tracker_config.get('simulation_mode',False)
@@ -127,13 +106,20 @@ class EyeTracker(EyeTrackerDevice):
             else:
                 self._eyelink.sendCommand("aux_mouse_simulation = NO")
                 
-                
+            # set that the EyeLink connected button box, button 5
+            # (the big button on most of supported gamepads), will initiate 
+            # an accept fixation command.
+            self._eyelink.sendCommand("button_function 5 'accept_target_fixation'")
+
+            # Sets up the file names / paths to be used for the native EyeLink EDF file.
             import iohub
             if iohub.data_paths is None:
                 EyeTracker._local_edf_dir=os.path.abspath('.')
             else:
                 EyeTracker._local_edf_dir=iohub.data_paths['NATIVE_DEVICE_DATA']
 
+            # Sets the 'runtime' configuration section of the eyetracker 
+            # settings, including eye to track, sample filtering level, etc.
             self._setRuntimeSettings(self._runtime_settings)
 
             # calibration related settings
@@ -160,8 +146,7 @@ class EyeTracker(EyeTrackerDevice):
                     else:
                         print2err("WARNING: unhandled eye tracker calibration setting: {0}, value: {1}".format(cal_key,cal_val))
 
-            # native data recording file
-            
+            # native data recording file            
             default_native_data_file_name=tracker_config.get('default_native_data_file_name',None)
             if default_native_data_file_name:
                 if isinstance(default_native_data_file_name,(str,unicode)):
@@ -183,6 +168,11 @@ class EyeTracker(EyeTrackerDevice):
             if self._local_edf_dir and self._full_edf_name:
                 EyeTracker._active_edf_file=self._full_edf_name+'.EDF'    
             self._eyelink.openDataFile(self._host_edf_name+'.EDF')
+            
+            # Creates a fileTransferDialog class that will be used when a connection is closed and
+            # a native EDF file needs to be transfered from Host to Experiment PC.
+            EyeTracker._eyelink.progressUpdate=self._fileTransferProgressUpdate
+
         except:
             print2err(" ---- Error during EyeLink EyeTracker Initialization ---- ")
             printExceptionDetailsToStdErr()
@@ -190,26 +180,53 @@ class EyeTracker(EyeTrackerDevice):
                     
     def trackerTime(self):
         """
+        trackerTime returns the current EyeLink Host Application time in 
+        msec format as a long integer.        
         """
         return self._eyelink.trackerTime()
 
     def trackerSec(self):
         """
+        trackerSec returns the current EyeLink Host Application time in 
+        sec.msec format.        
         """
         return self._eyelink.trackerTime()*self.DEVICE_TIMEBASE_TO_SEC
 
     def setConnectionState(self,enable):
         """
+        setConnectionState connects the ioHub Server to the EyeLink device if 
+        the enable arguement is True, otherwise an open connection is closed with
+        the device. Calling this method multiple times with the same value has no effect.
+        
+        Note that when the ioHub EyeLink Device class is created when the ioHub server starts, 
+        a connection is automatically created with the eye tracking device.
+        
+        If the eye tracker is currently recording eye data and sending it to the
+        ioHub server, the recording will be stopped prior to closing the connection.
         """
-        print2err("EyeLink Interface Warning: setConnectionState is not Handling DUMMY yet.")
         try:
+            
+            dummyModeEnabled=tracker_config.get('enable_interface_without_connection',False)    
+            host_pc_ip_address=tracker_config.get('network_settings','100.1.1.1')
+
+            if EyeTracker._eyelink is None:
+                if dummyModeEnabled:
+                    EyeTracker._eyelink=pylink.EyeLink(None)
+                else:
+                    EyeTracker._eyelink=pylink.EyeLink(host_pc_ip_address)
+                self._eyelink.setOfflineMode()
+                return EyeTrackerConstants.EYETRACKER_OK
+
             if enable is True or enable is False:
                 if enable is True and not self._eyelink.isConnected():
-                    self._eyelink.open()
-                    sleep(0.001)
-                    pylink.flushGetkeyQueue()
-                    self._eyelink.setOfflineMode()
-                    return True
+                    if dummyModeEnabled:
+                        self._eyelink.dummy_open()     
+                    else:
+                        self._eyelink.open(host_pc_ip_address)
+                        sleep(0.001)
+                        pylink.flushGetkeyQueue()
+                        self._eyelink.setOfflineMode()
+                    return EyeTrackerConstants.EYETRACKER_OK
                 elif enable is False and self._eyelink.isConnected():
                     self._eyelink.setOfflineMode()
     
@@ -217,10 +234,9 @@ class EyeTracker(EyeTrackerDevice):
                         self._eyelink.closeDataFile()
                         # receive(scr,dest)
                         self._eyelink.receiveDataFile(self._host_edf_name+".EDF",os.path.join(self._local_edf_dir,self._active_edf_file))
-    
                     self._eyelink.close()
                     EyeTracker._active_edf_file=None
-                    return False
+                    return EyeTrackerConstants.EYETRACKER_OK
             else:
                 return createErrorResult("INVALID_METHOD_ARGUMENT_VALUE",error_message="The enable arguement value provided is not recognized",method="EyeTracker.setConnectionState",arguement='enable', value=enable)            
         except Exception,e:
@@ -230,6 +246,15 @@ class EyeTracker(EyeTrackerDevice):
             
     def isConnected(self):
         """
+        isConnected indicates if there is an active connection between the ioHub
+        Server and the eye tracking device.
+
+        Note that when the ioHub EyeLink Device class is created when the ioHub server starts, 
+        a connection is automatically created with the eye tracking device.
+
+        The ioHub must be connected to the eye tracker device for it to be able to receive
+        events from the eye tracking system. Eye tracking events are received when 
+        isConnected() == True and when isRecordingEnabled() == True.
         """
         try:
             return self._eyelink.isConnected() != 0
@@ -240,6 +265,21 @@ class EyeTracker(EyeTrackerDevice):
             
     def sendCommand(self, key, value=None):
         """
+        The sendCommand method sends an EyeLink command key and value to the EyeLink device.
+        Any valid EyeLInk command can be sent using this method. However, not that
+        doing so is a device dependent operation, and will have no effect on other
+        implementations of the Common EyeTracker Interface, unless the other eye tracking
+        device happens to support the same command, value format.
+        
+        If both key and value are provided, internally they are combined into a
+        string of the form:
+            
+            "key = value" 
+            
+        and this is sent to the EyeLink device. If only key is provided, it is 
+        assumed to include both the command name and any value or arguements 
+        required by the EyeLink all in the one arguement, which is sent to the 
+        EyeLink device untouched. 
         """
         try:
             if key in EyeTracker._COMMAND_TO_FUNCTION:
@@ -259,6 +299,10 @@ class EyeTracker(EyeTrackerDevice):
         
     def sendMessage(self,message_contents,time_offset=None):
         """
+        The sendMessage method sends a string (max length 128 characters) to the
+        EyeLink device. The message will be time stamped and inserted into the
+        native EDF file, if one is being recorded. If no native EyeLink data file 
+        is being recorded, this method is a no-op.
         """
         try:        
             if time_offset:            
@@ -276,6 +320,20 @@ class EyeTracker(EyeTrackerDevice):
 
     def runSetupProcedure(self,starting_state=EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE):
         """
+        runSetupProcedure initiates the EyeLink Camera Setup and Calibration procedure. 
+        Currently, only the default starting_state value of 
+        EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE is supported. 
+        
+        The current implemntation does not support displaying of the eye camera
+        images on the Camera Setup screen, the screen is blank. 
+        
+        When runSetupProcedure is called, the following keys can be used on either the
+        Host PC or Experiment PC to control the state of the setup procedure:
+            * C = Start Calibration
+            * V = Start Validation
+            * ENTER should be pressed at the end of a calibration or validation to accept the calibration, or in the case of validation, use the option drift correction that can be performed as part of the validation process in the EyeLink system.
+            * ESC can be pressed at any time to exit the current state of the setup procedure and return to the initial blank screen state.
+            * O = Exit the runSetupProcedure method and continue with the experiment.
         """
         if starting_state!=EyeTrackerConstants.DEFAULT_SETUP_PROCEDURE:
             return createErrorResult("INVALID_METHOD_ARGUMENT_VALUE",
@@ -329,6 +387,9 @@ class EyeTracker(EyeTrackerDevice):
 
     def isRecordingEnabled(self,*args,**kwargs):
         """
+        isRecordingEnabled returns True if the eye tracking device is currently connected and
+        sending eye event data to the ioHub server. If the eye tracker is not recording, or is not
+        connected to the ioHub server, False will be returned.
         """
         try:
             return self._eyelink.isRecording()  == 0
@@ -339,6 +400,8 @@ class EyeTracker(EyeTrackerDevice):
 
     def enableEventReporting(self,enabled=True):
         """
+        enableEventReporting is the device type independent method that is equivelent
+        to the EyeTracker specific setRecordingState method.
         """
         try:        
             enabled=EyeTrackerDevice.enableEventReporting(self,enabled)
@@ -350,6 +413,10 @@ class EyeTracker(EyeTrackerDevice):
 
     def setRecordingState(self,recording):
         """
+        setRecordingState enables (recording=True) or disables (recording=False)
+        the recording of eye data by the eye tracker and the sending of any eye 
+        data to the ioHub Server. The eye tracker must be connected to the ioHub Server
+        by using the setConnectionState(True) method for recording to be possible.
         """
         try:
             if not isinstance(recording,bool):
@@ -389,6 +456,10 @@ class EyeTracker(EyeTrackerDevice):
 
     def getLastSample(self):
         """
+        getLastSample returns the most recent EyeSampleEvent received
+        from the iViewX system. Any position fields are in Display 
+        device coordinate space. If the eye tracker is not recording or is not 
+        connected, then None is returned.        
         """
         try:
             return self._latest_sample
@@ -399,6 +470,11 @@ class EyeTracker(EyeTrackerDevice):
 
     def getLastGazePosition(self):
         """
+        getLastGazePosition returns the most recent x,y eye position, in Display 
+        device coordinate space, received by the ioHub server from the EyeLink device.
+        In the case of binocular recording, and if both eyes are successfully being tracked,
+        then the average of the two eye positions is returned.
+        If the eye tracker is not recording or is not connected, then None is returned.
         """
         try:
             return self._latest_gaze_position

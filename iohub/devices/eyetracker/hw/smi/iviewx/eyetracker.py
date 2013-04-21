@@ -134,7 +134,7 @@ class EyeTracker(EyeTrackerDevice):
                     
     def trackerTime(self):
         """
-        trackerSec returns the current iViewX Application or Server time in 
+        trackerTime returns the current iViewX Application or Server time in 
         usec format as a long integer.        
         """
         tracker_time=c_longlong(0)
@@ -642,7 +642,7 @@ class EyeTracker(EyeTrackerDevice):
 
     def getLastSample(self):
         """
-        getLastSample returns the most recentBinocularEyeSampleEvent received
+        getLastSample returns the most recent BinocularEyeSampleEvent received
         from the iViewX system. Any position fields are in Display 
         device coordinate space. If the eye tracker is not recording or is not 
         connected, then None is returned.        
