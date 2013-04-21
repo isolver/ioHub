@@ -1,0 +1,28 @@
+#######################
+Dialog Utility Classes
+#######################
+
+PyschoPy has an excellent set of dialog fucntions that can be used to display
+GUI dialog windows of various types prior to openning the full screen window
+for your experiment stimulus. The dialogs contained here offer slightly different
+fucntionailty than is offered by the psychopy equivalent, or adds new dialog types,
+like the ProgressBarDialog class. If it makes sense, perhaps some of the changes
+or additions made here should be incorperated into the PsychoPy project proper.
+Comments?
+
+MessageDialog
+##############
+
+.. autoclass:: iohub.util.experiment.MessageDialog
+    :members:
+
+ProgressBarDialog
+##################
+   
+.. autoclass:: iohub.util.experiment.ProgressBarDialog
+    :members:
+
+FileDialog
+##################    
+.. autoclass:: iohub.util.experiment.FileDialog
+    :members:
