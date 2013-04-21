@@ -20,7 +20,7 @@ download from  www.sr-support.com once you are registered and includes the neces
 
 from psychopy import visual
 import sys, array
-
+import copy
 
 from ..... import DeviceEvent, Computer
 from ......constants import EventConstants, KeyboardConstants #, #DeviceConstants, EyeTrackerConstants
@@ -176,20 +176,22 @@ class EyeLinkCoreGraphicsIOHubPsychopy(EyeLinkCustomDisplay):
      
     def _handleEvent(self,ioe):
         #print2err("Got Event: ",ioe)
+
+        event=copy.deepcopy(ioe)
         event_type_index=DeviceEvent.EVENT_TYPE_ID_INDEX
-        if ioe[event_type_index] == EventConstants.KEYBOARD_PRESS:
+        if event[event_type_index] == EventConstants.KEYBOARD_PRESS:
             #print2err('Should handle keyboard event for: ', ioe[-4], ' key_id: ',ioe[-5],' key_mods: ',ioe[-2]) #key pressed
 #            print2err('** KEY: ', ioe[-4]," ,key_id: ",ioe[-5]," ,ascii_code: ",ioe[-6]," ,scan_code: ",ioe[-7])               
-            self.translate_key_message((ioe[-5],ioe[-2]))
+            self.translate_key_message((event[-5],event[-2]))
                 
-        elif ioe[event_type_index] == EventConstants.MOUSE_BUTTON_PRESS:
+        elif event[event_type_index] == EventConstants.MOUSE_BUTTON_PRESS:
 #            print2err('Should handle mouse pressed event for button id: ', ioe[-7])
             self.state=1
-        elif ioe[event_type_index] == EventConstants.MOUSE_BUTTON_RELEASE:
+        elif event[event_type_index] == EventConstants.MOUSE_BUTTON_RELEASE:
 #            print2err('Should handle mouse release event for button id: ', ioe[-7])
             self.state=0
             
-        elif ioe[event_type_index] == EventConstants.MOUSE_MOVE:
+        elif event[event_type_index] == EventConstants.MOUSE_MOVE:
             self.pos=self._ioMouse.getPosition()
 
 #    def _printKeyMapping(self):

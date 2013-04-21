@@ -1,4 +1,4 @@
-# ioHub #
+# ioHub
 
 ioHub is a [Python](http://www.python.org) package providing a cross-platform 
 computer device event monitoring and storage framework. 

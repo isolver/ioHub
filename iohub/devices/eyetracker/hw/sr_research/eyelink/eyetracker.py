@@ -1,7 +1,7 @@
 """
 ioHub
 Common Eye Tracker Interface
-.. file: ioHub/devices/eyetracker/hw/sr_research/eyelink/eyetracker.py
+.. file: iohub/devices/eyetracker/hw/sr_research/eyelink/eyetracker.py
 
 Copyright (C) 2012-2013 iSolver Software Solutions
 
@@ -22,16 +22,16 @@ EyeLink is also a registered trademark of SR Research Ltd, Ontario, Canada.
 
 import os
 import numpy as np
-
 from gevent import sleep
+import pylink
 
 from ...... import print2err,printExceptionDetailsToStdErr
 from ......constants import EventConstants, EyeTrackerConstants
+from ......util.experiment import ProgressBarDialog
 from ..... import Computer
 from .... import EyeTrackerDevice
 from ....eye_events import *
 from ......server import createErrorResult
-import pylink
 
 try:
     pylink.enableUTF8EyeLinkMessages()
@@ -100,11 +100,13 @@ class EyeTracker(EyeTrackerDevice):
         EyeTracker._eyelink=None
        
         try:                
-            dummyModeEnabled=self._runtime_settings.get('enable_interface_without_connection')
+            tracker_config=self.getConfiguration()
+
+            dummyModeEnabled=tracker_config.get('enable_interface_without_connection')
             if dummyModeEnabled:
                 self._eyelink.dummy_open()
     
-            host_pc_ip_address=self._runtime_settings.get('network_settings')
+            host_pc_ip_address=tracker_config.get('network_settings')
 
             EyeTracker._eyelink=pylink.EyeLink(host_pc_ip_address)
             
@@ -118,13 +120,69 @@ class EyeTracker(EyeTrackerDevice):
 
             self._eyelink.sendCommand("button_function 5 'accept_target_fixation'")
 
-            if ioHub.data_paths is None:
+            # Set whether to run in mouse simulation mode or not.
+            simulation_mode=host_pc_ip_address=tracker_config.get('simulation_mode',False)
+            if simulation_mode is True:
+                self._eyelink.sendCommand("aux_mouse_simulation = YES")
+            else:
+                self._eyelink.sendCommand("aux_mouse_simulation = NO")
+                
+                
+            import iohub
+            if iohub.data_paths is None:
                 EyeTracker._local_edf_dir=os.path.abspath('.')
             else:
-                EyeTracker._local_edf_dir=ioHub.data_paths['NATIVE_DEVICE_DATA']
+                EyeTracker._local_edf_dir=iohub.data_paths['NATIVE_DEVICE_DATA']
 
             self._setRuntimeSettings(self._runtime_settings)
 
+            # calibration related settings
+            eyelink=self._eyelink
+            calibration_config=tracker_config.get('calibration',None)
+            if calibration_config:
+                for cal_key,cal_val in calibration_config.iteritems():
+                    if cal_key == 'auto_pace':
+                        if cal_val is True:
+                            eyelink.enableAutoCalibration()
+                        elif cal_val is False:
+                            eyelink.disableAutoCalibration()        
+                    elif cal_key == 'pacing_speed': # in seconds.msec
+                        eyelink.setAutoCalibrationPacing(int(cal_val*1000))        
+                    elif cal_key == 'type':
+                        VALID_CALIBRATION_TYPES=dict(THREE_POINTS="HV3",FIVE_POINTS="HV5",NINE_POINTS="HV9",THIRTEEN_POINTS="HV13")
+                        eyelink.setCalibrationType(VALID_CALIBRATION_TYPES[cal_val])
+                    elif cal_key == 'target_type': 
+                        pass
+                    elif cal_key == 'screen_background_color':
+                        pass
+                    elif cal_key == 'target_attributes':
+                        pass
+                    else:
+                        print2err("WARNING: unhandled eye tracker calibration setting: {0}, value: {1}".format(cal_key,cal_val))
+
+            # native data recording file
+            
+            default_native_data_file_name=tracker_config.get('default_native_data_file_name',None)
+            if default_native_data_file_name:
+                if isinstance(default_native_data_file_name,(str,unicode)):
+                    r=default_native_data_file_name.rfind('.')
+                    if default_native_data_file_name>0:
+                        if default_native_data_file_name[r:] == 'edf'.lower():
+                            default_native_data_file_name=default_native_data_file_name[:r]
+
+                    if len(default_native_data_file_name)>7:
+                        EyeTracker._full_edf_name=default_native_data_file_name
+                        twoDigitRand=np.random.randint(10,99)
+                        EyeTracker._host_edf_name=self._full_edf_name[:3]+twoDigitRand+self._full_edf_name[5:7]
+                    else:
+                        EyeTracker._full_edf_name=default_native_data_file_name
+                        EyeTracker._host_edf_name=default_native_data_file_name
+                else:
+                    print2err("ERROR: default_native_data_file_name must be a string or unicode value")
+
+            if self._local_edf_dir and self._full_edf_name:
+                EyeTracker._active_edf_file=self._full_edf_name+'.EDF'    
+            self._eyelink.openDataFile(self._host_edf_name+'.EDF')
         except:
             print2err(" ---- Error during EyeLink EyeTracker Initialization ---- ")
             printExceptionDetailsToStdErr()
@@ -870,15 +928,7 @@ class EyeTracker(EyeTrackerDevice):
         """
         """
         try:
-            gaze_x=eyetracker_point[0]
-            gaze_y=eyetracker_point[1]
-            
-            # do mapping if necessary
-            # default is no mapping 
-            display_x=gaze_x
-            display_y=gaze_y
-            
-            return display_x,display_y
+            return eyetracker_point
         except Exception,e:
             return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
@@ -889,12 +939,7 @@ class EyeTracker(EyeTrackerDevice):
         """
         """
         try:            
-            # do mapping if necessary
-            # default is no mapping 
-            gaze_x=display_x
-            gaze_y=display_y
-            
-            return gaze_x,gaze_y
+            return display_x,display_y
         except Exception,e:
             return createErrorResult("IOHUB_DEVICE_EXCEPTION",
                     error_message="An unhandled exception occurred on the ioHub Server Process.",
@@ -902,34 +947,10 @@ class EyeTracker(EyeTrackerDevice):
                     error=e)            
 
     def _setRuntimeSettings(self,runtimeSettings):
-        eyelink=self._eyelink
         for pkey,v in runtimeSettings.iteritems():
             sleep(0.001)
 
-            if pkey in ['enable_interface_without_connection','network_settings']:
-                pass
-            elif pkey == 'calibration':
-                for cal_key,cal_val in v.iteritems():
-                    if cal_key == 'auto_pace':
-                        if cal_val is True:
-                            eyelink.enableAutoCalibration()
-                        elif cal_val is False:
-                            eyelink.disableAutoCalibration()        
-                    elif cal_key == 'pacing_speed': # in seconds.msec
-                        eyelink.setAutoCalibrationPacing(int(cal_val*1000))        
-                    elif cal_key == 'type':
-                        VALID_CALIBRATION_TYPES=dict(THREE_POINTS="HV3",FIVE_POINTS="HV5",NINE_POINTS="HV9",THIRTEEN_POINTS="HV13")
-                        eyelink.setCalibrationType(VALID_CALIBRATION_TYPES[cal_val])
-                    elif cal_key == 'target_type': 
-                        pass
-                    elif cal_key == 'screen_background_color':
-                        pass
-                    elif cal_key == 'target_attributes':
-                        pass
-                    else:
-                        ioHub.print2err("WARNING: unhandled eye tracker calibration setting: {0}, value: {1}".format(cal_key,cal_val))
-
-            elif pkey == 'sample_filtering':
+            if pkey == 'sample_filtering':
                 all_filters=dict()                
                 #ioHub.print2err("sample_filtering: {0}".format(v))
                 for filter_type, filter_level in v.iteritems():
@@ -937,34 +958,10 @@ class EyeTracker(EyeTrackerDevice):
                         if filter_level in  ['FILTER_LEVEL_OFF','FILTER_LEVEL_1','FILTER_LEVEL_2']:
                             all_filters[filter_type]=filter_level
                 self._setSampleFilterLevel(all_filters)
-
             elif pkey == 'sampling_rate':
                 self._setSamplingRate(v)
-
-            elif pkey == 'simulation_mode':
-                print2err("EyeLink Interface Warning: simulation_mode not yet implemented: {0} val: {1}".format(pkey,v))
-
-
-            elif pkey == 'default_native_data_file_name':
-                if isinstance(v,(str,unicode)):
-                    r=v.rfind('.')
-                    if r>0:
-                        if v[r:] == 'edf'.lower():
-                            v=v[:r]
-
-                    if len(v)>7:
-                        EyeTracker._full_edf_name=v
-                        twoDigitRand=np.random.randint(10,99)
-                        EyeTracker._host_edf_name=self._full_edf_name[:3]+twoDigitRand+self._full_edf_name[5:7]
-                    else:
-                        EyeTracker._full_edf_name=v
-                        EyeTracker._host_edf_name=v
-                else:
-                    print2err("ERROR: default_native_data_file_name must be a string or unicode value")
-
             elif pkey == 'track_eyes':
                 self._setEyesToTrack(v)
-
             elif pkey == 'vog_settings':
                 for vog_key,vog_val in v.iteritems():
                     sleep(0.001)
@@ -980,14 +977,7 @@ class EyeTracker(EyeTrackerDevice):
             else:
                 print2err("WARNING: unhandled eye tracker config setting:",pkey,v)
 
-        if self._local_edf_dir and self._full_edf_name:
-            EyeTracker._active_edf_file=self._full_edf_name+'.EDF'
-
-        self._eyelink.openDataFile(self._host_edf_name+'.EDF')
-
-
     def _fileTransferProgressUpdate(self,size,received):
-        from util.experiment import ProgressBarDialog
         if EyeTracker._file_transfer_progress_dialog is None:
             EyeTracker._file_transfer_progress_dialog =  ProgressBarDialog(
                     "OpenPsycho pyEyeTrackerInterface",
@@ -1182,10 +1172,9 @@ class EyeTracker(EyeTrackerDevice):
                 return False
     
             # calibration coord space
-            width,height=self._display_device.getPixelResolution()
-            bounds=dict(left=-width/2,top=height/2,right=width/2,bottom=-height/2)
-            eyelink.sendCommand("screen_pixel_coords %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
-            eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(bounds['left'],bounds['top'],bounds['right'],bounds['bottom']))
+            l,t,r,b=self._display_device.getCoordBounds()
+            eyelink.sendCommand("screen_pixel_coords %.5f %.5f %.5f %.5f" %(l,t,r,b))
+            eyelink.sendMessage("DISPLAY_COORDS  %.0f %.0f %.0f %.0f" %(l,t,r,b))
     
             sleep(0.001)
         except Exception,e:

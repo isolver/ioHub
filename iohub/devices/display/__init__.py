@@ -785,8 +785,8 @@ class Display(Device):
         if psychopy_monitor_name is None or psychopy_monitor_name == 'None':
             return False
             
-        from psychopy import monitors,misc
-        existing_monitors=monitors.getAllMonitors()
+        from psychopy import monitors#,misc
+#        existing_monitors=monitors.getAllMonitors()
         #print2err('existing_monitors: ',existing_monitors)
         #print2err(psychopy_monitor_name,' monitor exists: ',psychopy_monitor_name in existing_monitors)
 
@@ -810,12 +810,12 @@ class Display(Device):
         psychoMonitor.setSizePix(self.getPixelResolution())                                   
         psychoMonitor.saveMon()
         self._psychopy_monitor=psychoMonitor
-        print2err("psychopy dist: ",psychoMonitor.getDistance())
-        print2err("psychopy getSizePix: ",psychoMonitor.getSizePix())
-        print2err("psychopy getWidth: ",psychoMonitor.getWidth())
-        print2err("misc.deg2pix(1,psychoMonitor): ", misc.deg2pix(1,psychoMonitor))
-        print2err("misc.pix2deg(1920,psychoMonitor): ",misc.pix2deg(1920,psychoMonitor))
-        print2err("misc.pix2deg(1080,psychoMonitor): ",misc.pix2deg(1080,psychoMonitor))
+#        print2err("psychopy dist: ",psychoMonitor.getDistance())
+#        print2err("psychopy getSizePix: ",psychoMonitor.getSizePix())
+#        print2err("psychopy getWidth: ",psychoMonitor.getWidth())
+#        print2err("misc.deg2pix(1,psychoMonitor): ", misc.deg2pix(1,psychoMonitor))
+#        print2err("misc.pix2deg(1920,psychoMonitor): ",misc.pix2deg(1920,psychoMonitor))
+#        print2err("misc.pix2deg(1080,psychoMonitor): ",misc.pix2deg(1080,psychoMonitor))
 
         return True        
 
