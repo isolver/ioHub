@@ -5,7 +5,7 @@ monitor_devices:
         name: display
         reporting_unit_type: deg
 
-        device_number: 1
+        device_number: 0
         # T120 monitor size
         physical_dimensions:
             width: 600

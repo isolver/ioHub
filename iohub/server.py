@@ -26,6 +26,7 @@ from iohub.devices.deviceConfigValidation import validateDeviceConfiguration
 from yaml import load
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
+    print2err("Using libyaml Cloader and CDumper")
 except ImportError:
     from yaml import Loader, Dumper
         

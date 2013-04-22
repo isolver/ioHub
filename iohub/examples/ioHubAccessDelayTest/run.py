@@ -1,17 +1,25 @@
 """
-ioHub
-.. file: ioHub/examples/ioHubAccessDelayTest/run.py
+iohub
+.. file: iohub/examples/ioHubAccessDelayTest/run.py
+
+Authors: Sol Simpson, Jeremy Gray
+
+Changes:
+    *. September, 2012: Initial release (SS).
+    *. April, 2013: greatly improved graphics rendering time by optimizing PsychoPy stim resource usage (JG).
 
 """
 
 
 from psychopy import visual
+from numpy import zeros
+
 import iohub
 from iohub.devices import Computer
 from iohub.constants import EventConstants
 from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
 from iohub import OrderedDict
-from numpy import zeros
+
 
 
 class ExperimentRuntime(ioHubExperimentRuntime):
@@ -32,11 +40,24 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
     def run(self,*args,**kwargs):
         """
-        psychopy code is taken from an example psychopy script in the coder documentation.
-        """
+        Tests the round trip delay from when the experiment runtime requests
+        new events from the ioHub server to when a response with >=1 new
+        event is received and ready for use within the experiment script.
+        
+        Only getEvent requests that return with atleast one new event are used in
+        the calculated statistics to try and ensure the reported delay is measuring
+        the higher processing load case of new events being returned, vs. the 
+        case of no new events being available. 
 
-        #report process affinities
-        print "Current process affinities (experiment proc, ioHub proc):", Computer.getProcessAffinities()
+        At the end of the test, a MatPlotLib figure is displayed showing a
+        histogram of the round trip event request delays as well as two figures
+        representing the retrace onset detection stability of PsychoPy when the 
+        ioHub is being used.
+         
+        PsychoPy code is taken from an example psychopy script in the coder 
+        documentation.
+        """
+        self.initAttributes()
 
         # create 'shortcuts' to the devices of interest for this experiment
         self.mouse=self.hub.devices.mouse
@@ -94,16 +115,34 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         currentPosition=self.mouse.setPosition((0,0))
         self.mouse.setSystemCursorVisibility(False)
 
-        self.instructionText2Pattern='%d'
+        fixation = visual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,
+                                    color=[-1,-1,-1], colorSpace='rgb')
+        title = visual.TextStim(win=self.psychoWindow, 
+                                text="ioHub getEvents Delay Test", pos = [0,125],
+                                height=36, color=[1,.5,0], colorSpace='rgb',
+                                alignHoriz='center', wrapWidth=800.0)
+                                
+        instr = visual.TextStim(win=self.psychoWindow, 
+                                text='Move the mouse around, press keyboard keys and mouse buttons',
+                                pos = [0,-125], height=32, color=[-1,-1,-1], 
+                                colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
 
-        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, mask="circle", size=75,pos=[-100,0], sf=.075)
-        self.psychoStim['fixation'] = visual.PatchStim(self.psychoWindow, size=25, pos=[0,0], sf=0,  color=[-1,-1,-1], colorSpace='rgb')
-        self.psychoStim['title'] = visual.TextStim(win=self.psychoWindow, text="ioHub getEvents Delay Test", pos = [0,125], height=36, color=[1,.5,0], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['instructions'] = visual.TextStim(win=self.psychoWindow, text='Move the mouse around, press keyboard keys and mouse buttons', pos = [0,-125], height=32, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['instructions2'] = visual.TextStim(win=self.psychoWindow, text=self.instructionText2Pattern%(self.totalEventRequestsForTest,), pos = [0,-250],  color=[-1,-1,-1], height=32, colorSpace='rgb',alignHoriz='center',wrapWidth=800.0)
-        self.psychoStim['keytext'] = visual.TextStim(win=self.psychoWindow, text='key', pos = [0,300], height=48, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='left',wrapWidth=800.0)
-        self.psychoStim['mouseDot'] = visual.GratingStim(win=self.psychoWindow,tex=None, mask="gauss", pos=currentPosition,size=(50,50),color='purple')
-
+        self.psychoStim['static'] = visual.BufferImageStim(win=self.psychoWindow,
+                                         stim=(fixation, title, instr))
+        self.psychoStim['grating'] = visual.PatchStim(self.psychoWindow, 
+                                        mask="circle", size=75,pos=[-100,0],   
+                                        sf=.075)
+        self.psychoStim['keytext'] = visual.TextStim(win=self.psychoWindow, 
+                                        text='key', pos = [0,300], height=48, 
+                                        color=[-1,-1,-1], colorSpace='rgb',
+                                        alignHoriz='left',wrapWidth=800.0)
+        self.psychoStim['mouseDot'] = visual.GratingStim(win=self.psychoWindow,
+                                        tex=None, mask="gauss", 
+                                        pos=currentPosition,size=(50,50),
+                                        color='purple')
+        self.psychoStim['progress'] = visual.ShapeStim(win=self.psychoWindow, 
+                                        vertices=[(0,0),(0,0),(0,0),(0,0)], 
+                                        pos=(400, -300))
 
     def drawAndFlipPsychoWindow(self):
         self.psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
@@ -113,9 +152,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             currentPosition=(float(currentPosition[0]),float(currentPosition[1]))
             self.psychoStim['mouseDot'].setPos(currentPosition)
 
-
         if self.events:
-            self.psychoStim['instructions2'].setText(self.instructionText2Pattern%(self.totalEventRequestsForTest-self.numEventRequests,))
+            diff = self.totalEventRequestsForTest - self.numEventRequests
+            v = self.psychoWindow.size[1] / 2.0 * diff / self.totalEventRequestsForTest
+            vert = [[0,0], [0,v], [2,v],[2,0]]
+            self.psychoStim['progress'].setVertices(vert)
 
             for r in self.events:
                 if r.type is EventConstants.KEYBOARD_PRESS: #keypress code
@@ -214,10 +255,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         intervalsMS = flips
         m=fmean
         sd=fstd
-        distString= "Mean={0:.1f}ms,    s.d.={1:.1f},    99%CI={2:.1f}-{3:.1f}".format(m, sd, m - 3 * sd, m + 3 * sd)
+        distString= "Mean={0:.1f}ms,    s.d.={1:.1f},    99%CI={2:.1f}-{3:.1f}".format(
+                                m, sd, m - 3 * sd, m + 3 * sd)
         nTotal=len(intervalsMS)
         nDropped=sum(intervalsMS>(1.5*m))
-        droppedString = "Dropped/Frames = {0:d}/{1:d} = {2}%".format(nDropped, nTotal, int(nDropped) / float(nTotal))
+        droppedString = "Dropped/Frames = {0:d}/{1:d} = {2}%".format(
+                                nDropped, nTotal, int(nDropped) / float(nTotal))
 
         pylab.subplot(1,3,2)
 
@@ -243,7 +286,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 if __name__ == "__main__":
     def main(configurationDirectory):
         """
-        Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+        Creates an instance of the ExperimentRuntime class, checks for an 
+        experiment config file name parameter passed in via
         command line, and launches the experiment logic.
         """
         import sys
