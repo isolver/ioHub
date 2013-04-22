@@ -532,27 +532,37 @@ class EyeTracker(EyeTrackerDevice):
             print2err("ERROR occurred during poll:")
             printExceptionDetailsToStdErr()
                 
-    def _eyeTrackerToDisplayCoords(self,eyetracker_point):
+def _eyeTrackerToDisplayCoords(self,eyetracker_point):
         """
         """
         try:
-            px,py=eyetracker_point
-            display_x, display_y = self._display_device.pixel2DisplayCoord(px,py,self._display_device.getIndex())
-            return display_x, display_y
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._eyeTrackerToDisplayCoords", 
-                    error=e)            
+            cl,ct,cr,cb=self._display_device.getCoordBounds()
+            cw,ch=cr-cl,ct-cb
+            
+            dl,dt,dr,db=self._display_device.getBounds()
+            dw,dh=dr-dl,db-dt
+
+            gxn,gyn=eyetracker_point[0]/dw,eyetracker_point[1]/dh                        
+            return cl+cw*gxn,cb+ch*(1.0-gyn)   
+        except Exception:
+            print2err("ERROR occurred during _eyeTrackerToDisplayCoords:")
+            printExceptionDetailsToStdErr()          
         
-    def _displayToEyeTrackerCoords(self,display_x,display_y):
+        
+def _displayToEyeTrackerCoords(self,display_x,display_y):
         """
         """
         try:                        
-            gaze_x, gaze_y = self._display_device.pixel2DisplayCoord(display_x,display_y,self._display_device.getIndex())            
-            return gaze_x, gaze_y
-        except Exception,e:
-            return createErrorResult("IOHUB_DEVICE_EXCEPTION",
-                    error_message="An unhandled exception occurred on the ioHub Server Process.",
-                    method="EyeTracker._displayToEyeTrackerCoords", 
-                    error=e)
+            cl,ct,cr,cb=self._display_device.getCoordBounds()
+            cw,ch=cr-cl,ct-cb
+            
+            dl,dt,dr,db=self._display_device.getBounds()
+            dw,dh=dr-dl,db-dt
+            
+            cxn,cyn=(display_x+cw/2)/cw , 1.0-(display_y-ch/2)/ch       
+            return cxn*dw,  cyn*dh          
+           
+        except Exception:
+            print2err("ERROR occurred during _displayToEyeTrackerCoords:")
+            printExceptionDetailsToStdErr()          
+       

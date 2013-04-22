@@ -44,15 +44,26 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # Hide the 'system mouse cursor' so we can display a cool gaussian mask for a mouse cursor.
         mouse.setSystemCursorVisibility(False)
 
+        coord_type = display.getCoordinateType()
+        
+        # specify the size of the GC dot in a way that does not
+        # require changing the size when you change the display coord type.
+        # ( For quick testing purposes only.)
+        l,t,r,b=display.getCoordBounds()
+        dot_size=((r-l)/25.0,(t-b)/25.0)
+        
         image_cache=dict()
         for i in image_names:
             iname='./images/{0}'.format(i)
-            image_cache[i]=visual.ImageStim(self.window, image=iname, name=iname) 
+            image_cache[i]=visual.ImageStim(self.window, image=iname, 
+                                            name=iname, units=coord_type) 
             image_cache[i].draw()
         image_count=len(image_cache)
         self.window.clearBuffer()
         
-        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(-2000,-2000),size=(100,100),color='green')
+        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", 
+                                     pos=(-2000,-2000),size=dot_size,
+                                     color='green', units=coord_type)
 
         # screen state that can be used to just clear the screen to blank.
         self.clearScreen=ClearScreen(self)
@@ -69,7 +80,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Screen for showing text and waiting for a keyboard response or something
         instuction_text="Press Space Key".center(32)+'\n'+"to Start Experiment.".center(32)
-        dtrigger=DeviceEventTrigger(keyboard,EventConstants.KEYBOARD_CHAR,{'key':'SPACE'})
+        dtrigger=DeviceEventTrigger(keyboard,EventConstants.KEYBOARD_CHAR,{'key':' '})
         timeout=5*60.0
         self.instructionScreen=InstructionScreen(self,instuction_text,dtrigger,timeout)
         self.instructionScreen.setScreenColor((128,128,128))

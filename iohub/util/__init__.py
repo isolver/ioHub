@@ -152,15 +152,6 @@ try:
 except:
     pass
 
-try:
-    import describeModule
-except:
-    pass
-
-try:
-    import systemInfo
-except:
-    pass
 
 ###############################################################################
 #
