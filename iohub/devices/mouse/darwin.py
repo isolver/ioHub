@@ -6,19 +6,19 @@ Created on Thu Apr 11 18:56:04 2013
 """
 
 from copy import copy
-from Quartz import *
+import Quartz as Qz
 from AppKit import NSEvent
 
 from . import MouseDevice
-from ... import print2err
+from ... import print2err,printExceptionDetailsToStdErr
 from ...devices import Computer
 from ...constants import EventConstants,MouseConstants
 
 currentSec=Computer.getTime
 
-pressID = [None, kCGEventLeftMouseDown, kCGEventRightMouseDown, kCGEventOtherMouseDown]
-releaseID = [None, kCGEventLeftMouseUp, kCGEventRightMouseUp, kCGEventOtherMouseUp]
-dragID = [None, kCGEventLeftMouseDragged, kCGEventRightMouseDragged, kCGEventOtherMouseDragged]
+pressID = [None, Qz.kCGEventLeftMouseDown, Qz.kCGEventRightMouseDown, Qz.kCGEventOtherMouseDown]
+releaseID = [None, Qz.kCGEventLeftMouseUp, Qz.kCGEventRightMouseUp, Qz.kCGEventOtherMouseUp]
+dragID = [None, Qz.kCGEventLeftMouseDragged, Qz.kCGEventRightMouseDragged, Qz.kCGEventOtherMouseDragged]
 
 class Mouse(MouseDevice):
     """
@@ -30,12 +30,12 @@ class Mouse(MouseDevice):
                '_loop_mode','_scrollPositionX']
 
     _IOHUB_BUTTON_ID_MAPPINGS={
-        kCGEventLeftMouseDown:MouseConstants.MOUSE_BUTTON_LEFT,
-        kCGEventRightMouseDown:MouseConstants.MOUSE_BUTTON_RIGHT,
-        kCGEventOtherMouseDown:MouseConstants.MOUSE_BUTTON_MIDDLE,
-        kCGEventLeftMouseUp:MouseConstants.MOUSE_BUTTON_LEFT,
-        kCGEventRightMouseUp:MouseConstants.MOUSE_BUTTON_RIGHT,
-        kCGEventOtherMouseUp:MouseConstants.MOUSE_BUTTON_MIDDLE
+        Qz.kCGEventLeftMouseDown:MouseConstants.MOUSE_BUTTON_LEFT,
+        Qz.kCGEventRightMouseDown:MouseConstants.MOUSE_BUTTON_RIGHT,
+        Qz.kCGEventOtherMouseDown:MouseConstants.MOUSE_BUTTON_MIDDLE,
+        Qz.kCGEventLeftMouseUp:MouseConstants.MOUSE_BUTTON_LEFT,
+        Qz.kCGEventRightMouseUp:MouseConstants.MOUSE_BUTTON_RIGHT,
+        Qz.kCGEventOtherMouseUp:MouseConstants.MOUSE_BUTTON_MIDDLE
     }
     
     DEVICE_TIME_TO_SECONDS=0.000000001
@@ -67,44 +67,44 @@ class Mouse(MouseDevice):
     def __init__(self,*args,**kwargs):
         MouseDevice.__init__(self,*args,**kwargs['dconfig'])
         
-        self._tap = CGEventTapCreate(
-            kCGSessionEventTap,
-            kCGHeadInsertEventTap,
-            kCGEventTapOptionDefault,
-            CGEventMaskBit(kCGEventMouseMoved) |
-            CGEventMaskBit(kCGEventLeftMouseDown) |
-            CGEventMaskBit(kCGEventLeftMouseUp) |
-            CGEventMaskBit(kCGEventRightMouseDown) |
-            CGEventMaskBit(kCGEventRightMouseUp) |
-            CGEventMaskBit(kCGEventLeftMouseDragged) |
-            CGEventMaskBit(kCGEventRightMouseDragged) |
-            CGEventMaskBit(kCGEventOtherMouseDragged) |
-            CGEventMaskBit(kCGEventOtherMouseDown) |
-            CGEventMaskBit(kCGEventScrollWheel) |
-            CGEventMaskBit(kCGEventOtherMouseUp),
+        self._tap = Qz.CGEventTapCreate(
+            Qz.kCGSessionEventTap,
+            Qz.kCGHeadInsertEventTap,
+            Qz.kCGEventTapOptionDefault,
+            Qz.CGEventMaskBit(Qz.kCGEventMouseMoved) |
+            Qz.CGEventMaskBit(Qz.kCGEventLeftMouseDown) |
+            Qz.CGEventMaskBit(Qz.kCGEventLeftMouseUp) |
+            Qz.CGEventMaskBit(Qz.kCGEventRightMouseDown) |
+            Qz.CGEventMaskBit(Qz.kCGEventRightMouseUp) |
+            Qz.CGEventMaskBit(Qz.kCGEventLeftMouseDragged) |
+            Qz.CGEventMaskBit(Qz.kCGEventRightMouseDragged) |
+            Qz.CGEventMaskBit(Qz.kCGEventOtherMouseDragged) |
+            Qz.CGEventMaskBit(Qz.kCGEventOtherMouseDown) |
+            Qz.CGEventMaskBit(Qz.kCGEventScrollWheel) |
+            Qz.CGEventMaskBit(Qz.kCGEventOtherMouseUp),
             self._nativeEventCallback,
             None)            
         
         self._scrollPositionX=0
-        self._CGEventTapEnable=CGEventTapEnable
-        self._loop_source = CFMachPortCreateRunLoopSource(None, self._tap, 0)          
-        self._device_loop = CFRunLoopGetCurrent()
-        self._loop_mode=kCFRunLoopDefaultMode
+        self._CGEventTapEnable=Qz.CGEventTapEnable
+        self._loop_source = Qz.CFMachPortCreateRunLoopSource(None, self._tap, 0)          
+        self._device_loop = Qz.CFRunLoopGetCurrent()
+        self._loop_mode=Qz.kCFRunLoopDefaultMode
         
-        CFRunLoopAddSource(self._device_loop, self._loop_source, self._loop_mode)
+        Qz.CFRunLoopAddSource(self._device_loop, self._loop_source, self._loop_mode)
 
     def _nativeSetMousePos(self,px,py):
-        result=CGWarpMouseCursorPosition(CGPointMake(float(px),float(py)))
+        result=Qz.CGWarpMouseCursorPosition(Qz.CGPointMake(float(px),float(py)))
         print2err('_nativeSetMousePos result: ',result)
             
     def _nativeGetSystemCursorVisibility(self):
-        return CGCursorIsVisible()
+        return Qz.CGCursorIsVisible()
         
     def _nativeSetSystemCursorVisibility(self,v):
-        if v and not CGCursorIsVisible():
-            CGDisplayShowCursor(CGMainDisplayID())
-        elif not v and CGCursorIsVisible():
-            CGDisplayHideCursor(CGMainDisplayID())
+        if v and not Qz.CGCursorIsVisible():
+            Qz.CGDisplayShowCursor(Qz.CGMainDisplayID())
+        elif not v and Qz.CGCursorIsVisible():
+            Qz.CGDisplayHideCursor(Qz.CGMainDisplayID())
 
             
     def _nativeLimitCursorToBoundingRect(self,clip_rect):
@@ -129,7 +129,7 @@ class Mouse(MouseDevice):
 
     def _poll(self):
         self._last_poll_time=currentSec()            
-        while CFRunLoopRunInMode(self._loop_mode, 0.0, True) == kCFRunLoopRunHandledSource:
+        while Qz.CFRunLoopRunInMode(self._loop_mode, 0.0, True) == Qz.kCFRunLoopRunHandledSource:
             pass
                         
     def _nativeEventCallback(self,*args):
@@ -138,18 +138,18 @@ class Mouse(MouseDevice):
             if self.isReportingEvents():
                 logged_time=currentSec()
 
-                if etype == kCGEventTapDisabledByTimeout:
+                if etype == Qz.kCGEventTapDisabledByTimeout:
                     print2err("** WARNING: Mouse Tap Disabled due to timeout. Re-enabling....: ", etype)
-                    CGEventTapEnable(self._tap, True)
+                    Qz.CGEventTapEnable(self._tap, True)
                     return event
                 else:                
                     confidence_interval=0.0
                     delay=0.0
                     iohub_time = logged_time
-                    device_time=CGEventGetTimestamp(event)*self.DEVICE_TIME_TO_SECONDS      
+                    device_time=Qz.CGEventGetTimestamp(event)*self.DEVICE_TIME_TO_SECONDS      
                     ioe_type=EventConstants.UNDEFINED
-                    px,py = CGEventGetLocation(event)
-                    multi_click_count=CGEventGetIntegerValueField(event,kCGMouseEventClickState)
+                    px,py = Qz.CGEventGetLocation(event)
+                    multi_click_count=Qz.CGEventGetIntegerValueField(event,Qz.kCGMouseEventClickState)
                     mouse_event = NSEvent.eventWithCGEvent_(event)                                  
                     window_handle=mouse_event.windowNumber()                          
                                    
@@ -198,12 +198,12 @@ class Mouse(MouseDevice):
                         ioe_type=EventConstants.MOUSE_BUTTON_RELEASE
                     elif etype in dragID:
                         ioe_type=EventConstants.MOUSE_DRAG
-                    elif etype == kCGEventMouseMoved:
+                    elif etype == Qz.kCGEventMouseMoved:
                         ioe_type=EventConstants.MOUSE_MOVE
-                    elif etype == kCGEventScrollWheel:    
+                    elif etype == Qz.kCGEventScrollWheel:    
                         ioe_type=EventConstants.MOUSE_SCROLL
-                        scroll_dy= CGEventGetIntegerValueField(event,kCGScrollWheelEventPointDeltaAxis1)
-                        scroll_dx= CGEventGetIntegerValueField(event,kCGScrollWheelEventPointDeltaAxis2)
+                        scroll_dy= Qz.CGEventGetIntegerValueField(event,Qz.kCGScrollWheelEventPointDeltaAxis1)
+                        scroll_dx= Qz.CGEventGetIntegerValueField(event,Qz.kCGScrollWheelEventPointDeltaAxis2)
                         self._scrollPositionX+= scroll_dx
                         self._scrollPositionY+= scroll_dy
                                             
@@ -245,7 +245,7 @@ class Mouse(MouseDevice):
                 self._last_callback_time=logged_time
         except:
             printExceptionDetailsToStdErr()
-            CGEventTapEnable(self._tap, False)
+            Qz.CGEventTapEnable(self._tap, False)
         
         # Must return original event or no mouse events will get to OSX!
         return event
@@ -261,13 +261,13 @@ class Mouse(MouseDevice):
             pass
         
         try:
-            CGEventTapEnable(self._tap, False)
+            Qz.CGEventTapEnable(self._tap, False)
         except:
             pass
         
         try:
-            if CFRunLoopContainsSource(self._device_loop,self._loop_source,self._loop_mode) is True:    
-                CFRunLoopRemoveSource(self._device_loop,self._loop_source,self._loop_mode)
+            if Qz.CFRunLoopContainsSource(self._device_loop,self._loop_source,self._loop_mode) is True:    
+                Qz.CFRunLoopRemoveSource(self._device_loop,self._loop_source,self._loop_mode)
         finally:
             self._loop_source=None
             self._tap=None

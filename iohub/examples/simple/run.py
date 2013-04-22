@@ -81,7 +81,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         # ***** IMPORTANT: Must set coord type explicitly to match that of the
         # Display Device, as is done here....
-        psychoStim['grating'] = visual.PatchStim(psychoWindow, units=coord_type, mask="circle", size=cw*.10,pos=[0,0], sf=cw/float(cw*100))
+        psychoStim['grating'] = visual.PatchStim(psychoWindow, units=coord_type, mask="circle", size=cw*.10,pos=[0,0], sf=0.25)
         psychoStim['keytext'] = visual.TextStim(psychoWindow,  units=coord_type, text=u'?', pos = [cw*0.25,ch*.25], height=ch*0.05, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=cw*.9)
         psychoStim['ucodetext'] = visual.TextStim(psychoWindow, units=coord_type, text=u'?', pos = [-cw*0.25,ch*.25], height=ch*0.05, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=cw*.9)
         psychoStim['mods'] = visual.TextStim(psychoWindow,  units=coord_type, text=u'?', pos = [0,-ch*.25], height=ch*0.05, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=cw*.9)

@@ -12,9 +12,8 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
         
 from copy import copy
-import Quartz
 import Quartz as Qz
-from AppKit import NSKeyUp, NSSystemDefined, NSEvent
+from AppKit import NSEvent #NSKeyUp, NSSystemDefined, NSEvent
 
 from . import ioHubKeyboardDevice
 from ... import print2err,printExceptionDetailsToStdErr
@@ -89,7 +88,6 @@ class Keyboard(ioHubKeyboardDevice):
             self._nativeEventCallback,
             None)            
         
-        stime=getTime()
         self._CGEventTapEnable=Qz.CGEventTapEnable
         self._loop_source = Qz.CFMachPortCreateRunLoopSource(None, self._tap, 0)
         
@@ -100,10 +98,7 @@ class Keyboard(ioHubKeyboardDevice):
         from ...util import NumPyRingBuffer
         self._ring_buffer=NumPyRingBuffer(100)
         Qz.CFRunLoopAddSource(self._device_loop, self._loop_source, self._loop_mode)
-    
-        etime=getTime()
-        print2err("Quartz Tap setup time: ",etime-stime)
-    
+        
     def _handleModifierChangeEvent(self,event):
         flags=Qz.CGEventGetFlags(event)
         key_name=None
