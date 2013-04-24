@@ -3,7 +3,7 @@
 ioHub
 .. file: ioHub/examples/simple/run.py
 """
-from psychopy import visual
+from psychopy import core,  visual, logging
 
 import iohub
 from iohub import OrderedDict
@@ -43,20 +43,20 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     def run(self,*args,**kwargs):
         """
         """
-
+        #Setup Logging        
+        logging.LogFile('./lastRun.log',filemode='w',level=logging.NOTSET)
+        logging.console.setLevel(logging.WARNING)
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
         # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
         # -x_min, -y_min is the screen bottom left
         # +x_max, +y_max is the screen top right
-        #
-        # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
-
+        
         
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
         mouse=self.devices.mouse
         display=self.devices.display
         kb=self.devices.kb
-
+        experiment=self.devices.experimentRuntime
         #Computer.enableHighPriority()
         
         # Create a psychopy window, using settings from Display device config
@@ -87,13 +87,24 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         psychoStim['mods'] = visual.TextStim(psychoWindow,  units=coord_type, text=u'?', pos = [0,-ch*.25], height=ch*0.05, color=[-1,-1,-1], colorSpace='rgb',alignHoriz='center',alignVert='center',wrapWidth=cw*.9)
         psychoStim['mouseDot'] =visual.GratingStim(psychoWindow, units=coord_type,tex=None, mask="gauss", pos=currentPosition,size=(cw*0.03,ch*.03),color='purple')
 
+        
+        # check for experiment events
+        ex_events=experiment.getEvents()
+        #for ee in ex_events:
+        #    print "Got Experiment Event: ",ee
+            
         # Clear all events from the global and device level event buffers.
         self.hub.clearEvents('all')
         
         QUIT_EXP=False
         # Loop until we get a keyboard event with the space, Enter (Return), or Escape key is pressed.
         while QUIT_EXP is False:
-
+            
+            # check for experiment events
+            ex_events=experiment.getEvents()
+            #for ee in ex_events:
+            #    print "Got Experiment Event: ",ee
+            
             # for each loop, update the grating phase
             psychoStim['grating'].setPhase(0.05, '+')#advance phase by 0.05 of a cycle
 
@@ -127,7 +138,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 if k.key.upper() in ['ESCAPE', ] and k.type==EventConstants.KEYBOARD_CHAR:
                     print 'Quit key pressed: ',k.key,' for ',k.duration,' sec.'
                     QUIT_EXP=True
-                print u'{0}: time: {1}\t\tord: {2}.\t\tKey: [{3}]\t\tMods: {4}'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key,k.modifiers)
+                #print u'{0}: time: {1}\t\tord: {2}.\t\tKey: [{3}]\t\tMods: {4}'.format(k.time,EventConstants.getName(k.type),k.ucode,k.key,k.modifiers)
                 psychoStim['keytext'].setText(k.key)
                 psychoStim['ucodetext'].setText(unichr(k.ucode))
                 psychoStim['mods'].setText(str(k.modifiers))

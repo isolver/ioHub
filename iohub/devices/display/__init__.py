@@ -781,6 +781,8 @@ class Display(Device):
     def _createPsychopyCalibrationFile(self):
         display_config=self.getConfiguration()
         
+        override_using_psycho_settings=display_config.get('override_using_psycho_settings',False)
+        print2err('**** TODO: _createPsychopyCalibrationFile should handle override_using_psycho_settings setting: ',override_using_psycho_settings)
         psychopy_monitor_name=display_config.get('psychopy_monitor_name',None)
         if psychopy_monitor_name is None or psychopy_monitor_name == 'None':
             return False

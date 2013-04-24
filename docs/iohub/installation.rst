@@ -1,14 +1,14 @@
-####################
-ioHub Installation
-####################
+==================================
+Installation
+==================================
 
 There are different installation options depending on the target OS.
 
 Windows
-########
+==================================
 
 Using the OpenPsycho Distribution
-==================================
+--------------------------------------
 
 The easiest way to get up and running with the ioHub on Windows is to download
 the OpenPsycho Portable Software distribution, which includes the following, 
@@ -60,7 +60,7 @@ of the OpenPsycho distribution.
     in long standing issues though, don't worry.
 
 Manually Installing ioHub
-=========================
+----------------------------
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -71,14 +71,14 @@ the ioHub dependency installation list and installation of ioHub itself:
 
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
-ioHub Dependency List Installation
------------------------------------
+Dependency List Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once Python and PsychoPy are installed, the following extra Python packages must
 be installed for the ioHub:
 
 Python 2.7 Package List
-++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     #. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.7.exe>`_ A cross-platform process and system utilities module for Python
     #. `msgpack: <http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644>`_ It's like JSON. but fast and small.
@@ -91,7 +91,7 @@ Python 2.7 Package List
     #. `pyHook: <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download>`_ Python wrapper for global input hooks in Windows.
 
 Python 2.6 Package List
-++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     #. `psutil: <https://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.6.exe>`_ A cross-platform process and system utilities module for Python
     #. `msgpack: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#msgpack>`_ It's like JSON. but fast and small.
@@ -109,7 +109,7 @@ considerations. Please refer to the documentation page for each device to ensure
 any device specific driver required is known about and is installed.
 
 ioHub Package Installation
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To install the ioHub package itself, currently no python package installer exists. 
 Therefore the ioHub source is simply copied to your Python site-packages folder, 
@@ -123,14 +123,14 @@ To do so:
 
 
 Linux
-######
+=================
 
 For Linux the OpenPsycho distribution can not be used. Instead the necessary
 packages must be installed using the OS's package manager and the Python pip 
 and / or easy_install utilities.
 
 Manually Installing ioHub
-==========================
+----------------------------
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -142,7 +142,7 @@ the ioHub dependency installation list and installation of ioHub itself:
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
 ioHub Dependency List Installation
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following Python packages need to be installed on the system you plan to run
 ioHub on. Some apckages can be installed using *pip*, while other should be installed 
@@ -169,7 +169,7 @@ at the start of the command and entering your password when prompted. For exampl
 where package_name is the name of one of the required python packages.
 
 Installing pip if it is not Already on the System
-++++++++++++++++++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you type:: 
 
@@ -180,7 +180,7 @@ in a console and are told the program does not exist, then you can install pip u
     > sudo apt-get install pip
 
 Packages To Download
-+++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.tar.gz&can=2&q=>`_ A cross-platform process and system utilities module for Python
 #. `gevent: <https://github.com/downloads/SiteSupport/gevent/python-gevent_1.0rc2_i386.deb>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
@@ -188,19 +188,16 @@ Packages To Download
 #. `pyYAML: <http://pyyaml.org/wiki/PyYAMLDocumentation>`_ Following install instructions on the page. PyYAML is a YAML parser and emitter for Python. For faster processing, also download and install `LibYAML <http://pyyaml.org/wiki/LibYAML>`_; following install instructions on the page.
 #. `python-xlib: <http://sourceforge.net/projects/python-xlib/>`_ The Python X Library is a complete X11R6 client-side implementation, written in pure Python.
 
-If running Python 2.6, also download and install (using python setup.py install) the following package:
-
-#. `OrderedDict : <https://pypi.python.org/pypi/ordereddict>`_
 
 Packages to install using pip
-++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. msgpack: It's like JSON. but fast and small. ( pip install msgpack-python )
 #. greenlet: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets". ( pip install greenlet )
 #. pytables: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables )
 
 ioHub Package Installation
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To install the ioHub package itself the source should be downloaded from github, 
 as currently no python package installer exists. 
@@ -213,15 +210,15 @@ To do so:
 #. Copy the 'ioHub' folder to a directory in your Python path. sudo access may be needed.
 
 
-OSX 10.6 +:
-############
+OSX 10.6 - 10.8
+====================
 
 For OS X 10.6 + the OpenPsycho distribution can not be used. Instead the necessary
 packages must be installed using the OS's package manager and the Python pip utility
 as well as manually building packages
 
-Manually Installing ioHub
-==========================
+Manual Installation
+----------------------------
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -232,8 +229,8 @@ the ioHub dependency installation list and installation of ioHub itself:
 
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
-ioHub Dependency List Installation
------------------------------------
+Dependency List Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following Python packages need to be installed on the system you plan to run
 ioHub on. Some apckages can be installed using *pip*, while other should be installed 
@@ -257,7 +254,7 @@ at the start of the command and entering your password when prompted. For exampl
 where package_name is the name of one of the required python packages.
 
 Installing pip if it is not Already on the System
-++++++++++++++++++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you type:: 
 
@@ -269,14 +266,14 @@ in a console and are told the program does not exist, then you can install pip u
 
 
 Packages to install using pip
-++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. **msgpack**: It’s like JSON. but fast and small. ( pip install msgpack-python )
 #. **greenlet**: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called “tasklets”. ( pip install greenlet )
 #. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST ENSURE TO INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
 
 Packages To Download
-+++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. `pyobjc <https://pypi.python.org/packages/source/p/pyobjc/pyobjc-2.5.1.tar.gz#md5=f242cff4a25ce397bb381c21a35db885>`_ : A  Python ObjectiveC binding.    
 #. **gevent**: A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop::
@@ -289,7 +286,7 @@ Packages To Download
     First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
 
 ioHub Package Installation
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To install the ioHub package itself the source should be downloaded from github, 
 as currently no python package installer exists. 

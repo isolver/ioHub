@@ -18,12 +18,12 @@ try:
     from yaml import load
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
-    print "*** Using Python based YAML Parsing"
+#    print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 
 from ...devices import Computer
 from .dialogs import MessageDialog
-from ... import ioHubError,printExceptionDetailsToStdErr,highPrecisionTimer
+from ... import ioHubError,printExceptionDetailsToStdErr,getTime
 
 _currentSessionInfo=None
 
@@ -139,7 +139,7 @@ class ioHubExperimentRuntime(object):
         self.configuration=load(file( os.path.join(self.configFilePath,self.configFileName),u'r'), Loader=Loader)
 
         import random
-        random.seed(highPrecisionTimer()*1000.123)
+        random.seed(getTime()*1000.123)
         randomInt=random.randint(1,1000)
         self.experimentConfig=dict()
         self._experimentConfigKeys=['title','code','version','description']

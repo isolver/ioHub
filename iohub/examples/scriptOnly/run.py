@@ -25,17 +25,19 @@ To Run:
    python.exe run.py
 
 """
-from psychopy import visual, core
+from psychopy import visual, core, logging
 from iohub.constants import EventConstants
 from iohub.devices import Computer
 from iohub import OrderedDict,quickStartHubServer
+
+logging.LogFile('./lastRun.log',filemode='w',level=logging.NOTSET)
+logging.console.setLevel(logging.WARNING)
 
 # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
 # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
 # -x_min, -y_min is the screen bottom left
 # +x_max, +y_max is the screen top right
 #
-# *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
 # create and start the ioHub Server Process, enabling the 
 # the default ioHub devices: Keyboard, Mouse, and Display.
@@ -44,14 +46,14 @@ from iohub import OrderedDict,quickStartHubServer
 # experiment. Session codes must be unique for a given experiment code within an
 # ioDataStore hdf5 event file.
 import random
-io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
+io=quickStartHubServer(experiment_code="exp_code",session_code="sess_%d"%(random.randint(1,10000)))
         
-# By default, keyboard, mouse, and display devices are created if you 
+# By default, keyboard, mouse, experiment, and display devices are created if you 
 # do not pass any config info to the ioHubConnection class above.        
 mouse=io.devices.mouse
 display=io.devices.display
 keyboard=io.devices.keyboard
-
+experiment=io.devices.experiment
 # Lets switch to high priority on the psychopy process.
 Computer.enableHighPriority()
 
@@ -89,6 +91,8 @@ psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None,
                                             mask="gauss", 
                                             pos=mouse.getPosition(),
                                             size=(50,50),color='purple')
+
+ex_events=experiment.getEvents()
 
 # Clear all events from the global event buffer, 
 # and from the device level event buffers.
@@ -137,6 +141,8 @@ while QUIT_EXP is False:
         if k.key in [' ','RETURN','ESCAPE']:
             print 'Quit key pressed: ',k.key
             QUIT_EXP=True
+    
+    ex_events=experiment.getEvents()
 
     io.clearEvents('all')
     

@@ -1,7 +1,7 @@
 __author__ = 'Sol'
 
 
-from ... import OrderedDict,highPrecisionTimer,printExceptionDetailsToStdErr,print2err
+from ... import OrderedDict,getTime,printExceptionDetailsToStdErr,print2err
 
 import numpy as np
 import sys
@@ -83,7 +83,7 @@ class ExperimentVariableProvider(object):
 
         if ExperimentVariableProvider._randomGeneratorSeed is None:
             if randSeed is None:
-                randSeed=int(highPrecisionTimer()*1000.0)
+                randSeed=int(getTime()*1000.0)
             ExperimentVariableProvider._randomGeneratorSeed = randSeed
             np.random.seed(ExperimentVariableProvider._randomGeneratorSeed)
 

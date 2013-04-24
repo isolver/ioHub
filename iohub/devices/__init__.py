@@ -23,7 +23,7 @@ if sys.platform != 'darwin':
     import psutil
     _psutil_available=True
 
-from iohub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake
+from iohub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake,MonotonicClock
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg):
@@ -163,11 +163,11 @@ class Computer(object):
     #: False otherwise.
     inHighPriorityMode=False
     
-    #: The ioHub.ioClock instance used as the common time base for all devices
+    #: A iohub.MonotonicClock class instance used as the common time base for all devices
     #: and between the ioHub Server and Experiment Runtime Process. Do not 
     #: access this class directly, instead use the Computer.getTime()
     #: and associated method name alias's to actually get the current ioHub time.
-    globalClock=None
+    globalClock=MonotonicClock()
 
     #: The name of the current operating system Python is running on.
     system=sys.platform
@@ -312,7 +312,6 @@ class Computer(object):
         if _psutil_available is False:
             print2err("Computer.disableHighPriority is not supported on OS X")
             return False
-        
         try:
             if Computer.inHighPriorityMode is True:
                 gc.enable()
@@ -329,7 +328,7 @@ class Computer(object):
     def getProcessAffinities():
         """Retrieve the current Experiment Process affinity list and ioHub Process affinity list.
     
-        Returns:
+        Returns:event_class
            (list,list) Tuple of two lists: Experiment Process affinity ID list and ioHub Server Process affinity ID list. 
            
         For example, on a 2 core CPU with hyper-threading, the possible 'processor'
@@ -1459,8 +1458,6 @@ class DeviceEvent(ioObject):
 # Import Devices and DeviceEvents
 #
 
-loadedDeviceClasses=dict()
-loadedEventClasses=dict()
 
 import sys
 
@@ -1468,10 +1465,10 @@ def import_device(module_path, device_class_name):
     module = __import__(module_path, fromlist=[device_class_name])
     device_class=getattr(module, device_class_name)
 
-    loadedDeviceClasses[device_class_name.upper()]=device_class
-
     setattr(sys.modules[__name__], device_class_name, device_class)
-       
+    
+    event_classes=dict()
+    
     for event_class_name in device_class.EVENT_CLASS_NAMES:
         event_constant_string=convertCamelToSnake(event_class_name[:-5],False)
 
@@ -1480,16 +1477,15 @@ def import_device(module_path, device_class_name):
 
         event_class.DEVICE_PARENT=device_class
         
-        loadedEventClasses[event_constant_string]=event_class
+        event_classes[event_constant_string]=event_class
 
         setattr(sys.modules[__name__], event_class_name, event_class)
         
-    return device_class
+    return device_class,device_class_name,event_classes
 
 try:
-    if 'DISPLAY' not in loadedDeviceClasses:
-        display_class=import_device('iohub.devices.display','Display')
-        loadedDeviceClasses['DISPLAY']=display_class
+    if getattr(sys.modules[__name__],'Display',None) is None:
+        display_class,device_class_name,event_classes=import_device('iohub.devices.display','Display')
         setattr(sys.modules[__name__],'Display', display_class)
         
 except:

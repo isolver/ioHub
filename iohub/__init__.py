@@ -32,8 +32,14 @@ __maintainer_email__='sol@isolver-software.com'
 __users_email__='sol@isolver-software.com'
 __url__='https://www.github.com/isolver/ioHub/'
 
-SUPPORTED_SYS_NAMES=['linux2','win32','cygwin','darwin']
+psychopy_available=False
+try:
+    import psychopy
+    psychopy_available=True
+except:
+    pass
 
+SUPPORTED_SYS_NAMES=['linux2','win32','cygwin','darwin']  
 if sys.platform not in SUPPORTED_SYS_NAMES:
     print ''
     print "ERROR: ioHub is not supported on the current OS platform. Supported options are: ", SUPPORTED_SYS_NAMES
@@ -111,114 +117,146 @@ else:
 def isIterable(o):
     return isinstance(o, Iterable)
 
-global highPrecisionTimer
-def highPrecisionTimer():
-    raise ioHubError("highPrecisionTimer function must be overwritten by a platform specific implementation.")
-if platform.system() == 'Windows':
-    global _fcounter, _qpfreq, _winQueryPerformanceCounter
-    from ctypes import byref, c_int64, windll,cdll
-    _Kernel32=windll.Kernel32
-    _fcounter = c_int64()
-    _qpfreq = c_int64()
-    _Kernel32.QueryPerformanceFrequency(byref(_qpfreq))
-    _winQueryPerformanceCounter=_Kernel32.QueryPerformanceCounter
-
-    def highPrecisionTimer():
-        _winQueryPerformanceCounter(byref(_fcounter))
-        return  _fcounter.value/_qpfreq.value
-else:
-    if getPythonVerStr() == 'python27':    
-        import timeit
-        highPrecisionTimer = timeit.default_timer
+#set the default timing mechanism
+getTime=None
+    
+if psychopy_available:
+    getTime=psychopy.clock.getTime
+    MonotonicClock = psychopy.clock.MonotonicClock
+else:    
+    # Select the timer to use as the psychopy high resolution time base. Selection
+    # is based on OS and Python version. 
+    # 
+    # Three requirements exist for the psychopy time base implementation:
+    #     A) The Python interpreter does not apply an offset to the times returned
+    #        based on when the timer module being used was loaded or when the timer 
+    #        fucntion first called was first called. 
+    #     B) The timer implementation used must be monotonic and report elapsed time
+    #        between calls, 'not' system or CPU usage time. 
+    #     C) The timer implementation must provide a resolution of 50 usec or better.
+    #
+    # Given the above requirements, psychopy selects a timer implementation as follows:
+    #     1) On Windows, the Windows Query Performance Counter API is used using ctypes access.
+    #     2) On other OS's, if the Python version being used is 2.6 or lower,
+    #        time.time is used. For Python 2.7 and above, the timeit.default_timer
+    #        function is used.
+    if sys.platform == 'win32':
+        global _fcounter, _qpfreq, _winQPC
+        from ctypes import byref, c_int64, windll
+        _fcounter = c_int64()
+        _qpfreq = c_int64()
+        windll.Kernel32.QueryPerformanceFrequency(byref(_qpfreq))
+        _qpfreq=float(_qpfreq.value)
+        _winQPC=windll.Kernel32.QueryPerformanceCounter
+    
+        def getTime():
+            _winQPC(byref(_fcounter))
+            return  _fcounter.value/_qpfreq
     else:
-        import time
-        highPrecisionTimer = time.time
+        cur_pyver = sys.version_info
+        if cur_pyver[0]==2 and cur_pyver[1]<=6: 
+            import time
+            getTime = time.time
+        else:
+            import timeit
+            getTime = timeit.default_timer
+    
+    class MonotonicClock:
+        """
+        A convenient class to keep track of time in your experiments.
+        When a MonotonicClock is created, it stores the current time
+        from getTime and uses this as an offset for psychopy times returned.
+        """
+        def __init__(self,start_time=None):
+            if start_time is None:
+                self._timeAtLastReset=getTime()#this is sub-millisec timer in python
+            else:
+                self._timeAtLastReset=start_time
+                
+        def getTime(self):
+            """Returns the current time on this clock in secs (sub-ms precision)
+            """
+            return getTime()-self._timeAtLastReset
+            
+        def getLastResetTime(self):
+            """ 
+            Returns the current offset being applied to the high resolution 
+            timebase used by Clock.
+            """
+            return self._timeAtLastReset
         
-class ioClock(object):
-    """
-    Modified from psychopy.core.Clock, so ioClock supports the psychopy
-    Clock interface, and can be used in most situations where a clock
-    object can be given to a psychopy function or method.
-    
-    ioHub only supports one Clock object, which is automatically
-    created and associated with the ioHub.devices.Computer class.
-    
-    *Do not create other instances of ioClock within your experiment.*
-    
-    To get the current ioHub time, call Computer.getTime(). If the ioClock
-    that Computer uses needs to be accessed directly for come reason, 
-    it can be accessed via Computer.globalClock.
-
-    ioHub uses an instance of ioClock instead of the standard psychopy Clock 
-    class so that when timeAtLastReset is set on the Experiment Process,
-    the offset is also sent to the ioHub Process so that the 
-    ioHub Process uses the same time offset and therefore both processes time
-    base are identical.
-    """
-    def __init__(self,hubConnection,offset=None,sendOffsetToHub=True):
-        if offset is None:
-            offset=highPrecisionTimer()
-        self.hubConnection=hubConnection
-        if hubConnection and sendOffsetToHub is True:
-            offset=hubConnection.updateGlobalHubTimeOffset(offset)
-        self.timeAtLastReset=offset
-
-    def getTime(self):
-        """Returns the current time on this clock in secs (sub-ms precision)
-        """
-        return highPrecisionTimer()-self.timeAtLastReset
-
-    def reset(self, newT=0.0):
-        """Reset the time on the clock. With no args time will be
-        set to zero. If a float is received this will be the new
-        time on the clock
-        """
-        offset=highPrecisionTimer()+newT
-        if self.hubConnection:
-            r=self.hubConnection.updateGlobalHubTimeOffset(offset)
-        self.timeAtLastReset=r
-
-    def setOffset(self,offset):
-        self.timeAtLastReset=offset
-
-    def add(self,t):
-        """Add more time to the clock's 'start' time (t0).
-
-        Note that, by adding time to t0, you make the current time appear less.
-        Can have the effect that getTime() returns a negative number that will
-        gradually count back up to zero.
-
-        e.g.::
-
-            timer = core.Clock()
-            timer.add(5)
-            while timer.getTime()<0:
-                #do something
-        """
-        offset= self.timeAtLastReset + t
-        if self.hubConnection:
-            r=self.hubConnection.updateGlobalHubTimeOffset(offset)
-        self.timeAtLastReset = r
-
 import constants
 
-def quickStartHubServer(experimentCode, sessionCode, **deviceConfigs):
+
+def quickStartHubServer(**kwargs):
+    """
+    experiment_code=None, session_code=None, psychopy_monitor_name=None, **device_configs
+    """
     from .client import ioHubConnection
 
-    devices=deviceConfigs
+    experiment_code=kwargs.get('experiment_code',-1)
+    if experiment_code != -1:
+        del kwargs['experiment_code']
+    else:
+        experiment_code = None
+
+    session_code=kwargs.get('session_code',-1)
+    if session_code != -1:
+        del kwargs['session_code']
+    else:
+        session_code = None    
     
-    if len(devices)==0:
-        # Specify devices you want to use in the ioHub
-        devices=OrderedDict()
-        devices['Display']={'origin':'center','reporting_unit_type':'pix'}
-        devices['Keyboard']={}
-        devices['Mouse']={}
+    psychopy_monitor_name=kwargs.get('psychopy_monitor_name',None)
+    if psychopy_monitor_name:
+        del kwargs['psychopy_monitor_name']
+
+    device_dict=kwargs
+    
+    device_list=[]
+    
+    # Ensure a Display Device has been defined. If note, create one.
+    # Insert Display device as first device in dev. list.
+    if 'Display' not in device_dict: 
+        if psychopy_monitor_name:
+            device_list.append(dict(Display={'psychopy_monitor_name':psychopy_monitor_name,'override_using_psycho_settings':True}))
+        else:
+            device_list.append(dict(Display={'override_using_psycho_settings':True}))
+    else:
+        device_list.append(dict(Display=device_dict['Display']))
+        del device_dict['Display']
+
+    # Ensure a Experiment Device has been defined. If note, create one.
+    if 'Experiment' not in device_dict:    
+        device_list.append(dict(Experiment={}))
+    else:
+        device_list.append(dict(Experiment=device_dict['Experiment']))
+        del device_dict['Experiment']
+
+    # Ensure a Keyboard Device has been defined. If note, create one.
+    if 'Keyboard' not in device_dict:    
+        device_list.append(dict(Keyboard={}))
+    else:
+        device_list.append(dict(Keyboard=device_dict['Keyboard']))
+        del device_dict['Keyboard']
+
+    # Ensure a Mouse Device has been defined. If note, create one.
+    if 'Mouse' not in device_dict:    
+        device_list.append(dict(Mouse={}))
+    else:
+        device_list.append(dict(Mouse=device_dict['Mouse']))
+        del device_dict['Mouse']
+    
+    # Add remaining defined devices to the device list.
+    for class_name,device_config in device_dict.iteritems():
+        device_list.append(dict(class_name=device_config))
+
     # Create an ioHub configuration dictionary.
-    ioConfig=dict(monitor_devices=devices)
+    ioConfig=dict(monitor_devices=device_list)
     
-    if experimentCode and sessionCode:    
+    if experiment_code and session_code:    
         # Enable saving of all keyboard and mouse events to the 'ioDataStore'
-        ioConfig['data_store']=dict(experiment_info=dict(code=experimentCode),session_info=dict(code=sessionCode))
+        ioConfig['data_store']=dict(experiment_info=dict(code=experiment_code),
+                                            session_info=dict(code=session_code))
     
     # Start the ioHub Server
     return ioHubConnection(ioConfig)

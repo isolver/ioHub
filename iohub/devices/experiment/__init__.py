@@ -8,9 +8,10 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
-
+import numpy as N
 from .. import Device,Computer,DeviceEvent
 from ...constants import DeviceConstants, EventConstants
+from ... import print2err
 
 currentSec=Computer.currentSec
 
@@ -27,29 +28,47 @@ class Experiment(Device):
     with events from other devices for post hoc analysis of the experiments event steam using
     the ioDataStore.
     """
-    EVENT_CLASS_NAMES=['MessageEvent']
+    EVENT_CLASS_NAMES=['MessageEvent','LogEvent']
     
     DEVICE_TYPE_ID=DeviceConstants.EXPERIMENT
     DEVICE_TYPE_STRING='EXPERIMENT'
-    __slots__=[]
+    __slots__=['critical','fatal','error','warning','warn','data',
+               'exp','info','debug']
     def __init__(self,*args,**kwargs):
         Device.__init__(self,*args,**kwargs['dconfig'])
 
+        self.critical=lambda text,ltime: Experiment.log(self,text,LogEvent.CRITICAL,ltime)
+        self.fatal=self.critical
+        self.error=lambda text,ltime: Experiment.log(self,text,LogEvent.ERROR,ltime)
+        self.warning=lambda text,ltime: Experiment.log(self,text,LogEvent.WARNING,ltime)
+        self.warn=self.warning
+        self.data=lambda text,ltime: Experiment.log(self,text,LogEvent.DATA,ltime)
+        self.exp=lambda text,ltime: Experiment.log(self,text,LogEvent.EXP,ltime)
+        self.info=lambda text,ltime: Experiment.log(self,text,LogEvent.INFO,ltime)
+        self.debug=lambda text,ltime: Experiment.log(self,text,LogEvent.DEBUG,ltime)
         
     def _nativeEventCallback(self,native_event_data):
         if self.isReportingEvents():
             notifiedTime=currentSec()
             
+            if isinstance(native_event_data,tuple):
+                native_event_data=list(native_event_data)
+                        
+            native_event_data[DeviceEvent.EVENT_ID_INDEX]=Computer._getNextEventID()
+                
             native_event_data[DeviceEvent.EVENT_LOGGED_TIME_INDEX]=notifiedTime # set logged time of event
     
             native_event_data[DeviceEvent.EVENT_DELAY_INDEX]=native_event_data[DeviceEvent.EVENT_LOGGED_TIME_INDEX]-native_event_data[DeviceEvent.EVENT_DEVICE_TIME_INDEX]
     
-            # on windows ioHub and experiment process use same timebase, so device time == hub time
             native_event_data[DeviceEvent.EVENT_HUB_TIME_INDEX]=native_event_data[DeviceEvent.EVENT_DEVICE_TIME_INDEX]
     
             self._addNativeEventToBuffer(native_event_data)
-            
+
             self._last_callback_time=notifiedTime
+
+            
+    def log(self,text,level=None,log_time=None):
+        self._nativeEventCallback(LogEvent.create(text,level,log_time=log_time))
 
     def _close(self):
         Device._close(self)
@@ -80,9 +99,9 @@ class MessageEvent(DeviceEvent):
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING
 
     _newDataTypes=[
-                ('msg_offset','float32'), 
-                ('prefix','a3'), 
-                ('text','a128')  
+                ('msg_offset', N.float32), 
+                ('prefix',N.str,3), 
+                ('text',N.str,128)  
                 ]
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, *args, **kwargs):
@@ -119,11 +138,156 @@ class MessageEvent(DeviceEvent):
         DeviceEvent.__init__(self, *args,**kwargs)
 
     @staticmethod
-    def _createAsList(text,prefix='',msg_offset=0.0, sec_time=None):
+    def _createAsList(text,prefix='',msg_offset=0.0, sec_time=None,set_event_id=Computer.isIoHubProcess):
         csec=currentSec()
         if sec_time is not None:
             csec=sec_time
-        return (0,0,0,Computer._getNextEventID(),MessageEvent.EVENT_TYPE_ID,
+        event_num=0        
+        if set_event_id:
+            event_num=Computer._getNextEventID()
+        return (0,0,0,event_num,MessageEvent.EVENT_TYPE_ID,
                 csec,0,0,0.0,0.0,0,msg_offset,prefix,text)
 
+class LogEvent(DeviceEvent):
+    """
+    A LogEvent creates an entry in the ioHub dataStore logging table. If psychopy
+    is available, it also sends the LogEvent to the Experiment Process and it
+    is entered into the psychopy.logging module.
 
+    The LogEvent is unique in that instances can be created by the ioHub Server
+    or the Experiment Process psychopy script. In either case, the log entry is
+    entered in the psychopy.logging module and the DataStore log table 
+    (if the datastore is enabled).
+    
+    It is **critical** that log events created by the psychopy script use the 
+    core.getTime() method to provide a LogEvent with the time of the logged event,
+    or do not specify a time, in which case the logging module uses the chared time base
+    by default.
+    
+    Event Type ID: EventConstants.LOG
+    Event Type String: 'LOG'      
+    """
+    _psychopyAvailable=False
+    _levelNames=dict()
+    try:
+        from psychopy.logging import _levelNames
+        _psychopyAvailable=True
+        
+        for lln,llv in _levelNames.iteritems():
+            if isinstance(lln,basestring):
+                _levelNames[lln]=llv
+                _levelNames[llv]=lln
+    except:
+        # psychopy is not available, so we will just use the set of levels
+        # copied from psychopy 2.76:
+        CRITICAL = 50
+        FATAL = CRITICAL
+        ERROR = 40
+        WARNING = 30
+        WARN = WARNING
+        DATA = 25#will be a custom level
+        EXP = 22#info about the experiment might be less important than data info?
+        INFO = 20
+        DEBUG = 10
+        NOTSET = 0        
+
+        _levelNames = {
+            CRITICAL : 'CRITICAL',
+            ERROR : 'ERROR',
+            DATA : 'DATA',
+            EXP : 'EXP',
+            WARNING : 'WARNING',
+            INFO : 'INFO',
+            DEBUG : 'DEBUG',
+            NOTSET : 'NOTSET',
+            'CRITICAL' : CRITICAL,
+            'ERROR' : ERROR,
+            'DATA' : DATA,
+            'EXP' : EXP,
+            'WARN' : WARNING,
+            'WARNING' : WARNING,
+            'INFO' : INFO,
+            'DEBUG' : DEBUG,
+            'NOTSET' : NOTSET,
+        }
+
+    PARENT_DEVICE=Experiment
+    EVENT_TYPE_ID=EventConstants.LOG
+    EVENT_TYPE_STRING='LOG'
+    IOHUB_DATA_TABLE=EVENT_TYPE_STRING
+
+    _newDataTypes=[
+                ('log_level',N.uint8), 
+                ('text',N.str,128)  
+                ]
+    __slots__=[e[0] for e in _newDataTypes]
+    def __init__(self, *args, **kwargs):
+        """
+        """
+        
+        #: The text attribute is used to hold the actual 'content' of the message.
+        #: The text attribute string can not be more than 128 characters in length.
+        #: String type
+        self.text=None
+        
+        #: The log level to set the log event at. If psychopy is available, 
+        #: valid log levels match the *predefined* logging levels. Otherwise
+        #: the following log levels are available (which match the predefined
+        #: psychopy 2.76):
+        #:      *. CRITICAL = 50
+        #:      *. FATAL = CRITICAL
+        #:      *. ERROR = 40
+        #:      *. WARNING = 30
+        #:      *. WARN = WARNING
+        #:      *. DATA = 25
+        #:      *. EXP = 22
+        #:      *. INFO = 20
+        #:      *. DEBUG = 10
+        #:      *. NOTSET = 0      
+        #: The int defined value can be used, or a string version of the 
+        #: log level name, for example specifying "WARNING" is equal to
+        #: specifying a log level of LogEvent.WARNING or 30.
+        #: Default: NOTSET
+        #: String or Int type.
+        self.log_level=None
+        
+        DeviceEvent.__init__(self, *args,**kwargs)
+
+    @classmethod
+    def create(cls,msg,level=None,log_time=None):
+        created_time=currentSec()
+        if log_time is None:
+            log_time=created_time
+        if level is None or level not in cls._levelNames:
+            level=cls.NOTSET
+        elif isinstance(level,basestring):
+            level= cls._levelNames[level]
+        return cls._createAsList(msg, level, created_time, log_time)
+        
+    @staticmethod
+    def _createAsList(text, log_level, created_time, log_time):    
+        return (0,0,0,0,LogEvent.EVENT_TYPE_ID,
+                created_time,0,0,0.0,0.0,0,log_level,text)
+
+    @classmethod
+    def _convertFields(cls,event_value_list):
+        log_level_value_index=cls.CLASS_ATTRIBUTE_NAMES.index('log_level')
+        event_value_list[log_level_value_index]=cls._levelNames.get(event_value_list[log_level_value_index],'UNKNOWN')
+        
+    @classmethod
+    def createEventAsDict(cls,values):
+        cls._convertFields(values)
+        return dict(zip(cls.CLASS_ATTRIBUTE_NAMES,values))
+
+    #noinspection PyUnresolvedReferences
+    @classmethod
+    def createEventAsNamedTuple(cls,valueList):
+        cls._convertFields(valueList)
+        return cls.namedTupleClass(*valueList)
+# create the LogEvent class log level attributes
+# in the case of psychopy being available.
+if not hasattr(LogEvent,'CRITICAL'):
+    for lln,llv in LogEvent._levelNames.iteritems():
+        if isinstance(lln,basestring):
+            setattr(LogEvent,lln,llv)
+    

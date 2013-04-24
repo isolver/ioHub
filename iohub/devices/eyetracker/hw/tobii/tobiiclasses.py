@@ -30,7 +30,7 @@ except:
     # This only happens when it is Sphinx auto-doc loading the file
     pass
 
-from ..... import OrderedDict, print2err,highPrecisionTimer,ioClock
+from ..... import OrderedDict, print2err
 from .... import Computer,ioDeviceError
 
 # Tobii Tracker Browser / Detection Services
@@ -544,8 +544,8 @@ class TobiiTracker(object):
  
 if __name__ == '__main__':
     #init global clock manually for test    
-    _initial_clock_offset=highPrecisionTimer()
-    Computer.globalClock=ioClock(None,_initial_clock_offset,False)
+    import iohub    
+    Computer.globalClock=iohub.MonotonicClock()
     
     TobiiTrackerBrowser.start()
     

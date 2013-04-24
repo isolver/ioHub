@@ -73,19 +73,29 @@ try:
         MULTI_CHANNEL_ANALOG_INPUT=122
     
         MESSAGE=151
-    
+        LOG=152
+        
         @classmethod
-        def addClassMappings(cls):
+        def addClassMappings(cls,device_class,device_event_ids,event_classes):
             if cls._classes is None:
-                from .devices import loadedEventClasses
-                
                 cls._classes={}
     
-                for event_constant_string,event_class in loadedEventClasses.iteritems():
-                    cls._classes[getattr(cls,event_constant_string)]=event_class
-    
-    
-                cls._classes.update(dict([(kls,klsname) for klsname,kls in cls._classes.iteritems()]))
+            #import iohub
+            #iohub.print2err("Adding Device Event Mappings for device: ",device_class.__name__)
+   
+            for event_id in device_event_ids:
+                event_constant_string=cls.getName(event_id)
+                import iohub
+                event_class=None
+                for event_class in event_classes.values():
+                    if event_class.EVENT_TYPE_ID == event_id:
+                        cls._classes[event_id]=event_class
+                        cls._classes[event_class]=event_id
+                        #iohub.print2err("\tAdding Event Class Mapping: ",event_constant_string, " = ",event_id)
+                        break
+                
+                if event_id not in cls._classes.keys():
+                        iohub.print2err("\t*** ERROR ADDING EVENT CLASSS MAPPING: Could not find class: ",event_constant_string, " = ",event_id)
     
     EventConstants.initialize()
     
@@ -108,17 +118,17 @@ try:
     #    STAMPE_FILTER=219
     
         @classmethod
-        def addClassMappings(cls):
+        def addClassMapping(cls,device_class):
             if cls._classes is None:
-                from .devices import loadedDeviceClasses
-                
                 cls._classes={}
     
-                for device_constant_string,device_class in loadedDeviceClasses.iteritems():
-                    cls._classes[getattr(cls,device_constant_string)]=device_class
-    
-                # update classes dict with v,k pairs
-                cls._classes.update(dict([(kls,klsname) for klsname,kls in cls._classes.iteritems()]))
+            
+            device_constant_string=device_class.__name__.upper()
+            device_id=getattr(cls,device_constant_string)
+            #import iohub
+            #iohub.print2err("Adding Device Class Mapping: ",device_constant_string, " = ",device_id)
+            cls._classes[device_id]=device_class
+            cls._classes[device_class]=device_id
     
     DeviceConstants.initialize()
     
@@ -141,11 +151,7 @@ try:
     
     MouseConstants.initialize()
     
-
-    
-    import sys
-    print sys.platform
-    
+    import sys    
     if sys.platform == 'win32':
         
         class AsciiConstants(Constants):

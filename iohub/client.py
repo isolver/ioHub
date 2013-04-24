@@ -23,16 +23,24 @@ try:
     from yaml import load
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
-    print "*** Using Python based YAML Parsing"
+#    print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 
+_psychopyAvailable=False
+psycho_logging=None
+try:
+    from psychopy import logging as psycho_logging
+    _psychopyAvailable=True
+except:
+    psycho_logging=lambda msg, level, t , obj: None
+    
 if sys.platform != 'darwin':
     import psutil
     _psutil_available=True
 
-from iohub import print2err,printExceptionDetailsToStdErr,ioClock,ioHubError,highPrecisionTimer,IO_HUB_DIRECTORY,isIterable
+from iohub import print2err,printExceptionDetailsToStdErr,ioHubError,IO_HUB_DIRECTORY,isIterable
 from iohub.devices import Computer, DeviceEvent,import_device
-from iohub.devices.experiment import MessageEvent
+from iohub.devices.experiment import MessageEvent,LogEvent
 from iohub.constants import DeviceConstants,EventConstants
 from iohub.util.experiment import pumpLocalMessageQueue
 
@@ -160,6 +168,10 @@ class UDPClientConnection(SocketConnection):
 # the result.
 #
 class DeviceRPC(object):
+    _log_time_index=DeviceEvent.EVENT_HUB_TIME_INDEX
+    _log_text_index=LogEvent.CLASS_ATTRIBUTE_NAMES.index('text')
+    _log_level_index=LogEvent.CLASS_ATTRIBUTE_NAMES.index('log_level')
+    
     def __init__(self,sendToHub,device_class,method_name):
         self.device_class=device_class
         self.method_name=method_name
@@ -188,6 +200,18 @@ class DeviceRPC(object):
                     conversionMethod=ioHubConnection._eventListToNamedTuple
 
                 if conversionMethod:
+                    #print 'DeviceViewCall Device: ',self.device_class
+                    if self.device_class != 'Experiment':                    
+                        return [conversionMethod(el) for el in r]
+                    
+                    toBeLogged=[el for el in r if el[DeviceEvent.EVENT_TYPE_ID_INDEX]==LogEvent.EVENT_TYPE_ID]                    
+                    for l in toBeLogged:
+                        r.remove(l)
+                        ltime=l[self._log_time_index]
+                        ltext=l[self._log_text_index]
+                        llevel=l[self._log_level_index]
+                        psycho_logging.log(ltext,llevel,ltime)    
+                        
                     return [conversionMethod(el) for el in r]
 
         return r
@@ -455,8 +479,7 @@ class ioHubConnection(object):
     """
     _replyDictionary=dict()
     def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):
-        self._initial_clock_offset=highPrecisionTimer()
-        Computer.globalClock=ioClock(self,self._initial_clock_offset,False)
+        self._initial_clock_offset=Computer.globalClock.getLastResetTime()
         
         if ioHubConfig:
             if not isinstance(ioHubConfig,dict):
@@ -717,46 +740,58 @@ class ioHubConnection(object):
         # get the list of devices registered with the ioHub
         deviceList=[]
         for device_config_dict in monitor_devices_config:
-            device_class_name, device_config = device_config_dict.keys()[0], device_config_dict.values()[0]           
-            deviceList.append((device_config.get('name',device_class_name.lower()),device_class_name))
+            device_class_name, device_config = device_config_dict.keys()[0], device_config_dict.values()[0]   
+            if device_config.get('enable',True) is True:
+                deviceList.append((device_config.get('name',device_class_name.lower()),device_class_name))
 
-        #ioHub.print2err("_createDeviceList deviceList {0}".format(deviceList))
         # create an experiment process side device object to allow access to the public interface of the
         # ioHub device via transparent IPC.
         for name,device_class_name in deviceList:
             try:
-                class_name_start=device_class_name.rfind('.')
-                device_module_path='iohub.devices.'
-                if class_name_start>0:
-                    device_module_path=device_module_path+device_class_name[:class_name_start].lower()     
-                    device_class_name=device_class_name[class_name_start+1:]
-                else:
-                    device_module_path=device_module_path+device_class_name.lower()
-                    
-                #ioHub.print2err('device_module_path: ',device_module_path)
-                #ioHub.print2err('device_class_name: ',device_class_name)
-                
-                import_device(device_module_path,device_class_name)
-    
-                name_start=name.rfind('.')
-                if name_start>0:
-                    name=name[name_start+1:]
-                    
-                #ioHub.print2err("Creating ioHubDeviceView for device name {0}, path {1}, class {1}".format(name,device_module_path,device_class_name))
-    
-                d=ioHubDeviceView(self,name,device_class_name)
-                #ioHub.print2err("Created ioHubDeviceView: {0}".format(d))
-                setattr(self.devices,name,d)
-                self.deviceByLabel[name]=d
+                self._addDeviceView(name,device_class_name)
             except:
                 print2err("_createDeviceList: Error adding class. ")
                 printExceptionDetailsToStdErr()
-                
-        DeviceConstants.addClassMappings()
-        EventConstants.addClassMappings()
-        
-        #ioHub.print2err("Done _createDeviceList")
 
+    def _addDeviceView(self,name,device_class_name):
+        try:
+            class_name_start=device_class_name.rfind('.')
+            device_module_path='iohub.devices.'
+            if class_name_start>0:
+                device_module_path=device_module_path+device_class_name[:class_name_start].lower()     
+                device_class_name=device_class_name[class_name_start+1:]
+            else:
+                device_module_path=device_module_path+device_class_name.lower()
+                
+            #ioHub.print2err('device_module_path: ',device_module_path)
+            #ioHub.print2err('device_class_name: ',device_class_name)
+            
+            device_class,device_class_name,event_classes=import_device(device_module_path,device_class_name)
+    
+            DeviceConstants.addClassMapping(device_class)
+            
+            device_event_ids=[]
+            for ev in event_classes.values():
+                if ev.EVENT_TYPE_ID:
+                    device_event_ids.append(ev.EVENT_TYPE_ID)
+            EventConstants.addClassMappings(device_class,device_event_ids,event_classes)
+    
+            name_start=name.rfind('.')
+            if name_start>0:
+                name=name[name_start+1:]
+                
+            #ioHub.print2err("Creating ioHubDeviceView for device name {0}, path {1}, class {1}".format(name,device_module_path,device_class_name))
+    
+            d=ioHubDeviceView(self,name,device_class_name)
+            #ioHub.print2err("Created ioHubDeviceView: {0}".format(d))
+            setattr(self.devices,name,d)
+            self.deviceByLabel[name]=d
+            return d
+        except:
+            print2err("_addDeviceView: Error adding class. ")
+            printExceptionDetailsToStdErr()
+        return None
+        
     # UDP communication with ioHost
     def sendToHubServer(self,ioHubMessage):
         """
@@ -1091,18 +1126,18 @@ class ioHubConnection(object):
     @staticmethod
     def _eventListToObject(eventValueList):
         """
-        Convert an ioHub event that is current represented as an ordered list of values, and return the correct
-        ioHub.devices.DeviceEvent subclass for the given event type.
+        Convert an ioHub event that is current represented as an ordered list 
+        of values, and return the correct ioHub.devices.DeviceEvent subclass 
+        for the given event type.
         """
         eclass=EventConstants.getClass(eventValueList[DeviceEvent.EVENT_TYPE_ID_INDEX])
-        combo = zip(eclass.CLASS_ATTRIBUTE_NAMES,eventValueList)
-        kwargs = dict(combo)
         return eclass.createEventAsClass(eventValueList)
 
     @staticmethod
     def _eventListToDict(eventValueList):
         """
-        Convert an ioHub event that is current represented as an ordered list of values, and return the event as a
+        Convert an ioHub event that is current represented as an ordered list 
+        of values, and return the event as a
         dictionary of attribute name, attribute values for the object.
         """
         try:
@@ -1117,8 +1152,8 @@ class ioHubConnection(object):
     @staticmethod
     def _eventListToNamedTuple(eventValueList):
         """
-        Convert an ioHub event that is currently represented as an ordered list of values, and return the event as a
-        namedtuple.
+        Convert an ioHub event that is currently represented as an ordered list
+        of values, and return the event as a namedtuple.
         """
         try:
             if not isinstance(eventValueList,list):
@@ -1128,22 +1163,6 @@ class ioHubConnection(object):
         except:
             printExceptionDetailsToStdErr()
             raise ioHubError("Error converting ioHub Server event list response to a namedtuple",event_list_response=eventValueList)
-
-    def sendEvents(self,events):
-        """
-        Send 1 - N Experiment Events (currently MessageEvents are supported) to the ioHub Process
-        for storage. Each object in the events list must be a tuple containing the ordered
-        attributes of the event constructor.
-
-        Args:
-            events(tuple): list of ExperimentEvents
-        Return (int): the number of events that the ioHub Server process successfully parsed and saved.
-        """
-        eventList=[]
-        for e in events:
-            eventList.append(e._asList())
-        r=self.sendToHubServer(('EXP_DEVICE','EVENT_TX',eventList))
-        return r
 
     def sendMessageEvent(self,text,prefix='',offset=0.0,sec_time=None):
         """
@@ -1158,32 +1177,63 @@ class ioHubConnection(object):
                           If you send the event before or after the time the event actually occurred,
                           and you know what the offset value is, you can provide it here and it
                           will be applied to the ioHub time stamp for the event.
-          usec_time (int/long): Since (at least on Windows currently) if you use the ioHub timers,
-                                the time-base of the experiment process is identical to that of the ioHub
-                                server process, then you can specific the ioHub time (in usecs) for
-                                experiment events right in the experiment process itself.
-
+          usec_time (float): Since the time-base of the experiment process is identical 
+                             to that of the ioHub server process, then you can specific
+                             the ioHub time (in sec.usec) for experiment events right in
+                             the experiment process itself.
         Return (bool): True
         """
         self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent._createAsList(text,prefix=prefix,msg_offset=offset,sec_time=sec_time),]))
         return True
 
-    def sendMessages(self,messageList):
-        """
-        Same as the sendMessage method, but accepts a list of lists of message arguments,
-        so you can have N messages created and sent at once.
+#    def sendLogEvent(self,text,level=LogEvent.NOTSET,log_time=None):
+#        """
+#        Create and send a LogEvent to the ioHub Server Process for storage
+#        with the rest of the event data.
+#
+#        Args:
+#          text (str): The text for the log event. Can be up to 128 characters in length.
+#          level (str or int): One of the predefined level types. If the value specified is not recognized, then the level is set to NOTSET.
+#          usec_time (float): Since the time-base of the experiment process is identical 
+#                             to that of the ioHub server process, then you can specific
+#                             the ioHub time (in sec.usec) for experiment events right in
+#                             the experiment process itself.
+#        Return (bool): True
+#        """
+#        if log_time is None:
+#            log_time=currentSec()
+#        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[LogEvent.create(text,level,log_time=log_time),]))
+#        return True
+#
+#    def sendMessages(self,messageList):
+#        """
+#        Same as the sendMessage method, but accepts a list of lists of message arguments,
+#        so you can have N messages created and sent at once.
+#
+#        Args:
+#            messageList(tuple): list of lists, where each inner list represents a MessageEvent in list form
+#                           (i.e as an ordered list of event attribute value as would be passed to the
+#                            MessageEvent constructor)
+#        Return (bool): True
+#        """
+#        msgEvents=[]
+#        for msg in messageList:
+#            msgEvents.append(MessageEvent._createAsList(*msg))
+#        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',msgEvents))
+#        return True
 
-        Args:
-            messageList(tuple): list of lists, where each inner list represents a MessageEvent in list form
-                           (i.e as an ordered list of event attribute value as would be passed to the
-                            MessageEvent constructor)
-        Return (bool): True
+    def addDeviceToMonitor(self,device_class, device_config={}):
         """
-        msgEvents=[]
-        for msg in messageList:
-            msgEvents.append(MessageEvent._createAsList(*msg))
-        self.sendToHubServer(('EXP_DEVICE','EVENT_TX',msgEvents))
-        return True
+        Adds a device to the ioHub Server for event monitoring.
+        """
+        try:
+            r=self.sendToHubServer(('EXP_DEVICE','ADD_DEVICE',device_class,device_config))
+            device_class_name, dev_name, device_rpc_interface=r[2]      
+            return self._addDeviceView(dev_name,device_class_name)
+        except:
+            printExceptionDetailsToStdErr()
+            raise ioHubError("Error in _addDeviceToMonitor: device_class: ",device_class," . device_config: ",device_config)    
+            return None
 
     # client utility methods.
     def _getDeviceList(self):

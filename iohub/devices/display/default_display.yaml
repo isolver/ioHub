@@ -10,7 +10,8 @@ Display: &DisplaySettings
     default_eye_distance:
         surface_center: 500
         unit_type: mm
-    psychopy_monitor_name: None
+    psychopy_monitor_name: default
+    override_using_psycho_settings: False
     monitor_event_types: None
     save_events: False
     stream_events: False

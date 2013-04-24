@@ -1,21 +1,21 @@
-##############################
-ioHub Usage QuickStart Guide
-##############################
+======================================
+QuickStart Guide for PsychoPy Coders
+======================================
 
-.. topic:: Overview
+.. note::
 
     This QuickStart Guide is intended to give a fast introduction to how use the 
     ioHub and PsychoPy packages together. Not all the functionality of the ioHub 
     is covered, nor are all device types. For a more complete review of the ioHub
     package features and how to use them, see the ioHub User Manual section.
     
-    Obviously the PsychoPy package API is used heavily as well, so it is important
+    Obviously the PsychoPy package API is used heavily, so it is important
     that you have an understanding of how to use PsychoPy at a *coder* level.
     Please refer to the very good `documentation for PsychoPy <http://www.psychopy.org/>`_ 
     if / when needed.
         
 Overview
-#########
+==========
 
 There are two ways that the ioHub API can be used when creating an experiment with
 PsychoPy. The first way is more in line with the 'standard' PsychoPy coder examples
@@ -30,7 +30,7 @@ remember to add some boilerplate code from experiment to experiment.
 In the QuickStart we will go through an example of both methods.
 
 Adding the ioHub API to a 'standard' or Existing PsychoPy Coder Experiment
-###########################################################################
+============================================================================
 
 First, let's take an example from one of the PsychoPy demo scripts and show how
 to easily use the ioHub keyboard and mouse devices with it using iohub.quickStartHubServer.
@@ -177,7 +177,7 @@ file script.
 
 
 Converting a PsychoPy Script to use the ioHub ExperimentIOHubRuntime Class
-###########################################################################
+===============================================================================
 
 The second way to create a PsychoPy experiment script that uses the ioHub package
 is to effectively wrap your experiment script in an extension of the 
@@ -268,9 +268,7 @@ First, the PsychoPy demo script we will 'convert' is the joystick_universal.py d
         event.clearEvents()#do this each frame to avoid getting clogged with mouse events
         myWin.flip()#redraw the buffer
 
-.. topic:: Note
-
-    Currently ioHub has support for XInput compatible Gamepads only. This includes the 
+.. note:: Currently ioHub has support for XInput compatible Gamepads only. This includes the 
     Xbox 360 Gamepad for Computers (Wired or wireless) and some models of Logitech
     Gamepads, such as the Logitech F310 and F710. To run this example, you will need
     one of these Gamepad models, or another gamepad that supports the XInput interface.
@@ -304,6 +302,7 @@ compatible version of the demo can be started. Note that all source files for th
 example are in the ioGamepad directory of the ioHub Examples folder.
 
 The following steps should be followed if a new version of the demo is being created:
+------------------------------------------------------------------------------------------
 
 #. Create a directory (location of your choice) called ioXInputGamePad. The directory can be any name you wish, but here it is assumed it is called ioXInputPsychoPy.
 #. Within the ioXInputGamePad directory, create the python source file that will hold the example python source code. This example assumes it has been named run.py
@@ -313,9 +312,7 @@ The following steps should be followed if a new version of the demo is being cre
 With the above directory and file structure created, contents can now be added to the
 python source file and the two .yaml config files as described below. 
 
-.. topic:: Note
-
-    When using the ExperimentIOHubRuntime class approach to creating the experiment,
+.. note:: When using the ExperimentIOHubRuntime class approach to creating the experiment,
     the above expriment folder structure will always be used. To save time in creating
     this initial experiment folder setup, there is a folder called startingTemplate
     in the ioHub examples folder that contains the necessary python source file with
@@ -326,7 +323,7 @@ python source file and the two .yaml config files as described below.
     being created from scratch.
     
 run.py Python Source File Contents
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Add the following python source code to the run.py file that was created::
 
@@ -484,7 +481,7 @@ Add the following python source code to the run.py file that was created::
 
 
 experiment_config.yaml File Contents
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The experiment configuration settings, including session level information, are
 represented in the experiment_config.yaml. There are three main types of experiment
@@ -514,7 +511,7 @@ Enter the following into your experiment_config.yaml for this example::
 
     
 iohub_config.yaml File Contents
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ioHub configuration settings are represented in the iohub_config.yaml. There are two types of ioHub settings:
 

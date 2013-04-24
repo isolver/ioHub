@@ -1,6 +1,6 @@
-#######################################
+============================================
 Performance and Overhead of the ioHub
-#######################################
+============================================
 
 There are different aspects of 'performance' to consider when trying to determine
 the impact using ioHub within your experiment will have on both timing performance 
@@ -25,7 +25,7 @@ and the processing performance of your experiment.
     delays and impact on frame drops are.
 
 Device Event Time Stamp Accuracy
-#################################
+============================================
 
 When considering event time stamp accuracy, as defined as the difference between
 the time the event actually occurred in the environment and the time stamp
@@ -93,7 +93,7 @@ For further details on this subject, please refer to the documentation page for 
 supported by the iohub.
 
 Experiment Runtime Performance
-###############################
+============================================
 
 When ioHub is used for event monitoring, all event detection (and even storage) is 
 handled by a separate Python program that is running in a separate Python Process,
@@ -136,7 +136,7 @@ for many research applications.
 
 
 How Real-time Device Event End to End Delay is Effected
-#########################################################
+============================================================
 
 One of the primary goals of the ioHub is to try and ensure that it adds as little
 additional delay, or latency, to the events being delivered from devices to your

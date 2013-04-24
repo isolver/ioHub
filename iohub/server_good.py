@@ -18,7 +18,7 @@ from collections import deque
 
 import iohub
 import iohub.client
-from iohub import print2err, printExceptionDetailsToStdErr, ioHubError,OrderedDict,convertCamelToSnake,MonotonicClock
+from iohub import print2err, printExceptionDetailsToStdErr, ioHubError,OrderedDict,convertCamelToSnake,ioClock,highPrecisionTimer
 from iohub.constants import DeviceConstants,EventConstants
 from iohub.devices import Computer, DeviceEvent, import_device        
 from iohub.devices.deviceConfigValidation import validateDeviceConfiguration
@@ -26,6 +26,7 @@ from iohub.devices.deviceConfigValidation import validateDeviceConfiguration
 from yaml import load
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
+    print2err("Using libyaml Cloader and CDumper")
 except ImportError:
     from yaml import Loader, Dumper
         
@@ -253,24 +254,6 @@ class udpServer(DatagramServer):
                                         device=dclass),
                                   replyTo)
                 return False
-        elif request_type == 'ADD_DEVICE':
-            dclass_name=request.pop(0)
-            dconfig_dict=request.pop(1)
-            
-            # add device to ioSever here
-            data=self.iohub.createNewMonitoredDevice(dclass_name,dconfig_dict)
-            # end adding device to server
-                    
-            if data:
-                self.sendResponse(('ADD_DEVICE',data),replyTo)
-                return True
-            else:
-                self.sendResponse(createErrorResult('ADD_DEVICE_ERROR',
-                                        msg="An error occurred on the ioHub Server while adding a device to be monitored.",
-                                        device=dclass_name,
-                                        config=dconfig_dict),
-                                  replyTo)
-            return False
         else:
             self.sendResponse(createErrorResult('DEVICE_RPC_TYPE_NOT_SUPPORTED_ERROR',
                                     msg="The device RPC request type provided is not recognized by the ioHub Server.",
@@ -322,10 +305,7 @@ class udpServer(DatagramServer):
     def setExperimentInfo(self,experimentInfoList):
         self.iohub.experimentInfoList=experimentInfoList
         if self.iohub.emrt_file:
-            exp_id= self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList) 
-            self.iohub._experiment_id=exp_id
-            self.iohub.log("Current Experiment ID: %d"%(self.iohub._experiment_id),'CRITICAL')
-            return exp_id
+            return self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList)           
         return False
         
     def checkIfSessionCodeExists(self,sessionCode):
@@ -339,10 +319,7 @@ class udpServer(DatagramServer):
     def createExperimentSessionEntry(self,sessionInfoDict):
         self.iohub.sessionInfoDict=sessionInfoDict
         if self.iohub.emrt_file:
-            sess_id= self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
-            self.iohub._session_id=sess_id
-            self.iohub.log("Current Session ID: %d"%(self.iohub._session_id),'CRITICAL')
-            return sess_id
+            return self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
         return False
 
     def initializeConditionVariableTable(self, experiment_id, session_id, numpy_dtype):
@@ -418,13 +395,10 @@ class DeviceMonitor(Greenlet):
 class ioServer(object):
     eventBuffer=None
     deviceDict={}
-    _logMessageBuffer=deque(maxlen=128)
-    def __init__(self, rootScriptPathDir, config=None):
-        self._session_id=None
-        self._experiment_id=None
-
-        self.log("Time Offset: {0}".format(Computer.globalClock.getLastResetTime()),'CRITICAL')
-
+    _logMessageBuffer=None
+    def __init__(self, initial_time_offset, rootScriptPathDir, config=None):
+        Computer.isIoHubProcess=True
+        Computer.globalClock=ioClock(None,initial_time_offset)
         self._hookManager=None
         self.emrt_file=None
         self.config=config
@@ -434,9 +408,9 @@ class ioServer(object):
         self.experimentInfoList=None
         self.filterLookupByInput={}
         self.filterLookupByOutput={}
-        self.filterLookupByName={}  
-        self._hookDevice=None
+        self.filterLookupByName={}        
         ioServer.eventBuffer=deque(maxlen=config.get('global_event_buffer',2048))
+        ioServer._logMessageBuffer=deque(maxlen=128)
 
         self._running=True
         
@@ -456,9 +430,30 @@ class ioServer(object):
         except:
             pass
 
+        #print2err("#### ioHub.data_paths: ",ioHub.data_paths)
+        self._all_device_config_errors=dict()
+        device_instance_list=[]
+        try:
+            #built device list and config from yaml config settings
+            for iodevice in config.get('monitor_devices',()):
+                for device_class_name,deviceConfig in iodevice.iteritems():
+                    #print2err("======================================================")
+                    #print2err("Started load process for: {0}".format(device_class_name))
+                    device_instance_and_config=self.addDeviceToMonitor(device_class_name,deviceConfig)
+                    if device_instance_and_config:
+                        device_instance_list.append(device_instance_and_config)
+                    else:
+                        print2err('## Device was not started by the ioHub Server: ',device_class_name)
+                        raise ioHubError("Device config validation failed")
+            DeviceConstants.addClassMappings()
+            EventConstants.addClassMappings()
+        except:
+            print2err("Error during device creation ....")
+            printExceptionDetailsToStdErr()
+            raise ioHubError("Error during device creation ....")
 
         try:
-            # initial dataStore setup
+            # dataStore setup
             if 'data_store' in config:
                 experiment_datastore_config=config.get('data_store')
 
@@ -468,9 +463,11 @@ class ioServer(object):
                 for default_key,default_value in default_datastore_config.iteritems():
                     if default_key not in experiment_datastore_config:
                         experiment_datastore_config[default_key]=default_value
-                                
+                
+                #ioHub.print2err("Merged ioDataStoreConfig: {0}".format(experiment_datastore_config))
+                
                 if experiment_datastore_config.get('enable', True):
-                    #print2err("Creating ioDataStore....")
+                    #ioHub.print2err("Creating ioDataStore....")
 
                     if iohub.data_paths is None:
                         resultsFilePath=rootScriptPathDir
@@ -478,27 +475,111 @@ class ioServer(object):
                         resultsFilePath=iohub.data_paths[u'IOHUB_DATA']
                     self.createDataStoreFile(experiment_datastore_config.get('filename','events')+'.hdf5',resultsFilePath,'a',experiment_datastore_config)
 
-                    #print2err("Created ioDataStore.")
+                    #ioHub.print2err("Created ioDataStore.")
+
         except:
             print2err("Error during ioDataStore creation....")
             printExceptionDetailsToStdErr()
 
 
-        #built device list and config from initial yaml config settings
-        try:
-            for iodevice in config.get('monitor_devices',()):
-                for device_class_name,deviceConfig in iodevice.iteritems():
-                    #print2err("======================================================")
-                    #print2err("Started load process for: {0}".format(device_class_name))
-                    self.createNewMonitoredDevice(device_class_name,deviceConfig)
-        except:
-            print2err("Error during device creation ....")
-            printExceptionDetailsToStdErr()
-            raise ioHubError("Error during device creation ....")
+        self.log("Adding ioServer and DataStore event listeners......")
 
+        # add event listeners for saving events
+        if self.emrt_file is not None:
+            for device_instance,device_instance_config,eventIDs in device_instance_list:
+                if device_instance_config['save_events']:
+                    device_instance._addEventListener(self.emrt_file,eventIDs)
+                    self.log("DataStore listener for device added: device: %s eventIDs: %s"%(device_instance.__class__.__name__,eventIDs))
+                    #ioHub.print2err("DataStore listener for device added: device: %s eventIDs: %s"%(device_instance.__class__.__name__,eventIDs))
+                else:
+                    #ioHub.print2err("DataStore saving disabled for device: %s"%(device_instance.__class__.__name__,))
+                    self.log("DataStore saving disabled for device: %s"%(device_instance.__class__.__name__,))
+        else:
+            #ioHub.print2err("DataStore Not Evabled. No events will be saved.")
+            self.log("DataStore Not Enabled. No events will be saved.")
+    
+#        try:
+#            #built filter graph and config from yaml config settings
+#            for iofilters in config.get('filters',()):
+#                for filter_class,filterConfig in iofilters.iteritems():
+#                    self.addFilterToMonitor(filter_class,filterConfig)
+#        except:
+#            ioHub.print2err("Error during filter creation ....")
+#            ioHub.printExceptionDetailsToStdErr()
 
-        # initial time offset
-        #print2err("-- ioServer Init Complete -- ")
+        deviceDict=ioServer.deviceDict
+        iohub=self
+        if ('Mouse' in deviceDict or 'Keyboard' in deviceDict):
+            if Computer.system == 'win32':           
+                iohub.log("Creating pyHook Monitors....")
+                #ioHub.print2err("Creating pyHook Monitors....")
+
+                class pyHookDevice(object):
+                    def __init__(self):
+                        import pyHook
+                        self._hookManager=pyHook.HookManager()
+                        
+                        if 'Mouse' in deviceDict:
+                            #ioHub.print2err("Hooking Mouse.....")
+                            self._hookManager.MouseAll = deviceDict['Mouse']._nativeEventCallback
+                            self._hookManager.HookMouse()    
+                        if 'Keyboard' in deviceDict:
+                            #ioHub.print2err("Hooking Keyboard.....")
+                            self._hookManager.KeyAll = deviceDict['Keyboard']._nativeEventCallback
+                            self._hookManager.HookKeyboard()
+
+                        iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
+            
+                    def _poll(self):
+                        import pythoncom
+                        # PumpWaitingMessages returns 1 if a WM_QUIT message was received, else 0
+                        if pythoncom.PumpWaitingMessages() == 1:
+                            raise KeyboardInterrupt()               
+    
+                #ioHub.print2err("Creating pyHook Monitor......")
+
+                hookMonitor=DeviceMonitor(pyHookDevice(),0.00375)
+                self.deviceMonitors.append(hookMonitor)
+                
+                #ioHub.print2err("Created pyHook Monitor.")
+                
+            elif Computer.system == 'linux2':
+                # TODO: consider switching to xlib-ctypes implementation of xlib
+                # https://github.com/garrybodsworth/pyxlib-ctypes
+                iohub.log("Creating pyXHook Monitors....")
+                from .devices import pyXHook
+                
+                self._hookManager = pyXHook.HookManager()
+                if 'Keyboard' in deviceDict:
+                    print2err("Hooking Keyboard.....")
+                    self._hookManager.HookKeyboard()
+                    self._hookManager.KeyDown = deviceDict['Keyboard']._nativeEventCallback
+                    self._hookManager.KeyUp = deviceDict['Keyboard']._nativeEventCallback
+                if 'Mouse' in deviceDict:                
+                    print2err("Hooking Mouse.....")
+                    self._hookManager.HookMouse()
+                    self._hookManager.MouseAllButtonsDown = deviceDict['Mouse']._nativeEventCallback
+                    self._hookManager.MouseAllButtonsUp = deviceDict['Mouse']._nativeEventCallback
+                    self._hookManager.MouseAllMotion = deviceDict['Mouse']._nativeEventCallback
+
+                #ioHub.print2err("Starting pyXHook.HookManager.....")
+                self._hookManager.start()
+                iohub.log("pyXHook Thread Created.")
+                #ioHub.print2err("pyXHook.HookManager thread created.")
+
+            else: # OSX
+                if 'Mouse' in deviceDict:
+                    mouseHookMonitor=DeviceMonitor(deviceDict['Mouse'],0.004)
+                    self.deviceMonitors.append(mouseHookMonitor)
+                    deviceDict['Mouse']._CGEventTapEnable(deviceDict['Mouse']._tap, True)
+
+                if 'Keyboard' in deviceDict:
+                    kbHookMonitor=DeviceMonitor(deviceDict['Keyboard'],0.004)
+                    self.deviceMonitors.append(kbHookMonitor)
+                    deviceDict['Keyboard']._CGEventTapEnable(deviceDict['Keyboard']._tap, True)
+                  
+        self.log("Time Offset: {0}".format(initial_time_offset))
+        #ioHub.print2err("-- ioServer Init Complete -- ")
         
 
     def processDeviceConfigDictionary(self,device_module_path, device_class_name, device_config_dict,default_device_config_dict):
@@ -524,186 +605,10 @@ class ioServer(object):
                     device_errors=self._all_device_config_errors.get(device_module_path,{})
                     device_errors[error_type]=error_list                
                     self._all_device_config_errors[device_module_path]=device_errors
-
-    def createNewMonitoredDevice(self,device_class_name,deviceConfig):
-        #print2err("#### createNewMonitoredDevice: ",device_class_name)
-        self._all_device_config_errors=dict()
-
-        try:
-            device_instance=None
-            device_config=None
-            device_event_ids=None
-            event_classes=None
-            
-            device_instance_and_config=self.addDeviceToMonitor(device_class_name,deviceConfig)
-            if device_instance_and_config:
-                device_instance,device_config,device_event_ids,event_classes=device_instance_and_config 
-                DeviceConstants.addClassMapping(device_instance.__class__)
-                EventConstants.addClassMappings(device_instance.__class__,device_event_ids,event_classes)
-            else:
-                print2err('## Device was not started by the ioHub Server: ',device_class_name)
-                raise ioHubError("Device config validation failed")
-                
-        except:
-            print2err("Error during device creation ....")
-            printExceptionDetailsToStdErr()
-            raise ioHubError("Error during device creation ....")
-
-
-        # Update DataStore Structure if required.
-        try:            
-            if self.emrt_file is not None:
-                self.emrt_file.updateDataStoreStructure(device_instance,event_classes)
-        except:
-            print2err("Error while updating datastore for device addition:",device_instance,device_event_ids)
-            printExceptionDetailsToStdErr()
-
-
-        self.log("Adding ioServer and DataStore event listeners......")
-
-        # add event listeners for saving events
-        if self.emrt_file is not None:
-            if device_config['save_events']:
-                device_instance._addEventListener(self.emrt_file,device_event_ids)
-                self.log("DataStore listener for device added: device: %s eventIDs: %s"%(device_instance.__class__.__name__,device_event_ids))
-                #print2err("DataStore listener for device added: device: %s eventIDs: %s"%(device_instance.__class__.__name__,device_event_ids))
-            else:
-                #print2err("DataStore saving disabled for device: %s"%(device_instance.__class__.__name__,))
-                self.log("DataStore saving disabled for device: %s"%(device_instance.__class__.__name__,))
-        else:
-            #print2err("DataStore Not Evabled. No events will be saved.")
-            self.log("DataStore Not Enabled. No events will be saved.")
-    
-
-        # Add Device Monitor for Keyboard or Mouse device type 
-        deviceDict=ioServer.deviceDict
-        iohub=self
-        if device_class_name in ('Mouse','Keyboard'):
-            if Computer.system == 'win32':  
-                if self._hookDevice is None:
-                    iohub.log("Creating pyHook Monitors....")
-                    #print2err("Creating pyHook Monitor....")
-    
-                    class pyHookDevice(object):
-                        def __init__(self):
-                            import pyHook
-                            self._hookManager=pyHook.HookManager()
-                            
-                            self._mouseHooked=False
-                            self._keyboardHooked=False
-                            
-                            if device_class_name == 'Mouse':
-                                #print2err("Hooking Mouse.....")
-                                self._hookManager.MouseAll = deviceDict['Mouse']._nativeEventCallback
-                                self._hookManager.HookMouse()
-                                self._mouseHooked=True
-                            elif device_class_name == 'Keyboard':
-                                #print2err("Hooking Keyboard.....")
-                                self._hookManager.KeyAll = deviceDict['Keyboard']._nativeEventCallback
-                                self._hookManager.HookKeyboard()
-                                self._keyboardHooked=True
-    
-                            iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
-                
-                        def _poll(self):
-                            import pythoncom
-                            # PumpWaitingMessages returns 1 if a WM_QUIT message was received, else 0
-                            if pythoncom.PumpWaitingMessages() == 1:
-                                raise KeyboardInterrupt()               
-        
-                    #print2err("Creating pyHook Monitor......")
-                    self._hookDevice=pyHookDevice()
-                    hookMonitor=DeviceMonitor(self._hookDevice,0.00375)
-                    self.deviceMonitors.append(hookMonitor)
-                
-                    #print2err("Created pyHook Monitor.")
-                else:
-                    #print2err("UPDATING pyHook Monitor....")
-                    if device_class_name == 'Mouse' and self._hookDevice._mouseHooked is False:
-                       # print2err("Hooking Mouse.....")
-                        self._hookDevice._hookManager.MouseAll = deviceDict['Mouse']._nativeEventCallback
-                        self._hookDevice._hookManager.HookMouse()
-                        self._hookDevice._mouseHooked=True
-                    elif device_class_name == 'Keyboard' and self._hookDevice._keyboardHooked is False:
-                        #print2err("Hooking Keyboard.....")
-                        self._hookDevice._hookManager.KeyAll = deviceDict['Keyboard']._nativeEventCallback
-                        self._hookDevice._hookManager.HookKeyboard()
-                        self._hookDevice._keyboardHooked=True
-                
-                    #print2err("Finished Updating pyHook Monitor.")
-                
-            elif Computer.system == 'linux2':
-                # TODO: consider switching to xlib-ctypes implementation of xlib
-                # https://github.com/garrybodsworth/pyxlib-ctypes
-                from .devices import pyXHook
-                if self._hookManager is None:
-                    iohub.log("Creating pyXHook Monitors....")
-                    self._hookManager = pyXHook.HookManager()
-                    self._hookManager._mouseHooked=False
-                    self._hookManager._keyboardHooked=False
-
-                    if device_class_name == 'Keyboard':
-                        #print2err("Hooking Keyboard.....")
-                        self._hookManager.HookKeyboard()
-                        self._hookManager.KeyDown = deviceDict['Keyboard']._nativeEventCallback
-                        self._hookManager.KeyUp = deviceDict['Keyboard']._nativeEventCallback
-                        self._hookManager._keyboardHooked=True
-                    elif device_class_name == 'Mouse':                
-                        #print2err("Hooking Mouse.....")
-                        self._hookManager.HookMouse()
-                        self._hookManager.MouseAllButtonsDown = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager.MouseAllButtonsUp = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager.MouseAllMotion = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager._mouseHooked=True
-    
-                    #print2err("Starting pyXHook.HookManager.....")
-                    self._hookManager.start()
-                    iohub.log("pyXHook Thread Created.")
-                    #print2err("pyXHook.HookManager thread created.")
-                else:
-                    iohub.log("Updating pyXHook Monitor....")
-                    if device_class_name == 'Keyboard':
-                        #print2err("Hooking Keyboard.....")
-                        self._hookManager.HookKeyboard()
-                        self._hookManager.KeyDown = deviceDict['Keyboard']._nativeEventCallback
-                        self._hookManager.KeyUp = deviceDict['Keyboard']._nativeEventCallback
-                        self._hookManager._keyboardHooked=True
-                    elif device_class_name == 'Mouse':                
-                        #print2err("Hooking Mouse.....")
-                        self._hookManager.HookMouse()
-                        self._hookManager.MouseAllButtonsDown = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager.MouseAllButtonsUp = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager.MouseAllMotion = deviceDict['Mouse']._nativeEventCallback
-                        self._hookManager._mouseHooked=True
-                    iohub.log("Finished Updating pyXHook Monitor....")
-                    
-
-            else: # OSX
-                if self._hookDevice is None:
-                    self._hookDevice=[]
-                    
-                if 'Mouse' not in self._hookDevice:
-                   # print2err("Hooking OSX Mouse.....")
-                    mouseHookMonitor=DeviceMonitor(deviceDict['Mouse'],0.004)
-                    self.deviceMonitors.append(mouseHookMonitor)
-                    deviceDict['Mouse']._CGEventTapEnable(deviceDict['Mouse']._tap, True)
-                    self._hookDevice.append('Mouse')
-                    #print2err("Done Hooking OSX Mouse.....")
-                elif 'Keyboard' not in self._hookDevice:
-                   # print2err("Hooking OSX Keyboard.....")
-                    kbHookMonitor=DeviceMonitor(deviceDict['Keyboard'],0.004)
-                    self.deviceMonitors.append(kbHookMonitor)
-                    deviceDict['Keyboard']._CGEventTapEnable(deviceDict['Keyboard']._tap, True)
-                    self._hookDevice.append('Keyboard')
-                    #print2err("DONE Hooking OSX Keyboard.....")
-
-
-            return [device_class_name, device_config['name'], device_instance._getRPCInterface()]
-
                     
     def addDeviceToMonitor(self,device_class_name,device_config):
         self.log("Handling Device: %s"%(device_class_name,))
-        #print2err("addDeviceToMonitor:\n\tdevice_class: {0}\n\texperiment_device_config:{1}\n".format(device_class_name,device_config))
+#        ioHub.print2err("addDeviceToMonitor:\n\tdevice_class: {0}\n\texperiment_device_config:{1}\n".format(device_class_name,device_config))
 
         DeviceClass=None
         class_name_start=device_class_name.rfind('.')
@@ -714,16 +619,16 @@ class ioServer(object):
         else:
             device_module_path=device_module_path+device_class_name.lower()
 
-        #print2err("Processing device, device_class_name: {0}, device_module_path: {1}".format(device_class_name, device_module_path))
+        #ioHub.print2err("Processing device, device_class_name: {0}, device_module_path: {1}".format(device_class_name, device_module_path))
          
         dconfigPath=os.path.join(iohub.IO_HUB_DIRECTORY,device_module_path[6:].replace('.',os.path.sep),"default_%s.yaml"%(device_class_name.lower()))
 
-        #print2err("Loading Device Defaults file:\n\tdevice_class: {0}\n\tdeviceConfigFile:{1}\n".format(device_class_name,dconfigPath))
+        #ioHub.print2err("Loading Device Defaults file:\n\tdevice_class: {0}\n\tdeviceConfigFile:{1}\n".format(device_class_name,dconfigPath))
         self.log("Loading Device Defaults file: %s"%(device_class_name,))
 
         _dclass,default_device_config=load(file(dconfigPath,'r'), Loader=Loader).popitem()
 
-        #print2err("Device Defaults:\n\tdevice_class: {0}\n\tdefault_device_config:{1}\n".format(device_class_name,default_device_config))
+        #ioHub.print2err("Device Defaults:\n\tdevice_class: {0}\n\tdefault_device_config:{1}\n".format(device_class_name,default_device_config))
         
         self.processDeviceConfigDictionary(device_module_path, device_class_name, device_config,default_device_config)
 
@@ -738,13 +643,14 @@ class ioServer(object):
                 print2err("\n")
             return None
         
-        DeviceClass,device_class_name,event_classes=import_device(device_module_path,device_class_name)
-        #print2err("Updated Experiment Device Config:\n\tdevice_class: {0}\n\tdevice_config:{1}\n".format(device_class_name,default_device_config))
+        DeviceClass=import_device(device_module_path,device_class_name)
+
+        #ioHub.print2err("Updated Experiment Device Config:\n\tdevice_class: {0}\n\tdevice_config:{1}\n".format(device_class_name,default_device_config))
             
         if device_config.get('enable',True):
             self.log("Searching Device Path: %s"%(device_class_name,))
             self.log("Creating Device: %s"%(device_class_name,))
-            #print2err("Creating Device: %s"%(device_class_name,))
+            #ioHub.print2err("Creating Device: %s"%(device_class_name,))
             
             if DeviceClass._iohub_server is None:
                 DeviceClass._iohub_server=self
@@ -755,7 +661,7 @@ class ioServer(object):
             deviceInstance=DeviceClass(dconfig=device_config)
 
             self.log("Device Instance Created: %s"%(device_class_name,))
-            #print2err("Device Instance Created: %s"%(device_class_name,))
+            #ioHub.print2err("Device Instance Created: %s"%(device_class_name,))
 
             self.devices.append(deviceInstance)
             ioServer.deviceDict[device_class_name]=deviceInstance
@@ -787,26 +693,19 @@ class ioServer(object):
                 #  ioHub.print2err("%s event stream listener added: eventIDs=%s"%(device_class_name,eventIDs))
                 self.log("Standard event stream listener added for class %s for event ids %s"%(device_class_name,str(eventIDs)))
 
-            return deviceInstance,device_config,eventIDs,event_classes
+            return deviceInstance,device_config,eventIDs
 
 
-    def log(self,text,level=None):
-        try:
-            log_time=currentSec()
-            exp=self.deviceDict.get('Experiment',None)
-            if exp and self._session_id and self._experiment_id:
-                while len(self._logMessageBuffer):
-                    lm=self._logMessageBuffer.popleft()
-                    #print2err('>>>!!! Logging BACKLOGGED LogEvent: ',lm,", ",(exp, self._session_id, self._experiment_id))
-                    exp.log(*lm)
-                #print2err('>>>!!! Logging LogEvent: ',(text,level,log_time),", ",(exp, self._session_id, self._experiment_id))
-                exp.log(text,level,log_time)
-            else:
-                #print2err('>>>!!! Adding LogEvent to _logMessageBuffer: ',(text,level,log_time),", ",(exp, self._session_id, self._experiment_id))
-                self._logMessageBuffer.append((text,level,log_time))
-        except:
-            printExceptionDetailsToStdErr()
-            
+    def log(self,text,level=1):
+        if self.emrt_file:
+            while len(self._logMessageBuffer)>0:
+                time,text,level=self._logMessageBuffer.popleft()
+                self.emrt_file.log(time,text,level)
+            self.emrt_file.log(currentSec(),text,level)
+        else:
+            logMsg=(currentSec(),text,level)
+            self._logMessageBuffer.append(logMsg)
+
     def createDataStoreFile(self,fileName,folderPath,fmode,ioHubsettings):
         from datastore import ioHubpyTablesFile
         self.closeDataStoreFile()                
@@ -886,7 +785,7 @@ class ioServer(object):
 
 # ------------------ Main / Quickstart testing -------------------------
 
-def run(rootScriptPathDir,configFilePath):
+def run(initial_time_offset,rootScriptPathDir,configFilePath):
     import tempfile
     tdir=tempfile.gettempdir()
     cdir,cfile=os.path.split(configFilePath)
@@ -902,7 +801,7 @@ def run(rootScriptPathDir,configFilePath):
 
 
     try:
-        s = ioServer(rootScriptPathDir, ioHubConfig)
+        s = ioServer(initial_time_offset, rootScriptPathDir, ioHubConfig)
     except Exception,e:
         printExceptionDetailsToStdErr()
         sys.stdout.flush()
@@ -955,9 +854,6 @@ if __name__ == '__main__':
     if len(sys.argv)<2:
         configFileName=None
         rootScriptPathDir=None
-        initial_offset=iohub.getTime()
-
-    Computer.isIoHubProcess=True
-    Computer.globalClock=MonotonicClock(initial_offset)        
-
-    run(rootScriptPathDir=rootScriptPathDir, configFilePath=configFileName)
+        initial_offset=highPrecisionTimer()
+        
+    run(initial_time_offset=initial_offset, rootScriptPathDir=rootScriptPathDir, configFilePath=configFileName)

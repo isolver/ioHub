@@ -1,13 +1,16 @@
-##########################################
-ioHub Documentation and API Specification
-##########################################
+================================
+ioHub Event Monitoring Framwork
+================================
 
 ioHub is a Python package providing a cross-platform computer device event monitoring and
 storage framework. ioHub is not a complete experiment design and runtime API,
 but is instead intended to be used with existing Python experiment runtime packages,
 primarily `the most excellent PsychoPy <http://www.psychopy.org>`_ . 
 
-ioHub supports the following high level functionality:
+High Level Features
+=====================
+
+ioHub includes the following high level functionality:
 
 #.  Monitoring of input events from experiment input devices such as the keyboard,
     mouse, analog to digital converters, XInput compatible gamepads, and eye trackers
@@ -38,6 +41,9 @@ ioHub supports the following high level functionality:
 #.  Device inputs are converted into common event types based on device type, 
     regardless of the underlying supported hardware. 
 
+Project Website and User Groups
+================================
+
 ioHub source is hosted on GitHub `here <https://www.github.com/isolver/iohub/>`_.
 
 A `user forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users>`_ 
@@ -45,12 +51,13 @@ and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&from
 are available on Google Groups for support questions and development discussion topics respectively.
 
 Contents
----------
+============
 
 .. toctree::
    :maxdepth: 2
    
    Installation <iohub/installation>
+   Supported OS and Device Overview <iohub/overview>
    Quick Start <iohub/quickstart>
    API Specification <iohub/api/api_home>
    API Index <iohub/api/indices>

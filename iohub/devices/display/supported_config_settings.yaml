@@ -35,6 +35,7 @@ Display:
             min_length: 1
             max_length: 32
             required: True
+    override_using_psycho_settings: IOHUB_BOOL
     save_events: False
     stream_events: False
     auto_report_events: False    
