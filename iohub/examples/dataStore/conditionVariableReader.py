@@ -32,9 +32,8 @@ same directory s the selected hdf5 file.
 import sys,os
 
 import iohub
-from iohub.datastore.util import ExperimentDataAccessUtility, pprint
+from iohub.datastore.util import ExperimentDataAccessUtility
 from iohub.util.experiment import FileDialog
-import msgpack
 
 def chooseDataFile():
     """

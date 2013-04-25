@@ -15,13 +15,20 @@ import os
 from collections import namedtuple
 import msgpack
 
+import iohub
+
 global _hubFiles
 
 try:
     len(_hubFiles)
 except:
     _hubFiles=[]
-        
+ 
+def openHubFile(filepath,filename,mode):
+    global _hubFiles
+    hubFile=openFile(os.path.join(filepath,filename), mode)
+    _hubFiles.append(hubFile)
+    return hubFile       
 ########### Experiment / Experiment Session Based Data Access #################
 
 class ExperimentDataAccessUtility(object):
@@ -97,6 +104,40 @@ class ExperimentDataAccessUtility(object):
                     sessions.append(SessionMetaDataInstance(*rcpy))
             return sessions
 
+    def getEventTable(self,event_type):
+        if self.hdfFile:
+            klassTables=self.hdfFile.root.class_table_mapping
+            deviceEventTable=None
+            event_column=None
+            event_value=None
+            
+            if isinstance(event_type,basestring):
+                if event_type.find('Event')>=0:
+                    event_column='class_name'
+                    event_value=event_type
+                else:
+                    event_value=''
+                    tokens=event_type.split('_')
+                    for t in tokens:
+                        event_value+=t[0].upper()+t[1:].lower()
+                    event_value=event_type+'Event'         
+                event_value='"%s"'%(event_value)
+            elif isinstance(event_type,(int,long)):
+                event_column='class_id'
+                event_value=event_type
+            else:
+                iohub.print2err("getEventTable error: event_type arguement must be a string or and int")
+                return None
+            
+            result=[row.fetch_all_fields() for row in klassTables.where('({0} == {1}) & (class_type_id == 1)'.format(event_column,event_value))]
+            if len(result)!= 1:
+                iohub.print2err("event_type_id passed to getEventAttribute can only return one row from CLASS_MAPPINGS: ",len(result))
+                return None
+                
+            tablePathString=result[0][3]
+            return self.hdfFile.getNode(tablePathString)
+        return None
+        
     def getConditionVariableNames(self):
         cv_group=self.hdfFile.root.data_collection.condition_variables
         ecv="EXP_CV_%d"%(self._experimentID,)
@@ -256,6 +297,9 @@ class ExperimentDataAccessUtility(object):
 
             return None
 
+    def getEventIterator(self,event_type):
+        return self.getEventTable(event_type).iterrows()
+        
     def close(self):
         global _hubFiles
         if self.hdfFile in _hubFiles:

@@ -324,7 +324,7 @@ class udpServer(DatagramServer):
         if self.iohub.emrt_file:
             exp_id= self.iohub.emrt_file.createOrUpdateExperimentEntry(experimentInfoList) 
             self.iohub._experiment_id=exp_id
-            self.iohub.log("Current Experiment ID: %d"%(self.iohub._experiment_id),'CRITICAL')
+            self.iohub.log("Current Experiment ID: %d"%(self.iohub._experiment_id))
             return exp_id
         return False
         
@@ -341,7 +341,7 @@ class udpServer(DatagramServer):
         if self.iohub.emrt_file:
             sess_id= self.iohub.emrt_file.createExperimentSessionEntry(sessionInfoDict)
             self.iohub._session_id=sess_id
-            self.iohub.log("Current Session ID: %d"%(self.iohub._session_id),'CRITICAL')
+            self.iohub.log("Current Session ID: %d"%(self.iohub._session_id))
             return sess_id
         return False
 
@@ -423,7 +423,7 @@ class ioServer(object):
         self._session_id=None
         self._experiment_id=None
 
-        self.log("Time Offset: {0}".format(Computer.globalClock.getLastResetTime()),'CRITICAL')
+        self.log("Server Time Offset: {0}".format(Computer.globalClock.getLastResetTime()))
 
         self._hookManager=None
         self.emrt_file=None
@@ -927,6 +927,8 @@ def run(rootScriptPathDir,configFilePath):
         sys.stdout.flush()
         
         gevent.run()
+
+        s.log("Server END Time Offset: {0}".format(Computer.globalClock.getLastResetTime()),'DEBUG')
 
     except Exception as e:
         print2err("Error occurred during ioServer.start(): ",str(e))

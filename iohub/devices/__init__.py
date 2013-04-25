@@ -23,7 +23,7 @@ if sys.platform != 'darwin':
     import psutil
     _psutil_available=True
 
-from iohub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake,MonotonicClock
+from iohub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake,monotonicClock
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg):
@@ -167,7 +167,7 @@ class Computer(object):
     #: and between the ioHub Server and Experiment Runtime Process. Do not 
     #: access this class directly, instead use the Computer.getTime()
     #: and associated method name alias's to actually get the current ioHub time.
-    globalClock=MonotonicClock()
+    globalClock=monotonicClock
 
     #: The name of the current operating system Python is running on.
     system=sys.platform

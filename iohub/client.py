@@ -478,9 +478,7 @@ class ioHubConnection(object):
         ioHub Server Process Completed With Code:  0
     """
     _replyDictionary=dict()
-    def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):
-        self._initial_clock_offset=Computer.globalClock.getLastResetTime()
-        
+    def __init__(self,ioHubConfig=None,ioHubConfigAbsPath=None):        
         if ioHubConfig:
             if not isinstance(ioHubConfig,dict):
                 raise ioHubError("The provided ioHub Configuration is not a dictionary.", ioHubConfig)
@@ -567,7 +565,7 @@ class ioHubConnection(object):
                 tfile.close()
 
         run_script=os.path.join(IO_HUB_DIRECTORY,'server.py')
-        subprocessArgList=[sys.executable,run_script,"%.6f"%self._initial_clock_offset,rootScriptPath,ioHubConfigAbsPath]
+        subprocessArgList=[sys.executable,run_script,"%.6f"%Computer.globalClock.getLastResetTime(),rootScriptPath,ioHubConfigAbsPath]
 
         # check for existing ioHub Process based on process if saved to file
         iopFileName=os.path.join(rootScriptPath ,'.iohpid')

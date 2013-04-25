@@ -37,15 +37,15 @@ class Experiment(Device):
     def __init__(self,*args,**kwargs):
         Device.__init__(self,*args,**kwargs['dconfig'])
 
-        self.critical=lambda text,ltime: Experiment.log(self,text,LogEvent.CRITICAL,ltime)
+        self.critical=lambda text,ltime: self.log(text,LogEvent.CRITICAL,ltime)
         self.fatal=self.critical
-        self.error=lambda text,ltime: Experiment.log(self,text,LogEvent.ERROR,ltime)
-        self.warning=lambda text,ltime: Experiment.log(self,text,LogEvent.WARNING,ltime)
+        self.error=lambda text,ltime: self.log(text,LogEvent.ERROR,ltime)
+        self.warning=lambda text,ltime: self.log(self,text,LogEvent.WARNING,ltime)
         self.warn=self.warning
-        self.data=lambda text,ltime: Experiment.log(self,text,LogEvent.DATA,ltime)
-        self.exp=lambda text,ltime: Experiment.log(self,text,LogEvent.EXP,ltime)
-        self.info=lambda text,ltime: Experiment.log(self,text,LogEvent.INFO,ltime)
-        self.debug=lambda text,ltime: Experiment.log(self,text,LogEvent.DEBUG,ltime)
+        self.data=lambda text,ltime: self.log(text,LogEvent.DATA,ltime)
+        self.exp=lambda text,ltime: self.log(text,LogEvent.EXP,ltime)
+        self.info=lambda text,ltime: self.log(text,LogEvent.INFO,ltime)
+        self.debug=lambda text,ltime: self.log(text,LogEvent.DEBUG,ltime)
         
     def _nativeEventCallback(self,native_event_data):
         if self.isReportingEvents():
@@ -259,7 +259,7 @@ class LogEvent(DeviceEvent):
         if log_time is None:
             log_time=created_time
         if level is None or level not in cls._levelNames:
-            level=cls.NOTSET
+            level=cls.DEBUG
         elif isinstance(level,basestring):
             level= cls._levelNames[level]
         return cls._createAsList(msg, level, created_time, log_time)

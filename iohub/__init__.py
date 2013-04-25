@@ -119,15 +119,19 @@ def isIterable(o):
 
 #set the default timing mechanism
 getTime=None
-    
+monotonicClock=None
 if psychopy_available:
-    getTime=psychopy.clock.getTime
+    # Get abosolute time base
+    getTime=psychopy.clock.getTime    
+    # Get the MonotonicClock Class
     MonotonicClock = psychopy.clock.MonotonicClock
+    # Get the default instance of the MonotonicClock class
+    monotonicClock = psychopy.clock.monotonicClock
 else:    
-    # Select the timer to use as the psychopy high resolution time base. Selection
+    # Select the timer to use as the ioHub high resolution time base. Selection
     # is based on OS and Python version. 
     # 
-    # Three requirements exist for the psychopy time base implementation:
+    # Three requirements exist for the ioHub time base implementation:
     #     A) The Python interpreter does not apply an offset to the times returned
     #        based on when the timer module being used was loaded or when the timer 
     #        fucntion first called was first called. 
@@ -135,7 +139,7 @@ else:
     #        between calls, 'not' system or CPU usage time. 
     #     C) The timer implementation must provide a resolution of 50 usec or better.
     #
-    # Given the above requirements, psychopy selects a timer implementation as follows:
+    # Given the above requirements, ioHub selects a timer implementation as follows:
     #     1) On Windows, the Windows Query Performance Counter API is used using ctypes access.
     #     2) On other OS's, if the Python version being used is 2.6 or lower,
     #        time.time is used. For Python 2.7 and above, the timeit.default_timer
@@ -185,6 +189,8 @@ else:
             """
             return self._timeAtLastReset
         
+        monotonicClock = psychopy.clock.MonotonicClock
+
 import constants
 
 

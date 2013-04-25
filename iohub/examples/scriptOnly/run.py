@@ -92,6 +92,12 @@ psychoStim['mouseDot'] =visual.GratingStim(psychoWindow,tex=None,
                                             pos=mouse.getPosition(),
                                             size=(50,50),color='purple')
 
+# Get any experiment events from the ioHub Server; this will put any LogEvents
+# created by the ioHub Server into any log files that have been setup with the
+# correct log level threshold.
+# If this is not done explicitly in your script, ioHub Log Events will be lost
+# and not logged to the psychopy script, although they will be logged to the 
+# experiment.log table in the dataStore, so not all is lost.
 ex_events=experiment.getEvents()
 
 # Clear all events from the global event buffer, 
@@ -124,17 +130,10 @@ while QUIT_EXP is False:
 
     # flip the psychopy window buffers, so the 
     # stim changes you just made get displayed.
-    psychoWindow.flip()
-    # It is on this side of the call that you know the changes have 
-    # been displayed, so you can make a call to one of the built-in time 
-    # methods and get the event time of the flip, as the built in
-    # time methods represent both experiment process and ioHub server
-    # process time. NOTE: Integration between the ioHub times and 
-    # psychopy clock times needs to be done, so for now when using ioHub
-    # you should use the ioHub times so that the event time fields
-    # can be related to Computer.getTime() current time readings.
-    flip_time=Computer.currentSec()
-
+    flip_time=psychoWindow.flip()
+    iohub_flip_time=Computer.getTime()
+    print 'flip_times:', flip_time, iohub_flip_time
+    experiment.debug("Flip Completed",flip_time)
     # for each new keyboard press event, check if it matches one
     # of the end example keys.
     for k in keyboard.getEvents(EventConstants.KEYBOARD_PRESS):
@@ -142,6 +141,12 @@ while QUIT_EXP is False:
             print 'Quit key pressed: ',k.key
             QUIT_EXP=True
     
+    # Get any experiment events from the ioHub Server; this will put any LogEvents
+    # created by the ioHub Server into any log files that have been setup with the
+    # correct log level threshold.
+    # If this is not done explicitly in your script, ioHub Log Events will be lost
+    # and not logged to the psychopy script, although they will be logged to the 
+    # experiment.log table in the dataStore, so not all is lost.
     ex_events=experiment.getEvents()
 
     io.clearEvents('all')
@@ -165,7 +170,7 @@ stime = Computer.currentSec()
 events=io.getEvents()
 etime=Computer.currentSec()
 print 'event count: ', len(events),' delay (msec): ',(etime-stime)*1000.0
-
+print 'Stript End: Computer.globalClock.getLastResetTime(): ',  Computer.globalClock.getLastResetTime()
 # close neccessary files / objects, 'disable high priority.
 Computer.disableHighPriority()
  

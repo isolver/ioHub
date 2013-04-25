@@ -127,7 +127,6 @@ class ioHubpyTablesFile():
         
         def eventTableLabel2ClassName(event_table_label):
             tokens=str(event_table_label[0]+event_table_label[1:].lower()+'Event').split('_') 
-            print2err("event_table_label->eventCLassName: ",event_table_label, ' -> ',''.join([t[0].upper()+t[1:] for t in tokens]))
             return ''.join([t[0].upper()+t[1:] for t in tokens])
 
         for event_cls_name,event_cls in event_class_dict.iteritems():
