@@ -22,7 +22,7 @@ DOT_COUNT=1000
 # Example where ioHub does not use yaml config files specified by user.
 
 import random
-io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
+io=quickStartHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
 
 # By default, keyboard, mouse, and display devices are created if you
 # do not pass any config info to the ioHubConnection class above.
@@ -33,6 +33,8 @@ keyboard=io.devices.keyboard
 # with no boarder, using the monitor default profile name used by ioHub,
 # which is created on the fly right now by the script. (ioHubDefault)
 myWin= FullScreenWindow(display)
+
+coord_type=display.getCoordinateType()
 
 #INITIALISE SOME STIMULI
 dotPatch =visual.DotStim(myWin,
@@ -46,12 +48,14 @@ dotPatch =visual.DotStim(myWin,
                         signalDots='same', #are the signal dots the 'same' on each frame? (see Scase et al)
                         noiseDots='direction', #do the noise dots follow random- 'walk', 'direction', or 'position'
                         speed=3.0,
-                        coherence=90.0
+                        coherence=90.0,
+                        units=coord_type
                         )
 
 message =visual.TextStim(myWin,
                          text='Hit Q to quit',
-                         pos=(0,-0.5)
+                         pos=(0,-0.5),
+                         units=coord_type
                          )
 
 Computer.enableHighPriority(disable_gc=False)

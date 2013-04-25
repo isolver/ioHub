@@ -3,13 +3,17 @@
 Converted PsychoPy mouse.py demo script to use ioHub package for keyboard and
 mouse input.
 """
-from psychopy import visual, core
-from iohub import quickStartHubServer
-from iohub.constants import EventConstants
-from iohub.util.experiment import FullScreenWindow
 import sys
 import random
-io=quickStartHubServer("exp_code","sess_%d"%(random.randint(1,10000)))
+
+from psychopy import visual, core
+
+from iohub import quickStartHubServer
+from iohub.client import Computer
+from iohub.constants import EventConstants
+from iohub.util.experiment import FullScreenWindow
+
+io=quickStartHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
 
 # get 'shortcut' handles to the devices you will be using in the experiment:
 myMouse=io.devices.mouse
@@ -21,22 +25,23 @@ myMouse.setSystemCursorVisibility(False)
 myWin = FullScreenWindow(display)
 
 screen_resolution=display.getPixelResolution()
-
 display_index=display.getIndex()
+coord_type=display.getCoordinateType()
 
 #INITIALISE SOME STIMULI
 fixSpot = visual.PatchStim(myWin,tex="none", mask="gauss",
-        pos=(0,0), size=(30,30),color='black', autoLog=False)
+        pos=(0,0), size=(30,30),color='black', autoLog=False, units=coord_type)
 grating = visual.PatchStim(myWin,pos=(300,0),
                            tex="sin",mask="gauss",
                            color=[1.0,0.5,-1.0],
                            size=(150.0,150.0), sf=(0.01,0.0),
-                           autoLog=False)#this stim changes too much for autologging to be useful
-
+                           autoLog=False, units=coord_type)
+                           
 message = visual.TextStim(myWin,pos=(0.0,-250),alignHoriz='center',
                           alignVert='center',height=40,
                           text='move=mv-spot, left-drag=SF, right-drag=mv-grating, scroll=ori',
-                          autoLog=False,wrapWidth=screen_resolution[0]*.9)
+                          autoLog=False,wrapWidth=screen_resolution[0]*.9,
+                          units=coord_type)
 
 last_wheelPosY=0
 

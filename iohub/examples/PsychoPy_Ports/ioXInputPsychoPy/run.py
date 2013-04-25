@@ -2,8 +2,9 @@
 Example of using XInput gamepad support from ioHub in PsychoPy Exp.
 """
 
-from psychopy import visual
+from psychopy import core, visual
 import iohub
+from iohub.client import Computer
 from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
 
 class ExperimentRuntime(ioHubExperimentRuntime):
@@ -23,8 +24,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
         # -x_min, -y_min is the screen bottom left
         # +x_max, +y_max is the screen top right
-        #
-        # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED.
         
         #create a window to draw in
         mouse=self.devices.mouse
@@ -38,6 +37,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # and make it a full screen boarderless window.
         screen_resolution= display.getPixelResolution()
 
+        unit_type = display.getCoordinateType()
         # Create a psychopy window, full screen resolution, full screen mode, 
         # pix units, with no boarder.
         myWin = FullScreenWindow(display)
@@ -54,14 +54,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         print "Capabilities: ",caps
     
         fixSpot = visual.PatchStim(myWin,tex="none", mask="gauss",pos=(0,0), 
-                            size=(30,30),color='black')
+                            size=(30,30),color='black',units=unit_type)
         
         grating = visual.PatchStim(myWin,pos=(0,0), tex="sin",mask="gauss",
-                            color='white',size=(200,200), sf=(0.01,0))
+                            color='white',size=(200,200), sf=(0.01,0),units=unit_type)
 
         msgText='Left Stick = Spot Pos; Right Stick = Grating Pos;\nLeft Trig = SF; Right Trig = Ori;\n"r" key = Rumble; "q" = Quit\n'
         message = visual.TextStim(myWin,pos=(0,-200),
-                            text=msgText,
+                            text=msgText,units=unit_type,
                             alignHoriz='center',alignVert='center',height=24,
                             wrapWidth=screen_resolution[0]*.9)
     

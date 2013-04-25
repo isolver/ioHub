@@ -7,7 +7,7 @@ Created on Sat Nov 03 19:09:25 2012
 
 from __future__ import division
 from psychopy.visual import Window
-import platform
+
 
 from ...devices import Computer
 from .. import pi,cos,sin,rad
@@ -15,7 +15,11 @@ from .. import pi,cos,sin,rad
 ## Windows Message Pumping
 #
 
-if platform.system() == 'Windows':
+def pumpLocalMessageQueue():
+    pass
+ 
+if Computer.system == 'win32':
+    global pumpLocalMessageQueue
     import pythoncom
     
     def pumpLocalMessageQueue():
@@ -28,11 +32,7 @@ if platform.system() == 'Windows':
         takes between 10 and 90 usec.
         """
         if pythoncom.PumpWaitingMessages() == 1:
-            raise KeyboardInterrupt()
-else:
-    def pumpLocalMessageQueue():
-        pass
-    
+            raise KeyboardInterrupt()   
 #
 ## Create a FullScreenWindow based on an ioHub Displays settings
 # 

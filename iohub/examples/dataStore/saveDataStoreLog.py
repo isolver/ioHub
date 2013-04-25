@@ -41,6 +41,7 @@ import sys,os
 import iohub
 from iohub.datastore.util import ExperimentDataAccessUtility
 from iohub.util.experiment import FileDialog
+from iohub import getTime
 
 # Get the logging level strings and level ID associations, so we can 
 # always save the string version to the output file.
@@ -56,7 +57,7 @@ def chooseDataFile():
     """
     script_dir=iohub.module_directory(chooseDataFile)
     
-    fdlg=iohub.util.experiment.FileDialog(message="Select a ioHub DataStore Events File", 
+    fdlg=FileDialog(message="Select a ioHub DataStore Events File", 
                     defaultDir=script_dir,fileTypes=FileDialog.IODATA_FILES,display_index=0)
                     
     status,filePathList=fdlg.show()
@@ -100,6 +101,7 @@ def writeDataRow(output_file,session_info,session_uservar_names,log_entry_data):
 #
 
 if __name__ == '__main__':
+    
     # Some variables to hold the lists of different column names.
     session_metadata_columns=None
     session_uservar_columns=None
@@ -111,7 +113,8 @@ if __name__ == '__main__':
     # Select the hdf5 file to process.
     data_file_path= chooseDataFile()  
     dpath,dfile=os.path.split(data_file_path)
-
+    
+    start_time=getTime()
     print 'Loading data from :',data_file_path,'\n'
 
     # Create an instance of the ExperimentDataAccessUtility class
@@ -152,10 +155,14 @@ if __name__ == '__main__':
             if i%100==0:
                 print '.',
             i+=1
+
+    output_file.close()
     
     # Be sure to close the ExperimentDataAccessUtility object; 
     # that closes the hdf5 file too.
     dataAccessUtil.close()
+    end_time=getTime()
+    task_duration=end_time-start_time
     print
-    print '\nOutput Complete. %d Events Saved to %s.\n'%(i,log_file_name)
+    print '\nOutput Complete. %d Events Saved to %s in %.3f seconds (%.2f events/seconds).\n'%(i,log_file_name,task_duration,i/task_duration)
     print '%s will be in the same directory as the selected .hdf5 file'%(log_file_name)

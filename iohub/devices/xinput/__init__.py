@@ -372,7 +372,7 @@ def _initializeGamePad(gamepad,device_number):
 class GamepadStateChangeEvent(DeviceEvent):
     PARENT_DEVICE=Gamepad
     EVENT_TYPE_ID=EventConstants.GAMEPAD_STATE_CHANGE
-    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+    EVENT_TYPE_STRING='GAMEPAD_STATE_CHANGE'
     IOHUB_DATA_TABLE=EVENT_TYPE_STRING
     _newDataTypes = [
 
@@ -421,7 +421,7 @@ class GamepadStateChangeEvent(DeviceEvent):
 
 class GamepadDisconnectEvent(GamepadStateChangeEvent):
     EVENT_TYPE_ID=EventConstants.GAMEPAD_DISCONNECT
-    EVENT_TYPE_STRING=EventConstants.getName(EVENT_TYPE_ID)
+    EVENT_TYPE_STRING='.GAMEPAD_DISCONNECT'
     IOHUB_DATA_TABLE=GamepadStateChangeEvent.EVENT_TYPE_STRING
     __slots__=[]
     def __init__(self,*args,**kwargs):

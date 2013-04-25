@@ -10,55 +10,6 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 
-PyTables EMRT File Format v 0.1 ALPHA
-=====================================
-
-Root Node == EMRT User / Site Data File
-+++++++++++++++++++++++++++++++++++++++
-
-The purpose of this file is to hold all data for a given user, or user group (lab / site). This includes
-all experiment data, all experiment collateral. experiment documentation, information of devices available
-to the person or lab, etc. This file will be the data storage hub for the EMRT. WE NEED A BACKUP POLICY. ;)
-
-* Node Name = Name of user, or usernam/ site name , lab name
-
-* Node Attributes:
-
-EMRT_File_Format_Version - file format version number itself.
-
-Children Nodes:
-+++++++++++++++
-
-* Implementation Node (Group): contains sub groups holding all files and scripts needed to run the experiment.
-
-* Logistics (Group): Contains sub groups and Tables containing user information, site information, device instance data, etc.
-
-* Documentation (Group): Contains HTML formatted documentation about the experiment, how to run it, etc. 
-                         index.html is always the starting page. A set of helper files will be provided to make generating 
-                         good looking scientific html documentation easier.
-                         
-* Data Collection (Group): Contains groups and Tables for all the different event types that can occur in an experiment, the 
-                         conditions for the experiment trials (dependent and independent variables), data on each session that
-                         has been run, and each paricipant, as well as data on the experiment itself. The file can contain data
-                         for > 1 experiment, so that needs to considered in all dat tables.
-
-Experiment Table
-++++++++++++++++
-
-id - unique experiment id (assigned by system
-code - user definable code for experiment
-name - full name of experiment, up to X characters long
-description - brief desciption of experiment, up to Y characters
-experiment_version - version of experiment - string up to Z char 
-create_date - date the experiment file was first created
-modified_date - date the file was last modified
-created_by - member id of user who created the experiment
-status - NOT_STARTED, ACTIVE, ON HOLD, COMPLETED, CANCELLED
-phase - EXPERIMENT_DESIGN, DATA_COLLECTION, ANALYSIS, WRITE_UP, NONE
-
-PyTables Definition
-+++++++++++++++++++
-
 """
 import os, atexit
 
@@ -90,9 +41,9 @@ perhaps one less than this.  < S. Simpson Note: These are 'not' GIL bound
 threads and therefore actually improve performance > """
 
 DATA_FILE_TITLE="ioHub Experiment Data File"
-FILE_VERSION = '0.8 Alpha'
+FILE_VERSION = '0.7.0 Beta'
 SCHEMA_AUTHORS='Sol Simpson'
-SCHEMA_MODIFIED_DATE='October 1st, 2012'
+SCHEMA_MODIFIED_DATE='April 24th, 2013'
 
         
 class ioHubpyTablesFile():

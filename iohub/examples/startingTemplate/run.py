@@ -4,27 +4,20 @@ ioHub
 """
 
 import iohub
+from iohub.client import Computer
 from iohub.util.experiment import ioHubExperimentRuntime
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
-    all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    ioHubExperimentRuntime __init__ itself.
+    Create an experiment using psychopy and the ioHub framework by extending 
+    the ioHubExperimentRuntime class
     """
     def run(self,*args,**kwargs):
         """
-        The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
-        script.py file in a standard psychopy experiment setup. That is all there is too it really.
+        The run method contains your experiment logic. It is equal to what
+        would be in your main psychopy experiment script.py file in a standard
+        psychopy experiment setup. That is all there is too it really.
         """
-
-        # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
-        # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
-        # -x_min, -y_min is the screen bottom left
-        # +x_max, +y_max is the screen top right
-        #
-        # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON.
-
         print "Hello World. Press any key to quit."
         self.hub.clearEvents('all')
         kb=self.devices.kb
@@ -38,7 +31,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 if __name__ == "__main__":
     def main(configurationDirectory):
         """
-        Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
+        Creates an instance of the ExperimentRuntime class, checks for an 
+        experiment config file name parameter passed in via
         command line, and launches the experiment logic.
         """
         import sys

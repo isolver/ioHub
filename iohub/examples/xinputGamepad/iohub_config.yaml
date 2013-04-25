@@ -14,32 +14,13 @@ monitor_devices:
         origin: center
     - Keyboard:
         name: kb
-        enable: True
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 256
     - Mouse:
         name: mouse
-        enable: True
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 256
     - Experiment:
         name: experimentRuntime
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 64
     - xinput.Gamepad:
         device_number: -1
         name: gamepad
-        enable: True
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 256
         device_timer:
             interval: 0.005
 data_store:

@@ -17,7 +17,7 @@ To Run:
 -------
 
 1. Ensure you have followed the ioHub installation instructions 
-   at http://www.github.com/isolver/iohub/wiki
+   in the ioHub HTML Documentation.
 2. Open a command prompt to the directory containing this file.
 3. Ensure you have a xinput compliment gamepad connected to the experiment
    computer and that it is turned on.
@@ -30,7 +30,7 @@ Any issues or questions, please let me know.
 from psychopy import  visual
 
 import iohub
-from iohub.devices import  Computer
+from iohub.client import  Computer
 from iohub.constants import EventConstants
 from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
 from iohub import OrderedDict
@@ -38,17 +38,14 @@ from iohub import OrderedDict
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
-    Create an experiment using psychopy and the ioHub framework by extending the ioHubExperimentRuntime class. At minimum
-    all that is needed in the __init__ for the new class, here called ExperimentRuntime, is the a call to the
-    ioHubExperimentRuntime __init__ itself.
+    Create an experiment using psychopy and the ioHub framework by extending 
+    the ioHubExperimentRuntime class. 
     """
     def run(self,*args,**kwargs):
         # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
         # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
         # -x_min, -y_min is the screen bottom left
         # +x_max, +y_max is the screen top right
-        #
-        # *** RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED SOON. ***
 
         print "THIS DEMO REQUIRES A CONNECTED (WIRED OR WIRELESS) XBOX 360"
         print "GAMEPAD OR OTHER XINPUT COMPATIBLE DEVICE. DEVICE ALSO NEEDS TO "
@@ -153,16 +150,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             # for each new keyboard event, check if it matches one of the end example keys.
             for k in kb.getEvents():
-                # key: the string representation of the key pressed, A-Z if a-zA-Z pressed, 0-9 if 0-9 pressed ect.
-                #      To get the mapping from a key_id to a key string, use
-                #
-                #      key_string=EventConstants.IDToName(key_event['key_id'])
-                #
-                # char: the ascii char for the key pressed. This field factors in if shift was also pressed or not
-                #       when the char was typed, so typing a 's' == char field of 's', while typing SHIFT+s == char
-                #       field of 'S'. This is in contrast to the key field, which always returns upper case values
-                #       regardless of shift value. If the character pressed is not an ascii printable character,
-                #       this filed will print junk, hex, or who knows what else at this point.
                 if k.key in ['ESCAPE',]:
                     print 'Quit key pressed: ',k.key
                     QUIT_EXP=True

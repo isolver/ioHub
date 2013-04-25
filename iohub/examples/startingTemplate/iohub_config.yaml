@@ -16,21 +16,9 @@ monitor_devices:
         origin: center
     - Keyboard:
         name: kb
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 256
     - Mouse:
         name: mouse
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 256
     - Experiment:
         name: experimentRuntime
-        save_events: True
-        stream_events: True
-        auto_report_events: True
-        event_buffer_length: 64
 data_store:
     enable: True
