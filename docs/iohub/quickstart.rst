@@ -5,9 +5,12 @@ QuickStart Guide for PsychoPy Coders
 .. note::
 
     This QuickStart Guide is intended to give a fast introduction to how use the 
-    ioHub and PsychoPy packages together. Not all the functionality of the ioHub 
-    is covered, nor are all device types. For a more complete review of the ioHub
-    package features and how to use them, see the ioHub User Manual section.
+    ioHub and PsychoPy packages together by going through the process of 'porting'
+    two PsychoPy demo's to use ioHub for device event reporting. 
+    
+    Not all the functionality of the ioHub  is covered, nor are all device types.
+    For a more complete review of the ioHub package features and how to use them,
+    see the ioHub User Manual section.
     
     Obviously the PsychoPy package API is used heavily, so it is important
     that you have an understanding of how to use PsychoPy at a *coder* level.
@@ -17,20 +20,20 @@ QuickStart Guide for PsychoPy Coders
 Overview
 ==========
 
-There are two ways that the ioHub API can be used when creating an experiment with
-PsychoPy. The first way is more in line with the 'standard' PsychoPy coder examples
-and can be used when simple devices like the keyboard and mouse are all that is 
-needed for the experiment. The second way, while still very easy to use, goes beyond
-'standard' PsychoPy coder examples by using YAML configuration files to define
-device properties and settings that do not change during an experiment instance,
-and uses a Python class wrapper around the experiment script itself, making access
-to the ioHub API more seamless and saving the coder from having to repeat or 
-remember to add some boilerplate code from experiment to experiment.
+In this section we will introduce ioHub by converting the PsychoPy demo 'mouse.py'
+to use the ioHub Event Monitoring Framework using a 'srcipt only' approach to
+working with ioHub. We will then convert a second PsychoPy demo, 'joystick_universal.py',
+but this time use the scipt + configuration file approach to using ioHub. 
 
-In the QuickStart we will go through an example of both methods.
+Each approach has some strengths and weaknesses, however in general if the experiment
+is using more complex device types, like an eye tracker or an analog to digital
+converter, then the latter approach of using two configuration files to define 
+experiment and session metadata and the specifics of how the devices being
+used should be configured, plus  a python source file that contains your experiment logic,
+is the better approach to use.
 
-Adding the ioHub API to a 'standard' or Existing PsychoPy Coder Experiment
-============================================================================
+Converting PsychoPy's mouse.py Demo to use ioHub
+================================================
 
 First, let's take an example from one of the PsychoPy demo scripts and show how
 to easily use the ioHub keyboard and mouse devices with it using iohub.quickStartHubServer.
@@ -85,7 +88,9 @@ PsychoPy software installation)::
         myWin.flip()#redraw the buffer
         
 To convert the mouse.py script as literally as possible and use the ioHub for
-the keyboard and mouse device inputs, the script would look as follows. Please review the
+the keyboard and mouse device inputs, the script would look as follows. The ioHub
+version is much longer here because loads of comments have been added to the 
+script explaining the ioHub API calls being made in some detail. Please review the
 comments added to the below source code, as they explain differences to note when using
 the ioHub package instead of the built in PsychoPy event functionality. The source
 code can be found in the ioHub example folder in the ioMouse example::
@@ -324,19 +329,23 @@ With your experiment file saved, you can run this example by running the python
 file script.
 
 
-Converting a PsychoPy Script to use the ioHub ExperimentIOHubRuntime Class
-===============================================================================
+Converting the PsychoPy Demo 'joystick_universal.py' Using ioHub Configuration Files 
+=====================================================================================
 
-The second way to create a PsychoPy experiment script that uses the ioHub package
-is to effectively wrap your experiment script in an extension of the 
-iohub.util.experiment.ExperimentIOHubRuntime class and to define the settings for
-your experiment and ioHub devices using experiment_config.yaml and iohub_config.yaml
-files. Using this approach has advantages regardless of the devices being used,
-however it is really the 'required' approach when your experiment is using more 
-complicated device types such as an eye tracker.
+The second approach to creating an ioHub experiment is to use a combination of
+the python experiment script files(s) needed for the experiment with two
+configuration files that are used by ioHub to learn about high level experiment
+data, any experiment session level variables that should be tracked, and the details of
+the devices to be used during the experiment runtime.
 
-Let's take another PsychoPy demo script and convert it to use the ioHub package, 
-this time by using the ExperimentIOHubRuntime class and .yaml configuration files.
+This approach is most useful when your experiment uses more complex devices like
+an eye tracker or analog to digital input device. However it can be used for any experiment,
+and has the advantage of cleanly seperating device configuration from the experiment
+runtime logic. This seperation allows, for example, the same experiment script to
+be used while still being able to easily change the eye tracker device that is used
+during the experiment runtime. Nothing in the python experiment logic needs to change,
+the eye tracker device configuration is instead updated to reflect the change in
+eye tracking hwardware being used.
 
 First, the PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
 
@@ -417,20 +426,18 @@ First, the PsychoPy demo script we will 'convert' is the joystick_universal.py d
         myWin.flip()#redraw the buffer
 
 .. note:: Currently ioHub has support for XInput compatible Gamepads only. This includes the 
-    Xbox 360 Gamepad for Computers (Wired or wireless) and some models of Logitech
+    Xbox 360 Gamepad for PCs (Wired or wireless) and some models of Logitech
     Gamepads, such as the Logitech F310 and F710. To run this example, you will need
     one of these Gamepad models, or another gamepad that supports the XInput interface.
     
-    Full XInput Gamepad 1.3 functionality is supported, including reading all 
+    Full XInput Gamepad 1.3 functionality is supported by ioHub, including reading all 
     Gamepad inputs, setting the vibration state for the two vibration mechanisms
     in the Xbox 360 PC and Logitech F710 controllers, and even getting the battery status 
     of wireless versions of the gamepads.
     
     Note that your computer needs to have XInput version 1.3 installed in order
     for the ioHub Gamepad device to work. if you do not, when you run your experiment
-    you will get an uniformative stack trace at the start of the experiment.
-    
-    TODO: Make the error message informative. ;)
+    you will get an error at the start of the experiment printed to your python console.
     
     You can check if you already have XInput 1.3 installed on your Windows system
     by searching for xinput1_3.dll in the c:\Windows directory of your PC. If the file 
@@ -450,7 +457,7 @@ compatible version of the demo can be started. Note that all source files for th
 example are in the ioGamepad directory of the ioHub Examples folder.
 
 The following steps should be followed if a new version of the demo is being created:
-------------------------------------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #. Create a directory (location of your choice) called ioXInputGamePad. The directory can be any name you wish, but here it is assumed it is called ioXInputPsychoPy.
 #. Within the ioXInputGamePad directory, create the python source file that will hold the example python source code. This example assumes it has been named run.py
@@ -458,9 +465,9 @@ The following steps should be followed if a new version of the demo is being cre
 #. Within the ioXInputGamePad directory, create a file that will hold the ioHub configuration for the demo. This file can be of any name, but the standard is to call it iohub_config.yaml.
 
 With the above directory and file structure created, contents can now be added to the
-python source file and the two .yaml config files as described below. 
+python source file and the two .yaml configuration files as described below. 
 
-.. note:: When using the ExperimentIOHubRuntime class approach to creating the experiment,
+.. note:: When using this approach to creating the experiment,
     the above expriment folder structure will always be used. To save time in creating
     this initial experiment folder setup, there is a folder called startingTemplate
     in the ioHub examples folder that contains the necessary python source file with
@@ -471,7 +478,7 @@ python source file and the two .yaml config files as described below.
     being created from scratch.
     
 run.py Python Source File Contents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++
 
 Add the following python source code to the run.py file that was created::
 
@@ -479,8 +486,9 @@ Add the following python source code to the run.py file that was created::
     Example of using XInput gamepad support from ioHub in PsychoPy Exp.
     """
 
-    from psychopy import visual
-    import ioHub
+    from psychopy import core, visual
+    import iohub
+    from iohub.client import Computer
     from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
 
     class ExperimentRuntime(ioHubExperimentRuntime):
@@ -493,20 +501,15 @@ Add the following python source code to the run.py file that was created::
             """
             The run method contains your experiment logic. It is equal to what would
             be in your main psychopy experiment script.py file in a standard psychopy
-            experiment setup. That is all there is to it really.
+            experiment setup. That is all there is too it really.
             """
 
             # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
             # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,
             # -x_min, -y_min is the screen bottom left
             # +x_max, +y_max is the screen top right
-            #
-            # RIGHT NOW, ONLY PIXEL COORD SPACE IS SUPPORTED. THIS WILL BE FIXED.
-
-            # Get 'shortcut' handles to the devices you will be using in the experiment.
-            # Note the change from 'io.devices.[deviceName]' when using iohub.quickStartHubServer
-            # to 'self.devices.[deviceName]' when extending ioHubExperimentRuntime.
-            # Also note that the [deviceName]'s are defined in the iohub_config.yaml (see below).
+            
+            #create a window to draw in
             mouse=self.devices.mouse
             display=self.devices.display
             keyboard=self.devices.keyboard
@@ -514,14 +517,15 @@ Add the following python source code to the run.py file that was created::
             computer=self.devices.computer
 
             # Read the current resolution of the displays screen in pixels.
-            # We will set our window size to match the current screen resolution
+            # We will set our window size to match the current screen resolution 
             # and make it a full screen boarderless window.
             screen_resolution= display.getPixelResolution()
 
-            # Create a psychopy window, full screen resolution, full screen mode,
+            unit_type = display.getCoordinateType()
+            # Create a psychopy window, full screen resolution, full screen mode, 
             # pix units, with no boarder.
             myWin = FullScreenWindow(display)
-
+                
             # Hide the 'system mouse cursor'
             mouse.setSystemCursorVisibility(False)
 
@@ -532,31 +536,30 @@ Add the following python source code to the run.py file that was created::
             gamepad.updateCapabilitiesInformation()
             caps=gamepad.getLastReadCapabilitiesInfo()
             print "Capabilities: ",caps
-
-            fixSpot = visual.PatchStim(myWin,tex="none", mask="gauss",pos=(0,0),
-                                size=(30,30),color='black')
-
+        
+            fixSpot = visual.PatchStim(myWin,tex="none", mask="gauss",pos=(0,0), 
+                                size=(30,30),color='black',units=unit_type)
+            
             grating = visual.PatchStim(myWin,pos=(0,0), tex="sin",mask="gauss",
-                                color='white',size=(200,200), sf=(0.01,0))
+                                color='white',size=(200,200), sf=(0.01,0),units=unit_type)
 
             msgText='Left Stick = Spot Pos; Right Stick = Grating Pos;\nLeft Trig = SF; Right Trig = Ori;\n"r" key = Rumble; "q" = Quit\n'
             message = visual.TextStim(myWin,pos=(0,-200),
-                                text=msgText,
+                                text=msgText,units=unit_type,
                                 alignHoriz='center',alignVert='center',height=24,
                                 wrapWidth=screen_resolution[0]*.9)
-
+        
             END_DEMO=False
-
+            
             while not END_DEMO:
+                
 
-                # Update stim from joystick
-                # Mapping between raw joystick values and screen coordinates is controlled by the
-                # normalizedValue2Pixel function defined below.
+                #update stim from joystick
                 x,y,mag=gamepad.getThumbSticks()['RightStick'] # sticks are 3 item lists (x,y,magnitude)
                 xx=self.normalizedValue2Pixel(x*mag,screen_resolution[0], -1)
                 yy=self.normalizedValue2Pixel(y*mag,screen_resolution[1], -1)
                 grating.setPos((xx, yy))
-
+                
                 x,y,mag=gamepad.getThumbSticks()['LeftStick'] # sticks are 3 item lists (x,y,magnitude)
                 xx=self.normalizedValue2Pixel(x*mag,screen_resolution[0], -1)
                 yy=self.normalizedValue2Pixel(y*mag,screen_resolution[1], -1)
@@ -564,36 +567,38 @@ Add the following python source code to the run.py file that was created::
 
                 # change sf
                 sf=gamepad.getTriggers()['LeftTrigger']
-
+                
                 grating.setSF((sf/display.getPixelsPerDegree()[0])*2+0.01) #so should be in the range 0:4
 
                 #change ori
                 ori=gamepad.getTriggers()['RightTrigger']
-                grating.setOri(ori*360.0)
+                grating.setOri(ori*360.0) 
 
                 #if any button is pressed then make the stimulus coloured
                 if gamepad.getPressedButtonList():
                     grating.setColor('red')
                 else:
                     grating.setColor('white')
-
+                        
                 #drift the grating
                 t=computer.getTime()
                 grating.setPhase(t*2)
                 grating.draw()
-
+                
                 fixSpot.draw()
                 message.draw()
                 myWin.flip()#redraw the buffer
 
+                #print joy.getAllAxes()#to see what your axes are doing!
+                
                 for event in keyboard.getEvents():
-                    if event.key in ['q',]:
+                    if event.key in ['q',]:                
                         END_DEMO=True
                     elif event.key in ['r',]:
                         # rumble the pad , 50% low frequency motor,
                         # 25% high frequency motor, for 1 second.
-                        r=gamepad.setRumble(50.0,25.0,1.0)
-
+                        r=gamepad.setRumble(50.0,25.0,1.0)                    
+                    
                 self.hub.clearEvents()#do this each frame to avoid getting clogged with mouse events
 
         def normalizedValue2Pixel(self,nv,screen_dim,minNormVal):
@@ -605,7 +610,7 @@ Add the following python source code to the run.py file that was created::
 
     ################################################################################
     # The below code should never need to be changed, unless you want to get command
-    # line arguments or something.
+    # line arguements or something. 
 
     if __name__ == "__main__":
         def main(configurationDirectory):
@@ -619,60 +624,71 @@ Add the following python source code to the run.py file that was created::
                 runtime=ExperimentRuntime(configurationDirectory, configFile)
             else:
                 runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-
+        
             runtime.start()
-
+            
         configurationDirectory=iohub.module_directory(main)
 
         # run the main function, which starts the experiment runtime
         main(configurationDirectory)
+        
+    ############################ End of run.py Script #########################
 
-
-experiment_config.yaml File Contents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining the Experiment Configuration Setting
+++++++++++++++++++++++++++++++++++++++++++++++
 
 The experiment configuration settings, including session level information, are
-represented in the experiment_config.yaml. There are three main types of experiment
-settings:
+represented in a YAML formatted configuration filecalled experiment_config.yaml.
+This file is placed in the same directory as the main experiment python script file.
+Three types of settings are defined within the experiment_config.yaml file:
 
 #.  Custom session variables you want displayed in a dialog for input at the start 
-    of the experiment. These are defined in the session_defaults: user_variables section. 
+    of each session of the experiment. These are defined in the 
+    session_defaults: user_variables section. 
 #.  Configuration settings related to the local Experiment process. 
 #.  Custom experiment preferences can also be added, as long as the preference name is 
     not a standard ioHub experiment configuration preference name.
 
+ioHub Configuration files are specified using YAML syntax. For this quickstart section,
+we will not go into details abuot each setting with the files.
+
 Enter the following into your experiment_config.yaml for this example::
 
     # Experiment level configuration settings in YAML format
-    title: ioHub XInput Gamepad Example with PsychoPy # appears in the read-only experiment dialog
-    code: ioXInput      # experiment code, used by the ioHub DataStore
-    version: '1.0'      # experiment version (must be a string)
-    description: Uses an XInput compatible gamepad within a PsychoPy script. # brief description for read-only dialog
-    session_defaults: # custom variables: defaultValues for the session dialog
-        name: Session Name  # session name
-        code: E1S01         # session code, used by the ioHub DataStore. Must be unique!
-        comments: None      # session comments
-    session_variable_order: [ name, code, comments ] # specifies order in session dialog. Unlisted session vars appear at the end.
-    ioHub:                        # local Experiment Process config
-        enable: True              # use ioHub? Requires a valid configuration .yaml file
-        config: ioHub_config.yaml # specifies the ioHub configuration file
+    title: ioHub XInput Gamepad Example with PsychoPy
+    code: ioXInput
+    version: '1.0'
+    description: Uses an XInput compatible gamepad within a psychoPy script.
+    session_defaults:
+        name: Session Name
+        code: E1S01
+        comments: None
+    session_variable_order: [ name, code, comments ]
+    ioHub:
+        enable: True
+        config: ioHub_config.yaml
 
     
-iohub_config.yaml File Contents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining Device Information in the iohub_config.yaml File.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The ioHub configuration settings are represented in the iohub_config.yaml. There are two types of ioHub settings:
+ioHub specific configuration settings, mainly in regard to the devices that will be used
+within your experiment, are represented in the iohub_config.yaml file.
+There are two types of ioHub settings in the iohub_config.yaml file:
 
-#.  ioDevice configuration settings.
-#.  ioHub Server configuration settings.
+#.  General ioHub Server configuration settings.
+#.  Details about the setup of each ioHub Device to be used.
 
 Enter the following into your iohub_config.yaml for this example::
 
-    monitor_devices:    # devices to be monitored
-        - Display:              # display settings 
-            name: display       # name, to be accessed using self.devices.[deviceName]
-            reporting_unit_type: pix # currently only pix are supported
-            device_number: 0    # allows for multiple displays
+    # iohub_config.yaml: settings related to the iohub process and the device types 
+    # that are to be enabled for the experiment.
+
+    monitor_devices:
+        - Display:
+            name: display
+            reporting_unit_type: pix
+            device_number: 0
             physical_dimensions:
                 width: 500
                 height: 281
@@ -681,27 +697,27 @@ Enter the following into your iohub_config.yaml for this example::
                 surface_center: 500
                 unit_type: mm
             psychopy_monitor_name: default
-            origin: [0.5,0.5]
+            origin: center
         - Keyboard:
-            name: keyboard      # name, to be accessed using self.devices.[deviceName]
+            name: keyboard
             save_events: True
             stream_events: True
             auto_report_events: True
             event_buffer_length: 256
         - Mouse:
-            name: mouse         # name, to be accessed using self.devices.[deviceName]
+            name: mouse
             save_events: True
             stream_events: True
             auto_report_events: True
             event_buffer_length: 256
         - Experiment:
-            name: experimentRuntime # name, to be accessed using self.devices.[deviceName]
+            name: experimentRuntime
             save_events: True
             stream_events: True
             auto_report_events: True
-            event_buffer_length: 64
+            event_buffer_length: 128
         - xinput.Gamepad:
-            name: gamepad       # name, to be accessed using self.devices.[deviceName]
+            name: gamepad
             device_number: -1
             enable: True
             save_events: True
@@ -710,10 +726,24 @@ Enter the following into your iohub_config.yaml for this example::
             event_buffer_length: 256
             device_timer:
                 interval: 0.005
-    data_store:         # ioHub server settings for recording events
-        enable: True
-    
+    data_store:
+        enable: True    
+        
+The iohub_config.yaml file also resides in the same folder as your main experiment script.
+
 With all three files saved, and a supported XInput compatible gamepad connected
 to the computer (powered on if a wireless gamepad), you can run the gamepad example
-by starting the run.py script.
+by starting the run.py script. 
 
+While at first this approach may seem like more work than a script only approach to 
+creating your experiment, I think once you have used it a couple times it will become
+clear that the configuration file vs. experiment logic approach to dividing how
+information is represented for an experiment often results in less work and the
+promotion of experiment python script reuse. This is because there is less of a need
+to be repeatedly 'configuring' more complex device types within the script environment itself, 
+but instead within a better suited, more constrained, device configuration specification.
+
+Please let us know your opinions on this after working with this experiment structure.
+
+For details on the ioHub configuration file definition and the valid settings 
+supported by each device please see the API section of the Manual.

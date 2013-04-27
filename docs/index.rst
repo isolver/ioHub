@@ -1,5 +1,5 @@
 ================================
-ioHub Event Monitoring Framwork
+ioHub Event Monitoring Framework
 ================================
 
 ioHub is a Python package providing a cross-platform computer device event monitoring and storage framework. ioHub is free to use and is GLP version 3 licensed.
