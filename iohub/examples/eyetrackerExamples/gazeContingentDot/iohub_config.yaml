@@ -26,7 +26,7 @@ monitor_devices:
         name: exp_rt
         save_events: True
         stream_events: True
-        event_buffer_length: 64
+        event_buffer_length: 128
     - eyetracker.hw.sr_research.eyelink.EyeTracker:
         # Indicates if the device should actually be loaded at experiment runtime.
         enable: True

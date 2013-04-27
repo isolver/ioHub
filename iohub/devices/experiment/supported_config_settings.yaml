@@ -10,7 +10,7 @@ Experiment:
     auto_report_events: True    
     event_buffer_length:
         IOHUB_INT:
-            min: 128
+            min: 1
             max: 2048    
     monitor_event_types:
         IOHUB_LIST: 

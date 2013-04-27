@@ -14,13 +14,8 @@ from .. import pi,cos,sin,rad
 #
 ## Windows Message Pumping
 #
-
-global pumpLocalMessageQueue
-def pumpLocalMessageQueue():
-    pass
  
 if Computer.system == 'win32':
-    global pumpLocalMessageQueue
     import pythoncom
     
     def pumpLocalMessageQueue():
@@ -34,6 +29,10 @@ if Computer.system == 'win32':
         """
         if pythoncom.PumpWaitingMessages() == 1:
             raise KeyboardInterrupt()   
+else:
+    def pumpLocalMessageQueue():
+        pass
+
 #
 ## Create a FullScreenWindow based on an ioHub Displays settings
 # 

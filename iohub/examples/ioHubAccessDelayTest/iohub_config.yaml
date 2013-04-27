@@ -32,6 +32,6 @@ monitor_devices:
         save_events: True
         stream_events: True
         auto_report_events: True
-        event_buffer_length: 64
+        event_buffer_length: 128
 data_store:
     enable: True

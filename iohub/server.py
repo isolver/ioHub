@@ -505,7 +505,7 @@ class ioServer(object):
         for default_config_param,default_config_value in default_device_config_dict.iteritems():
             if default_config_param not in device_config_dict:            
                 if isinstance(default_config_value,(dict,OrderedDict)):
-                    #ioHub.print2err("dict setting value in default config not in device config:\n\nparam: {0}\n\nvalue: {1}\n============= ".format(default_config_param,default_config_value ))
+                    #print2err("dict setting value in default config not in device config:\n\nparam: {0}\n\nvalue: {1}\n============= ".format(default_config_param,default_config_value ))
                     device_param_value=dict()
                     self.processDeviceConfigDictionary(None,None,
                                                        device_param_value,default_config_value)
@@ -515,7 +515,7 @@ class ioServer(object):
                     
         # Start device config verification.
         if device_module_path and  device_class_name:
-            #ioHub.print2err('** Verifying device configuartion: {0}\t{1}'.format(device_module_path,device_class_name))
+            #print2err('** Verifying device configuartion: {0}\t{1}'.format(device_module_path,device_class_name))
     
             device_config_errors=validateDeviceConfiguration(device_module_path,device_class_name,device_config_dict)
     
@@ -603,7 +603,7 @@ class ioServer(object):
                                 self._hookManager.HookKeyboard()
                                 self._keyboardHooked=True
     
-                            iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
+                            #iohub.log("WindowsHook PumpEvents Periodic Timer Created.")
                 
                         def _poll(self):
                             import pythoncom
@@ -620,7 +620,7 @@ class ioServer(object):
                 else:
                     #print2err("UPDATING pyHook Monitor....")
                     if device_class_name == 'Mouse' and self._hookDevice._mouseHooked is False:
-                       # print2err("Hooking Mouse.....")
+                        #print2err("Hooking Mouse.....")
                         self._hookDevice._hookManager.MouseAll = deviceDict['Mouse']._nativeEventCallback
                         self._hookDevice._hookManager.HookMouse()
                         self._hookDevice._mouseHooked=True
@@ -637,7 +637,7 @@ class ioServer(object):
                 # https://github.com/garrybodsworth/pyxlib-ctypes
                 from .devices import pyXHook
                 if self._hookManager is None:
-                    iohub.log("Creating pyXHook Monitors....")
+                    #iohub.log("Creating pyXHook Monitors....")
                     self._hookManager = pyXHook.HookManager()
                     self._hookManager._mouseHooked=False
                     self._hookManager._keyboardHooked=False
@@ -658,39 +658,39 @@ class ioServer(object):
     
                     #print2err("Starting pyXHook.HookManager.....")
                     self._hookManager.start()
-                    iohub.log("pyXHook Thread Created.")
+                    #iohub.log("pyXHook Thread Created.")
                     #print2err("pyXHook.HookManager thread created.")
                 else:
-                    iohub.log("Updating pyXHook Monitor....")
-                    if device_class_name == 'Keyboard':
+                    #iohub.log("Updating pyXHook Monitor....")
+                    if device_class_name == 'Keyboard' and self._hookManager._keyboardHooked is False:
                         #print2err("Hooking Keyboard.....")
                         self._hookManager.HookKeyboard()
                         self._hookManager.KeyDown = deviceDict['Keyboard']._nativeEventCallback
                         self._hookManager.KeyUp = deviceDict['Keyboard']._nativeEventCallback
                         self._hookManager._keyboardHooked=True
-                    elif device_class_name == 'Mouse':                
+                    if device_class_name == 'Mouse' and self._hookManager._mouseHooked is False:                
                         #print2err("Hooking Mouse.....")
                         self._hookManager.HookMouse()
                         self._hookManager.MouseAllButtonsDown = deviceDict['Mouse']._nativeEventCallback
                         self._hookManager.MouseAllButtonsUp = deviceDict['Mouse']._nativeEventCallback
                         self._hookManager.MouseAllMotion = deviceDict['Mouse']._nativeEventCallback
                         self._hookManager._mouseHooked=True
-                    iohub.log("Finished Updating pyXHook Monitor....")
+                    #iohub.log("Finished Updating pyXHook Monitor....")
                     
 
             else: # OSX
                 if self._hookDevice is None:
                     self._hookDevice=[]
                     
-                if 'Mouse' not in self._hookDevice:
-                   # print2err("Hooking OSX Mouse.....")
+                if  device_class_name == 'Mouse' and 'Mouse' not in self._hookDevice:
+                    #print2err("Hooking OSX Mouse.....")
                     mouseHookMonitor=DeviceMonitor(deviceDict['Mouse'],0.004)
                     self.deviceMonitors.append(mouseHookMonitor)
                     deviceDict['Mouse']._CGEventTapEnable(deviceDict['Mouse']._tap, True)
                     self._hookDevice.append('Mouse')
                     #print2err("Done Hooking OSX Mouse.....")
-                elif 'Keyboard' not in self._hookDevice:
-                   # print2err("Hooking OSX Keyboard.....")
+                if device_class_name == 'Keyboard'  and 'Keyboard' not in self._hookDevice:
+                    #print2err("Hooking OSX Keyboard.....")
                     kbHookMonitor=DeviceMonitor(deviceDict['Keyboard'],0.004)
                     self.deviceMonitors.append(kbHookMonitor)
                     deviceDict['Keyboard']._CGEventTapEnable(deviceDict['Keyboard']._tap, True)
