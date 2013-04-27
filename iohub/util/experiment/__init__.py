@@ -15,6 +15,7 @@ from .. import pi,cos,sin,rad
 ## Windows Message Pumping
 #
 
+global pumpLocalMessageQueue
 def pumpLocalMessageQueue():
     pass
  

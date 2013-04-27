@@ -1,6 +1,6 @@
-#####################################################
+===============================================
 Measurement Computing AnalogInputDevice Class
-#####################################################
+===============================================
 
 .. note::
     Supported Platforms:
@@ -12,19 +12,20 @@ Measurement Computing AnalogInputDevice Class
     USB-1208FS and USB-1616FS 
 
 .. autoclass:: iohub.devices.daq.hw.mc.AnalogInput
-    :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
-
+    :exclude-members: input_channel_count, options, ANALOG_RANGE, ANALOG_TO_DIGITAL_RANGE, DAQ_CHANNEL_MAPPING, DAQ_CONFIG_OPTIONS , DAQ_GAIN_OPTIONS, ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
+    
+    
 Installing other Necessary Measurement Computing Software
-###########################################################
+==========================================================
 
 Contents TBC
     
 Measurement Computing AnalogInputDevice iohub_config.yaml Settings
-####################################################################
+===================================================================
 
 Contents TBC
 
 General Considerations
-#######################
+=======================
 
 None at this time.

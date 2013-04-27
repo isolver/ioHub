@@ -1,6 +1,6 @@
-##################################
+================================
 iohub.devices.display.Display
-##################################
+================================
 
 Device description text TBC.
 
@@ -82,6 +82,6 @@ add the following entry to the **monitor_devices** list::
         psychopy_config_file: ioHubDefault        
 
 Display Event Types
-###################################
+====================
 
 The Display Device currently has no associated event types.

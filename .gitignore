@@ -85,3 +85,4 @@ nonSphinx
 appData.cfg
 *.edf
 *.zip
+*.bat
