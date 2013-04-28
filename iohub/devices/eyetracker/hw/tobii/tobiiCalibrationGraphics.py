@@ -262,7 +262,6 @@ class TobiiPsychopyCalibrationGraphics(object):
             left,top,right,bottom=self._eyetrackerinterface._display_device.getCoordBounds()
             w,h=right-left,top-bottom            
             x,y=left+w*pt[0],bottom+h*(1.0-pt[1])
-            print2err("coordBounds: ",(left,top,right,bottom),(x,y),pt)
             self.drawCalibrationTarget((x,y))
             self.clearAllEventBuffers()
             stime=currentTime()

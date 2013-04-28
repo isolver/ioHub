@@ -7,8 +7,7 @@ from psychopy import visual
 import iohub
 from iohub.client import Computer, ioHubExperimentRuntime
 from iohub.constants import EventConstants, EyeTrackerConstants
-from iohub.util import getCurrentDateTimeString
-from iohub.util import ( DeviceEventTrigger, 
+from iohub.util import ( DeviceEventTrigger, getCurrentDateTimeString,
                                    ClearScreen, InstructionScreen, 
                                    FullScreenWindow)
 
@@ -47,7 +46,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # they are added, you you can use it to reference stim by a name or by 'zorder'
         image_name='./images/party.png'
         imageStim = visual.ImageStim(self.window, image=image_name, name='image_stim',units=display_coord_type)
-        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(-200,-200),size=(3,3),color='green', units=display_coord_type)
+        gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(0,0 ),size=(66,66),color='green', units=display_coord_type)
 
         # create screen statesertv
         # screen state that can be used to just clear the screen to blank.
@@ -89,7 +88,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             while runtrial:
                 gpos=tracker.getLastGazePosition()
                 if gpos:
-                    print 'gpos: ',gpos
+                    #print 'gpos: ',gpos
                     gaze_dot.setPos(gpos)
                     imageStim.draw()
                     gaze_dot.draw()
