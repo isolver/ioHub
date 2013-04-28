@@ -111,6 +111,7 @@ class MouseDevice(Device):
 
         Args: 
             return_display_index: if True, the display index that is associated with the mouse position will also be returned.
+            
         Returns:
             tuple: If return_display_index is false (default), return (x,y) position of mouse. If return_display_index is True return ( (x,y), display_index). 
         """
@@ -176,8 +177,8 @@ class MouseDevice(Device):
         arbitrary value space ranging for -32648 to +32648. Scroll position is initialize to 0 when
         the experiment starts. This method allows you to change the scroll value to anywhere in the
         valid value range.
-        Args (int): The scroll position you want to set the vertical scroll to. Should be a number
-                    between -32648 to +32648.
+        Args (int): The scroll position you want to set the vertical scroll to. Should be a number between -32648 to +32648.
+                    
         Returns (int): current vertical scroll value.
         """
         if isinstance(s, (int, long, float, complex)):

@@ -29,22 +29,25 @@ attributes and event data storage tables formats.
     The ioHub package creates all Device based class instances and DeviceEvent instances as needed,
     and these classses are accessable via methods within the ioHub package.
  
-Abstract Classes
-=================
+The Root Device and DeviceEvent Classes
+=========================================
 
-The parent class of all supported device types in the ioHub is the Device class. 
-The parent class of all events, regardless of the device type that it has been received from,
-is the DeviceEvent class. 
+All device and event types supported by the ioHub are extensions of two abstract
+clsss definitions.
 
 iohub.devices.Device
 +++++++++++++++++++++
+
+The parent class of all supported device types in the ioHub is the Device class. 
    
 .. autoclass:: iohub.devices.Device
     :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
-    
 
 iohub.devices.DeviceEvent
 ++++++++++++++++++++++++++
+
+The parent class of all events, regardless of the device type that it has been received from,
+is the DeviceEvent class. 
 
 .. autoclass:: iohub.devices.DeviceEvent
     :exclude-members: filter_id, device_id, NUMPY_DTYPE, DEVICE_ID_INDEX, BASE_EVENT_MAX_ATTRIBUTE_INDEX, CLASS_ATTRIBUTE_NAMES, EVENT_CONFIDENCE_INTERVAL_INDEX, EVENT_DELAY_INDEX, EVENT_DEVICE_TIME_INDEX, EVENT_EXPERIMENT_ID_INDEX, EVENT_FILTER_ID_INDEX, EVENT_HUB_TIME_INDEX, EVENT_ID_INDEX, EVENT_LOGGED_TIME_INDEX, EVENT_SESSION_ID_INDEX, EVENT_TYPE_ID, EVENT_TYPE_ID_INDEX, EVENT_TYPE_STRING, IOHUB_DATA_TABLE, PARENT_DEVICE, createEventAsClass, createEventAsDict, createEventAsNamedTuple, e, namedTupleClass
@@ -72,4 +75,4 @@ found in the following sections.
 Device Class Heirarchy
 =======================
 
-.. inheritance-diagram:: iohub.devices.Device
+**inheritance dash diagram not working**

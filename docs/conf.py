@@ -42,6 +42,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.viewcode']
 
+autosummary_generate=True
+
 mathjax_path="..\\..\\Python-2.7.3\\Lib\\site-packages\\IPython\\frontend\\html\\notebook\\static\\mathjax"
 
 # Add any paths that contain templates here, relative to this directory.
@@ -338,6 +340,7 @@ html_theme_options = {
     'bootswatch_theme': "united",
 }
 
+autoclass_content = "class"
 
 autodoc_default_flags = ['members', 'undoc-members', 'inherited-members','show-inheritance']
 

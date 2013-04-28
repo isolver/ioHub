@@ -40,7 +40,7 @@ To Run:
 import sys,os
 import iohub
 from iohub.datastore.util import ExperimentDataAccessUtility
-from iohub.util.experiment import FileDialog
+from iohub.util import FileDialog
 from iohub import getTime
 
 # Get the logging level strings and level ID associations, so we can 

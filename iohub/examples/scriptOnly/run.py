@@ -26,10 +26,8 @@ To Run:
 
 """
 from psychopy import visual, core
-from iohub.constants import EventConstants
-from iohub.devices import Computer
-from iohub import OrderedDict,quickStartHubServer
-from iohub.util.experiment import FullScreenWindow
+from iohub.client import Computer, quickStartHubServer,EventConstants
+from iohub.util import FullScreenWindow, OrderedDict
 
 # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
 # REGARDLESS OF THE COORDINATE SPACE YOU ARE RUNNING IN. THIS MEANS 0,0 IS SCREEN CENTER,

@@ -4,8 +4,8 @@ Example of using XInput gamepad support from ioHub in PsychoPy Exp.
 
 from psychopy import core, visual
 import iohub
-from iohub.client import Computer
-from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
+from iohub.client import Computer, ioHubExperimentRuntime
+from iohub.util import FullScreenWindow
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """

@@ -157,6 +157,7 @@ Supported EyeTracker Device Event Types
 The LC EyeGaze implementation of the Common Eye Tracker Interface supports the 
 following eye event types, with data being populated for the attributes listed 
 with each event type:
+
     #. iohub.devices.eyetracker.MonocularEyeSampleEvent:
         #. Attributes supported:
             #. experiment_id

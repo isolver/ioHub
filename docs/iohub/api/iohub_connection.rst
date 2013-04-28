@@ -1,6 +1,6 @@
-##################################################
-iohub.client.ioHubConnection and Related Classes
-##################################################
+==========================================
+Connecting to the ioHub Event Framework
+==========================================
 
 The Experiment / PsychoPy script runs in a seperate Process than that of the 
 ioHub Server. A UDP message protocal is used by the two processes to communicate
@@ -25,8 +25,47 @@ significantly longer than stated above, please check the following:
     * Are you running the test on a multicore CPU? Using the the ioHub and PychoPy packages together on an old single core or single CPU computer will likely cause increased delays.
     * Are other background processes running that can interfer with the experiment or ioHub process and cause poor reduced performance? Examples of such programs or services are file backup software, cloud based file syncronization programs such as Dropbox, Google Drive, bloated antivirus software such as Norton, etc. If any of these types of serverices or programs are running in the background, turn them off while you run your experiment sessions. This is important even if using PsychoPy alone, but is even more important when using ioHub and PsychoPy together. 
  
-iohub.client.ioHubConnection
-###############################
+ioHubConnection Class
+=======================
 
 .. autoclass:: iohub.client.ioHubConnection
     :members:
+	
+
+quickStartHubServer Function
+==============================
+
+.. autofunction:: iohub.client.quickStartHubServer
+
+    
+ioHubExperimentRuntime Class
+=============================
+
+The ioHubExperimentRuntime Class is a core class using in the ioHub Package. If
+your experiment contains more than just a keyboard and mouse device, or even if those
+are the only devices used, using the ioHubExperimentRuntime class helps make your script mode
+modular and helps you control the specific device settings used across sessions of
+an experiment during data collection. 
+
+The main features of the ioHubExperimentRuntime classs are:
+#. Simple addition of the experiment logic by simply creating your main experiment script in the runmethod of the ioHubExperimentRuntime class extension.
+#. Use of an experiment_config.yaml and ioHub_congif.yaml to represent experiment and device setting to be used during the experiment runtime.
+#. Automatic creation of the ioHubCOnnection class, creation of the ioHub Server process, and initialization of all devices specified in the iohub_config.yaml.
+#. Automatic display of an "Experiment Details" Dialog at the start of each experiment session, listing some of the experiment details, helping to ensure the correct experiment is being run.
+#. Automatic display of an Experiment Session information dialog, which can be customized within the experiment_config.yaml for each experiment, allowing collection of relevent participant data prior to the start of the experiment itself.
+#. Automatic cleanup of ioHub and PsychoPy objects as necessary at the end of the experiment.
+
+ioHubExperimentRuntime Class Definition
+#########################################
+
+.. autoclass:: iohub.client.ioHubExperimentRuntime
+    :members:
+
+Example Usage
+##############
+
+The Quickstart section of this manual contains an example of how to use the 
+ioHubExperimentRuntime class and create the two .yaml configuration files.
+
+The ioHub examples folder also has many demos of how to use this class, as most
+of the demos were written using it.

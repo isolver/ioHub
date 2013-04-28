@@ -35,10 +35,8 @@ To Run:
 
 """
 from psychopy import core, visual, logging
-from iohub import quickStartHubServer
-from iohub.constants import EventConstants
-from iohub.devices import Computer
-from iohub.util.experiment import FullScreenWindow
+from iohub.client import Computer, quickStartHubServer,EventConstants
+from iohub.util import FullScreenWindow
 
 # When you would like to use the psychopy logging module, you create a logFile
 # and, providing the log file name to use, whether you want to over-write a

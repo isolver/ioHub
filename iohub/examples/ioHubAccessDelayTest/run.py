@@ -15,10 +15,8 @@ from psychopy import visual
 from numpy import zeros
 
 import iohub
-from iohub.devices import Computer
-from iohub.constants import EventConstants
-from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
-from iohub import OrderedDict
+from iohub.client import Computer, ioHubExperimentRuntime,EventConstants
+from iohub.util import FullScreenWindow, OrderedDict
 
 
 
@@ -245,7 +243,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         plot(bins, y, 'r--', linewidth=1)
         xlabel('ioHub getEvents Delay')
         ylabel('Percentage')
-        title('$\mathrm{{Histogram\ of\ Delay:}}\ \min={0},\ \max={1},\ \mu={2},\ \sigma={3}$'.format(
+        title('ioHub Event Delay Histogram (msec.usec):\n'+r'$\ \min={0:.3f},\ \max={1:.3f},\ \mu={2:.3f},\ \sigma={3:.3f}$'.format(
                 dmin, dmax, dmean, dstd))
         axis([0, dmax+1.0, 0, 25.0])
         grid(True)

@@ -14,9 +14,8 @@ This script is a copy of the PsychoPy 'dots' demo with
 ioHub integration.
 """
 from psychopy import visual, core
-from iohub import quickStartHubServer
-from iohub.client import Computer
-from iohub.util.experiment import FullScreenWindow
+from iohub.client import Computer, quickStartHubServer
+from iohub.util import FullScreenWindow
 DOT_COUNT=1000
 
 # Example where ioHub does not use yaml config files specified by user.

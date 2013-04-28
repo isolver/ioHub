@@ -6,9 +6,8 @@ ioHub
 from psychopy import visual
 
 import iohub
-from iohub import OrderedDict
-from iohub.devices import Computer
-from iohub.util.experiment import ioHubExperimentRuntime, FullScreenWindow
+from iohub.client import Computer, ioHubExperimentRuntime
+from iohub.util import FullScreenWindow, OrderedDict
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """

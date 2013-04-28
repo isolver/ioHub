@@ -7,7 +7,7 @@ ioHub
 from psychopy import visual
 
 import iohub
-from iohub.util.experiment import ScreenState
+from iohub.util import ScreenState
 
 from shapely.geometry import Point
 

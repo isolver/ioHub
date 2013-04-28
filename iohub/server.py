@@ -18,7 +18,7 @@ from collections import deque
 
 import iohub
 import iohub.client
-from iohub import print2err, printExceptionDetailsToStdErr, ioHubError,OrderedDict,convertCamelToSnake,MonotonicClock
+from iohub.util import OrderedDict,print2err, printExceptionDetailsToStdErr, ioHubError, createErrorResult,convertCamelToSnake,MonotonicClock
 from iohub.constants import DeviceConstants,EventConstants
 from iohub.devices import Computer, DeviceEvent, import_device        
 from iohub.devices.deviceConfigValidation import validateDeviceConfiguration
@@ -34,11 +34,6 @@ currentSec= Computer.currentSec
 import msgpack
 msgpk_unpacker=msgpack.Unpacker(use_list=True)
 msgpk_unpack=msgpk_unpacker.unpack
-
-def createErrorResult(error_name,**kwargs):
-    print2err( "IOHUB_SERVER_ERROR",error_name,kwargs)
-    printExceptionDetailsToStdErr()
-    return "IOHUB_SERVER_ERROR",error_name,kwargs
     
 #noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):

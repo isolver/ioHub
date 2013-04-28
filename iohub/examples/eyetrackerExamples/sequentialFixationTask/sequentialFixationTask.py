@@ -5,11 +5,11 @@ ioHub
 """
 
 import iohub
-from iohub.devices import Computer
-from iohub.util.experiment import (ioHubExperimentRuntime,ExperimentVariableProvider,
+from iohub.client import Computer,ioHubExperimentRuntime, EventConstants
+from iohub.util import (ExperimentVariableProvider, getCurrentDateTimeString,
                               DeviceEventTrigger, ClearScreen, generatedPointGrid,
                               InstructionScreen, FileDialog, FullScreenWindow)
-from iohub.constants import EventConstants
+
 from  experimentResources import TargetScreen
 
 
@@ -62,7 +62,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                            display_index=display.getIndex())
 
         result,conditionVariablesFile=fdialog.show()
-        fdialog.destroy()
+        fdialog.Destroy()
 
         if result != FileDialog.OK_RESULT:
             print "User cancelled Condition Variable Selection... Exiting Experiment."
@@ -95,7 +95,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.clearScreen.flip(text='EXPERIMENT_INIT')
 
         self.clearScreen.sendMessage("IO_HUB EXPERIMENT_INFO START")
-        self.clearScreen.sendMessage("ioHub Experiment started {0}".format(ioHub.util.getCurrentDateTimeString()))
+        self.clearScreen.sendMessage("ioHub Experiment started {0}".format(getCurrentDateTimeString()))
         self.clearScreen.sendMessage("Experiment ID: {0}, Session ID: {1}".format(self.hub.experimentID,self.hub.experimentSessionID))
         self.clearScreen.sendMessage("Stimulus Screen ID: {0}, Size (pixels): {1}, CoordType: {2}".format(display.getIndex(),display.getPixelResolution(),display.getCoordinateType()))
         self.clearScreen.sendMessage("Calculated Pixels Per Degree: {0} x, {1} y".format(*display.getPixelsPerDegree()))        
@@ -262,70 +262,78 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             self.targetScreen.nextAreaOfInterest=None
             
             for trial in trialSet.getNextConditionSet():
-                currentTrialIndex=trialSet.getCurrentConditionSetIndex()
-                
-                nextTargetPosition=TARGET_POSITIONS[currentTrialIndex]                
-                trial['FP_X']=nextTargetPosition[0]
-                trial['FP_Y']=nextTargetPosition[1]
-                
-                ppd_x,ppd_y=self.devices.display.getPixelsPerDegree()
-                                
-                fp_outer_radius=int(trial['FP_OUTER_RADIUS']*ppd_x),int(trial['FP_OUTER_RADIUS']*ppd_y)
-                fp_inner_radius=int(trial['FP_INNER_RADIUS']*ppd_x),int(trial['FP_INNER_RADIUS']*ppd_y)
-
-                self.targetScreen.setScreenColor(tuple(trial['SCREEN_COLOR']))
-                self.targetScreen.setTargetOuterColor(tuple(trial['FP_OUTER_COLOR']))
-                self.targetScreen.setTargetInnerColor(tuple(trial['FP_INNER_COLOR']))
-                self.targetScreen.setTargetOuterSize(fp_outer_radius)
-                self.targetScreen.setTargetInnerSize(fp_inner_radius)
-                
-                self.hub.clearEvents('kb') 
-                
-                self.targetScreen.setTimeout(trial['PRE_POS_CHANGE_INTERVAL'])
-                self._TRIAL_STATE=trial,'FIRST_PRE_POS_CHANGE_KEY'                
-                target_pos1_color1_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_INITIAL_COLOR')
-                
-                
-                self.targetScreen.setTargetPosition(nextTargetPosition)
-                self.targetScreen.setTimeout(trial['PRE_COLOR_CHANGE_INTERVAL'])
-                self._TRIAL_STATE=trial,'FIRST_POST_POS_CHANGE_KEY'                
-
-                # create a 3 degree circular region (1.5 degree radius) around the next target position
-                # for use as out invisible boundary                 
-                self.targetScreen.nextAreaOfInterest=Point(*nextTargetPosition).buffer(((ppd_x+ppd_y)/2.0)*1.5)
-
-                target_pos2_color1_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_MOVE')
-                
-                
-                self.targetScreen.setTargetInnerColor(tuple(trial['FP_INNER_COLOR2']))
-                self.targetScreen.setTimeout(trial['POST_COLOR_CHANGE_INTERVAL'])
-                self._TRIAL_STATE=trial,'FIRST_POST_COLOR_CHANGE_KEY'                
-                target_pos2_color2_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_COLOR_TWO')
-                
-                # end of 'trial sequence'
-                # send condition variables used / populated to ioDataStore
-                toSend=[self.hub.experimentSessionID,trialSet.getCurrentConditionSetIteration()]
-                trial['TSTART_TIME']=target_pos1_color1_time
-                trial['APPROX_TEND_TIME']=target_pos2_color2_time+time_since_flip
-                trial['target_pos1_color1_time']=target_pos1_color1_time
-                trial['target_pos2_color1_time']=target_pos2_color1_time
-                trial['target_pos2_color2_time']=target_pos2_color2_time
-                
-                if self.targetScreen.aoiTriggeredID:
-                    trial['VOG_SAMPLE_ID_AOI_TRIGGER']=self.targetScreen.aoiTriggeredID
-                    trial['VOG_SAMPLE_TIME_AOI_TRIGGER']=self.targetScreen.aoiTriggeredTime
-                if self.targetScreen.aoiBestGaze:
-                    trial['BEST_GAZE_X']=self.targetScreen.aoiBestGaze[0]
-                    trial['BEST_GAZE_Y']=self.targetScreen.aoiBestGaze[1]
+                try:
+                        
+                    currentTrialIndex=trialSet.getCurrentConditionSetIndex()
                     
-                self._TRIAL_STATE=None
-                if self.targetScreen.nextAreaOfInterest:
-                    del self.targetScreen.nextAreaOfInterest
-                    self.targetScreen.nextAreaOfInterest=None
+                    nextTargetPosition=TARGET_POSITIONS[currentTrialIndex]                
+                    trial['FP_X']=nextTargetPosition[0]
+                    trial['FP_Y']=nextTargetPosition[1]
                     
-                toSend.extend(trial.tolist())
-                self.hub.addRowToConditionVariableTable(toSend)
-                
+                    ppd_x,ppd_y=self.devices.display.getPixelsPerDegree()
+                                    
+                    fp_outer_radius=int(trial['FP_OUTER_RADIUS']*ppd_x),int(trial['FP_OUTER_RADIUS']*ppd_y)
+                    fp_inner_radius=int(trial['FP_INNER_RADIUS']*ppd_x),int(trial['FP_INNER_RADIUS']*ppd_y)
+    
+                    self.targetScreen.setScreenColor(tuple(trial['SCREEN_COLOR']))
+                    self.targetScreen.setTargetOuterColor(tuple(trial['FP_OUTER_COLOR']))
+                    self.targetScreen.setTargetInnerColor(tuple(trial['FP_INNER_COLOR']))
+                    self.targetScreen.setTargetOuterSize(fp_outer_radius)
+                    self.targetScreen.setTargetInnerSize(fp_inner_radius)
+                    
+                    self.hub.clearEvents('kb') 
+                    
+                    self.targetScreen.setTimeout(trial['PRE_POS_CHANGE_INTERVAL'])
+                    self._TRIAL_STATE=trial,'FIRST_PRE_POS_CHANGE_KEY'                
+                    target_pos1_color1_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_INITIAL_COLOR')
+                    print 'TRIAL_TARGET_INITIAL_COLOR: ',  target_pos1_color1_time,time_since_flip,event
+                    
+                    self.targetScreen.setTargetPosition(nextTargetPosition)
+                    self.targetScreen.setTimeout(trial['PRE_COLOR_CHANGE_INTERVAL'])
+                    self._TRIAL_STATE=trial,'FIRST_POST_POS_CHANGE_KEY'                
+    
+                    # create a 3 degree circular region (1.5 degree radius) around the next target position
+                    # for use as out invisible boundary                 
+                    self.targetScreen.nextAreaOfInterest=Point(*nextTargetPosition).buffer(((ppd_x+ppd_y)/2.0)*1.5)
+    
+                    target_pos2_color1_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_MOVE')
+                    print 'TRIAL_TARGET_MOVE: ',  target_pos1_color1_time,time_since_flip,event
+                    
+                    
+                    self.targetScreen.setTargetInnerColor(tuple(trial['FP_INNER_COLOR2']))
+                    self.targetScreen.setTimeout(trial['POST_COLOR_CHANGE_INTERVAL'])
+                    self._TRIAL_STATE=trial,'FIRST_POST_COLOR_CHANGE_KEY'                
+                    target_pos2_color2_time,time_since_flip,event=self.targetScreen.switchTo(msg='TRIAL_TARGET_COLOR_TWO')
+                    print 'TRIAL_TARGET_COLOR_TWO: ',  target_pos1_color1_time,time_since_flip,event
+                   
+                    # end of 'trial sequence'
+                    # send condition variables used / populated to ioDataStore
+                    toSend=[self.hub.experimentSessionID,trialSet.getCurrentConditionSetIteration()]
+                    trial['TSTART_TIME']=target_pos1_color1_time
+                    trial['APPROX_TEND_TIME']=target_pos2_color2_time+time_since_flip
+                    trial['target_pos1_color1_time']=target_pos1_color1_time
+                    trial['target_pos2_color1_time']=target_pos2_color1_time
+                    trial['target_pos2_color2_time']=target_pos2_color2_time
+                    
+                    if self.targetScreen.aoiTriggeredID:
+                        trial['VOG_SAMPLE_ID_AOI_TRIGGER']=self.targetScreen.aoiTriggeredID
+                        trial['VOG_SAMPLE_TIME_AOI_TRIGGER']=self.targetScreen.aoiTriggeredTime
+                    if self.targetScreen.aoiBestGaze:
+                        trial['BEST_GAZE_X']=self.targetScreen.aoiBestGaze[0]
+                        trial['BEST_GAZE_Y']=self.targetScreen.aoiBestGaze[1]
+                        
+                    self._TRIAL_STATE=None
+                    if self.targetScreen.nextAreaOfInterest:
+                        del self.targetScreen.nextAreaOfInterest
+                        self.targetScreen.nextAreaOfInterest=None
+                        
+                    toSend.extend(trial.tolist())
+                    self.hub.addRowToConditionVariableTable(toSend)
+                    print 'Trial end'
+                    print '------------'
+                except:
+                    print 'Error During Trial'
+                    self.printExceptionDetails()
             # end of block of trials, clear screen
             self.clearScreen.flip(text='BLOCK_END')
 

@@ -3,7 +3,9 @@ Analog Input Devices
 ======================
     
 .. autoclass:: iohub.devices.daq.AnalogInputDevice
-    :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES , DAQ_CHANNEL_MAPPING,DAQ_CONFIG_OPTIONS,DAQ_GAIN_OPTIONS,input_channel_count    
+    :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES, DAQ_CHANNEL_MAPPING,DAQ_CONFIG_OPTIONS,DAQ_GAIN_OPTIONS,input_channel_count
+
+    
 Analog Input Device Configuration Settings
 ===========================================
 
@@ -79,7 +81,7 @@ Analog Input Event Types
 ==========================
 
 The Analog Input Device currently supports one Event type, regardless of the 
-Analaog Input model being used.
+Analag Input model being used.
 
 .. autoclass:: iohub.devices.daq.MultiChannelAnalogInputEvent
     :exclude-members: DEVICE_ID_INDEX, filter_id, device_id, NUMPY_DTYPE, BASE_EVENT_MAX_ATTRIBUTE_INDEX, CLASS_ATTRIBUTE_NAMES, EVENT_CONFIDENCE_INTERVAL_INDEX, EVENT_DELAY_INDEX, EVENT_DEVICE_TIME_INDEX, EVENT_EXPERIMENT_ID_INDEX, EVENT_FILTER_ID_INDEX, EVENT_HUB_TIME_INDEX, EVENT_ID_INDEX, EVENT_LOGGED_TIME_INDEX, EVENT_SESSION_ID_INDEX, EVENT_TYPE_ID, EVENT_TYPE_ID_INDEX, EVENT_TYPE_STRING, IOHUB_DATA_TABLE, PARENT_DEVICE, createEventAsClass, createEventAsDict, createEventAsNamedTuple, e, namedTupleClass
@@ -92,7 +94,6 @@ The following links provide details on the ioHub Analog Input implementation
 for each currently supported analog input manufacturer. It is very important to review
 the documentation for the system you are using the ioHub with.
 
-
 Analog Input implementations are listed in alphabetical order.
 
 .. toctree::
@@ -100,3 +101,5 @@ Analog Input implementations are listed in alphabetical order.
     
     LabJack <daq_interface/LabJack_Implementation_Notes>
     Measurement Computing <daq_interface/MeasurementComputing_Implementation_Notes>
+
+    

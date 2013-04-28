@@ -11,8 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 
 import sys
-from ..... import print2err
-from .....server import createErrorResult
+from ..... import print2err, createErrorResult
 from ... import AnalogInputDevice, MultiChannelAnalogInputEvent
 from .... import Computer,  ioDeviceError
 

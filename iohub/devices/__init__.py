@@ -10,7 +10,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 from __future__ import division
-import gc, os, sys, platform
+import gc, os, sys
 import collections
 from collections import deque
 from operator import itemgetter
@@ -23,7 +23,8 @@ if sys.platform != 'darwin':
     import psutil
     _psutil_available=True
 
-from iohub import print2err,printExceptionDetailsToStdErr,convertCamelToSnake,monotonicClock
+from ..util import convertCamelToSnake, print2err,printExceptionDetailsToStdErr
+from ..timebase import monotonicClock
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg):

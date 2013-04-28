@@ -5,10 +5,8 @@ ioHub
 
 from psychopy import visual
 import iohub
-from iohub.devices import Computer
-from iohub.constants import EventConstants
-from iohub.util import getCurrentDateTimeString
-from iohub.util.experiment import (ioHubExperimentRuntime, DeviceEventTrigger, 
+from iohub.client import Computer, ioHubExperimentRuntime, EventConstants
+from iohub.util import (DeviceEventTrigger, getCurrentDateTimeString,
                                    ClearScreen, InstructionScreen, 
                                    FullScreenWindow)
 

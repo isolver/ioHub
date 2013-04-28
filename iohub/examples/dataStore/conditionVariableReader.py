@@ -33,7 +33,7 @@ import sys,os
 
 import iohub
 from iohub.datastore.util import ExperimentDataAccessUtility
-from iohub.util.experiment import FileDialog
+from iohub.util import FileDialog
 
 def chooseDataFile():
     """
@@ -41,7 +41,7 @@ def chooseDataFile():
     """
     script_dir=iohub.module_directory(chooseDataFile)
     
-    fdlg=iohub.util.experiment.FileDialog(message="Select a ioHub DataStore Events File", 
+    fdlg=iohub.util.FileDialog(message="Select a ioHub DataStore Events File", 
                     defaultDir=script_dir,fileTypes=FileDialog.IODATA_FILES,display_index=0)
                     
     status,filePathList=fdlg.show()

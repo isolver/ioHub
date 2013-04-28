@@ -6,10 +6,8 @@ ioHub
 from psychopy import core,  visual, logging
 
 import iohub
-from iohub import OrderedDict
-from iohub.devices import Computer
-from iohub.constants import EventConstants
-from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
+from iohub.client import Computer, ioHubExperimentRuntime, EventConstants
+from iohub.util import FullScreenWindow, OrderedDict
 
 
 class ExperimentRuntime(ioHubExperimentRuntime):

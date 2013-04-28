@@ -18,10 +18,8 @@ import sys
 from psychopy import misc
 
 from .. import Device,Computer
-from ... import print2err,printExceptionDetailsToStdErr
-from ...server import createErrorResult
 from ...constants import DeviceConstants
-from ...util.experiment import ioHubDialog
+from ...util import ioHubDialog, print2err,printExceptionDetailsToStdErr, createErrorResult, win32MessagePump
 
 currentSec=Computer.currentSec
             

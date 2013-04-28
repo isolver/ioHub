@@ -12,13 +12,13 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 
 import sys
 import copy
-        
-from ...... import print2err, convertCamelToSnake
+
+
+from ...... import print2err, convertCamelToSnake, createErrorResult
 from ......constants import EventConstants, EyeTrackerConstants
-from ..... import Computer,KeyboardPressEvent
+from ..... import Computer
 from .... import EyeTrackerDevice
 from ....eye_events import *
-from ......server import createErrorResult
 
 import pyViewX
 from ctypes import byref, c_longlong ,c_int
@@ -525,6 +525,7 @@ class EyeTracker(EyeTrackerDevice):
                                       "Common Eye Tracker Interface")
         
     def _getKeyboardPress(self,key_mappings):
+        from ..... import KeyboardPressEvent
         while 1:
             while len(self._kbEventQueue)>0:
                 event=copy.deepcopy((self._kbEventQueue.pop(0)))

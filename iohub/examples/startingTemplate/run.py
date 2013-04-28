@@ -1,11 +1,10 @@
-"""
+dcf"""
 ioHub
 .. file: ioHub/examples/startingTemplate/run.py
 """
 
 import iohub
-from iohub.client import Computer
-from iohub.util.experiment import ioHubExperimentRuntime
+from iohub.client import Computer, ioHubExperimentRuntime
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """

@@ -10,10 +10,9 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from ... import print2err
+from ... import print2err, createErrorResult
 from .. import Device,ioDeviceError
 from ...constants import DeviceConstants,EyeTrackerConstants
-from ...server import createErrorResult
 import hw
 
 #noinspection PyUnusedLocal,PyTypeChecker

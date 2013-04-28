@@ -25,13 +25,12 @@ import numpy as np
 from gevent import sleep
 import pylink
 
-from ...... import print2err,printExceptionDetailsToStdErr
+from ...... import print2err,printExceptionDetailsToStdErr, createErrorResult
 from ......constants import EventConstants, EyeTrackerConstants
-from ......util.experiment import ProgressBarDialog
+from ......util import ProgressBarDialog
 from ..... import Computer
 from .... import EyeTrackerDevice
 from ....eye_events import *
-from ......server import createErrorResult
 
 try:
     pylink.enableUTF8EyeLinkMessages()
@@ -333,6 +332,7 @@ class EyeTracker(EyeTrackerDevice):
         
         When runSetupProcedure is called, the following keys can be used on either the
         Host PC or Experiment PC to control the state of the setup procedure:
+            
             * C = Start Calibration
             * V = Start Validation
             * ENTER should be pressed at the end of a calibration or validation to accept the calibration, or in the case of validation, use the option drift correction that can be performed as part of the validation process in the EyeLink system.

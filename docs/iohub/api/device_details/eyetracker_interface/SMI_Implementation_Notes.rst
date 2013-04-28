@@ -306,6 +306,7 @@ Supported EyeTracker Device Event Types
 The SMI iViewX implementation of the Common Eye Tracker Interface supports the 
 following eye event types, with data being populated for the attributes listed 
 with each event type:
+
     #. iohub.devices.eyetracker.BinocularEyeSampleEvent:
         #. Attributes supported:
             #. experiment_id
@@ -367,7 +368,7 @@ with each event type:
 General Considerations
 #######################
 
-** Last Updated:** April 11th, 2013
+**Last Updated:** April 11th, 2013
 
 The following is a list of known limitations, issues, or untested areas of 
 functionality in the iViewX Common Eye Tracker Interface             

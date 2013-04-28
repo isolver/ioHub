@@ -7,10 +7,8 @@ import sys
 
 from psychopy import visual, core
 
-from iohub import quickStartHubServer
-from iohub.client import Computer
-from iohub.constants import EventConstants
-from iohub.util.experiment import FullScreenWindow
+from iohub.client import Computer, quickStartHubServer, EventConstants
+from iohub.util import FullScreenWindow
 
 # Create and start the ioHub Server Process, enabling the 
 # the default ioHub devices: Keyboard, Mouse, Experiment, and Display.

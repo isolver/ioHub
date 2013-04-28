@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 """
 ioHub
 .. file: ioHub/client.py
@@ -26,23 +27,21 @@ except ImportError:
 #    print "*** Using Python based YAML Parsing"
     from yaml import Loader, Dumper
 
-_psychopyAvailable=False
-psycho_logging=None
-try:
-    from psychopy import logging as psycho_logging
-    _psychopyAvailable=True
-except:
-    psycho_logging=lambda msg, level, t , obj: None
+from psychopy import  core as core, gui
+import psychopy.logging as psycho_logging
     
 if sys.platform != 'darwin':
     import psutil
     _psutil_available=True
 
-from iohub import print2err,printExceptionDetailsToStdErr,ioHubError,IO_HUB_DIRECTORY,isIterable
+from iohub import IO_HUB_DIRECTORY,isIterable
 from iohub.devices import Computer, DeviceEvent,import_device
 from iohub.devices.experiment import MessageEvent,LogEvent
 from iohub.constants import DeviceConstants,EventConstants
-from iohub.util.experiment import pumpLocalMessageQueue
+from iohub.util import MessageDialog, print2err,printExceptionDetailsToStdErr,ioHubError,win32MessagePump
+
+_currentSessionInfo=None
+
 
 MAX_PACKET_SIZE=64*1024
 
@@ -978,28 +977,30 @@ class ioHubConnection(object):
         represented as a dictionary of event attributes. When events are retrieved from an event buffer,
         they are removed from the buffer as well.
 
+        Events are sent from the ioHub Process as lists of ordered attributes. This is the most
+        efficient for data transmission, but not for readability.
+
+        If you do want events to be kept in list form, set asType = 'list'.
+
+        Setting asType = 'namedtuple' converts the events lists to namedtuple objects.
+        This process is quite fast so the small conversion time is usually worth it given the
+        huge benefit in usability within your program.
+
+        Setting asType = 'dict' converts the events lists to event dictionaries.
+
+        Setting asType = 'object' converts the events to their ioHub DeviceEvent class form.
+        This can take a bit of time if the event list is long and currently there is not much
+        benefit in doing so vs. treating events as dictionaries. This may change in
+        the future. For now, it is suggested that the default, asType='dict' setting be kept.
+
         Args:
             deviceLabel (str): optional : if specified, indicates to only retrieve events for
                          the device with the associated label name. None (default) returns
                          all device events.
-            asType (str): optional : indicated how events should be represented when they are returned.
-                         Default: 'dict'
-                Events are sent from the ioHub Process as lists of ordered attributes. This is the most
-                efficient for data transmission, but not for readability.
+            
+            asType (str): optional : indicated how events should be represented when they are returned. Default: 'namedtuple'.
 
-                If you do want events to be kept in list form, set asType = 'list'.
-
-                Setting asType = 'dict' (the default) converts the events lists to event dictionaries.
-                This process is quite fast so the small conversion time is usually worth it given the
-                huge benefit in usability within your program.
-
-                Setting asType = 'object' converts the events to their ioHub DeviceEvent class form.
-                This can take a bit of time if the event list is long and currently there is not much
-                benefit in doing so vs. treating events as dictionaries. This may change in
-                the future. For now, it is suggested that the default, asType='dict' setting be kept.
-
-        Return (tuple): returns a list of event objects, where the object type is defined by the
-                'asType' parameter.
+        Return (tuple): returns a list of event objects, where the object type is defined by the 'asType' parameter.
         """
 
         r=None
@@ -1043,7 +1044,8 @@ class ioHubConnection(object):
             devicelabel (str): name of the device that should have it's event buffer cleared.
                          If None (the default), the device wide event buffer is cleared
                          and device level event buffers are not changed.
-        Return: None
+
+        Return: None        
         """
         if deviceLabel is None or deviceLabel.lower() == 'all':
             self.sendToHubServer(('RPC','clearEventBuffer'))
@@ -1108,7 +1110,7 @@ class ioHubConnection(object):
                     events=self.getEvents()
                     if events:
                         self.allEvents.extend(events)
-                    pumpLocalMessageQueue()
+                    win32MessagePump()
                 
                 remainingSec=targetEndTime-Computer.currentTime()
             
@@ -1169,16 +1171,19 @@ class ioHubConnection(object):
 
         Args:
           text (str): The text message for the message event. Can be up to 128 characters in length.
-          prefix (str): A 0 - 3 character prefix for the message that can be used to sort or group
-                        messages by 'types'
+          
+          prefix (str): A 0 - 3 character prefix for the message that can be used to sort or group messages by 'types'
+                        
           offset (float): The usec offset to apply to the time stamp of the message event.
                           If you send the event before or after the time the event actually occurred,
                           and you know what the offset value is, you can provide it here and it
                           will be applied to the ioHub time stamp for the event.
+                          
           usec_time (float): Since the time-base of the experiment process is identical 
                              to that of the ioHub server process, then you can specific
                              the ioHub time (in sec.usec) for experiment events right in
                              the experiment process itself.
+                             
         Return (bool): True
         """
         self.sendToHubServer(('EXP_DEVICE','EVENT_TX',[MessageEvent._createAsList(text,prefix=prefix,msg_offset=offset,sec_time=sec_time),]))
@@ -1367,3 +1372,592 @@ class ioHubConnection(object):
             self._shutDownServer()
         except:
             pass
+
+
+#quickConnect
+
+def quickStartHubServer(**kwargs):
+    """
+    The quickStartHubServer function can be used to start the ioHub Server Process
+    the need to create an experiment or iohub configuration file. 
+    
+    Device configuration attributes that do need to be given to the ioHub server can 
+    be done by passing the necessary Device configuration settings as a dictionary 
+    value passed into the quickStartHubServer function, where the kwarg name for the value 
+    is the class name of the device that the settings should be  applied to.
+    
+    All values passed to the quickStartHubServer method must be kwarg inputs.
+    
+    Other than any valid device class name, the other valid keywoard args that the 
+    function will acccept are:
+        
+        * experiment_code: The label being used for the experiment being run.
+        * session_code=None: A unique session code for the current run of the  experiment.
+        * psychopy_monitor_name: The name of the PsychoPy Monitor settings file that
+        should be used to define physical characteristics of the ioHub Display
+        device being created.
+        
+    If experiment_code and session_code are both None (the default), then the ioDataStore
+    will not create an event hdf5 file for the session and no events will be saved. Events
+    will only be sent to the experiment process during the experiment runtime.
+    """
+    experiment_code=kwargs.get('experiment_code',-1)
+    if experiment_code != -1:
+        del kwargs['experiment_code']
+    else:
+        experiment_code = None
+
+    session_code=kwargs.get('session_code',-1)
+    if session_code != -1:
+        del kwargs['session_code']
+    else:
+        session_code = None    
+    
+    psychopy_monitor_name=kwargs.get('psychopy_monitor_name',None)
+    if psychopy_monitor_name:
+        del kwargs['psychopy_monitor_name']
+
+    device_dict=kwargs
+    
+    device_list=[]
+    
+    # Ensure a Display Device has been defined. If note, create one.
+    # Insert Display device as first device in dev. list.
+    if 'Display' not in device_dict: 
+        if psychopy_monitor_name:
+            device_list.append(dict(Display={'psychopy_monitor_name':psychopy_monitor_name,'override_using_psycho_settings':True}))
+        else:
+            device_list.append(dict(Display={'override_using_psycho_settings':True}))
+    else:
+        device_list.append(dict(Display=device_dict['Display']))
+        del device_dict['Display']
+
+    # Ensure a Experiment Device has been defined. If note, create one.
+    if 'Experiment' not in device_dict:    
+        device_list.append(dict(Experiment={}))
+    else:
+        device_list.append(dict(Experiment=device_dict['Experiment']))
+        del device_dict['Experiment']
+
+    # Ensure a Keyboard Device has been defined. If note, create one.
+    if 'Keyboard' not in device_dict:    
+        device_list.append(dict(Keyboard={}))
+    else:
+        device_list.append(dict(Keyboard=device_dict['Keyboard']))
+        del device_dict['Keyboard']
+
+    # Ensure a Mouse Device has been defined. If note, create one.
+    if 'Mouse' not in device_dict:    
+        device_list.append(dict(Mouse={}))
+    else:
+        device_list.append(dict(Mouse=device_dict['Mouse']))
+        del device_dict['Mouse']
+    
+    # Add remaining defined devices to the device list.
+    for class_name,device_config in device_dict.iteritems():
+        device_list.append(dict(class_name=device_config))
+
+    # Create an ioHub configuration dictionary.
+    ioConfig=dict(monitor_devices=device_list)
+    
+    if experiment_code and session_code:    
+        # Enable saving of all keyboard and mouse events to the 'ioDataStore'
+        ioConfig['data_store']=dict(experiment_info=dict(code=experiment_code),
+                                            session_info=dict(code=session_code))
+    
+    # Start the ioHub Server
+    return ioHubConnection(ioConfig)
+
+
+
+
+        
+### ioHubExperimentRuntime ####
+
+
+class ioHubExperimentRuntime(object):    
+    """
+    ioHubExperimentRuntime is a utility class that is used to 'bind' the ioHub framework to the PsychoPy API in an easy to use way,
+    hiding many of the internal complexities of the implementation and making it as simple to use within a PsychoPy script
+    as possible. That is the *intent* anyway.
+
+    The ioHubExperimentRuntime class is intended to be extended in a user script, with the .run() method being implemented with
+    the actual contents of the main body of the experiment.
+    
+    Along with a python file that extends the ioHubExperimentRuntime class, normally you will also need to provide an experiment_config.yaml and ioHub_config.yaml file.
+    These files are read by the ioHubExperimentRuntime and the ioHub system and make it much easier for the ioHub and associated devices to be
+    configurated than if you needed to do it within a python script. So while at first these files may seem like extra overhead, we hope that they are found to
+    actually save time and work in the end. Comments and feedback on this would be highly apprieciated.
+    
+    The iohub/examples/simple example contains the python file and two .yaml config files needed to run the example.
+
+    Initialize the ioHubExperimentRuntime Object, loading the experiment configuration file, initializing and launching
+    the ioHub server process, and creating the client side device interface to the ioHub devices that have been created.
+
+    Currently the ioHub timer uses a ctypes implementation of direct access to the Windows QPC functions in win32
+    (so no python interpreter start time offset is applied between processes) and timeit.default_timer is used for
+    all other platforms at this time. The advantage of not having a first read offset applied per python interpreter is that
+    it means the both the psychopy process and the ioHub process are using the exact same timebase without a different
+    offset that is hard to exactly determine due to the variablility in IPC request-reponses. By the two processes using
+    the exact same time space, including offset, getTime() for the the ioHub client in psychopy == the current time of the ioHub server
+    process, greatly simplifying some aspects of synconization. This only holds as long as both processes are running
+    on the same PC of course.
+
+    Note on timeit.default_timer: As of 2.7, timeit.default_timer correctly selects the best clock based on OS for high
+    precision timing. < 2.7, you need to check the OS version yourself and select; or use the psychopy clocks since
+    it does the work for you. ;)
+
+    Args:
+        configFilePath (str): The absolute path to the experiment configuration .yaml file, which is automatically assigned
+        to the path the experiment script is running from by default.
+        
+        configFile (str): The name of the experiment configuration .yaml file, which has a default value of 'experiment_config.yaml'
+
+    Return: None
+
+    """
+    def __init__(self, configFilePath, configFile):
+        self.hub=None
+        self.configFilePath=configFilePath
+        self.configFileName=configFile
+
+        # load the experiment config settings from the experiment_config.yaml file.
+        # The file must be in the same directory as the experiment script.
+        self.configuration=load(file( os.path.join(self.configFilePath,self.configFileName),u'r'), Loader=Loader)
+
+        import random
+        random.seed(Computer.getTime()*1000.123)
+        randomInt=random.randint(1,1000)
+        self.experimentConfig=dict()
+        self._experimentConfigKeys=['title','code','version','description']
+        self.experimentConfig.setdefault('title',self.experimentConfig.get('title','A Default Experiment Title'))
+        self.experimentConfig.setdefault('code',self.experimentConfig.get('code','EXP_%d'%(randomInt,)))
+        self.experimentConfig.setdefault('version',self.experimentConfig.get('version','1.0d'))
+        self.experimentConfig.setdefault('description',self.experimentConfig.get('description','A Default Experiment Description'))
+#        self.experimentConfig.setdefault('total_sessions_to_run',self.experimentConfig.get('total_sessions_to_run',0))
+
+        for key in self._experimentConfigKeys:
+            if key in self.configuration:
+                self.experimentConfig[key]=self.configuration[key]
+ 
+        self.experimentSessionDefaults=self.configuration['session_defaults']
+        self.sessionUserVariables=self.experimentSessionDefaults.get('user_variables',None)
+        if self.sessionUserVariables is not None:
+            del self.experimentSessionDefaults['user_variables']
+        else:
+            self.sessionUserVariables={}
+
+        # initialize the experiment object based on the configuration settings.
+        self.hub=self._initalizeConfiguration()
+
+        self.devices=self.hub.devices
+        self.devices.computer=Computer
+
+    def getExperimentConfiguration(self):
+        '''
+        Returns the full YAML parsing of experiment_config.
+        '''
+        return self.configuration
+
+    def getSavedExperimentParameters(self):
+        '''
+        Returns the experiment parameters saved to the DataStore.
+        These are also displayed in the read-only Experiment Dialog.
+        '''
+        return self.experimentConfig
+
+    def getSavedSessionParameters(self):
+        '''
+        Returns the experiment session parameters saved to the DataStore.
+        These are also displayed in the Session Dialog. These do 'not' include
+        user defined parameters.
+        '''
+        return self.experimentSessionDefaults
+
+    def getSavedUserDefinedParameters(self):
+        '''
+        Returns the experiment session user defined parameters saved to the DataStore.
+        These are also displayed in the Session Dialog.
+        '''
+        return self.sessionUserVariables
+
+
+    def isSessionCodeNotInUse(self,current_sess_code):
+        r=self.hub.sendToHubServer(('RPC','checkIfSessionCodeExists',(current_sess_code,)))
+        return r[2]
+                    
+    def _initalizeConfiguration(self):
+        global _currentSessionInfo
+        """
+        Based on the configuration data in the experiment_config.yaml and iohub_config.yaml,
+        configure the experiment environment and ioHub process environments. This mehtod is called by the class init
+        and should not be called directly.
+        """
+        display_experiment_dialog=self.configuration.get("display_experiment_dialog",False)
+        display_session_dialog=self.configuration.get("display_session_dialog",True)
+        
+        
+        if display_experiment_dialog is True:        
+            # display a read only dialog verifying the experiment parameters
+            # (based on the experiment .yaml file) to be run. User can hit OK to continue,
+            # or Cancel to end the experiment session if the wrong experiment was started.
+            exitExperiment=self._displayExperimentSettingsDialog()
+            if exitExperiment:
+                print "User Cancelled Experiment Launch."
+                self._close()
+                sys.exit(1)
+
+        self.experimentConfig=self.prePostExperimentVariableCallback(self.experimentConfig)
+
+        ioHubInfo= self.configuration.get('ioHub',{})
+        
+        if ioHubInfo is None:
+            print 'ioHub section of configuration file could not be found. Exiting.....'
+            self._close()
+            sys.exit(1)
+        else:
+            ioHubConfigFileName=unicode(ioHubInfo.get('config','iohub_config.yaml'))
+            ioHubConfigAbsPath=os.path.join(self.configFilePath,unicode(ioHubConfigFileName))
+            self.hub=ioHubConnection(None,ioHubConfigAbsPath)
+
+            #print 'ioHubExperimentRuntime.hub: {0}'.format(self.hub)
+            # A circular buffer used to hold events retrieved from self.getEvents() during
+            # self.delay() calls. self.getEvents() appends any events in the allEvents
+            # buffer to the result of the hub.getEvents() call that is made.
+            self.hub.allEvents=deque(maxlen=self.configuration.get('event_buffer_length',256))
+
+            #print 'ioHubExperimentRuntime sending experiment config.....'
+            # send experiment info and set exp. id
+            self.hub._sendExperimentInfo(self.experimentConfig)
+
+            #print 'ioHubExperimentRuntime SENT experiment config.'
+           
+            allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
+            sessionVariableOrder=self.configuration['session_variable_order']
+            if 'user_variables' in allSessionDialogVariables:
+                del allSessionDialogVariables['user_variables']
+    
+            if display_session_dialog is True:
+                # display session dialog
+                r=True
+                while r is True:
+                    # display editable session variable dialog displaying the ioHub required session variables
+                    # and any user defined session variables (as specified in the experiment config .yaml file)
+                    # User can enter correct values and hit OK to continue, or Cancel to end the experiment session.
+    
+                    allSessionDialogVariables = dict(self.experimentSessionDefaults, **self.sessionUserVariables)
+                    sessionVariableOrder=self.configuration['session_variable_order']
+                    if 'user_variables' in allSessionDialogVariables:
+                        del allSessionDialogVariables['user_variables']
+         
+                    tempdict=self._displayExperimentSessionSettingsDialog(allSessionDialogVariables,sessionVariableOrder)
+                    if tempdict is None:
+                        print "User Cancelled Experiment Launch."
+                        self._close()
+                        sys.exit(1)
+                
+                    tempdict['user_variables']=self.sessionUserVariables
+    
+                    r=self.isSessionCodeNotInUse(tempdict['code'])
+                     
+                    if r is True:
+                        display_device=self.hub.getDevice('display')
+                        display_id=0
+                        if display_device:
+                            display_id=display_device.getIndex()
+                        msg_dialog=MessageDialog(
+                                        "Session Code {0} is already in use by the experiment.\nPlease enter a new Session Code".format(tempdict['code']),
+                                        "Session Code In Use",
+                                        dialogType=MessageDialog.ERROR_DIALOG,
+                                        allowCancel=False,
+                                        display_index=display_id)
+                        msg_dialog.show()
+            else:
+                tempdict=allSessionDialogVariables
+                tempdict['user_variables']=self.sessionUserVariables
+
+            for key,value in allSessionDialogVariables.iteritems():
+                if key in self.experimentSessionDefaults:
+                    self.experimentSessionDefaults[key]=value#(u''+value).encode('utf-8')
+                elif  key in self.sessionUserVariables:
+                    self.sessionUserVariables[key]=value#(u''+value).encode('utf-8')      
+
+
+            tempdict=self.prePostSessionVariableCallback(tempdict)
+            tempdict['user_variables']=self.sessionUserVariables
+
+            _currentSessionInfo=self.experimentSessionDefaults
+
+            self.hub._sendSessionInfo(tempdict)
+
+            # create necessary paths based on yaml settings,
+            self.paths=PathMapping(self.configFilePath,self.configuration.get('paths',None))
+    
+            self.paths.saveToJson()
+        
+
+            self._setInitialProcessAffinities(ioHubInfo)
+
+            return self.hub
+
+    def _setInitialProcessAffinities(self,ioHubInfo):
+            # set process affinities based on config file settings
+            cpus=range(Computer.processingUnitCount)
+            experiment_process_affinity=cpus
+            other_process_affinity=cpus
+            iohub_process_affinity=cpus
+    
+            experiment_process_affinity=self.configuration.get('process_affinity',[])
+            if len(experiment_process_affinity) == 0:
+                experiment_process_affinity=cpus
+                    
+            other_process_affinity=self.configuration.get('remaining_processes_affinity',[])
+            if len(other_process_affinity) == 0:
+                other_process_affinity=cpus
+            
+            iohub_process_affinity=ioHubInfo.get('process_affinity',[])
+            if len(iohub_process_affinity) == 0:
+                iohub_process_affinity=cpus
+    
+            if len(experiment_process_affinity) < len(cpus) and len(iohub_process_affinity) < len(cpus):
+                Computer.setProcessAffinities(experiment_process_affinity,iohub_process_affinity)
+    
+            if len(other_process_affinity) < len(cpus):
+                ignore=[Computer.currentProcessID,Computer.ioHubServerProcessID]
+                Computer.setAllOtherProcessesAffinity(other_process_affinity,ignore)
+        
+
+    def run(self,*args,**kwargs):
+        """
+        The run method is what gets calls when the ioHubExperimentRuntime.start method is called. The run method is intended
+        to be over written by your extension class and should include your experiment / program logic. By default it does nothing.
+
+        Args:
+            args: list of unnamed input variables passed to method
+            kwargs: dictionary of named variables passed to method. Variable names are the dict keys.
+
+        Return: None
+        """
+        pass
+
+    def start(self):
+        """
+        The start method should be called by the main portion of your experiment script.
+        This method simply wraps a call to self.run() in an exception handler that tries to
+        ensure any error that occurs is printed out in detail, and that the ioHub server process
+        is terminates even in the case of an exception that may not have been handled explicitly
+        in your script.
+
+        Args: None
+        Return: None
+        """
+        try:
+            self.run()
+        except ioHubError, e:
+            print e
+        except:
+            printExceptionDetailsToStdErr()
+        finally:
+            # _close ioHub, shut down ioHub process, clean-up.....
+            self._close()
+
+
+    def prePostExperimentVariableCallback(self,expVarDict):
+        return expVarDict
+
+    def prePostSessionVariableCallback(self,sessionVarDict):
+        sess_code=sessionVarDict['code']
+        scount=1
+        while self.isSessionCodeNotInUse(sess_code) is True:
+            sess_code='%s-%d'%(sessionVarDict['code'],scount)
+            scount+=1
+        sessionVarDict['code']=sess_code
+        return sessionVarDict
+        
+    def _close(self):
+        """
+        Close the experiment runtime and the ioHub server process.
+        """
+        # terminate the ioServer
+        if self.hub:
+            self.hub._shutDownServer()
+        # terminate psychopy
+        core.quit()
+        
+    def _displayExperimentSettingsDialog(self):
+        """
+        Display a read-only dialog showing the experiment setting retrieved from the configuration file. This gives the
+        experiment operator a chance to ensure the correct configuration file was loaded for the script being run. If OK
+        is selected in the dialog, the experiment logic continues, otherwise the experiment session is terminated.
+        """
+        #print 'self.experimentConfig:', self.experimentConfig
+        #print 'self._experimentConfigKeys:',self._experimentConfigKeys
+
+        experimentDlg=gui.DlgFromDict(self.experimentConfig, 'Experiment Launcher', self._experimentConfigKeys, self._experimentConfigKeys, {})
+        if experimentDlg.OK:
+            result= False
+        else:
+            result= True
+
+            
+        return result
+
+    def _displayExperimentSessionSettingsDialog(self,allSessionDialogVariables,sessionVariableOrder):
+        """
+        Display an editable dialog showing the experiment session setting retrieved from the configuration file.
+        This includes the few mandatory ioHub experiment session attributes, as well as any user defined experiment session
+        attributes that have been defined in the experiment configuration file. If OK is selected in the dialog,
+        the experiment logic continues, otherwise the experiment session is terminated.
+        """
+        
+        sessionDlg=gui.DlgFromDict(allSessionDialogVariables, 'Experiment Session Settings', [], sessionVariableOrder)
+
+        result=None        
+        if sessionDlg.OK:
+            result=allSessionDialogVariables
+
+            
+        return result
+        
+    @staticmethod    
+    def printExceptionDetails():
+        """
+        Prints out stack trace info for the last exception in multiple ways.
+        No idea if all of this is needed, in fact I know it is not. But for now why not.
+        Taken straight from the python 2.7.3 manual on Exceptions.
+        """
+        import traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print "*** print_tb:"
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+        print "*** print_exception:"
+        traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                  limit=2, file=sys.stdout)
+        print "*** print_exc:"
+        traceback.print_exc()
+        print "*** format_exc, first and last line:"
+        formatted_lines = traceback.format_exc().splitlines()
+        print formatted_lines[0]
+        print formatted_lines[-1]
+        print "*** format_exception:"
+        print repr(traceback.format_exception(exc_type, exc_value,
+                                              exc_traceback))
+        print "*** extract_tb:"
+        print repr(traceback.extract_tb(exc_traceback))
+        print "*** format_tb:"
+        print repr(traceback.format_tb(exc_traceback))
+        print "*** tb_lineno:", exc_traceback.tb_lineno
+ 
+
+class PathDir(object):
+    def __init__(self, physicalAbsPath, fileFilter=None):
+        self._extensions=None
+        self._fileTypes=None
+        self._path=physicalAbsPath
+
+        if fileFilter is not None:
+            if len(fileFilter)==2:
+                self._fileTypes,self._extensions=fileFilter
+
+        if self._fileTypes:
+            for ft in self._fileTypes:
+                if ft in PathMapping._FILE_TYPES:
+                    if ft not in PathMapping._fileTypeToPath:
+                        PathMapping._fileTypeToPath[ft]=self
+    
+    def getPath(self):
+        return self._path
+    
+    def getExtensions(self):    
+        return self._extensions
+
+    def getFileTypes(self):    
+        return self._fileTypes
+    
+class PathMapping(object):
+    _FILE_TYPES=dict(CONDITION_FILES='CONDITION_FILES',
+                    IMAGE_FILES='IMAGE_FILES',
+                    AUDIO_FILES='AUDIO_FILES',
+                    VIDEO_FILES='VIDEO_FILES',
+                    IOHUB_DATA='IOHUB_DATA',
+                    LOGS='LOGS',
+                    SYS_INFO='SYS_INFO',
+                    USER_FILES='USER_FILES',
+                    NATIVE_DEVICE_DATA='NATIVE_DEVICE_DATA',)
+    _fileTypeToPath={}
+    def __init__(self, top, pathSettings):
+        self.experimentSourceDir=os.path.abspath(top)
+        self.pythonPath=sys.path
+        self.workingDir=os.getcwdu()
+
+        self.structure=PathDir(os.path.abspath(top))
+
+        # build the structure
+
+        if pathSettings is None:
+            self._fileTypeToPath['*']=self.structure
+            self._fileTypeToPath['SYS_INFO']=self.structure
+            self._fileTypeToPath['IOHUB_DATA']=self.structure
+            self._fileTypeToPath['NATIVE_DEVICE_DATA']=self.structure
+            self.SYS_INFO=self.structure
+            self.IOHUB_DATA=self.structure
+        else:
+            def buildOutPath(root,pathDict):
+
+                for subdir,info in pathDict.iteritems():
+                    isSubjectDir=False
+                    if subdir == 'session_defaults.code':
+                        subdir=_currentSessionInfo['code']
+                        isSubjectDir=True
+
+                    newDir=os.path.join(root._path,subdir)
+                    if os.path.exists(newDir):
+                        if isSubjectDir:
+                            #TODO Show dialog asking if they want subject dir to be removed / overwritten.
+                            print "#TODO Show dialog asking if they want subject dir to be removed / overwritten."
+                    else:
+                        os.makedirs(newDir)
+
+                    if isinstance(info,dict):
+                        newPath=PathDir(newDir)
+                        setattr(root,subdir,newPath)
+                        buildOutPath(newPath,info)
+                    else:
+                        newPath=PathDir(newDir,info)
+                        for ft in newPath._fileTypes:
+                            if not hasattr(self,ft):
+                                setattr(self,ft,newPath)
+                        setattr(root,subdir,newPath)
+
+
+            buildOutPath(self.structure,pathSettings)
+
+    def getPathForFile(self,fileName=None,fileExtension=None,fileType=None):
+        if fileExtension in self._fileTypeToPath:
+            return self._fileTypeToPath[fileExtension]
+        if fileType in self._fileTypeToPath:
+            return self._fileTypeToPath[fileType]
+        if isinstance(fileName,(str,unicode)):
+            i=fileName.rfind('.')
+            if i > 0:
+                ext = fileName.strip()[i+1:]
+                if ext in self._fileTypeToPath:
+                    return self._fileTypeToPath[ext]
+        return self._fileTypeToPath['*']
+
+    def saveToJson(self):
+        import msgpack
+        mappings={}
+        for v in self._FILE_TYPES.values():
+            if v in self._fileTypeToPath:
+                mappings[v]=self._fileTypeToPath[v]._path
+
+        f=open(os.path.join(self.experimentSourceDir,'exp.paths'),'w')
+        f.write(msgpack.dumps(mappings))
+        f.flush()
+        f.close()
+       
+class ioHubExperimentRuntimeError(Exception):
+    """Base class for exceptions raised by ioHubExperimentRuntime class."""
+    pass        
+

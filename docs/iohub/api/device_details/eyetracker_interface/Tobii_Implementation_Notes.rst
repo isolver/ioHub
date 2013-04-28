@@ -30,10 +30,10 @@ site-packages folder, located at something like C:\Python26\Lib\site-packages.
 
 Required files / folder from the Tobii Analytics SDK 3.0 RC 1 package:
 
-    *.  The directory named 'tobii' found in the Python files area of the 32-bit Tobii Analytics SDK 3.0 RC 1 package.
-    *.  tobiisdk.dll
-    *.  _tobiisdkpy26.pyd
-    *.  boost_python-vc90-mt-1_41.dll
+    *  The directory named 'tobii' found in the Python files area of the 32-bit Tobii Analytics SDK 3.0 RC 1 package.
+    *  tobiisdk.dll
+    *  _tobiisdkpy26.pyd
+    *  boost_python-vc90-mt-1_41.dll
 
 Again, the one directory and 3 files listed above must be in a directory that is in your
 Python 2.6 Python Path, as well as in your system PATH environment variable setting.
@@ -245,6 +245,7 @@ The Tobii Analytics SDK 3.0 RC 1 provides real-time access to binocular sample d
 Therefore the BinocularEyeSample event type is supported when using a Tobii as 
 the ioHub EyeTracker device. The following fields of the BinocularEyeSample event are 
 supported:
+
     #. iohub.devices.eyetracker.BinocularEyeSampleEvent:
         #. Attributes supported:
             #. experiment_id

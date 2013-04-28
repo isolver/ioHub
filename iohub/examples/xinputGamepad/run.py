@@ -30,10 +30,8 @@ Any issues or questions, please let me know.
 from psychopy import  visual
 
 import iohub
-from iohub.client import  Computer
-from iohub.constants import EventConstants
-from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
-from iohub import OrderedDict
+from iohub.client import  Computer, ioHubExperimentRuntime, EventConstants
+from iohub.util import FullScreenWindow, OrderedDict
 
 
 class ExperimentRuntime(ioHubExperimentRuntime):

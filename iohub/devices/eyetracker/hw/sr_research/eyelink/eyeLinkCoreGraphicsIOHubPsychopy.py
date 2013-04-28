@@ -24,8 +24,8 @@ import copy
 
 from ..... import DeviceEvent, Computer
 from ......constants import EventConstants, KeyboardConstants #, #DeviceConstants, EyeTrackerConstants
-from ...... import OrderedDict, convertCamelToSnake, print2err
-from ......util.experiment import FullScreenWindow
+from ...... import convertCamelToSnake, print2err
+from ......util import FullScreenWindow, OrderedDict
 
 import pylink
 from pylink import EyeLinkCustomDisplay

@@ -32,57 +32,18 @@ ioHub supports the following high level functionality:
 * A common time base is provided for all device events, making it easy to syncronize data from multiple physical devices and virtual devices, such as the Experiment Runtime itself. Events are time stamped by ioHub when it is not done by the source device itself, or existing device event time stamps are converted to the common ioHub time base.
 * Device inputs are converted into common event types based on device type, regardless of the underlying supported hardware.
 
-Installation
-=============
-
-Please refer to the Installation section of the documentation.
-
-Source Download
-================
-
-ioHub source is hosted on GitHub `here <http://www.github.com/isolver/ioHub>`_.
-
-*Package installers will also be made available soon.*
-
-Documentation
-==============
-
-The ioHub source contains a documentation folder that has been written using Sphinx. If the ioHub source is downloaded, open a console or terminal window in the iohub/doc/ directory and build the documentation using::
-
-	>> make html
-
-`Sphinx <http://sphinx-doc.org/>`_ must be installed.
-
-*Pre-built documentation will be available online shortly.*
-
-Support
-=======
-
-A `user forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users>`_ and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-dev>`_ are available on Google Groups for support questions and development discussion topics respectively.
-
-License
-=======
-
-ioHub and the Python Common Eye Tracker Interface are Copyright (C) 2012-2013 iSolver Software Solutions, except for files or modules where otherwise noted. 
-
-ioHub is distributed under the terms of the GNU General Public License (GPL version 3 or any later version). See the LICENSE file included with the ioHub project for details.
-
-ioHub Python module dependancies and other 3rd party libraries are copyright their respective copyright holders. Any trademarked names used in this documentation are owned by their trademark owners and use of any such names is not an endorsement of ioHub by the trademark owner.
 
 
 Contents
 ============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    
    Installation <iohub/installation>
-   Supported OS and Device Overview <iohub/overview>
-   Quick Start <iohub/quickstart>
+   Quick Start Guide <iohub/quickstart>
+   User Manual <iohub/manual/user_manual>
    API Specification <iohub/api/api_home>
-   API Index <iohub/api/indices>
-   Performance Considerations<iohub/performance>
-   Known Issues <iohub/known_issues>
-   Change Log <iohub/change_log>
    Credits <iohub/credits>
-   License <iohub/iohub_license>
+   License <iohub/license>
+   Change Log <iohub/change_log>

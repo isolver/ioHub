@@ -19,7 +19,7 @@ import copy
 from ..... import print2err,printExceptionDetailsToStdErr,convertCamelToSnake
 from .... import Computer,DeviceEvent
 from .....constants import EventConstants
-from .....util.experiment import FullScreenWindow
+from .....util import FullScreenWindow
 
 currentTime=Computer.getTime
 

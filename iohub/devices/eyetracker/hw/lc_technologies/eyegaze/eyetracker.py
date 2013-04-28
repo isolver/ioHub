@@ -13,12 +13,11 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 """
 
 
-from ...... import printExceptionDetailsToStdErr, print2err
+from ...... import printExceptionDetailsToStdErr, print2err, createErrorResult
 from ......constants import EventConstants, EyeTrackerConstants
 from ..... import Computer
 from .... import EyeTrackerDevice
 from ....eye_events import *
-from ......server import createErrorResult
 
 import pEyeGaze
 

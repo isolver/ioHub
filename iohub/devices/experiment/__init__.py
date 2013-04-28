@@ -32,8 +32,7 @@ class Experiment(Device):
     
     DEVICE_TYPE_ID=DeviceConstants.EXPERIMENT
     DEVICE_TYPE_STRING='EXPERIMENT'
-    __slots__=['critical','fatal','error','warning','warn','data',
-               'exp','info','debug']
+    __slots__=['critical','fatal','error','warning','warn','data', 'exp','info','debug']
     def __init__(self,*args,**kwargs):
         Device.__init__(self,*args,**kwargs['dconfig'])
 
@@ -105,9 +104,6 @@ class MessageEvent(DeviceEvent):
                 ]
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, *args, **kwargs):
-        """
-        """
-        
         #: The text attribute is used to hold the actual 'content' of the message.
         #: The text attribute string can not be more than 128 characters in length.
         #: String type
@@ -124,7 +120,7 @@ class MessageEvent(DeviceEvent):
         #: Evenet needs to be sent *before* or *after* the time the actual event occurred.
         #: msg offset should be in sec.msec format and in general can be calculated as:
         #:
-        #: msg_offset=actual_event_iohub_time - iohub_message_time
+        #:      msg_offset=actual_event_iohub_time - iohub_message_time
         #: 
         #: where actual_event_iohub_time is the time the event occured that is being
         #: represented by the Message event; and iohub_message_time is either the
@@ -178,15 +174,13 @@ class LogEvent(DeviceEvent):
                 _levelNames[lln]=llv
                 _levelNames[llv]=lln
     except:
-        # psychopy is not available, so we will just use the set of levels
-        # copied from psychopy 2.76:
         CRITICAL = 50
         FATAL = CRITICAL
         ERROR = 40
         WARNING = 30
         WARN = WARNING
-        DATA = 25#will be a custom level
-        EXP = 22#info about the experiment might be less important than data info?
+        DATA = 25
+        EXP = 22
         INFO = 20
         DEBUG = 10
         NOTSET = 0        
@@ -208,7 +202,7 @@ class LogEvent(DeviceEvent):
             'WARNING' : WARNING,
             'INFO' : INFO,
             'DEBUG' : DEBUG,
-            'NOTSET' : NOTSET,
+            'NOTSET' : NOTSET
         }
 
     PARENT_DEVICE=Experiment
@@ -222,9 +216,6 @@ class LogEvent(DeviceEvent):
                 ]
     __slots__=[e[0] for e in _newDataTypes]
     def __init__(self, *args, **kwargs):
-        """
-        """
-        
         #: The text attribute is used to hold the actual 'content' of the message.
         #: The text attribute string can not be more than 128 characters in length.
         #: String type
@@ -233,17 +224,17 @@ class LogEvent(DeviceEvent):
         #: The log level to set the log event at. If psychopy is available, 
         #: valid log levels match the *predefined* logging levels. Otherwise
         #: the following log levels are available (which match the predefined
-        #: psychopy 2.76):
-        #:      *. CRITICAL = 50
-        #:      *. FATAL = CRITICAL
-        #:      *. ERROR = 40
-        #:      *. WARNING = 30
-        #:      *. WARN = WARNING
-        #:      *. DATA = 25
-        #:      *. EXP = 22
-        #:      *. INFO = 20
-        #:      *. DEBUG = 10
-        #:      *. NOTSET = 0      
+        #: psychopy 2.76)::
+        #:      * CRITICAL = 50
+        #:      * FATAL = CRITICAL
+        #:      * ERROR = 40
+        #:      * WARNING = 30
+        #:      * WARN = WARNING
+        #:      * DATA = 25
+        #:      * EXP = 22
+        #:      * INFO = 20
+        #:      * DEBUG = 10
+        #:      * NOTSET = 0      
         #: The int defined value can be used, or a string version of the 
         #: log level name, for example specifying "WARNING" is equal to
         #: specifying a log level of LogEvent.WARNING or 30.
@@ -279,13 +270,11 @@ class LogEvent(DeviceEvent):
         cls._convertFields(values)
         return dict(zip(cls.CLASS_ATTRIBUTE_NAMES,values))
 
-    #noinspection PyUnresolvedReferences
     @classmethod
     def createEventAsNamedTuple(cls,valueList):
         cls._convertFields(valueList)
         return cls.namedTupleClass(*valueList)
-# create the LogEvent class log level attributes
-# in the case of psychopy being available.
+
 if not hasattr(LogEvent,'CRITICAL'):
     for lln,llv in LogEvent._levelNames.iteritems():
         if isinstance(lln,basestring):
