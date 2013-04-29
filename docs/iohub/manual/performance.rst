@@ -3,15 +3,15 @@ Performance Considerations
 ============================
 
 
-Many Benifits and a Couple Things to Keep in Mind
+Benefits to Using ioHub and a Couple Things to Keep in Mind
 =====================================================
 
 ioHub has been written to try and have as little impact on the Experiment Runtime
 Process as possible, as integration with PsychoPy continues to evolve, the net 
-effect on processing load for the PsychoPy Process should actually be a reduction.
+effect on processing load for the PsychoPy Process should actually diminish.
 
-Recall that ioHub runs as a seperate operating system process than PsychoPy; with the
-two processing communicating via a very fast and light weight message request, 
+Recall that ioHub runs as a separate operating system process to PsychoPy. The
+two processes communicate via a very fast and light weight message request, 
 message response pattern using UDP. As is shown below, the average round trip delay 
 for PsychoPy to request new events from the ioHub and receive the event object 
 representations back from the ioHub Server is under 0.5 msec, with maximum delays 
@@ -19,9 +19,9 @@ typically less than 1.0 msec.
 
 The advantage of this model is that the ioHub Server is able to spend all its time
 checking for new events from devices that need to be polled, and handling callback 
-functions from devices that using event driven motification model. This can continue
+functions from devices that use event driven modification. This monitoring can proceed
 regardless of what state the PsychoPy experiment is in. Events are handled and processed
-by the ioHub when PsychoPy is laoding an image, drawing updated graphics to the video 
+by the ioHub when PsychoPy is loading an image, drawing updated graphics to the video 
 card backbuffer, or waiting in a blocked state for the start of the next vertical 
 retrace to occur in the video card logic. This means that the precision of event timestamping
 will be much better than what is possible when events are processed 'in between' 
@@ -29,14 +29,14 @@ other activities. Timing should also be improved over the case of an application
 using multiple Python threads to try and handle the event processing for devices
 that can even report events on a different thread. This is because the Python Interpreter
 only allows a single Python thread to run at a time; Python threads can not take
-advantage of the benifits that multicore CPUs that are common place today offer.
+advantage of the benefits that multicore CPUs that are common place today offer.
 
 The model ioHub uses for event monitoring and communication with the 'client' process
 ( PsychoPy ) is relatively unique and as discussed has clear advantages for an experiment runtime
 environment. However there are also considerations that have to be remembered to ensure
 that the ioHub - PsychoPy dual process model works as intended:
-    #. Since multiple processes are in use, it is a 'requirement' that the computer running the experiment have multiple processing units, or timing will be significantly effected. Either multiple cores, or multiple physical CPUs. Multicore processors are the defacto standard now, even with inexpensive entry level PCs that are purchased. A dual core system is the minumum that is suggested; a quad core CPU, and to a lesser extent dual core CPU with hypertheading capabilities, is the ideal CPU for use with PsychoPy and ioHub. If a single CPU, single core system is used, the experiment will run and events will be received, however the performance of the experiment runtime and ioHub will be greatly reduced. This is because the two seperate processes are having to share a single CPU and take turns using the processing bandwidth available. When processes have to repeatedly start and stop to allow another process to have some CPU time, this is a *very* expensive operation for a computer, and wastes a large amount of the overall processing capabilities of the CPU.
-    #. Communication between PsychoPy and the ioHub is very fast, however it is still *slow* relative to how mcuh information can be passed around within a single application process. therefore, as is seen in the ioHub examples, requests for static data values from the ioHub Process are generally made once and saved to a local PsychoPy variable that can be refernced through out the experiment. Repeatedly calling an ioHub device method that will always return the same value is a waste of inter process messaging, no matter how fast that messaging may be. In some cases it is obviously necessary to ask for the data from the ioHub server every frame. That is expected and in general will never be an issue. However it is a good practice to do so when necessary only, and cache static values locally when possible. 
+    #. Since multiple processes are in use, it is a 'requirement' that the computer running the experiment have multiple processing units (multiple cores or multiple physical CPUs), or timing will be significantly affected. Multicore processors are the defacto standard now, even with inexpensive entry level PCs. A dual core system is the minimum that is suggested; a quad core CPU, and to a lesser extent dual core CPU with hypertheading capabilities, is the ideal CPU for use with PsychoPy and ioHub. If a single CPU, single core system is used, the experiment will run and events will be received, however the performance of the experiment runtime and ioHub will be greatly reduced. This is because the two separate processes are having to share a single CPU and take turns using the processing bandwidth available. When processes have to repeatedly start and stop to allow another process to have some CPU time, this is a *very* expensive operation for a computer, and wastes a large amount of the overall processing capabilities of the CPU.
+    #. Communication between PsychoPy and the ioHub is very fast, however it is still *slow* relative to how much information can be passed around within a single application process. Therefore, as is seen in the ioHub examples, requests for static data values from the ioHub Process are generally made once and saved to a local PsychoPy variable that can be referenced through out the experiment. Repeatedly calling an ioHub device method that will always return the same value is a waste of inter process messaging, no matter how fast that messaging may be. In some cases it is obviously necessary to ask for the data from the ioHub server every frame. That is expected and in general will never be an issue. However it is a good practice to do so when necessary only, and cache static values locally when possible. 
     
 
 ioHub Event Processing and Storage
@@ -47,24 +47,24 @@ handled by a separate Python program that is running in a separate Python Proces
 utilizing a separate CPU core of a multicore CPU if possible (which it should be).
 
 The ioHub is constantly either checking for new events from a device, 
-or is being notified of new events as they are ade available by the underlying 
-device driver / user level event API. The ioHub has been written to run as a non-
+or is being notified of new events as they are made available by the underlying 
+device driver / user level event API. ioHub has been written to run as a non-
 blocking event server, meaning that no code that checks for new events on a device
 'waits' until an event is available. For devices that need to be polled, 
 a 'peak' and 'get' approach is always used instead. This results in any given 
 operation that runs on the ioHub taking well under a msec, often under 50 usec.
  
-Therefore device are constantly being monitored with an average update interval
+Device are constantly being monitored with an average update interval
 of about 1 msec across all devices within the ioHub software itself.  This means that
 event time stamping will occur within about 1 msec or less on average, relative to when
-the event was made available to the ioHub system. Further more, since the ioHub is
-running as a separate Python process, on a separate CPU core, much 'more' can be done
+the event was made available to the ioHub system. Furthermore, since ioHub runs
+as a separate Python process, on a separate CPU core, much 'more' can be done
 with the events that are received than is normally feasible when event collection
 is handled by the same Python process that is responsible for all the really heavy work
 that an experiment runtime needs to handle. Overall system CPU usage is higher of course,
 but it is spread across two CPU cores instead of all being limited to one.
 
-For example, 'all' events received by ioHub can be saved for later access and analysis,
+Dedicated event monitoring allows 'all' events received by ioHub to be saved for later access and analysis,
 regardless of what subset of these events are actually being used by the experiment paradigm.
 For example ioHub has been used to simultaneously save analog input data
 from eight channels of a DAQ device sampling each channel at 1000 Hz, while also saving

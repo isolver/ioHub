@@ -34,11 +34,11 @@ distribution to go.
 WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages
 added and the structure of the distribution changed somewhat.
 
-WinPython makes no perminant changes to your Windows registry or environment settings. Only temporary
-charges are made to the shell environment that is launched to run which ever application you run.
+WinPython makes no permanent changes to your Windows registry or environment settings. Only temporary
+changes are made to the shell environment that is launched to run which ever application you run.
 
 Once extracted, open the WinPythonPlus folder and you will see a set of .bat files in the top level directory
-(a poor mans version of an executabkle ;) ). The .bat file are what need to be used to start any of the 
+(a poor mans version of an executable ;) ). The .bat file are what need to be used to start any of the 
 provided applications, and even when you wish to just start a python interpreter in the Windows console.
 
 .. warning:: It is very important to always launch a tool packaged in the WinPythonPlus
@@ -49,7 +49,7 @@ provided applications, and even when you wish to just start a python interpreter
 	tools exe or similar file will not work correctly and will cause unexpected
 	issues and perhaps application crashes.
 	
-    **Nothing will happen that would effect your computer overall or result
+    **Nothing will happen that would affect your computer overall or result
     in long standing issues though, don't worry.**
 
 Manually Installing ioHub
@@ -104,7 +104,7 @@ ioHub Package Installation
 ++++++++++++++++++++++++++++++
 
 There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
-The site-packages directory of your Python installation is a guarenteed place that will work. 
+The site-packages directory of your Python installation is a guaranteed place that will work. 
 
 To do so:
 
@@ -137,21 +137,21 @@ ioHub Dependency List Installation
 +++++++++++++++++++++++++++++++++++
 
 The following Python packages need to be installed on the system you plan to run
-ioHub on. Some apckages can be installed using *pip*, while other should be installed 
+ioHub on. Some packages can be installed using *pip*, while other should be installed 
 by downloading the package from the provided URL, unpacking the tarball, and 
 installing the package by typing::
 
     > python setup.py install
 
-in a terminal session where you have cd to the location of the uncompressed 
-python package source that contrains the setup.py script.
+in a terminal session where you have changed directories to the location of the uncompressed 
+python package source that contains the setup.py script.
 
 Some packages downloaded via a URL are a .deb file, in which case you just download
 the file and install it by double clicking the .deb file once downloaded. 
 
 Note that for both 'pip' and manual 'python setup.py install', depending on your
 Linux distribution and system configuration, you may need to run pip or 
-'python setup.py install' with root priveledges by placing 'sudo ' in front of the
+'python setup.py install' with root privileges by placing 'sudo ' in front of the
 command line text to be run.
 
 For example::
@@ -209,7 +209,7 @@ packages must be installed. Unfortunately, on OS X, this can be a frustrating ta
 based at a university, then I would suggest that you get a free copy of the Enthought Canopy Python distribution. 
 The link to apply for one is: https://www.enthought.com/products/canopy/academic/
 The Enthought Canopy Python distribution includes many of the packages needed by PsychoPy and ioHub.
-You will find that some packages are still missing though, so for thoose you will need to install them manually.
+You will find that some packages are still missing and must be installed manually.
 
 Manual Installation
 ====================
@@ -227,13 +227,13 @@ Dependency List Installation
 ++++++++++++++++++++++++++++++
 
 The following Python packages need to be installed on the system you plan to run
-ioHub on. Some apckages can be installed using *pip*, while other should be installed 
+ioHub on. Some packages can be installed using *pip*, while other should be installed 
 by downloading the package from the provided URL, unpacking the tarball, and 
 installing the package by typing::
 
     > python setup.py install
 
-in a terminal session where you have cd to the location of the uncompressed 
+in a terminal session where you have changed directories to the location of the uncompressed 
 python package source that contains the setup.py script.
 
 Note that for both 'pip' and manual 'python setup.py install', depending on your
@@ -262,7 +262,7 @@ Packages to install using pip or easy_install
 
 #. **msgpack**: It’s like JSON. but fast and small. ( pip install msgpack-python )
 #. **greenlet**: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called “tasklets”. ( pip install greenlet )
-#. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST ENSURE TO INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
+#. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
 
 Packages To Download
 ++++++++++++++++++++
@@ -273,9 +273,7 @@ Packages To Download
 		pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent
 
 #. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.    
-#. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python::
-
-		First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
+#. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python. First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
 
 ioHub Package Installation
 +++++++++++++++++++++++++++
@@ -293,15 +291,11 @@ To do so:
 Running Example Scripts
 #########################
 
-Running example scripts using ioHub should now work. All examples are in the *examples* folder of the iohub distribution. For example
-
-Open a console and cd to the **Example dir** (relative to the iohub root folder): examples\ioHubAccessDelayTest         
+Running example scripts using ioHub should now work. All examples are in the *examples* folder of the iohub distribution. To run a demo, open a console and cd to the **Example dir** (relative to the iohub root folder): examples\ioHubAccessDelayTest         
 
 **Run with**: python run.py
 
-or
-
-cd to **Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
+or cd to **Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
 
 **Run with**: python ioMouse.py
 

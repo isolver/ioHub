@@ -10,7 +10,7 @@ General ioHub Contributions
 The following people (listed alphabetically) have contributed to the overall ioHub Project.
 
 * **QIAN Chencan** - Chinese Academy of Sciences - Early testing and user feedback on ioHub, including input on timing related matters.
-* **Pierce Edmiston** - College of St. Benedict / St. John's University - Help with implementing and proofing ioHub Documentation, general functional testing and improvement / enhancement feedback, and EyeLink Common Eye Tracker Implementation testing.
+* **Pierce Edmiston** - University of Wisconsin-Madison - Help with implementing and proofing ioHub Documentation, general functional testing and improvement / enhancement feedback, and EyeLink Common Eye Tracker Implementation testing.
 * **Jeremy Gray** - Michigan State University - OS X Implementation input and testing. Example script optimizations.
 * **Jeff Pelz** - R.I.T. - Input on functional priorities, the Common Eye Tracker Interface,  and active 'real lab use' test site.
 * **Dong Wang** - R.I.T. - System functionality feedback, input, and testing support.
