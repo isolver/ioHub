@@ -33,8 +33,8 @@ add the following entry to the **monitor_devices** list::
         #   False = Do not save events for this device in the ioDataStore.
         save_events: True
         # streamEvents: Indicate if events from this device should be made available
-        #   during experiment runtime to the Experiment / PsychoPy Process.
-        #   True = Send events for this device to  the Experiment Process in real-time.
+        #   during experiment runtime to the PsychoPy Process.
+        #   True = Send events for this device to the PsychoPy Process in real-time.
         #   False = Do *not* send events for this device to the Experiment Process in real-time.
         stream_events: True
         # auto_report_events: Indicate if events from this device should start being
@@ -51,7 +51,7 @@ add the following entry to the **monitor_devices** list::
         #   discarded from the ioHub device event buffer.
         event_buffer_length: 256
         # monitor_event_types: Specified which KeyboardEvent types should be monitored
-        # for and therefore saved to the DataStore or sent to the Experiment Process.
+        # for and therefore saved to the DataStore or sent to the PsychoPy Process.
         monitor_event_types: [KeyboardPressEvent, KeyboardReleaseEvent, KeyboardCharEvent]
         # The remaining settings are optional and are not used within the device 
         # logic of iohub.

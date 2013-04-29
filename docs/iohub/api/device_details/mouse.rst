@@ -39,8 +39,8 @@ add the following entry to the **monitor_devices** list::
         
         
         # streamEvents: Indicate if events from this device should be made available
-        #   during experiment runtime to the Experiment / PsychoPy Process.
-        #   True = Send events for this device to  the Experiment Process in real-time.
+        #   during experiment runtime to the PsychoPy Process.
+        #   True = Send events for this device to the PsychoPy Process in real-time.
         #   False = Do *not* send events for this device to the Experiment Process in real-time.
         streamEvents: True
         

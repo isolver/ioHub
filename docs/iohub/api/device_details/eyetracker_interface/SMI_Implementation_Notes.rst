@@ -59,7 +59,7 @@ listed below are the default values for the iViewX configuration::
         # is recording data ?
         save_events: True
         
-        # Should eye tracker events be sent to the Experiment process when the device
+        # Should eye tracker events be sent to the PsychoPy process when the device
         # is recording data ?
         stream_events: True
         

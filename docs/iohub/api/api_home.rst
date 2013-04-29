@@ -11,4 +11,4 @@ ioHub API Manual and Specification
     Device and DeviceEvent class Reference <devices>
     ioDataStore ExperimentDataAccessUtility Class <datastore/iodatastore_api>
     ioHub Timebase <timebase>
-    Experiment Runtime 'Helper' API <utilities>
+    PsychoPy Coder *Extra's* API <utilities>

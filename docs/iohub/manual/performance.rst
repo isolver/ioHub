@@ -4,7 +4,7 @@ Performance Considerations
 
 
 Benefits to Using ioHub and a Couple Things to Keep in Mind
-=====================================================
+============================================================
 
 ioHub has been written to try and have as little impact on the Experiment Runtime
 Process as possible, as integration with PsychoPy continues to evolve, the net 
@@ -35,6 +35,7 @@ The model ioHub uses for event monitoring and communication with the 'client' pr
 ( PsychoPy ) is relatively unique and as discussed has clear advantages for an experiment runtime
 environment. However there are also considerations that have to be remembered to ensure
 that the ioHub - PsychoPy dual process model works as intended:
+
     #. Since multiple processes are in use, it is a 'requirement' that the computer running the experiment have multiple processing units (multiple cores or multiple physical CPUs), or timing will be significantly affected. Multicore processors are the defacto standard now, even with inexpensive entry level PCs. A dual core system is the minimum that is suggested; a quad core CPU, and to a lesser extent dual core CPU with hypertheading capabilities, is the ideal CPU for use with PsychoPy and ioHub. If a single CPU, single core system is used, the experiment will run and events will be received, however the performance of the experiment runtime and ioHub will be greatly reduced. This is because the two separate processes are having to share a single CPU and take turns using the processing bandwidth available. When processes have to repeatedly start and stop to allow another process to have some CPU time, this is a *very* expensive operation for a computer, and wastes a large amount of the overall processing capabilities of the CPU.
     #. Communication between PsychoPy and the ioHub is very fast, however it is still *slow* relative to how much information can be passed around within a single application process. Therefore, as is seen in the ioHub examples, requests for static data values from the ioHub Process are generally made once and saved to a local PsychoPy variable that can be referenced through out the experiment. Repeatedly calling an ioHub device method that will always return the same value is a waste of inter process messaging, no matter how fast that messaging may be. In some cases it is obviously necessary to ask for the data from the ioHub server every frame. That is expected and in general will never be an issue. However it is a good practice to do so when necessary only, and cache static values locally when possible. 
     

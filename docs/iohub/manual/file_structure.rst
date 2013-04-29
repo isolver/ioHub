@@ -32,9 +32,9 @@ Using the above experiment directory name example, a minimum directory structure
 would look like the following:
 
     * path/to/my_experiment_1/
-        * [myExperimentCode].py
-        * [experiment_config].yaml
-        * [ioHub_config].yaml
+        * <myExperimentCode>.py
+        * <experiment_config>.yaml
+        * <ioHub_config>.yaml
 
 A Brief Description of Each File
 *********************************

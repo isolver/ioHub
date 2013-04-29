@@ -3,7 +3,7 @@ ioHub Device and Device Event API
 ==================================
 
 The device and device event portion of the ioHub API contains the classes that represent
-the devices in use by the experiment runtime script and the associated events that each device type
+the devices in use by the PsychoPy script and the associated events that each device type
 can generate. 
 
 The device and device event API has been designed to try and provide a consistent

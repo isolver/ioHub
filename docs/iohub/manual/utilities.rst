@@ -1,17 +1,16 @@
 =================================================================
-Using the Experiment Runtime Utility Classes and Functions
+Using the PsychoPy Coder *Extra's* API
 =================================================================
 
 **THIS PAGE IS NOT COMPLETE AND WILL BE UPDATED WITHIN 72 HOURS**
 
 The iohub.util submodule of the ioHub Framework contains various classes and functions
-aimed at making it easier to code using ioHub and PsychoPy together within a scripting
-development environemnt.
+that add some optional functionality to the PsychoPy API. This area of fucntionality is
+*experimental* and will be adjusted as there is time consider any feadback received.
 
-These fucntionality defined within this section of the ioHub Package is
-*in progress* higher level experiment runtime *helper* code. The API for these utilities
-may change in the future and backwards compatibility is not yet a main consern of this
-area of the API. Some of the fucntionality may eventually be merged with PsychoPy itself,
+Therefore the API for this section of the API is likely to change in the future and 
+backwards compatibility is not yet a main consern of this area of the API. 
+Some of the fucntionality may eventually be merged with PsychoPy itself,
 or replaced in favor of a better option that has become apparent through use and feedback.
 
 
@@ -21,28 +20,28 @@ Experiment Runtime Utility Classes
 Full Screen Window Creation
 ----------------------------
 
-Contents TBD
+Contents TBC
 
 
 Screen States and Event Triggers
 ---------------------------------
 
-Contents TBD
+Contents TBC
 
 
 Experiment Condition Variable Provider
 ---------------------------------------
 
-Contents TBD
+Contents TBC
 
 Dialogs
 ---------
 
-Contents TBD
+Contents TBC
 
 Misc. Utilities
 -------------------
 
-Contents TBD
+Contents TBC
 
 

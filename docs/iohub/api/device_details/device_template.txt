@@ -40,9 +40,9 @@ add the following entry to the **monitor_devices** list::
         
         
         # streamEvents: Indicate if events from this device should be made available
-        #   during experiment runtime to the Experiment / PsychoPy Process.
-        #   True = Send events for this device to  the Experiment Process in real-time.
-        #   False = Do *not* send events for this device to the Experiment Process in real-time.
+        #   during experiment runtime to the PsychoPy Process.
+        #   True = Send events for this device to the PsychoPy Process in real-time.
+        #   False = Do *not* send events for this device to the PsychoPy Process in real-time.
         streamEvents: True
         
         # auto_report_events: Indicate if events from this device should start being
@@ -51,7 +51,7 @@ add the following entry to the **monitor_devices** list::
         #   device's enableEventReporting method is made with a parameter value of True.
         #   True = Automatically start reporting events for this device when the experiment starts.
         #   False = Do not start reporting events for this device until enableEventReporting(True)
-        #       is set for the device during experiment runtime.
+        #       is set for the device during PsychoPy runtime.
         auto_report_events: True
         
         # event_buffer_length: Specify the maximum number of events (for each 

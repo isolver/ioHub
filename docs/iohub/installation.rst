@@ -2,6 +2,8 @@
 Installation
 #############
 
+.. important:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over short term as the PsychoPy Package and PsychoPy Python Distributes are updated to include ioHub as a submodule.
+ 
 There are different installation options depending on the target OS.
 
 Windows
@@ -13,18 +15,23 @@ Using the WinPythonPlus Distribution
 The easiest way to get up and running with the ioHub and PychoPy on Windows (as of end of April, 2013)
 is to download the WinPythonPlus Portable Software distribution, which includes everything you need plus
 several other very useful and cool tools:
-    * Python 2.7.3 32 bit
-    * PsychoPy and all necessary dependencies, including numpy and scipy
-    * ioHub and all necessary dependencies
-    * Matplotlib
-    * iPython, including the iPython qtConsole and iPython Notebook
-    * PyQt, pyqtgraph, and pyqtgui
-    * cv2 OpenCV Python wrappers
-    * support for cython development out of the box, using the provided gcc compiler.
-    * several other useful python packages for scientific applications.
-    * Spyder Python IDE
-	* The great HDFView application, a HDF5 file viewer written by the HDF Group.
-    * Many other python packages preinstalled.
+
+* Python 2.7.3 32 bit.
+* `PsychoPy <http://www.psychopy.org>`_ and all necessary dependencies.
+* ioHub and all necessary dependencies.
+* `NumPy <http://www.numpy.org>`_.
+* `SciPy <http://www.scipy.org>`_.
+* `Matplotlib <http://matplotlib.org/>`_.
+* `iPython 0.13 <http://ipython.org/install.html>`_ , including the iPython qtConsole and iPython Notebook.
+* `PyQt <http://wiki.python.org/moin/PyQt>`_.
+* `PyGraphQt <http://www.pyqtgraph.org/>`_.
+* `GuiQwt <https://code.google.com/p/guiqwt/>`_.
+* `GuiData <http://pythonhosted.org/guidata/>`_.
+* `OpenCV (including the cv2 Python interface) <http://opencv.org/>`_.
+* `cython <http://www.cython.org/>`_, using the provided minggw / gnuwin32 / gcc tool chain.
+* `Spyder <https://code.google.com/p/spyderlib/>`_.
+* `HDFView <http://www.hdfgroup.org/hdf-java-html/hdfview/>`_, a HDF5 file viewer written by The HDF Group.
+* Several other useful python packages for scientific applications.
     
 Given WinPythonPlus is provided in the form of a portable software distribution, 
 there is no actual *installation* required. Simply download the self extracting archive
@@ -41,16 +48,9 @@ Once extracted, open the WinPythonPlus folder and you will see a set of .bat fil
 (a poor mans version of an executable ;) ). The .bat file are what need to be used to start any of the 
 provided applications, and even when you wish to just start a python interpreter in the Windows console.
 
-.. warning:: It is very important to always launch a tool packaged in the WinPythonPlus
-    distribution using the provided launcher .bat file or exe in the WinPythonPlus 
-    root folder. These launchers temporarily configure the environment 
-    variables for that process so that the application and associated APIs will 
-    run correctly. Starting one of the provided tools by directly running the 
-	tools exe or similar file will not work correctly and will cause unexpected
-	issues and perhaps application crashes.
+.. warning:: It is important to always launch a tool packaged in the WinPythonPlus distribution using the provided launcher .bat file or exe in the WinPythonPlus root folder. These launchers temporarily configure the environment variables for that process so that the application and associated APIs will run correctly. Starting one of the provided tools by directly running the tools exe or similar file will not work correctly and will cause unexpected issues and perhaps application crashes.
 	
-    **Nothing will happen that would affect your computer overall or result
-    in long standing issues though, don't worry.**
+.. note:: **Nothing can happen to your computer that would affect your computer overall or result in long standing issues though, don't worry.**
 
 Manually Installing ioHub
 ===========================
@@ -72,28 +72,28 @@ Once Python and PsychoPy (including all the stated PsychoPy dependencies) are in
 Python 2.7 Package List with URLs
 ++++++++++++++++++++++++++++++++++
 
-    #. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.7.exe>`_ A cross-platform process and system utilities module for Python
-    #. `msgpack: <http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644>`_ It's like JSON. but fast and small.
-    #. `greenlet: <http://pypi.python.org/packages/2.7/g/greenlet/greenlet-0.4.0.win32-py2.7.exe#md5=910896116b1e4fd527b8afaadc7132f3>`_ The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets".
-    #. `gevent: <https://github.com/downloads/SiteSupport/gevent/gevent-1.0rc2.win32-py2.7.exe>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
-    #. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.7.exe&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
-    #. `pytables: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data.
-    #. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.7.exe>`_ PyYAML is a YAML parser and emitter for Python.
-    #. `pywin32: <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download>`_ Python Extensions for Windows
-    #. `pyHook: <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download>`_ Python wrapper for global input hooks in Windows.
+    #. `psutil <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.7.exe>`_ A cross-platform process and system utilities module for Python
+    #. `msgpack <http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644>`_ It's like JSON. but fast and small.
+    #. `greenlet <http://pypi.python.org/packages/2.7/g/greenlet/greenlet-0.4.0.win32-py2.7.exe#md5=910896116b1e4fd527b8afaadc7132f3>`_ The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets".
+    #. `gevent <https://github.com/downloads/SiteSupport/gevent/gevent-1.0rc2.win32-py2.7.exe>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
+    #. `numexpr <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.7.exe&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
+    #. `pytables <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data.
+    #. `pyYAML <http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.7.exe>`_ PyYAML is a YAML parser and emitter for Python.
+    #. `pywin32 <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download>`_ Python Extensions for Windows
+    #. `pyHook <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download>`_ Python wrapper for global input hooks in Windows.
 
 Python 2.6 Package List with URLs
 +++++++++++++++++++++++++++++++++++
 
-    #. `psutil: <https://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.6.exe>`_ A cross-platform process and system utilities module for Python
-    #. `msgpack: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#msgpack>`_ It's like JSON. but fast and small.
-    #. `greenlet: <https://pypi.python.org/packages/2.6/g/greenlet/greenlet-0.4.0.win32-py2.6.exe>`_ The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets".
-    #. `gevent: <https://code.google.com/p/gevent/downloads/detail?name=gevent-1.0b4.win32-py2.6.exe&can=2&q=>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
-    #. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.6.exe&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
-    #. `pytables: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data.
-    #. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.6.exe>`_ PyYAML is a YAML parser and emitter for Python.
-    #. `pyHook: <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.6.exe/download>`_ Python wrapper for global input hooks in Windows.
-    #. `pywin32: <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.6.exe/download>`_ Python Extensions for Windows
+    #. `psutil <https://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.6.exe>`_ A cross-platform process and system utilities module for Python
+    #. `msgpack <http://www.lfd.uci.edu/~gohlke/pythonlibs/#msgpack>`_ It's like JSON. but fast and small.
+    #. `greenlet <https://pypi.python.org/packages/2.6/g/greenlet/greenlet-0.4.0.win32-py2.6.exe>`_ The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets".
+    #. `gevent <https://code.google.com/p/gevent/downloads/detail?name=gevent-1.0b4.win32-py2.6.exe&can=2&q=>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
+    #. `numexpr <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.6.exe&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
+    #. `pytables <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data.
+    #. `pyYAML <http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.6.exe>`_ PyYAML is a YAML parser and emitter for Python.
+    #. `pyHook <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.6.exe/download>`_ Python wrapper for global input hooks in Windows.
+    #. `pywin32 <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.6.exe/download>`_ Python Extensions for Windows
 
 Several of the devices supported by ioHub require the installation of a binary OS driver
 for the device that can not be included with the ioHub package due to licensing 
@@ -174,11 +174,11 @@ in a console and are told the program does not exist, then you can install pip u
 Packages To Download with URLs
 ++++++++++++++++++++++++++++++
 
-#. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.tar.gz&can=2&q=>`_ A cross-platform process and system utilities module for Python
-#. `gevent: <https://github.com/downloads/SiteSupport/gevent/python-gevent_1.0rc2_i386.deb>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
-#. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
-#. `pyYAML: <http://pyyaml.org/wiki/PyYAMLDocumentation>`_ Following install instructions on the page. PyYAML is a YAML parser and emitter for Python. For faster processing, also download and install `LibYAML <http://pyyaml.org/wiki/LibYAML>`_; following install instructions on the page.
-#. `python-xlib: <http://sourceforge.net/projects/python-xlib/>`_ The Python X Library is a complete X11R6 client-side implementation, written in pure Python.
+#. `psutil <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.tar.gz&can=2&q=>`_ A cross-platform process and system utilities module for Python
+#. `gevent <https://github.com/downloads/SiteSupport/gevent/python-gevent_1.0rc2_i386.deb>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
+#. `numexpr <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
+#. `pyYAML <http://pyyaml.org/wiki/PyYAMLDocumentation>`_ Following install instructions on the page. PyYAML is a YAML parser and emitter for Python. For faster processing, also download and install `LibYAML <http://pyyaml.org/wiki/LibYAML>`_; following install instructions on the page.
+#. `python-xlib <http://sourceforge.net/projects/python-xlib/>`_ The Python X Library is a complete X11R6 client-side implementation, written in pure Python.
 
 
 Packages to install using pip
@@ -260,9 +260,9 @@ in a console and are told the program does not exist, then you can install pip o
 Packages to install using pip or easy_install
 ++++++++++++++++++++++++++++++++++++++++++++++
 
-#. **msgpack**: It’s like JSON. but fast and small. ( pip install msgpack-python )
-#. **greenlet**: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called “tasklets”. ( pip install greenlet )
-#. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
+#. **msgpack** It's like JSON. but fast and small. ( pip install msgpack-python )
+#. **greenlet** The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets". ( pip install greenlet )
+#. **pytables** PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
 
 Packages To Download
 ++++++++++++++++++++
@@ -272,8 +272,8 @@ Packages To Download
 
 		pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent
 
-#. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.    
-#. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python. First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
+#. `numexpr <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.    
+#. `pyYAML <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python. First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
 
 ioHub Package Installation
 +++++++++++++++++++++++++++

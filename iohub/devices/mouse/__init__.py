@@ -141,8 +141,8 @@ class MouseDevice(Device):
         Mouse Position and Delta are in display coordinate units.
 
         Args: None
-        Return (tuple): ( (x,y), (dx,dy) ) position of mouse, change in mouse position,
-                                           both in Display coordinate space.
+		
+        Return (tuple): ( (x,y), (dx,dy) ) position of mouse, change in mouse position, both in Display coordinate space.
         """
         try:
             cpos=self._position

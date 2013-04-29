@@ -1,10 +1,10 @@
 ==================================================
-Experiment Runtime Utility Module API
+PsychoPy Coder *Extra's* API
 ==================================================
 
 The iohub.util submodule of the ioHub Framework contains various classes and functions
-aimed at making it easier to code using ioHub and PsychoPy together within a scripting
-development environemnt.
+that add some optional functionality to the PsychoPy API. This section of the API is
+*experimental* and will be adjusted as there is time consider any feadback received.
 
 .. toctree::
    :maxdepth: 4
