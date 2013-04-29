@@ -1,18 +1,18 @@
-==================================
+#############
 Installation
-==================================
+#############
 
 There are different installation options depending on the target OS.
 
 Windows
-==================================
+########
 
-Using the OpenPsycho Distribution
---------------------------------------
+Using the WinPythonPlus Distribution
+=====================================
 
-The easiest way to get up and running with the ioHub on Windows is to download
-the OpenPsycho Portable Software distribution, which includes the following, 
-in high level outine form:
+The easiest way to get up and running with the ioHub and PychoPy on Windows (as of end of April, 2013)
+is to download the WinPythonPlus Portable Software distribution, which includes everything you need plus
+several other very useful and cool tools:
     * Python 2.7.3 32 bit
     * PsychoPy and all necessary dependencies, including numpy and scipy
     * ioHub and all necessary dependencies
@@ -20,47 +20,40 @@ in high level outine form:
     * iPython, including the iPython qtConsole and iPython Notebook
     * PyQt, pyqtgraph, and pyqtgui
     * cv2 OpenCV Python wrappers
-    * support for cython development out of the box
+    * support for cython development out of the box, using the provided gcc compiler.
     * several other useful python packages for scientific applications.
     * Spyder Python IDE
-    * Libre Office
-    * GIMP
+	* The great HDFView application, a HDF5 file viewer written by the HDF Group.
     * Many other python packages preinstalled.
     
-Given OpenPsycho is provided in the form of a portable software distribution, 
-there is no actual *installation* required. Simply download the latest distribution
-from `here <URL_TO_BE_DETERMINED>`_ and unpack the self extracting archive to the 
-location of your choosing.
+Given WinPythonPlus is provided in the form of a portable software distribution, 
+there is no actual *installation* required. Simply download the self extracting archive
+from `here <URL TO BE DETERMINED>`_. launch it, and select where you want the WinPythonPlus
+distribution to go. 
 
-OpenPsycho is based on the `WinPython project <http://www.winpython.org>`_, with extra packages
+WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages
 added and the structure of the distribution changed somewhat.
 
-The OpenPsycho file you download is a self extracting '7zip <www.7zip.org>`_ archive.
-7zip is **not** required to be installed on your computer to run the self extracting file. 
-Simply double click on the downloaded OpenPsycho.exe and select where you want
-the OpenPsycho directory placed in your file system. Avoiding paths with the ' '
-space character in them may be a safe idea. Placing the extracted OpenPsycho 
-directory in the root C:\ folder is often easiest; or the root of another partition, or
-USB drive. No changes to your Windows registry or environment variables are made
-during installation.
+WinPython makes no perminant changes to your Windows registry or environment settings. Only temporary
+charges are made to the shell environment that is launched to run which ever application you run.
 
-Once extracted, open the OpenPsycho folder and a set of bat files 
-(soon to be exe files) can be found and used to start the main tools
-of the OpenPsycho distribution. 
+Once extracted, open the WinPythonPlus folder and you will see a set of .bat files in the top level directory
+(a poor mans version of an executabkle ;) ). The .bat file are what need to be used to start any of the 
+provided applications, and even when you wish to just start a python interpreter in the Windows console.
 
-.. note:: It is very important to always launch a tool packaged in the OpenPsycho
-    distribution using the provided launch .bat file or exe in the openPsycho 
-    folder root folder. These launchers temporarily configure the environment 
+.. warning:: It is very important to always launch a tool packaged in the WinPythonPlus
+    distribution using the provided launcher .bat file or exe in the WinPythonPlus 
+    root folder. These launchers temporarily configure the environment 
     variables for that process so that the application and associated APIs will 
-    run correctly. 
-    
-    Starting a tool by directly running the tools exe or similar file will not 
-    work correctly and will cause unexpected issues and perhaps application crashes.
-    Nothing will happen that would effect your computer overall or result
-    in long standing issues though, don't worry.
+    run correctly. Starting one of the provided tools by directly running the 
+	tools exe or similar file will not work correctly and will cause unexpected
+	issues and perhaps application crashes.
+	
+    **Nothing will happen that would effect your computer overall or result
+    in long standing issues though, don't worry.**
 
 Manually Installing ioHub
-----------------------------
+===========================
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -71,14 +64,13 @@ the ioHub dependency installation list and installation of ioHub itself:
 
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
-Dependency List Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dependency Installation List 
++++++++++++++++++++++++++++++
 
-Once Python and PsychoPy are installed, the following extra Python packages must
-be installed for the ioHub:
+Once Python and PsychoPy (including all the stated PsychoPy dependencies) are installed, the following extra Python packages must be installed for the ioHub:
 
-Python 2.7 Package List
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python 2.7 Package List with URLs
+++++++++++++++++++++++++++++++++++
 
     #. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.7.exe>`_ A cross-platform process and system utilities module for Python
     #. `msgpack: <http://pypi.python.org/packages/2.7/m/msgpack-python/msgpack_python-0.2.0-py2.7-win32.egg#md5=d52bd856ca8c8d9a6ee86937e1b4c644>`_ It's like JSON. but fast and small.
@@ -90,8 +82,8 @@ Python 2.7 Package List
     #. `pywin32: <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download>`_ Python Extensions for Windows
     #. `pyHook: <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.7.exe/download>`_ Python wrapper for global input hooks in Windows.
 
-Python 2.6 Package List
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python 2.6 Package List with URLs
++++++++++++++++++++++++++++++++++++
 
     #. `psutil: <https://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.win32-py2.6.exe>`_ A cross-platform process and system utilities module for Python
     #. `msgpack: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#msgpack>`_ It's like JSON. but fast and small.
@@ -103,34 +95,34 @@ Python 2.6 Package List
     #. `pyHook: <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.6.exe/download>`_ Python wrapper for global input hooks in Windows.
     #. `pywin32: <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.6.exe/download>`_ Python Extensions for Windows
 
-Several of the devices supported by ioHub require the installation of an OS driver
+Several of the devices supported by ioHub require the installation of a binary OS driver
 for the device that can not be included with the ioHub package due to licensing 
-considerations. Please refer to the documentation page for each device to ensure that
+considerations. Please refer to the documentation page for each device you will be using to ensure that
 any device specific driver required is known about and is installed.
 
 ioHub Package Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
-To install the ioHub package itself, currently no python package installer exists. 
-Therefore the ioHub source is simply copied to your Python site-packages folder, 
-putting the ioHub directory in the site-packages directory of your Python installation.
+There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
+The site-packages directory of your Python installation is a guarenteed place that will work. 
+
 To do so:
 
 #. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
 #. Open the zip file.
-#. Copy the folder in the zip file to your python site-packages directory. (likely something like C:\Python27\Lib\site-packages, or C:\Python27\Lib\site-packages)
-#. Rename the folder you copied to the site-packages directory from ioHub-master to just ioHub .
+#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the zip file downloaded to your python site-packages directory. (likely something like C:\Python27\Lib\site-packages, or C:\Python26\Lib\site-packages).
 
 
 Linux
-=================
+#######
 
-For Linux the OpenPsycho distribution can not be used. Instead the necessary
+For Linux the WinPythonPlus distribution can not be used. Instead the necessary
 packages must be installed using the OS's package manager and the Python pip 
-and / or easy_install utilities.
+and / or easy_install utilities. Fortunately, on Linux, this is a very easy 
+process that almost anyone can do.
 
 Manually Installing ioHub
-----------------------------
+===========================
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -142,7 +134,7 @@ the ioHub dependency installation list and installation of ioHub itself:
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
 ioHub Dependency List Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++++++++++
 
 The following Python packages need to be installed on the system you plan to run
 ioHub on. Some apckages can be installed using *pip*, while other should be installed 
@@ -155,21 +147,21 @@ in a terminal session where you have cd to the location of the uncompressed
 python package source that contrains the setup.py script.
 
 Some packages downloaded via a URL are a .deb file, in which case you just download
-the file and install it by dowble clicking the .deb file once downloaded. 
+the file and install it by double clicking the .deb file once downloaded. 
 
 Note that for both 'pip' and manual 'python setup.py install', depending on your
 Linux distribution and system configuration, you may need to run pip or 
-'python setup.py install' with root priveledges.
+'python setup.py install' with root priveledges by placing 'sudo ' in front of the
+command line text to be run.
 
-If your user had admin rights, this can be done by running the command with 'sudo'
-at the start of the command and entering your password when prompted. For example::
+For example::
 
     > sudo pip install package_name
 
 where package_name is the name of one of the required python packages.
 
 Installing pip if it is not Already on the System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you type:: 
 
@@ -179,8 +171,8 @@ in a console and are told the program does not exist, then you can install pip u
 
     > sudo apt-get install pip
 
-Packages To Download
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Packages To Download with URLs
+++++++++++++++++++++++++++++++
 
 #. `psutil: <http://code.google.com/p/psutil/downloads/detail?name=psutil-0.6.1.tar.gz&can=2&q=>`_ A cross-platform process and system utilities module for Python
 #. `gevent: <https://github.com/downloads/SiteSupport/gevent/python-gevent_1.0rc2_i386.deb>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
@@ -190,35 +182,37 @@ Packages To Download
 
 
 Packages to install using pip
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 #. msgpack: It's like JSON. but fast and small. ( pip install msgpack-python )
 #. greenlet: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets". ( pip install greenlet )
 #. pytables: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables )
 
 ioHub Package Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
-To install the ioHub package itself the source should be downloaded from github, 
-as currently no python package installer exists. 
+There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
+The site-packages directory of your Python installation is a guarenteed place that will work. 
 
 To do so:
 
 #. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
-#. Open the zip file
-#. Rename the folder in the zip, which is likely called something like 'iohub-master', to just 'ioHub'.
-#. Copy the 'ioHub' folder to a directory in your Python path. sudo access may be needed.
+#. Open the zip file.
+#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the compressed file downloaded to a directory in your Python path. sudo access may be needed.
 
 
 OSX 10.6 - 10.8
-====================
+################
 
-For OS X 10.6 + the OpenPsycho distribution can not be used. Instead the necessary
-packages must be installed using the OS's package manager and the Python pip utility
-as well as manually building packages
+For OS X 10.6 + the WinPythonPlus distribution can not be used. Instead the necessary
+packages must be installed. Unfortunately, on OS X, this can be a frustrating task. If you are
+based at a university, then I would suggest that you get a free copy of the Enthought Canopy Python distribution. 
+The link to apply for one is: https://www.enthought.com/products/canopy/academic/
+The Enthought Canopy Python distribution includes many of the packages needed by PsychoPy and ioHub.
+You will find that some packages are still missing though, so for thoose you will need to install them manually.
 
 Manual Installation
-----------------------------
+====================
 
 The following software must be installed on the computer before proceeding with 
 the ioHub dependency installation list and installation of ioHub itself: 
@@ -230,7 +224,7 @@ the ioHub dependency installation list and installation of ioHub itself:
     #. For the NumPy package, please ensure 1.6.2 or greater is installed.
 
 Dependency List Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 The following Python packages need to be installed on the system you plan to run
 ioHub on. Some apckages can be installed using *pip*, while other should be installed 
@@ -243,7 +237,7 @@ in a terminal session where you have cd to the location of the uncompressed
 python package source that contains the setup.py script.
 
 Note that for both 'pip' and manual 'python setup.py install', depending on your
-OS X settings and system configuration, you may need to run pip or 
+OS X settings and python configuration, you may need to run pip or 
 'python setup.py install' with root priveledges.
 
 If your user has admin rights, this can be done by running the command with 'sudo'
@@ -254,63 +248,60 @@ at the start of the command and entering your password when prompted. For exampl
 where package_name is the name of one of the required python packages.
 
 Installing pip if it is not Already on the System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you type:: 
 
     > pip
 
-in a console and are told the program does not exist, then you can install pip using::
-
-    > sudo apt-get install pip
+in a console and are told the program does not exist, then you can install pip or easy_install before proceeding.
 
 
-Packages to install using pip
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Packages to install using pip or easy_install
+++++++++++++++++++++++++++++++++++++++++++++++
 
 #. **msgpack**: It’s like JSON. but fast and small. ( pip install msgpack-python )
 #. **greenlet**: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called “tasklets”. ( pip install greenlet )
 #. **pytables**: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables ). FIRST ENSURE TO INSTALL 'numexpr' from the list below, as it is a dependency of tables) 
 
 Packages To Download
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++
 
 #. `pyobjc <https://pypi.python.org/packages/source/p/pyobjc/pyobjc-2.5.1.tar.gz#md5=f242cff4a25ce397bb381c21a35db885>`_ : A  Python ObjectiveC binding.    
 #. **gevent**: A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop::
 
-    pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent
+		pip install cython -e git://github.com/surfly/gevent.git@1.0rc2#egg=gevent
 
 #. `numexpr: <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-2.0.1.tar.gz&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.    
 #. `pyYAML: <http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz>`_ PyYAML is a YAML parser and emitter for Python::
 
-    First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
+		First install the C side package `LibYAML <http://pyyaml.org/wiki/LibYAML>`_, before installing ptYAML.
 
 ioHub Package Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++
 
-To install the ioHub package itself the source should be downloaded from github, 
-as currently no python package installer exists. 
+There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
+The site-packages directory of your Python installation is a guarenteed place that will work. 
 
 To do so:
 
-#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_    
-#. Open the zip file    
-#. Rename the folder in the zip, which is likely called something like 'iohub-master', to just 'ioHub'.    
-#. Copy the 'ioHub' folder to a directory in your Python path. sudo access may be needed.    
+#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
+#. Open the zip file.
+#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the compressed file downloaded to a directory in your Python path. sudo access may be needed.
 
 
 Running Example Scripts
 #########################
 
-Running example scripts using ioHub should now work. All examples are in the *examples* folder of the ioHub distribution. For example
+Running example scripts using ioHub should now work. All examples are in the *examples* folder of the iohub distribution. For example
 
-**Demo dir** (relative to the ioHub root folder): ioHub\examples\ioHubAccessDelayTest         
+Open a console and cd to the **Example dir** (relative to the iohub root folder): examples\ioHubAccessDelayTest         
 
 **Run with**: python run.py
 
 or
 
-**Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
+cd to **Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
 
 **Run with**: python ioMouse.py
 

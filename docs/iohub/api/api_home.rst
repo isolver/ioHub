@@ -1,6 +1,8 @@
 ===================================
 ioHub API Manual and Specification
 ===================================
+
+**THIS SECTION OF THE DOCUMENTATION IS NOT COMPLETE AND WILL BE UPDATED WITHIN 72 HOURS**
    
 .. toctree::
     :maxdepth: 4

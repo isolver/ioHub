@@ -2,6 +2,8 @@
 ioHub Example Scripts
 ###########################
 
+**THIS PAGE IS OUT OF DATE AND WILL BE UPDATED WITHIN 72 HOURS**
+
 There are a set of example programs / experiments that are included with the 
 ioHub source code. All examples can be found in the ioHub/examples/ directory.
 

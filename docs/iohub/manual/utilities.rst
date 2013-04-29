@@ -2,6 +2,8 @@
 Using the Experiment Runtime Utility Classes and Functions
 =================================================================
 
+**THIS PAGE IS NOT COMPLETE AND WILL BE UPDATED WITHIN 72 HOURS**
+
 The iohub.util submodule of the ioHub Framework contains various classes and functions
 aimed at making it easier to code using ioHub and PsychoPy together within a scripting
 development environemnt.
@@ -28,7 +30,7 @@ Screen States and Event Triggers
 Contents TBD
 
 
-Experiment Condition Valiable Provider
+Experiment Condition Variable Provider
 ---------------------------------------
 
 Contents TBD

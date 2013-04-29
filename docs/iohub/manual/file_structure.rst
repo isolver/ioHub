@@ -2,6 +2,9 @@
 Structure Options for a PsychoPy-ioHub Experiment Script
 ==========================================================
 
+**THIS PAGE IS NOT COMPLETE AND WILL BE UPDATED WITHIN 48 HOURS**
+
+
 Using a Single Python Experiment Script File 
 ===============================================
 
