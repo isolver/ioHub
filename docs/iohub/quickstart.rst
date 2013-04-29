@@ -25,6 +25,8 @@ to use the ioHub Event Monitoring Framework using a 'script only' approach to
 working with ioHub. We will then convert a second PsychoPy demo, 'joystick_universal.py',
 but this time use the scipt + ioHub configuration file approach. 
 
+..	note:: Both examples shown here can be found in the ioHub examples\quickStart sub directory.
+
 Each approach has strengths and weaknesses. In general if the experiment
 is using complex device types, like an eye tracker or an analog to digital
 converter, then the latter approach of using configuration files to define 
@@ -91,8 +93,7 @@ the keyboard and mouse device inputs, the script would look as follows. The ioHu
 version is much longer here because loads of comments have been added to the 
 script explaining the ioHub API calls being made in some detail. Please review the
 comments added below the source code, as they explain differences to note when using
-ioHub instead of the built in PsychoPy event functionality. The source
-code for this 'conversion' can be found in the ioHub example folder in the ioMouse example::
+ioHub instead of the built in PsychoPy event functionality::
 
 	# -*- coding: utf-8 -*-
 	"""
@@ -103,10 +104,8 @@ code for this 'conversion' can be found in the ioHub example folder in the ioMou
 
 	from psychopy import visual, core
 
-	from iohub import quickStartHubServer
-	from iohub.client import Computer
-	from iohub.constants import EventConstants
-	from iohub.util.experiment import FullScreenWindow
+	from iohub.client import Computer, EventConstants, quickStartHubServer
+	from iohub.util import FullScreenWindow
 
 	# Create and start the ioHub Server Process, enabling the 
 	# the default ioHub devices: Keyboard, Mouse, Experiment, and Display.
@@ -294,8 +293,11 @@ code for this 'conversion' can be found in the ioHub example folder in the ioMou
 		fixSpot.draw()
 		grating.draw()
 		message.draw()
-		myWin.flip()#redraw the buffer
-
+		flip_time=myWin.flip()#redraw the buffer
+		
+		# For the example, we will print the flip times out to devide events that are printed for each flip.
+		print '########### WINDOW REDRAW AT %.6f secs'%(flip_time)
+		
 		# Handle key presses each frame. Since no event type is being given
 		# to the getEvents() method, all KeyboardEvent types will be 
 		# returned (KeyboardPressEvent, KeyboardReleaseEvent, KeyboardCharEvent), 
@@ -316,10 +318,20 @@ code for this 'conversion' can be found in the ioHub example folder in the ioMou
 			if event.key in ['ESCAPE','q']:
 				io.quit()
 				core.quit()
-				
-		# Clear out events that were not accessed this frame.
+			else:
+				# For the example, lets print out the keyboard event object, 
+				# which will print all the attributes of the KeyBoard event.
+				print event
+			
+		for event in myMouse.getEvents(): 
+			# For the example, lets print out the keyboard event object, 
+			# which will print all the attributes of the KeyBoard event.
+			print event
+			
+		# Since we are getting events from the two main event generating devices
+		# in our experiment, no need to clear anything.
 		#
-		io.clearEvents('all')
+		#io.clearEvents('all')
 
 	#
 	## End of Example
@@ -456,8 +468,7 @@ capable device plugged into your PC, then creating the ioHub version of the demo
 can be started. Note that all source files for this 
 example are in the ioGamepad directory of the ioHub Examples folder.
 
-The following steps should be followed if a new version of the demo is being created:
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+**The following steps should be followed if a new version of the demo is being created:**
 
 #. Create a directory (location of your choice) called ioXInputGamePad. The directory can be any name you wish, but here it is assumed it is called ioXInputPsychoPy.
 #. Within the ioXInputGamePad directory, create the python source file that will hold the example python source code. This example assumes it has been named run.py
@@ -488,8 +499,8 @@ Add the following python source code to the run.py file that was created::
 
     from psychopy import core, visual
     import iohub
-    from iohub.client import Computer
-    from iohub.util.experiment import ioHubExperimentRuntime,FullScreenWindow
+    from iohub.client import Computer, ioHubExperimentRuntime
+    from iohub.util import FullScreenWindow
 
     class ExperimentRuntime(ioHubExperimentRuntime):
         """
@@ -654,19 +665,19 @@ we will not go into details about each setting with the files.
 
 Enter the following into your experiment_config.yaml for this example::
 
-    # Experiment level configuration settings in YAML format
-    title: ioHub XInput Gamepad Example with PsychoPy
-    code: ioXInput
-    version: '1.0'
-    description: Uses an XInput compatible gamepad within a psychoPy script.
-    session_defaults:
-        name: Session Name
-        code: E1S01
-        comments: None
-    session_variable_order: [ name, code, comments ]
-    ioHub:
-        enable: True
-        config: ioHub_config.yaml
+	# Experiment level configuration settings in YAML format
+	title: ioHub XInput Gamepad Example with PsychoPy
+	code: ioXInput
+	version: '1.0'
+	description: Uses an XInput compatible gamepad within a psychoPy script.
+	session_defaults:
+		name: Session Name
+		code: E1S01
+		comments: None
+	session_variable_order: [ name, code, comments ]
+	ioHub:
+		enable: True
+		config: ioHub_config.yaml
 
     
 Defining Device Information in the iohub_config.yaml File.
@@ -681,54 +692,53 @@ There are two types of ioHub settings in the iohub_config.yaml file:
 
 Enter the following into your iohub_config.yaml for this example::
 
-    # iohub_config.yaml: settings related to the iohub process and the device types 
-    # that are to be enabled for the experiment.
-
-    monitor_devices:
-        - Display:
-            name: display
-            reporting_unit_type: pix
-            device_number: 0
-            physical_dimensions:
-                width: 500
-                height: 281
-                unit_type: mm
-            default_eye_distance:
-                surface_center: 500
-                unit_type: mm
-            psychopy_monitor_name: default
-            origin: center
-        - Keyboard:
-            name: keyboard
-            save_events: True
-            stream_events: True
-            auto_report_events: True
-            event_buffer_length: 256
-        - Mouse:
-            name: mouse
-            save_events: True
-            stream_events: True
-            auto_report_events: True
-            event_buffer_length: 256
-        - Experiment:
-            name: experimentRuntime
-            save_events: True
-            stream_events: True
-            auto_report_events: True
-            event_buffer_length: 128
-        - xinput.Gamepad:
-            name: gamepad
-            device_number: -1
-            enable: True
-            save_events: True
-            stream_events: True
-            auto_report_events: True
-            event_buffer_length: 256
-            device_timer:
-                interval: 0.005
-    data_store:
-        enable: True    
-        
+	# iohub_config.yaml: settings related to the iohub process and the device types 
+	# that are to be enabled for the experiment.
+	monitor_devices:
+		- Display:
+			name: display
+			reporting_unit_type: pix
+			device_number: 0
+			physical_dimensions:
+				width: 500
+				height: 281
+				unit_type: mm
+			default_eye_distance:
+				surface_center: 500
+				unit_type: mm
+			psychopy_monitor_name: default
+			origin: center
+		- Keyboard:
+			name: keyboard
+			save_events: True
+			stream_events: True
+			auto_report_events: True
+			event_buffer_length: 256
+		- Mouse:
+			name: mouse
+			save_events: True
+			stream_events: True
+			auto_report_events: True
+			event_buffer_length: 256
+		- Experiment:
+			name: experimentRuntime
+			save_events: True
+			stream_events: True
+			auto_report_events: True
+			event_buffer_length: 128
+		- xinput.Gamepad:
+			name: gamepad
+			device_number: -1
+			enable: True
+			save_events: True
+			stream_events: True
+			auto_report_events: True
+			event_buffer_length: 256
+			device_timer:
+				interval: 0.005
+	data_store:
+		enable: True
+	
 The iohub_config.yaml file also resides in the same folder as your main experiment script.
 
 With all three files saved, and a supported XInput compatible gamepad connected

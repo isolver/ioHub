@@ -14,7 +14,12 @@ Using the WinPythonPlus Distribution
 
 The easiest way to get up and running with the ioHub and PychoPy on Windows (as of end of April, 2013)
 is to download the WinPythonPlus Portable Software distribution, which includes everything you need plus
-several other very useful and cool tools:
+several other very useful and cool tools.
+
+Download the **WinPythonPlus self-extracting archive from `here <https://docs.google.com/file/d/0B-qFhchxISOSUHpfS3dvN2hXU00/edit?usp=sharing>`_. **
+
+What's Included
+----------------
 
 * Python 2.7.3 32 bit.
 * `PsychoPy <http://www.psychopy.org>`_ and all necessary dependencies.
@@ -32,21 +37,22 @@ several other very useful and cool tools:
 * `Spyder <https://code.google.com/p/spyderlib/>`_.
 * `HDFView <http://www.hdfgroup.org/hdf-java-html/hdfview/>`_, a HDF5 file viewer written by The HDF Group.
 * Several other useful python packages for scientific applications.
-    
+
+Installation of WinPythonPlus
+------------------------------
+
 Given WinPythonPlus is provided in the form of a portable software distribution, 
-there is no actual *installation* required. Simply download the self extracting archive
-from `here <URL TO BE DETERMINED>`_. launch it, and select where you want the WinPythonPlus
-distribution to go. 
-
-WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages
-added and the structure of the distribution changed somewhat.
-
-WinPython makes no permanent changes to your Windows registry or environment settings. Only temporary
-changes are made to the shell environment that is launched to run which ever application you run.
-
+there is no actual *installation* required. Simply downloaded the WinPythonPlus archive from the link above, 
+run the self extracting archive, and select where you want the WinPythonPlus distribution to go. **That is it.**
 Once extracted, open the WinPythonPlus folder and you will see a set of .bat files in the top level directory
 (a poor mans version of an executable ;) ). The .bat file are what need to be used to start any of the 
 provided applications, and even when you wish to just start a python interpreter in the Windows console.
+
+
+.. note:: WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages
+added and the structure of the distribution changed somewhat. WinPython makes no permanent changes to your 
+Windows registry or environment settings. Only temporary changes are made to the shell environment that is 
+launched to run which ever application you run.
 
 .. warning:: It is important to always launch a tool packaged in the WinPythonPlus distribution using the provided launcher .bat file or exe in the WinPythonPlus root folder. These launchers temporarily configure the environment variables for that process so that the application and associated APIs will run correctly. Starting one of the provided tools by directly running the tools exe or similar file will not work correctly and will cause unexpected issues and perhaps application crashes.
 	

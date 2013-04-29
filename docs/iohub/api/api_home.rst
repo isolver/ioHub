@@ -1,14 +1,22 @@
-===================================
+####################################
 ioHub API Manual and Specification
-===================================
+####################################
 
-**THIS SECTION OF THE DOCUMENTATION IS NOT COMPLETE AND WILL BE UPDATED WITHIN 72 HOURS**
+This section of the documentation provides the ioHub
+API details for parts of the ioHub Framework that an
+end user of the ioHub may want to know about.
+It does not cover *back-end* related API's that
+are only of importance to a developer working on the ioHub 
+source code, or creatiing a new Device class or Common Eye Tracker
+Implementation.
+
+**The ioHub API can be broken down into five areas based on the functionality provided.**
    
 .. toctree::
-    :maxdepth: 4
+    :maxdepth: 2
     
-    Connection and Control Classes <iohub_connection>
-    Device and DeviceEvent class Reference <devices>
-    ioDataStore ExperimentDataAccessUtility Class <datastore/iodatastore_api>
-    ioHub Timebase <timebase>
-    PsychoPy Coder *Extra's* API <utilities>
+    * ioHub Connection and Control <iohub_connection>
+    * ioHub Device and DeviceEvent Reference <devices>
+    * The ioHub Time Base <timebase>
+    * ioDataStore ExperimentDataAccessUtility Class <datastore/iodatastore_api>
+    * PsychoPy Coder *Extra's* API <utilities>

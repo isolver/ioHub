@@ -1,39 +1,55 @@
-##############################
+#################
 ioHub Change Log
-##############################
+#################
 
-Release 0.6rc1
-==============
 
-#. TODO: Created first version of the LC Technologies EyeGaze Common Eye Tracker Interface. TODO: See the EyeGaze implementation page for a list of known *to-do's*.
+Release 0.7
+#############
 
-#. Tobii Common Eye Tracker Interface has been updated to support 3, 5 and 9 point calibrations. The target position order can also be randomized. The calibration auto_pace and pacing_speed parameters have also been implemented. TODO: See the Tobii implementation page for a list of known *to-do's*
+#. Created a NumPyRingBuffer class, useful for cases where you want a moving window of the last X previous data points and want to be able to use numpy.array.XXXX methods with the current data in the RingBuffer / Window. Implemented used a zero array copy algorithm when items are added to the buffer, event when full.
 
-#. Re-wrote the SMI Common Eye Tracker Interface from scratch. TODO: See the SMI implementation page for a list of known *to-do's*
+#. Implemented psychopy integration for the default time base used in PsychoPy and in ioHub so they use the same time base when running together.
 
-#. TODO: (verify) SR Research EyeLink Common Eye Tracker Interface is running. TODO: See the EyeLink implementation page for a list of known *to-do's*
+#. Implemented a LogEvent type in the Experiment Device, which is used by ioHub to integrate with the psychopy.logging module.
 
-#. TODO: Created the first release for the Mac OS X port.
+#. Created first version of the LC Technologies EyeGaze Common Eye Tracker Interface. Tested with a monocular head fixed version of the EyeGaze, single PC mode only. No Binocular data support is in place yet.
 
-#. TODO: Tested and fixed several issues with the Linux port.
+#. Tobii Common Eye Tracker Interface has been updated to support:
+	* 3, 5 and 9 point calibrations. 
+	* Target position order can also be randomized. 
+	* The calibration auto_pace and pacing_speed parameters have also been implemented.
 
-#. TODO: Documented all public ioHub Device and DeviceEvent attributes and methods.
+#. Re-wrote the SMI Common Eye Tracker Interface from scratch. Tested with an SMI iViewX-M tracker. tested in single PC mode only at this point.
 
-#. TODO: Created the first version of the ioHub documentation using Sphinx.
+#. Updated EyeLink Common Eye Tracker Interface: all listed config options should now actually work. Tested on a EyeLink 1000 Desktop system that has monocular support only.
 
-#. TODO: Created a Python distutils installer for the ioHub source (i.e. python setup.py install)
+#. Created the first release for the Mac OS X port.
 
-#. Refactored the Display Device class towards the goal of, well making more  of it being easier to integrate *properly* with PsychoPy.
+#. Implemented Unicode support for keyboard events. Unicode support for other text attributes of events should be checked and fixed when possible. 
+
+#. Tested and fixed several issues with the Linux port. Unicode support on Linux is still flacky I would say.
+
+#. Created the first version of the ioHub documentation using Sphinx.
+
+#. Refactored project layout to it better meets Python Package standards.
+
+#. Moved around some classes and functions as part of the Sphinx documentation process. Most of this was within the iohub.util folder.
+ 
+ 
+Release 0.6rc1 and Earlier (not a complete list)
+#################################################
+
+#. Refactored the Display Device class towards the goal of, well making more of it being easier to integrate *properly* with PsychoPy.
 
 #. Added proper conversion logic allowing mapping of any Display Coordinate Space to the Display Screen's Pixel Space. Only 'pix' coord type is still supported, but adding other coord type support will be quite easy now. 
 
 #. Did a major overhaul of the EyeTrackerDevice interface:
     #. Simplified the interface definition, removing several methods that were clearly going to be almost never implemented.
-    #. Removed *args, **kwargs parameter passing to interface methods and replaced with clearly defined parameter expectations.
+    #. Removed args, kwargs parameter passing to interface methods and replaced with clearly defined parameter expectations.
     #. Improved the documentation of each interface method, outlining expected behaviour of each and the valid return object types.
     #. Interface supported the device configuration verification framework put in place for all ioHub Devices.
  
-#. Added a FullScreenWindow class to iohub.util.experiment, greatly simplifying the creation of a PsychoPy Window with the expected ioHub Display settings.
+#. Added a FullScreenWindow class to iohub.util, greatly simplifying the creation of a PsychoPy Window with the expected ioHub Display settings.
 
 #. Added support for devices running on the ioHub Server to be able to return exceptions that are then raised by the Experiment Process. (experimental and buggy)
 
