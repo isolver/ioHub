@@ -2,7 +2,7 @@
 Installation
 #############
 
-.. important:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over short term as the PsychoPy Package and PsychoPy Python Distributes are updated to include ioHub as a submodule.
+.. important:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over the short term as the PsychoPy Package and PsychoPy Python Distributions are updated to include ioHub as a submodule.
  
 There are different installation options depending on the target OS.
 
