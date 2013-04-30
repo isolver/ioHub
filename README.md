@@ -5,7 +5,7 @@ real-time reporting, and persistant storage of input device events on a system w
 for experiment device monitoring during a psychopolgy or neuroscience type study, ioHub is designed to be used
 with the most excellent [PsychoPy](http://www.psychopy.org). 
 
->> Note: In the near future ioHub will be merging with PsychoPy ( psychopy.iohub ), so it can be used
+>> Note: In the near future ** ioHub will be merging with PsychoPy ( psychopy.iohub ) **, so it can be used
 >> out of the box with a PsychoPy installation, even if the desire is to use the ioHub event reporting
 >> features in a 'headless' mode that does not create any windows or graphics. 
 >> 
