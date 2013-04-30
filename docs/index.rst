@@ -2,11 +2,20 @@
 ioHub Event Monitoring Framework
 ================================
 
-ioHub is a Python package providing a cross-platform computer device event monitoring and storage framework. ioHub is free to use and is GLP version 3 licensed.
+ioHub is a Python package providing a cross-platform computer device event monitoring 
+and storage framework. ioHub is free to use and is GLP version 3 licensed.
 
-ioHub is not a complete experiment design and runtime API. It's main focus is on device event monitoring, real-time reporting, and persistant storage of input device events on a system wide basis. When ioHub is used for experiment device monitoring during a psychopolgy or neuroscience type study, ioHub is designed to be used with the most excellent `PsychoPy <http://www.psychopy.org>`_. 
+ioHub is not a complete experiment design and runtime API. It's main focus is 
+on device event monitoring, real-time reporting, and persistant storage of 
+input device events on a system wide basis. When ioHub is used for experiment 
+device monitoring during a psychopolgy or neuroscience type study, 
+ioHub is designed to be used with the most excellent `PsychoPy <http://www.psychopy.org>`_. 
 
-.. note:: In the near future ioHub will be merging with PsychoPy, so it can be used out of the box with a PsychoPy installation, even if the desire is to use the ioHub event reporting features in a 'headless' mode that does not create any windows or graphics.
+.. note:: In the near future ioHub will be merging with PsychoPy, so it can be 
+    used out of the box with a PsychoPy installation.
+    This will mean many **positive changes** over the short term
+    as the psychopy.iohub project is put in place. We will keep this
+    page updated with the latest news and status on this exciting development. 
 
 OS and Device Support
 =====================
@@ -44,8 +53,22 @@ ioHub Features
 * High-precision synchronization:
     Descriptive messages can be sent to ioHub Server as Experiment Runtime Events, allowing important experiment information (such as stimulus onsets, etc.) to be time stamped with microsecond level precision. A common time base is provided for all device events, making it easy to syncronize data from multiple physical and virtual devices, such as the PsychoPy runtime itself. Device inputs are converted to common event types with ioHub regulated time stamps regardless of the underlying hardware.
 
-Contents
-============
+
+Github Hosted
+==============
+
+The ioHub project source is available on GitHub `here <https://www.github.com/isolver/ioHub>`_.
+
+Support
+========
+
+A `user forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users>`_ 
+and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-dev>`_
+are available on Google Groups for support questions and development discussion topics respectively.
+
+
+Manual Contents
+================
 
 .. toctree::
    :maxdepth: 4
