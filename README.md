@@ -1,27 +1,19 @@
 # ioHub
 
-ioHub is a [Python](http://www.python.org) package providing a cross-platform computer device event monitoring and storage framework. ioHub is free to use and is GLP version 3 licensed. 
+ioHub is not a complete experiment design and runtime API. It's main focus is on device event monitoring, 
+real-time reporting, and persistant storage of input device events on a system wide basis. When ioHub is used
+for experiment device monitoring during a psychopolgy or neuroscience type study, ioHub is designed to be used
+with the most excellent [PsychoPy](http://www.psychopy.org). 
 
-ioHub is not a complete experiment design and runtime API, but is instead intended to be used with existing Python experiment runtime packages,primarily [the most excellent PsychoPy](http://www.psychopy.org). 
+>> Note: In the near future ioHub will be merging with PsychoPy ( psychopy.iohub ), so it can be used
+>> out of the box with a PsychoPy installation, even if the desire is to use the ioHub event reporting
+>> features in a 'headless' mode that does not create any windows or graphics. 
+>> 
+>> This will effect (in a positive way) how ioHub can be installed, where documentation is found, 
+>> and how to get support for the ioHub Event Framework. 
+>>
+>> Stay tuned for updated on this exciting development !
 
-ioHub supports the following high level functionality:
-
-*  Monitoring of events from computer devices such as the keyboard, mouse, analog to digital converters, XInput compatible gamepads, and eye trackers via a Common Eye Tracking Interface that provides the same user level API regardless of the eye tracking hardware used.
-*  The Common Eye Tracking Interface currently supports the following eye tracking systems:
-    *  [LC Technologies](http://www.eyegaze.com/) EyeGaze and EyeFollower models
-    *  [SensoMotoric Instruments](http://www.smivision.com/) iViewX models
-    *  [SR Research](http://www.sr-research.com) EyeLink models
-    *  [Tobii Technologies](http://www.tobii.com) Tobii models
-*  Support for Windows XP and 7, Apple OS X 10.6, 10.7, and Linux 2.6+  
-*  Device event monitoring is done completely independently from the experiment runtime graphics environment and allows for device inputs to be captured system wide, not just for events targeted to the stimulus presentation / forground application window. In fact, no graphical window in needed at all to collect inputs from supported devices.
-*  The ioHub Server, responsible for the monitoring, translation, storage, and online transmission of device events,  runs in a seperate OS process from the main application / experiment runtime process. This allows for event monitoring and device event callback processing to occur very quickly, regardless of what state the experiment runtime process is in (i.e. even when the experiment runtime process is blocked and would not be able to monitor for new events itself).
-*  Device inputs can be saved by the ioHub Server Process for post hoc analysis. Assuming a multicore CPU is being used, in general *all* device events can be saved during the experiment without effecting the performance of the experiment runtime logic itself. Event data is saved in a structured format using the HDF5 standard. Event data retrieved from a data file is provided as numpy ndarray's, providing the ability to directly use retrieved data in several scientific Python models such as [Scipy](http://scipy.org/) and [MatPlotLib](http://matplotlib.org/).   
-*  Events can be accessed by the experiment script during runtime either in a global, chronologically ordered, device independent manner or for a specific device type alone. 
-*  Text Messages can be sent to ioHub Server as Experiment Runtime Events, allowing the easy integration of important experiment information (such as stimulus onsets, etc.), each timestamped with microsecond level precision with the ioHub timebase.
-*  A common time base is provided for all device events, making it easy to syncronize data from multiple physical devices and virtual devices, such as the Experiment Runtime itself. Events are time stamped by ioHub when it is not done by the source device itself, or existing device event time stamps are converted to the common ioHub time base. 
-*  Device inputs are converted into common event types based on device type, regardless of the underlying supported hardware. 
-
-    
 ## Download
 
 **Note that the provided setup.py file is currently broken, and will be fixed ASAP. For now simply download the source distribution and copy the internal 'iohub' folder (all lower case folder name) to your python path; for example your site-packages folder. Sorry for the inconvience.**
@@ -38,6 +30,14 @@ A package installers will also be made available soon.
 
 ## Documentation
 
+The documentation, which is **still being completed** (firm completion date of May 3rd), is now available 
+[online](http://www.isolver-solutions.com/iohubdocs/0.7/index.html). 
+
+If you would like to help by correcting grammatical errors, spelling, 
+filling in incomplete doc strings, etc, (which would be greatly apprieciated)
+please make a fork of the ioHub project to your github account, make changes
+to the master branch docs, and submit a pull request back to isolver/ioHub to have the updates merged.
+
 The ioHub source contains a documentation folder that has been written using Sphinx.
 If the ioHub source is downloaded, open a console or terminal window in the
 iohub/doc/ directory and build the documentation using::
@@ -46,21 +46,15 @@ iohub/doc/ directory and build the documentation using::
 
 [Sphinx](http://sphinx-doc.org/#) must be installed.
 
-Pre-built documentation will be available online shortly.
-
-
 ## Installation
 
-
-Please refer to the Installation section of the documentation.
-
+Please refer to the Installation section of the [documentation](http://www.isolver-solutions.com/iohubdocs/0.7/index.html).
 
 ## Support
 
 A [user forum / mailing list](https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users) 
 and [developer forum / mailing list](https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-dev)
 are available on Google Groups for support questions and development discussion topics respectively.
-
 
 ## License
 
