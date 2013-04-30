@@ -5,7 +5,7 @@ import warnings
 import scipy, numpy
 import sys
 
-from exception_tools import printExceptionDetailsToStdErr,print2err,createErrorResult,ioHubError
+from exception_tools import ioHubConnectionException, ioHubServerError, printExceptionDetailsToStdErr, print2err, createErrorResult, ioHubError
 from ..timebase import MonotonicClock, monotonicClock
 getTime = monotonicClock.getTime
 

@@ -488,27 +488,19 @@ class ClassTableMappings(IsDescription):
 
 class ExperimentMetaData(IsDescription):
     experiment_id = UInt32Col(pos=1)
-    code = StringCol(8,pos=2)
+    code = StringCol(24,pos=2)
     title = StringCol(48,pos=3)
     description  = StringCol(256,pos=4)
     version = StringCol(6,pos=5)
     total_sessions_to_run = UInt16Col(pos=9)    
-#    status = EnumCol([ 'NOT_STARTED', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED'],'NOT_STARTED','int16',pos=10)
-#    phase = EnumCol([ 'EXPERIMENT_DESIGN', 'TESTING', 'DATA_COLLECTION', 'ANALYSIS', 'WRITE_UP', 'NONE'],'NONE','int16',pos=11)
-#    parent_experiment_id = UInt32Col(pos=10)
-    
+ 
 class SessionMetaData(IsDescription):
     session_id = UInt32Col(pos=1)
     experiment_id = UInt32Col(pos=2)
-    code = StringCol(8,pos=3)
-    name = StringCol(16,pos=4)
-    comments  = StringCol(128,pos=5)
-    user_variables = StringCol(512,pos=6) # will hold json encoded version of user variable dict for session
-#    date = Time64Col(pos=6)
-#    participant_id=UInt32Col(pos=8)
-#    member_id=UInt32Col(pos=7)
-#    completion_status=EnumCol([ 'FULLY_COMPLETED', 'PARTIAL_COMPLETION', 'NOT_ABLE_TO_START','N/A'],'N/A','uint8',pos=9)
-#    data_rating=EnumCol([ 'EXCELLENT', 'VERY_GOOD', 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE', 'POOR', 'NOT_SATISFACTORY','N/A'],'N/A','uint8',pos=10)
+    code = StringCol(24,pos=3)
+    name = StringCol(48,pos=4)
+    comments  = StringCol(256,pos=5)
+    user_variables = StringCol(2048,pos=6) # will hold json encoded version of user variable dict for session
 
 
 """

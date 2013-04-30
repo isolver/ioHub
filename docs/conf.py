@@ -344,4 +344,4 @@ autoclass_content = "class"
 
 autodoc_default_flags = ['members', 'undoc-members', 'inherited-members','show-inheritance']
 
-autodoc_member_order='groupwise'
+autodoc_member_order='bysource'

@@ -13,7 +13,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from tables import *
 import os
 from collections import namedtuple
-import msgpack
+import json
 
 import iohub
 
@@ -100,7 +100,7 @@ class ExperimentDataAccessUtility(object):
             for r in self.hdfFile.root.data_collection.session_meta_data:
                 if (len(sessionCodes) == 0 or r['code'] in sessionCodes) and r['experiment_id']==self._experimentID:
                     rcpy=list(r[:])         
-                    rcpy[-1]=msgpack.loads(rcpy[-1])
+                    rcpy[-1]=json.loads(rcpy[-1])
                     sessions.append(SessionMetaDataInstance(*rcpy))
             return sessions
 

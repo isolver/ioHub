@@ -31,9 +31,8 @@ except ImportError:
         
 currentSec= Computer.currentSec
 
+import json
 import msgpack
-msgpk_unpacker=msgpack.Unpacker(use_list=True)
-msgpk_unpack=msgpk_unpacker.unpack
     
 #noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
@@ -45,10 +44,10 @@ class udpServer(DatagramServer):
             self.iohub.log("ioHub Server configuring msgpack...")
             self.coder=msgpack
             self.packer=msgpack.Packer()
-            self.unpacker=msgpk_unpacker
             self.pack=self.packer.pack
-            self.feed=msgpk_unpacker.feed
-            self.unpack=msgpk_unpack       
+            self.unpacker=msgpack.Unpacker(use_list=True)
+            self.unpack=self.unpacker.unpack      
+            self.feed=self.unpacker.feed
         DatagramServer.__init__(self,address)
          
     def handle(self, request, replyTo):
@@ -276,7 +275,7 @@ class udpServer(DatagramServer):
     def sendResponse(self,data,address):
         packet_data=None
         try:
-            max_size=iohub.client.MAX_PACKET_SIZE/2-20
+            max_size=iohub.net.MAX_PACKET_SIZE/2-20
             packet_data=self.pack(data)+'\r\n'
             packet_data_length=len(packet_data)
             if packet_data_length>= max_size:
@@ -290,6 +289,9 @@ class udpServer(DatagramServer):
         except:
             print2err('Error trying to send data to experiment process:')
             print2err('data length:',len(data))
+            print2err("=============================")            
+            printExceptionDetailsToStdErr()
+            print2err("=============================")            
 
             first_data_element="NO_DATA_AVAILABLE"            
             if data:
@@ -303,7 +305,6 @@ class udpServer(DatagramServer):
             if packet_data:
                 packet_data_length=len(packet_data)
                 print2err('packet Data length: ',len(packet_data))
-            printExceptionDetailsToStdErr()
 
             data=createErrorResult('IOHUB_SERVER_RESPONSE_ERROR',       
                                    msg="The ioHub Server Failed to send the intended response.",
@@ -444,7 +445,7 @@ class ioServer(object):
         try:
             expJsonPath=os.path.join(rootScriptPathDir,'exp.paths')
             f=open(expJsonPath,'r')
-            iohub.data_paths=msgpack.loads(f.read())
+            iohub.data_paths=json.loads(f.read())
             f.flush()
             f.close()
             os.remove(expJsonPath)
@@ -697,6 +698,8 @@ class ioServer(object):
 
                     
     def addDeviceToMonitor(self,device_class_name,device_config):
+        device_class_name=str(device_class_name)
+        
         self.log("Handling Device: %s"%(device_class_name,))
         #print2err("addDeviceToMonitor:\n\tdevice_class: {0}\n\texperiment_device_config:{1}\n".format(device_class_name,device_config))
 
@@ -704,10 +707,10 @@ class ioServer(object):
         class_name_start=device_class_name.rfind('.')
         device_module_path='iohub.devices.'
         if class_name_start>0:
-            device_module_path=device_module_path+device_class_name[:class_name_start].lower()     
+            device_module_path="{0}{1}".format(device_module_path,device_class_name[:class_name_start].lower())   
             device_class_name=device_class_name[class_name_start+1:]
         else:
-            device_module_path=device_module_path+device_class_name.lower()
+            device_module_path="{0}{1}".format(device_module_path,device_class_name.lower())
 
         #print2err("Processing device, device_class_name: {0}, device_module_path: {1}".format(device_class_name, device_module_path))
          
@@ -857,7 +860,8 @@ class ioServer(object):
             while len(self.deviceMonitors) > 0:
                 m=self.deviceMonitors.pop(0)
                 m.running=False
-            self.clearEventBuffer()
+            if self.eventBuffer:
+                self.clearEventBuffer()
             try:
                 self.closeDataStoreFile()
             except:
@@ -888,8 +892,7 @@ def run(rootScriptPathDir,configFilePath):
 
     if tdir==cdir:
         tf=open(configFilePath)
-        msgpk_unpacker.feed(tf.read())
-        ioHubConfig=msgpk_unpack()
+        ioHubConfig=json.loads(tf.read())
         tf.close()
         os.remove(configFilePath)
     else:

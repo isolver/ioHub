@@ -6,6 +6,8 @@ ioHub Change Log
 Release 0.7
 #############
 
+This release of ioHub is **dedicated to Pierce Edmiston**, who provided a huge amount of help giving documentation feedback and general suggestions, as well as doing a lot of Windows tests of all forms and types. **Thank you Pierce, 0.7 would not have made it without your help!**
+
 #. Created a NumPyRingBuffer class, useful for cases where you want a moving window of the last X previous data points and want to be able to use numpy.array.XXXX methods with the current data in the RingBuffer / Window. Implemented used a zero array copy algorithm when items are added to the buffer, event when full.
 
 #. Implemented psychopy integration for the default time base used in PsychoPy and in ioHub so they use the same time base when running together.
@@ -14,7 +16,8 @@ Release 0.7
 
 #. Created first version of the LC Technologies EyeGaze Common Eye Tracker Interface. Tested with a monocular head fixed version of the EyeGaze, single PC mode only. No Binocular data support is in place yet.
 
-#. Tobii Common Eye Tracker Interface has been updated to support:
+#. Tobii Common Eye Tracker Interface has been updated to support
+
 	* 3, 5 and 9 point calibrations. 
 	* Target position order can also be randomized. 
 	* The calibration auto_pace and pacing_speed parameters have also been implemented.
@@ -27,7 +30,7 @@ Release 0.7
 
 #. Implemented Unicode support for keyboard events. Unicode support for other text attributes of events should be checked and fixed when possible. 
 
-#. Tested and fixed several issues with the Linux port. Unicode support on Linux is still flacky I would say.
+#. Tested and fixed several issues with the Linux port. Unicode support on Linux is still flakey I would say.
 
 #. Created the first version of the ioHub documentation using Sphinx.
 
@@ -36,14 +39,15 @@ Release 0.7
 #. Moved around some classes and functions as part of the Sphinx documentation process. Most of this was within the iohub.util folder.
  
  
-Release 0.6rc1 and Earlier (not a complete list)
-#################################################
+Release 0.6rc1
+##############
 
 #. Refactored the Display Device class towards the goal of, well making more of it being easier to integrate *properly* with PsychoPy.
 
 #. Added proper conversion logic allowing mapping of any Display Coordinate Space to the Display Screen's Pixel Space. Only 'pix' coord type is still supported, but adding other coord type support will be quite easy now. 
 
 #. Did a major overhaul of the EyeTrackerDevice interface:
+
     #. Simplified the interface definition, removing several methods that were clearly going to be almost never implemented.
     #. Removed args, kwargs parameter passing to interface methods and replaced with clearly defined parameter expectations.
     #. Improved the documentation of each interface method, outlining expected behaviour of each and the valid return object types.

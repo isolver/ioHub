@@ -1,0 +1,108 @@
+#############
+Terminology
+#############
+
+This page attempts to provide a list of terms or phrases that are commonly used throughout the documentation and a short explaination of each. 
+
+.. note: Currently This page is being used to consolodate different terms that have the same meaning as well. These are listed in the **A.K.A:** section of the term. Once that process is complete, we will review the A.K.A terms used and select which one to standardize on. A terms that has a *Conflicts:** section lists other terms that may be ambigous and need to be changed to correct this.
+
+DataStore
+----------
+**A.K.A:**
+
+* ioDataStore
+* ioHub DataStore
+* Data Store
+
+Nam faucibus magna sit amet sapien pretium pellentesque.
+
+
+Device Configuration
+---------------------
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+
+Experiment Configuration
+-------------------------
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+
+ioHub
+------
+**A.K.A:**
+
+* The ioHub
+* ioHub Event Framework 
+
+Fusce posuere risus vitae mi mattis vitae pharetra urna accumsan.
+
+
+ioHub Device
+---------------
+**A.K.A:**
+
+* Device
+* ioDevice
+
+Vivamus volutpat augue a turpis ultricies in blandit risus vehicula.
+
+
+ioHub DeviceEvent
+------------------
+**A.K.A:**
+
+* DeviceEvent
+* Event
+* ioHub Event
+
+Fusce fermentum urna non est ultrices sollicitudin elementum odio aliquam.
+
+
+ioHub Process
+---------------
+**A.K.A:**
+
+* ioHub Server Process
+
+Nam faucibus magna sit amet sapien pretium pellentesque.
+
+
+ioHub Server
+---------------
+Aliquam egestas metus quis dolor tempus tristique.
+
+
+MessageEvent
+-------------
+**A.K.A:**
+
+* Message
+* Experiment Message Event
+* Message Event
+
+**Conflicts:**
+
+* PychoPy - ioHub Messages
+
+Praesent tempor nibh id arcu fermentum hendrerit molestie magna lacinia.
+
+
+PsychoPy
+-------------------
+**A.K.A:**
+
+* psychopy
+
+Fusce posuere risus vitae mi mattis vitae pharetra urna accumsan.
+
+
+PsychoPy Process
+-------------------
+Fusce posuere risus vitae mi mattis vitae pharetra urna accumsan.
+
+
+PsychoPy Runtime
+-------------------
+Aliquam egestas metus quis dolor tempus tristique.
+
+

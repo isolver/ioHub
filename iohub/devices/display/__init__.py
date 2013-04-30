@@ -494,51 +494,23 @@ class Display(Device):
         if runtime_info is None:        
             runtime_info=self.getRuntimeInfoByIndex(self.device_number)        
             display_config['runtime_info']=runtime_info
+
+            self._createPsychopyCalibrationFile()
             
-            # add pixil_origin to runtime info dict based on display resolution
-            # and device configs display origin.
             
             pixel_width=runtime_info['pixel_width']
             pixel_height=runtime_info['pixel_height']
             
-            # add displays width and hieght in visual degrees to device config
-            #import math
             
             phys_width=display_config["physical_dimensions"]['width']
             phys_height=display_config["physical_dimensions"]['height']
             phys_unit_type=display_config["physical_dimensions"]['unit_type']
             
-#            viewing_distance=float(self.getDefaultEyeDistance())
-                   
-            #degree_width=(57.2958* math.atan(((pixel_width/2.0)/(viewing_distance*pixel_width/phys_width))))*2
-            #degree_height=(57.2958* math.atan(((pixel_height/2.0)/(viewing_distance*pixel_height/phys_height))))*2
-            #degree_width=57.2958 * 2.0 * math.atan(phys_width/(2.0*viewing_distance))
-            #degree_height=57.2958 * 2.0 * math.atan(phys_height/(2.0*viewing_distance))
-
-            #display_config['degrees_width']=degree_width
-            #display_config['degree_height']=degree_height
-
-#            print2err('============ Start ioHub Display calc =============')
-#
-#            print2err('viewing_distance: ',viewing_distance)
-#
-#            print2err('phys_width: ',phys_width)
-#            print2err('phys_height: ',phys_height)
-            
-            #print2err('degree_width: ',degree_width)
-            #print2err('degree_height: ',degree_height)
-
-            self._createPsychopyCalibrationFile()
              
             # add pixels_per_degree to runtime info
             ppd_x=misc.deg2pix(1.0,self._psychopy_monitor)#math.tan(math.radians(0.5))*2.0*viewing_distance*pixel_width/phys_width
             ppd_y=misc.deg2pix(1.0,self._psychopy_monitor)#math.tan(math.radians(0.5))*2.0*viewing_distance*pixel_height/phys_height
-            runtime_info['pixels_per_degree']=ppd_x,ppd_y
-            #runtime_info['pixels_per_degree']=pixel_width/degree_width,pixel_height/degree_height
-
-#            print2err('ppd x: ',ppd_x)
-#            print2err('ppd y: ',ppd_y)
-            
+            runtime_info['pixels_per_degree']=ppd_x,ppd_y            
                     
             self. _calculateCoordMappingFunctions(pixel_width,pixel_height,phys_unit_type, phys_width,phys_height)
             
@@ -547,8 +519,6 @@ class Display(Device):
             coord_right,coord_bottom=self.pixel2DisplayCoord(right,bottom,self.device_number)
             runtime_info['coordinate_bounds']= coord_left,coord_top,coord_right,coord_bottom
 
-#            print2err('coordinate_bounds: ',runtime_info['coordinate_bounds'])
-#            print2err('============ End ioHub Display calc =============')
             
     def _calculateCoordMappingFunctions(self,pixel_width,pixel_height,phys_unit_type, phys_width,phys_height):
         # calculate transform matrix
@@ -780,35 +750,68 @@ class Display(Device):
         display_config=self.getConfiguration()
         
         override_using_psycho_settings=display_config.get('override_using_psycho_settings',False)
-        print2err('**** TODO: _createPsychopyCalibrationFile should handle override_using_psycho_settings setting: ',override_using_psycho_settings)
         psychopy_monitor_name=display_config.get('psychopy_monitor_name',None)
         if psychopy_monitor_name is None or psychopy_monitor_name == 'None':
             return False
             
         from psychopy import monitors#,misc
-#        existing_monitors=monitors.getAllMonitors()
-        #print2err('existing_monitors: ',existing_monitors)
-        #print2err(psychopy_monitor_name,' monitor exists: ',psychopy_monitor_name in existing_monitors)
-
-        stim_area=display_config.get('physical_dimensions')
-        dwidth=stim_area['width']
         
-        # switch from mm to cm if required
-        dw_unit_type=stim_area['unit_type']
-        if dw_unit_type == 'mm':
-            dwidth=dwidth/10.0
+        existing_monitors=monitors.getAllMonitors()
 
-        ddist= self.getDefaultEyeDistance()
-        unit_type=self.getConfiguration()['default_eye_distance']\
-                                        ['unit_type']                                        
-        # switch from mm to cm if required
-        if unit_type == 'mm':
-            ddist=ddist/10.0
+        psychoMonitor=None
         
-        psychoMonitor=monitors.Monitor(psychopy_monitor_name,
-                                   width=dwidth, distance=ddist, gamma=1.0)
-        psychoMonitor.setSizePix(self.getPixelResolution())                                   
-        psychoMonitor.saveMon()
+        if override_using_psycho_settings is True and psychopy_monitor_name in existing_monitors: 
+            print2err('**** Updating ioHub Display settings based on PsychoPy Monitor config...')
+
+            
+#            print2err('psychopy_monitor_name: ',psychopy_monitor_name)
+#            print2err('existing_monitors: ',existing_monitors)
+#            print2err(psychopy_monitor_name,' monitor exists: ',psychopy_monitor_name in existing_monitors)
+            
+            psychoMonitor = monitors.Monitor(psychopy_monitor_name)
+
+            px,py=self.getPixelResolution()
+            mwidth=psychoMonitor.getWidth()*10.0
+            aspect_ratio=px/float(py)
+            mheight=mwidth/aspect_ratio
+            display_config['physical_dimensions']['width']=mwidth
+            display_config['physical_dimensions']['height']=mheight
+            display_config['physical_dimensions']['unit_type']='mm'
+
+            display_config['default_eye_distance']['surface_center']=psychoMonitor.getDistance()*10.0
+            display_config['default_eye_distance']['unit_type']='mm'
+            
+#            print2err('self.getDefaultEyeDistance(): ',self.getDefaultEyeDistance())
+#            print2err('psychoMonitor.getDistance()*10.0: ',psychoMonitor.getDistance()*10.0)
+#            print2err('mwidth: ' ,mwidth)
+#            print2err('aspect_ratio: ', aspect_ratio)
+#            print2err('px,py: ', (px,py))
+#            print2err('mheight: ', mheight)
+#            print2err('getPhysicalDimensions: ', self.getPhysicalDimensions())
+        else:
+            print2err('**** Setting / Creating PsychoPy Monitor Config based on ioHub Display settings...')
+
+            stim_area=display_config.get('physical_dimensions')
+            dwidth=stim_area['width']
+            
+            # switch from mm to cm if required
+            dw_unit_type=stim_area['unit_type']
+            if dw_unit_type == 'mm':
+                dwidth=dwidth/10.0
+    
+            ddist= self.getDefaultEyeDistance()
+            unit_type=self.getConfiguration()['default_eye_distance']\
+                                            ['unit_type']                                        
+            # switch from mm to cm if required
+            if unit_type == 'mm':
+                ddist=ddist/10.0
+            
+            psychoMonitor=monitors.Monitor(psychopy_monitor_name,
+                                       width=dwidth, distance=ddist, gamma=1.0)
+            # SS: I don't think this means the current screen resolution, so commenting out.
+            #psychoMonitor.setSizePix(self.getPixelResolution())                                   
+            psychoMonitor.saveMon()
+
         self._psychopy_monitor=psychoMonitor
 #        print2err("psychopy dist: ",psychoMonitor.getDistance())
 #        print2err("psychopy getSizePix: ",psychoMonitor.getSizePix())

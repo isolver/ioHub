@@ -48,12 +48,12 @@ Contents
 ============
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 4
    
    Installation <iohub/installation>
    Quick Start Guide <iohub/quickstart>
-   User Manual <iohub/manual/user_manual>
-   API Specification <iohub/api/api_home>
+   User Manual / API Overview <iohub/api/api_home>
+   Performance <iohub/performance>
    Credits <iohub/credits>
    License <iohub/license>
    Change Log <iohub/change_log>
