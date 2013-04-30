@@ -14,6 +14,12 @@ with the most excellent [PsychoPy](http://www.psychopy.org).
 >>
 >> Stay tuned for updated on this exciting development !
 
+## Status, Issues, To Do's
+
+See the Issue Tracker on the projects Github page for an up to date list of outstanding issues, 
+features that still need to be completed, and other To-Do's. The project documentation also has information on 
+outstanding issues and tasks related to some device implementations.
+
 ## Download
 
 **Note that the provided setup.py file is currently broken, and will be fixed ASAP. For now simply download the source distribution and copy the internal 'iohub' folder (all lower case folder name) to your python path; for example your site-packages folder. Sorry for the inconvience.**
@@ -24,9 +30,12 @@ Download the source, uncompress the file downloaded, open a terminal or console 
 uncompressed directory location, and run::
 
     >> python setup.py install
-    
-A package installers will also be made available soon.
 
+---
+
+**Information on downloading a pre-configured python environment for Windows that includes everything
+needed to use ioHub with Python 2.7 can be found in the Installation page of the 
+[project documentation](http://www.isolver-solutions.com/iohubdocs/0.7/index.html).**
 
 ## Documentation
 
@@ -48,7 +57,8 @@ iohub/doc/ directory and build the documentation using::
 
 ## Installation
 
-Please refer to the Installation section of the [documentation](http://www.isolver-solutions.com/iohubdocs/0.7/index.html).
+Please refer to the Installation section of the 
+[documentation](http://www.isolver-solutions.com/iohubdocs/0.7/index.html).
 
 ## Support
 
