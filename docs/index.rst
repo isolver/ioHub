@@ -3,12 +3,12 @@ ioHub Event Monitoring Framework
 ================================
 
 ioHub is a Python package providing a cross-platform computer device event monitoring 
-and storage framework. ioHub is free to use and is GLP version 3 licensed.
+and storage framework. ioHub is free to use and is GPL version 3 licensed.
 
 ioHub is not a complete experiment design and runtime API. It's main focus is 
-on device event monitoring, real-time reporting, and persistant storage of 
+on device event monitoring, real-time reporting, and persistent storage of 
 input device events on a system wide basis. When ioHub is used for experiment 
-device monitoring during a psychopolgy or neuroscience type study, 
+device monitoring during a psychology or neuroscience type study, 
 ioHub is designed to be used with the most excellent `PsychoPy <http://www.psychopy.org>`_. 
 
 .. note:: In the near future ioHub will be merging with PsychoPy, so it can be 
@@ -44,14 +44,14 @@ ioHub Features
 ==============
 
 * Independent device event monitoring:
-    The ioHub Server, responsible for the monitoring, translation, storage, and online transmission of device events, runs in a separate OS process from the main PsychoPy Process. Device events are therefore monitored completelyindependently from the PsychoPy environment, allowing events to be captured system wide, not just for events targeted to the stimulus presentation / foreground PsychoPy window. In fact, no graphical window in needed at all to collect inputs from supported devices (An example of using this *headless* event tracking mode is provided in the examples folder). This process independence allows for event monitoring and device event callback processing to occur very quickly, regardless of what state the PsychoPy Process is in (i.e. even when it is performing a blocking operation and would not be able to monitor for new events itself).
-* Easy data storage and retrival:
+    The ioHub Server, responsible for the monitoring, translation, storage, and online transmission of device events, runs in a separate OS process from the main PsychoPy Process. Device events are therefore monitored completely independently from the PsychoPy environment, allowing events to be captured system wide, not just for events targeted to the stimulus presentation / foreground PsychoPy window. In fact, no graphical window in needed at all to collect inputs from supported devices (An example of using this *headless* event tracking mode is provided in the examples folder). This process independence allows for event monitoring and device event callback processing to occur very quickly, regardless of what state the PsychoPy Process is in (i.e. even when it is performing a blocking operation and would not be able to monitor for new events itself).
+* Easy data storage and retrieval:
     Device event data are saved in the *ioDataStore*, a structured event definition using the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ standard, for post hoc analysis. Events saved in the ioDataStore have the same event attributes as events accessed in real-time within the experiment script. Events can be accessed by the experiment script at runtime in a number of ways: (1) By event time (chronologically and device independent), (2) by device (e.g., mouse events), and (3) by device event type (e.g., fixation events).
     Event data retrieved from a data file is provided as numpy ndarray's, providing the ability to directly use retrieved data in several scientific Python models such as Scipy and MatPlotLib. With a multicore CPU, all device events can be saved during the experiment without affecting the performance of the PsychoPy runtime logic itself.
 * Smooth integration with PsychoPy:
     When used with `PsychoPy <http://www.psychopy.org>`_, ioHub can save debugging messages to PsychoPy log files, and a PsychoPy script can create *LogEvents* that are saved to the PsychoPy logging system as well as being saved in the ioDataStore. Furthermore, ioHub and PsychoPy share a common time base, so times read from the PsychoPy process are directly comparable to times read from ioHub-monitored events (The PsychoPy time must be based on the psychopy.core.getTime or default psychopy.logging.defaultClock mechanisms.)
 * High-precision synchronization:
-    Descriptive messages can be sent to ioHub Server as Experiment Runtime Events, allowing important experiment information (such as stimulus onsets, etc.) to be time stamped with microsecond level precision. A common time base is provided for all device events, making it easy to syncronize data from multiple physical and virtual devices, such as the PsychoPy runtime itself. Device inputs are converted to common event types with ioHub regulated time stamps regardless of the underlying hardware.
+    Descriptive messages can be sent to ioHub Server as Experiment Runtime Events, allowing important experiment information (such as stimulus onsets, etc.) to be time stamped with microsecond level precision. A common time base is provided for all device events, making it easy to synchronize data from multiple physical and virtual devices, such as the PsychoPy runtime itself. Device inputs are converted to common event types with ioHub regulated time stamps regardless of the underlying hardware.
 
 
 Github Hosted

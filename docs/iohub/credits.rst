@@ -2,7 +2,7 @@
 Credits and Thanks
 =====================
 
-Without the help and input from the following people and organizations, ioHub would not be were it is today. This page is dedicated to thanking those people for the time and effort they have spent helping make this happen.
+Without the help and input from the following people and organizations, ioHub would not be where it is today. This page is dedicated to thanking those people for the time and effort they have spent helping make this happen.
 
 General ioHub Contributions
 ==============================
@@ -22,7 +22,7 @@ I really can not say enough about how much his input has meant to me and how muc
 This thanks is extended to the PsychoPy developer and user group as a whole; many members of which have made important points and debate that I always find informative and useful.
 
 It is also so important to thank and recognize all the incredible open source Python packages and modules that the ioHub uses to do what it does. 
-Without the hard work of these project teams, this project would not exist either.  The list of current dependancies for ioHub can be found in the Installation Section of this manual.
+Without the hard work of these project teams, this project would not exist either.  The list of current dependencies for ioHub can be found in the Installation Section of this manual.
 
 Common Eye Tracker Interface Contributions
 ===========================================
@@ -34,7 +34,7 @@ The hope is that the package will also serve as a useful open source and free re
 
 The following people (listed alphabetically) have contributed to the Common Eye Tracker Interface component of the ioHub. 
 
-* **Josh Borah** - A.S.L. - Sudo code implementation of physical unit to various eye angle measures.
+* **Josh Borah** - A.S.L. - Pseudo code implementation of physical unit to various eye angle measures.
 * **Thomas Jablonski** - SMI - SMI Common Eye Tracker Implementation Version 2  Input and Support.
 * **Markus Joos** - Interactive Minds - LC Technologies Common Eye Tracker Implementation Input and Support.
 * **Oskar Fajerson** - Tobii -  Tobii Common Eye Tracker Implementation Input and Support.
@@ -42,7 +42,7 @@ The following people (listed alphabetically) have contributed to the Common Eye 
 * **Michael MacAskill** - University of Otago - Contributed a python wrapper of much of the SMI UDP interface at the very beginning of the pyEyeTracker (as it was then called) project. This contribution has not been used however due to SMI stating that the UDP interface would not be supported in the future.
 * **Fiona Mulvey** - Lund University - Input on functional requirements for the Common Eye Tracker Interface for the COGAIN Eye Tracker Standardization Committee.
 
-I would also like to thank **LC Technologies, SMI, and Tobii** for providing one of their systems on a *loaned basis* to me so that I could work with them and implement the Common Eye Tracker Interface for their system. Things in this area would not be where they are without this generous consideration on their part, and it has been greatly apprieciated.
+I would also like to thank **LC Technologies, SMI, and Tobii** for providing one of their systems on a *loaned basis* to me so that I could work with them and implement the Common Eye Tracker Interface for their system. Things in this area would not be where they are without this generous consideration on their part, and it has been greatly appreciated.
 
 Getting Involved
 =================
