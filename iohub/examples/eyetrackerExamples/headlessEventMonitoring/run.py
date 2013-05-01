@@ -230,7 +230,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     def prePostSessionVariableCallback(self,sessionVarDict):
         sess_code=sessionVarDict['code']
         scount=1
-        while self.isSessionCodeNotInUse(sess_code) is True:
+        while self.isSessionCodeInUse(sess_code) is True:
             sess_code='%s-%d'%(sessionVarDict['code'],scount)
             scount+=1
         sessionVarDict['code']=sess_code

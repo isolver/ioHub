@@ -47,22 +47,9 @@ For details on each of these ioHub device types, please refer to the device's do
 ioHubExperimentRuntime Class
 =============================
 
-The ioHubExperimentRuntime Class is a core class using in the ioHub Package. If
-your experiment contains more than just a keyboard and mouse device, or even if those
-are the only devices used, using the ioHubExperimentRuntime class helps make your script mode
-modular and helps you control the specific device settings used across sessions of
-an experiment during data collection. 
-
-The main features of the ioHubExperimentRuntime class are:
-#. Simple addition of the experiment logic by creating your main experiment script in the 'run' method of the ioHubExperimentRuntime class extension.
-#. Use of an experiment_config.yaml and ioHub_congif.yaml to represent experiment and device setting to be used during the experiment runtime.
-#. Automatic creation of the ioHubConnection class, creation of the ioHub Server process, and initialization of all devices specified in the iohub_config.yaml.
-#. Optionally display an "Experiment Details" Dialog at the start of each experiment session, listing some of the experiment details, helping to ensure the correct experiment is being run.
-#. Optionally display an Experiment Session Information Dialog, which can be customized within the experiment_config.yaml for each experiment, allowing collection of relevant participant data prior to the start of the experiment itself.
-#. Automatic cleanup of ioHub and PsychoPy objects as necessary at the end of the experiment.
-
 .. autoclass:: iohub.client.ioHubExperimentRuntime
-
+    :exclude-members: start
+	
 Example Usage
 ##############
 

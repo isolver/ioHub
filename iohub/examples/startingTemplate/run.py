@@ -1,4 +1,4 @@
-dcf"""
+"""
 ioHub
 .. file: ioHub/examples/startingTemplate/run.py
 """
@@ -11,11 +11,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     Create an experiment using psychopy and the ioHub framework by extending 
     the ioHubExperimentRuntime class
     """
-    def run(self,*args,**kwargs):
+    def run(self,*args):
         """
         The run method contains your experiment logic. It is equal to what
         would be in your main psychopy experiment script.py file in a standard
-        psychopy experiment setup. That is all there is too it really.
+        psychopy experiment setup. That is all there is too it really. Any *args
+        are equal to the sys.argv received by the script when it was executed.
         """
         print "Hello World. Press any key to quit."
         self.hub.clearEvents('all')
@@ -35,13 +36,9 @@ if __name__ == "__main__":
         command line, and launches the experiment logic.
         """
         import sys
-        if len(sys.argv)>1:
-            configFile=sys.argv[1]
-            runtime=ExperimentRuntime(configurationDirectory, configFile)
-        else:
-            runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-    
-        runtime.start()
+        
+        runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")    
+        runtime.start(sys.argv)
 
     # The ioHub.module_directory function determines what the current directory is of
     # the function that is passed to it. It is more reliable when running scripts
