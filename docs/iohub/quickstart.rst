@@ -167,7 +167,7 @@ ioHub instead of the built in PsychoPy event functionality::
 	# provided arguments using the actual MouseDevice instance that exists
 	# on the ioHub Server Process, and returns the result of the method call to your
 	# Experiment process script. This all happens without you needing to think about it,
-	# but it is nice to know what is actually happenning behind the scenes.
+	# but it is nice to know what is actually happening behind the scenes.
 	#
 	myMouse.setSystemCursorVisibility(False)
 
@@ -212,7 +212,7 @@ ioHub instead of the built in PsychoPy event functionality::
 	
 	# Create some psychopy visual stim. This is identical to how you would do so normally.
 	# The only consideration is that you currently need to pass the unit type used by the Display
-	# device to each stim reasource created, as is done here.
+	# device to each stim resource created, as is done here.
 	#
 	fixSpot = visual.PatchStim(myWin,tex="none", mask="gauss",
 			pos=(0,0), size=(30,30),color='black', autoLog=False, units=coord_type)
@@ -352,7 +352,7 @@ the devices to be used during the experiment runtime.
 
 This approach is most useful when your experiment uses more complex devices like
 an eye tracker or analog to digital input device. However it can be used for any experiment,
-and has the advantage of cleanly seperating device configuration from the experiment
+and has the advantage of cleanly separating device configuration from the experiment
 runtime logic. This separation allows, for example, the same experiment script to
 be used while still being able to easily change the eye tracker device that is used
 during the experiment runtime. Nothing in the python experiment logic needs to change,
@@ -457,7 +457,7 @@ The PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
     already, Windows XP SP2 or 3 may not have the file.)
     
     The easiest way to install XInput 1.3 if it is not already on your PC is to run
-    the DirectX 10 upgrade utility provided by Miscrosoft. It can be downloaded 
+    the DirectX 10 upgrade utility provided by Microsoft. It can be downloaded 
     `here. <http://www.microsoft.com/en-us/download/details.aspx?id=35>`_
     This will install xinput1_3.dll into your C:\Windows\System32 and 
     C:\Windows\SysWOW64. Please check that this DLL is present after you run 
@@ -479,7 +479,7 @@ With the above directory and file structure created, contents can now be added t
 python source file and the two .yaml configuration files as described below. 
 
 .. note:: When using this approach to creating the experiment,
-    the above expriment folder structure will always be used. To save time in creating
+    the above experiment folder structure will always be used. To save time in creating
     this initial experiment folder setup, there is a folder called startingTemplate
     in the ioHub examples folder that contains the necessary python source file with
     the ExperimentIOHubRuntime class extension already defined, so only your experiment
@@ -529,7 +529,7 @@ Add the following python source code to the run.py file that was created::
 
             # Read the current resolution of the displays screen in pixels.
             # We will set our window size to match the current screen resolution 
-            # and make it a full screen boarderless window.
+            # and make it a full screen borderless window.
             screen_resolution= display.getPixelResolution()
 
             unit_type = display.getCoordinateType()
@@ -649,7 +649,7 @@ Defining the Experiment Configuration Setting
 ++++++++++++++++++++++++++++++++++++++++++++++
 
 The experiment configuration settings, including session level information, are
-represented in a YAML formatted configuration filecalled experiment_config.yaml.
+represented in a YAML formatted configuration file called experiment_config.yaml.
 This file is placed in the same directory as the main experiment python script file.
 Three types of settings are defined within the experiment_config.yaml file:
 
@@ -757,3 +757,5 @@ Please let us know your opinions on this after working with this experiment stru
 
 For details on the ioHub configuration file definition and the valid settings 
 supported by each device please see the API section of the Manual.
+
+

@@ -10,7 +10,7 @@ end user of the ioHub may want to know about.
 
 We do not cover *back-end* related API's that
 are only of importance to a developer working on the ioHub 
-source code, or creatiing a new Device class or Common Eye Tracker
+source code, or creating a new Device class or Common Eye Tracker
 Implementation.
 
 **The ioHub Event Framework can be broken down into six areas based on the functionality provided.**

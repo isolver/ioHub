@@ -2,7 +2,7 @@
 Installation
 #############
 
-.. important:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over the short term as the PsychoPy Package and PsychoPy Python Distributions are updated to include ioHub as a submodule.
+.. note:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over the short term as the PsychoPy Package and PsychoPy Python Distributions are updated to include ioHub as a submodule.
  
 There are different installation options depending on the target OS.
 
@@ -49,7 +49,7 @@ Once extracted, open the WinPythonPlus folder and you will see a set of .bat fil
 provided applications, and even when you wish to just start a python interpreter in the Windows console.
 
 
-.. note:: WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages added and the structure of the distribution changed somewhat. WinPython makes no permanent changes to your Windows registry or environment settings. Only temporary changes are made to the shell environment that is launched to run which ever application you run.
+.. note:: WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages added and the structure of the distribution changed somewhat. WinPython makes no permanent changes to your Windows registry or environment settings. Only temporary changes are made to the shell environment that is launched to run whichever application you run.
 
 .. warning:: It is important to always launch a tool packaged in the WinPythonPlus distribution using the provided launcher .bat file or exe in the WinPythonPlus root folder. These launchers temporarily configure the environment variables for that process so that the application and associated APIs will run correctly. Starting one of the provided tools by directly running the tools exe or similar file will not work correctly and will cause unexpected issues and perhaps application crashes.
 	
@@ -93,7 +93,7 @@ Python 2.6 Package List with URLs
     #. `greenlet <https://pypi.python.org/packages/2.6/g/greenlet/greenlet-0.4.0.win32-py2.6.exe>`_ The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets".
     #. `gevent <https://code.google.com/p/gevent/downloads/detail?name=gevent-1.0b4.win32-py2.6.exe&can=2&q=>`_ A coroutine-based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libevent event loop.
     #. `numexpr <http://code.google.com/p/numexpr/downloads/detail?name=numexpr-1.4.2.win32-py2.6.exe&can=2&q=>`_ Fast numerical array expression evaluator for Python and NumPy.
-    #. `pytables <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data.
+    #. `pytables <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pytables>`_ PyTables is a package for managing hierarchical data sets and designed to efficiently and easily cope with extremely large amounts of data.
     #. `pyYAML <http://pyyaml.org/download/pyyaml/PyYAML-3.10.win32-py2.6.exe>`_ PyYAML is a YAML parser and emitter for Python.
     #. `pyHook <http://sourceforge.net/projects/pyhook/files/pyhook/1.5.1/pyHook-1.5.1.win32-py2.6.exe/download>`_ Python wrapper for global input hooks in Windows.
     #. `pywin32 <http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.6.exe/download>`_ Python Extensions for Windows
@@ -189,13 +189,13 @@ Packages to install using pip
 
 #. msgpack: It's like JSON. but fast and small. ( pip install msgpack-python )
 #. greenlet: The greenlet package is a spin-off of Stackless, a version of CPython that supports micro-threads called "tasklets". ( pip install greenlet )
-#. pytables: PyTables is a package for managing hierarchical datasets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables )
+#. pytables: PyTables is a package for managing hierarchical data sets and designed to efficiently and easily cope with extremely large amounts of data. ( pip install tables )
 
 ioHub Package Installation
 ++++++++++++++++++++++++++++++
 
 There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
-The site-packages directory of your Python installation is a guarenteed place that will work. 
+The site-packages directory of your Python installation is a guaranteed place that will work. 
 
 To do so:
 
@@ -301,4 +301,3 @@ Running example scripts using ioHub should now work. All examples are in the *ex
 or cd to **Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
 
 **Run with**: python ioMouse.py
-

@@ -63,7 +63,7 @@ Release 0.6rc1
 
 #. Added ability to lock the Mouse device to a Display region on a multi-monitor computer.
 
-#. Added a 'display_id' field to the Mouse Device's events, so the display device the mouse was on is known, and therefore how the mouse pixel position information reported in an event can be interpreter properly.
+#. Added a 'display_id' field to the Mouse Device's events, so the display device the mouse was on is known, and therefore how the mouse pixel position information reported in an event can be interpreted properly.
 
 #. Changed the MessageEvent.msg_offset attribute to be type float32 so offsets can be represented in the standard sec.msec-usec format.
 
@@ -76,3 +76,5 @@ Release 0.6rc1
 #. Updated the example scripts folder by moving all eye tracking related examples to a subdirectory.
 
 #. Created a 'headlessEventMonitoring' example, console based, showing how ioHub can be used to get events from supported devices even when no application   graphics environment is in use.
+
+
