@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
+
 """
 ioHub
 .. file: ioHub/devices/__init__.py
@@ -9,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. moduleauthor:: Sol Simpson <sol@isolver-software.com> + contributors, please see credits section of documentation.
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
-from __future__ import division
+
 import gc, os, sys
 import collections
 from collections import deque
@@ -138,20 +140,41 @@ class ioObject(object):
 
 class Computer(object):
     """
-    The Computer class does not extend the ioHub.devices.Device class, however
-    it is conseptually convienient to think of the Computer class as a type of
-    Device. The Computer class contains the ioHub Clock used to access the ioHub time
-    from the Experiment process as well as time stamp all Device Events.
+    The Computer class does not actually extend the ioHub.devices.Device class.
+    However it is conseptually convienient to think of the Computer class as a type of
+    Device. 
     
-    The Computer Class also contains methods allowing the Experiment and ioHub 
+    The Computer class contains the ioHub global clock instance used to access 
+    the ioHub time from either the PsychoPy or ioHub Process as. This clock
+    is used as the universal timebase for all event times reported by ioHub,
+    regardless of the Device or DeviceEvent type. 
+    
+    .. note:: Changes have been made and committed to both the psychoPy and ioHub 
+        projects that will allow both packages to use the same time base. For PsychoPy
+        this is used for the psychopy.core.getTime() and the default psychopy.logging.defaultClock object.
+        This means that a psychoPy script can use eith psychopy.core.getTime or 
+        iohub.devices.Computer.getTime to get the time for either process. This makes
+        syncronizing times of PsychoPy experiment based events and the times 
+        provided with ioHub events very easy; no syncronization is needed by the
+        user stript at all, it has already been done for you!
+    
+    The Computer Class contains methods allowing the Experiment and ioHub 
     Process affinities to be set to particular processing units of the computer
     if desired. The operating system priority of either process can also be
-    increased if desired.
+    increased.
     
+    .. note:: Currently Process Affinity and Priority manipulation is not supported on OS X.
+    
+    The Computer class also has methods providing information on the
+    current Computer memory and CPU usage. If the psutil Process object is available,
+    process level memory, cpu, thread count, disk, and network utilization, can be
+    accessed via the psutil process object. 
+
     The Computer class only contains static or class level methods, so an instance 
-    of the class does **not** need to be created. The Computer device can either be accessed 
-    via the ioHub package using 'ioHub.devices.Computer', or using the 'devices.computer'
-    attribute of the ioClientConnection class or the ioHubExperimentRuntime class.    
+    of the Computer class does **not** need to be created. The Computer device can 
+    either be accessed using the Computer class alone, either via the ioHub package 
+    using 'iohub.devices.Computer', or using the 'self.devices.computer'
+    attribute of the ioHubExperimentRuntime class if it is being used.    
     """
     _nextEventID=1
     
@@ -175,20 +198,21 @@ class Computer(object):
     
     #: Attribute representing the number of *processing units* available on the current computer. 
     #: This includes cpu's, cpu cores, and hyperthreads. Notes:
-    #:      - processingUnitCount = num_cpus*num_cores_per_cpu*num_hyperthreads.
-    #:      - For single core CPU's,  num_cores_per_cpu = 1.
-    #:      - For CPU's that do not support hyperthreading,  num_hyperthreads = 1
-    #:        otherwise num_hyperthreads = 2.  
+    #:      * processingUnitCount = num_cpus*num_cores_per_cpu*num_hyperthreads.
+    #:      * For single core CPU's,  num_cores_per_cpu = 1.
+    #:      * For CPU's that do not support hyperthreading,  num_hyperthreads = 1, otherwise num_hyperthreads = 2.  
+    processingUnitCount=None
     if _psutil_available:
         processingUnitCount=psutil.NUM_CPUS
     else:
         import multiprocessing
         processingUnitCount=multiprocessing.cpu_count()
     
-    #: The system ID of the current Python process.
+    #: The OS processes ID of the current Python process.
     currentProcessID=os.getpid()
     
     #: Access to the psutil.Process class for the current system Process.
+    #: On OS X, this is the returned value from multiprocessing.current_process()
     if _psutil_available:
         currentProcess=psutil.Process(currentProcessID)
     else:
@@ -196,10 +220,11 @@ class Computer(object):
         import multiprocessing
         currentProcess=multiprocessing.current_process()
         
-    #: The system ID of the ioHub Server process.
+    #: The OS process ID of the ioHub Process.
     ioHubServerProcessID=None
     
-    #: The psutil Process object for the ioHub Server.
+    #: On Windows and Linux, the psutil Process object for the ioHub Process.
+    #: On OS X, None.
     ioHubServerProcess=None
     
     _process_original_nice_value=-1 # used on linux.
@@ -218,10 +243,10 @@ class Computer(object):
         
         On Linux, the process is set to a nice level of 10.
 
+        This method is not supported on OS X.
+        
         Args:
-            disable_gc(bool): True = Turn of the Python Garbage Collector. 
-                              False = Leave the Garbage Collector running.
-                              Default: True
+            disable_gc (bool): True = Turn of the Python Garbage Collector. False = Leave the Garbage Collector running. Default: True
         """
         if _psutil_available is False:
             print2err("Computer.enableHighPriority is not supported on OS X")
@@ -254,10 +279,10 @@ class Computer(object):
         
         On Linux, the process is set to a nice level of 16.
         
+        This method is not supported on OS X.
+
         Args:
-            disable_gc(bool): True = Turn of the Python Garbage Collector.
-                              False = Leave the Garbage Collector running.
-                              Default: True
+            disable_gc (bool): True = Turn of the Python Garbage Collector. False = Leave the Garbage Collector running. Default: True
         """
         if _psutil_available is False:
             print2err("Computer.enableRealtimePriority is not supported on OS X")
@@ -288,7 +313,10 @@ class Computer(object):
         On Linux, sets the nice level of the process back to the value being used
         prior to the call to enableRealTimePriority()
         
-        Return: None
+        This method is not supported on OS X.
+
+        Return: 
+            None
         """
         if _psutil_available is False:
             print2err("Computer.disableRealTimePriority is not supported on OS X")
@@ -307,7 +335,10 @@ class Computer(object):
         On Linux, sets the nice level of the process back to the value being used
         prior to the call to enableHighPriority()
         
-        Return: None
+        This method is not supported on OS X.
+
+        Return: 
+            None
         """
         
         if _psutil_available is False:
@@ -326,15 +357,34 @@ class Computer(object):
             print2err("WARNING: Could not disable increased priority for process {0}".format(Computer.currentProcessID))
 
     @staticmethod
+    def getProcessingUnitCount():
+        """
+        Return the number of *processing units* available on the current computer. 
+        Processing Units include: cpu's, cpu cores, and hyper threads. 
+        
+        Notes:
+            
+        * processingUnitCount = num_cpus*num_cores_per_cpu*num_hyperthreads.
+        * For single core CPU's,  num_cores_per_cpu = 1.
+        * For CPU's that do not support hyperthreading,  num_hyperthreads = 1, otherwise num_hyperthreads = 2.  
+        
+        Args:
+            None
+
+        Returns:
+            int: the number of processing units on the computer.
+        """
+        
+        return Computer.processingUnitCount
+
+    @staticmethod
     def getProcessAffinities():
-        """Retrieve the current Experiment Process affinity list and ioHub Process affinity list.
-    
-        Returns:event_class
-           (list,list) Tuple of two lists: Experiment Process affinity ID list and ioHub Server Process affinity ID list. 
-           
+        """
+        Retrieve the current PsychoPy Process affinity list and ioHub Process affinity list.
+               
         For example, on a 2 core CPU with hyper-threading, the possible 'processor'
-        list would be [0,1,2,3], and by default both the Experiment and ioHub Server
-        processes can run on any of these 'processors', so::
+        list would be [0,1,2,3], and by default both the PsychoPy and ioHub
+        Processes can run on any of these 'processors', so::
 
 
             psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()
@@ -343,8 +393,8 @@ class Computer(object):
             >> [0,1,2,3], [0,1,2,3]
 
 
-        If setProcessAffinities was used to set the Experiment process to core 1
-        (index 0 and 1) and the ioHub Server process to core 2 (index 2 and 3),
+        If Computer.setProcessAffinities was used to set the PsychoPy Process to core 1
+        (index 0 and 1) and the ioHub Process to core 2 (index 2 and 3),
         with each using both hyper threads of the given core, the set call would look like::
 
 
@@ -356,16 +406,25 @@ class Computer(object):
             >> [0,1], [2,3]
 
 
-        If the ioHub is not being used (i.e self.hub == None), then only the Experiment
-        process affinity list will be returned and None will be returned for the
-        ioHub process affinity::
+        If the ioHub is not being used (i.e self.hub == None), then only the PsychoPy
+        Process affinity list will be returned and None will be returned for the
+        ioHub Process affinity::
 
             psychoCPUs,ioHubCPUS=Computer.getProcessAffinities()
             print psychoCPUs,ioHubCPUS
 
             >> [0,1,2,3], None
 
-        But in this case, why are you using the ioHub package at all? ;)
+        **But in this case, why are you using the ioHub package at all? ;)**
+
+        This method is not supported on OS X.
+
+        Args:
+            None
+
+        Returns:
+            (list,list) Tuple of two lists: PsychoPy Process affinity ID list and ioHub Process affinity ID list. 
+
         """
         if _psutil_available is False:
             return range(Computer.processingUnitCount),range(Computer.processingUnitCount),
@@ -373,16 +432,9 @@ class Computer(object):
 
     @staticmethod
     def setProcessAffinities(experimentProcessorList, ioHubProcessorList):
-        """Sets the processor affinity for the Experiment Runtime Process and the ioHub Server Process.
+        """
+        Sets the processor affinity for the PsychoPy Process and the ioHub Process.
         
-        Args:
-           experimentProcessorList (list): list of int processor ID's to set the Experiment Process affinity to. An empty list means all processors.
-           
-           ioHubProcessorList (list): list of int processor ID's to set the ioHub Server Process affinity to. An empty list means all processors.
-    
-        Returns:
-           None
-
         For example, on a 2 core CPU with hyper-threading, the possible 'processor'
         list would be [0,1,2,3], and by default both the experiment and ioHub
         server processes can run on any of these 'processors',
@@ -411,6 +463,14 @@ class Computer(object):
             print psychoCPUs,ioHubCPUS
 
             >> [0,1], [2,3]
+
+        Args:
+           experimentProcessorList (list): list of int processor ID's to set the PsychoPy Process affinity to. An empty list means all processors.
+           
+           ioHubProcessorList (list): list of int processor ID's to set the ioHub Process affinity to. An empty list means all processors.
+    
+        Returns:
+           None
         """
         if _psutil_available is False:
             print2err("Computer.setProcessAffinities is not supported on OSX.")
@@ -420,31 +480,26 @@ class Computer(object):
 
     @staticmethod
     def autoAssignAffinities():
-        """Auto sets the experiment process and ioHub process processor affinities
+        """
+        Auto sets the PsychoPy Process and ioHub Process affinities
         based on some very simple logic.
+
+        It is not known at this time if the implementation of this method makes
+        any sense in terms of actually improving performance. Field tests and 
+        feedback will need to occur, based on which the algorithm can be improved.
+
+        Currently:
+            
+        * If the system is detected to have 1 processing unit, or greater than 8 processing units, nothing is done by the method.
+        * For a system that has two processing units, the PsychoPy Process is assigned to index 0, ioHub Process assigned to 1.
+        * For a system that has four processing units, the PsychoPy Process is assigned to index's 0,1 and the ioHub Process assigned to 2,3.
+        * For a system that has eight processing units, the PsychoPy Process is assigned to index 2,3, ioHub Process assigned to 4,5. All other processes running on the OS are attempted to be assigned to indexes 0,1,6,7.
 
         Args:
             None
             
         Returns:
             None
-
-        It is not known at this time if the implementation of this method makes
-        any sense in terms of actually improving performance. Field tests and 
-        feedback will need to occur, based on which the algorithm can be improved.
-
-        Currently, if the system is detected to have 1 processing unit, 
-        or greater than 8 processing units, nothing is done by the method.
-
-        For a system that has two processing units, the PsychoPy Process is 
-        assigned to index 0, ioHub Process assigned to 1.
-
-        For a system that has four processing units, the Experiment Process is 
-        assigned to index's 0,1 and the ioHub Process assigned to 2,3.
-
-        For a system that has eight processing units, the PsychoPy Process is 
-        assigned to index 2,3, ioHub Server assigned to 4,5. All other processes
-        running on the OS are attempted to be assigned to indexes 0,1,6,7.
         """
         if _psutil_available is False:
             print2err("Computer.autoAssignAffinities is not supported on OSX.")
@@ -487,7 +542,7 @@ class Computer(object):
         that the current (calling) process should only be allowed to run on.
 
         Args:
-           processorList (list): list of int processor ID's to set the Experiment Process affinity to. An empty list means all processors.
+           processorList (list): list of int processor ID's to set the current Process affinity to. An empty list means all processors.
             
         Returns:
             None
@@ -499,10 +554,10 @@ class Computer(object):
         return Computer.currentProcess.set_cpu_affinity(processorList)
 
     @staticmethod
-    def setProcessAffinityByID(processID,processorList):
+    def setProcessAffinityByID(process_id,processor_list):
         """
         Sets the list of 'processor' ID's (from 0 to Computer.processingUnitCount-1)
-        that the process with the provided processID is able to run on.
+        that the process with the provided OS Process ID is able to run on.
 
         Args:
            processID (int): The system process ID that the affinity should be set for.
@@ -515,11 +570,12 @@ class Computer(object):
         if _psutil_available is False:
             print2err("Computer.setProcessAffinityByID is not supported on OSX.")
             return
-        p=psutil.Process(processID)
-        return p.set_cpu_affinity(processorList)
+            
+        p=psutil.Process(process_id)
+        return p.set_cpu_affinity(processor_list)
 
     @staticmethod
-    def getProcessAffinityByID(processID):
+    def getProcessAffinityByID(process_id):
         """
         Returns a list of 'processor' ID's (from 0 to Computer.processingUnitCount-1)
         that the process with the provided processID is able to run on.
@@ -532,27 +588,30 @@ class Computer(object):
         """
         if _psutil_available is False:
             return range(Computer.processingUnitCount)
-        p=psutil.Process(processID)
+        p=psutil.Process(process_id)
         return p.get_cpu_affinity()
 
     @staticmethod
-    def setAllOtherProcessesAffinity(processorList, excludeProcessByIDList=[]):
-        """
-        Sets the list of 'processor' ID's (from 0 to Computer.processingUnitCount-1)
-        that all processes, other than those specified in the excludeProcessByIDList,
-        are able to run on. excludeProcessByIDList should be a list of process ID
-        integers, or an empty list. Note that the OS may not allow the calling process
-        to set the affinity of every other process running on the system. For
-        example, some system level processing can not have their affinity set
-        by a user level application. However, in general, many 
-        processes can have their affinity set by another user process.
+    def setAllOtherProcessesAffinity(processor_list, exclude_process_id_list=[]):
+        """ 
+        Sets the affinity for all OS Processes other than those specified in the
+        exclude_process_id_list, to the processing unit indexes specified in processor_list.
+        Valid values in the processor_list are between 0 to Computer.processingUnitCount-1.
+        
+        exclude_process_id_list should be a list of OS Process ID integers, 
+        or an empty list (indicating to set the affiinty to all processing units).
+        
+        Note that the OS may not allow the calling process to set the affinity 
+        of every other process running on the system. For example, some system 
+        level processing can not have their affinity set by a user level application.
+        
+        However, in general, many processes can have their affinity set by another user process.
 
         Args:
-           processorList (list): list of int processor ID's to set all non Experiment or ioHub Server Process's to. An empty list means all processors.
+           processor_list (list): list of int processor ID's to set all OS Processes to. An empty list means all processors.
            
-        Kwargs:
-           excludeProcessByIDList (list): A list of process ID's that should not have their process affinity settings changed.
-           
+           exclude_process_id_list (list):  A list of process ID's that should not have their process affinity settings changed.
+
         Returns:
            None
         """
@@ -560,9 +619,9 @@ class Computer(object):
             print2err("Computer.setAllOtherProcessesAffinity is not supported on OSX.")
             return
         for p in psutil.process_iter():
-            if p.pid not in excludeProcessByIDList:
+            if p.pid not in exclude_process_id_list:
                 try:
-                    p.set_cpu_affinity(processorList)
+                    p.set_cpu_affinity(processor_list)
                     print2err('Set OK process affinity: %s : %ld'%(p.name,p.pid))
                 except Exception:
                     print2err('ERROR setting process affinity: %s : %ld'%(p.name,p.pid))
@@ -578,28 +637,24 @@ class Computer(object):
     def currentSec():
         """
         Returns the current sec.msec-msec time of the system. 
+          
+        The underlying timer that is used is based on OS and Python version. 
+        Three requirements exist for the ioHub time base implementation:
         
+        * The Python interpreter does not apply an offset to the times returned based on when the timer module being used was loaded or when the timer fucntion first called was first called. 
+        * The timer implementation used must be monotonic and report elapsed time between calls, 'not' CPU usage time. 
+        * The timer implementation must provide a resolution of 50 usec or better.
+        
+        Given the above requirements, ioHub selects a timer implementation as follows:
+            
+        * On Windows, the Windows Query Performance Counter API is used using ctypes access.
+        * On other OS's, if the Python version being used is 2.6 or lower, time.time is used. For Python 2.7 and above, the timeit.default_timer function is used.
+         
         Args:
            None
                       
         Returns:
            None
-           
-        On Windows this is implemented by directly calling the Windows QPC functions using ctypes.
-        
-        This is done so that no offset is applied to the time base used by either
-        the Experiment or ioHub Server Process. The standard Python high resolution 
-        timer can not be used on Windows, as it starts at 0.0 based on when the first
-        call to the python time function is called, which will be different between
-        Experiment and ioHub Server Processes since they do not start at exactly the same time.
-        
-        By using a 0 offset root time base, both interpreters have a totally 
-        common / shared time-base to use. This means that either process knows
-        the current time of the other process, since they are the same. ;)
-
-        For other OS's, right now the timeit.base_timer function is used, 
-        which as of python 2.7 correctly selects the best high resolution clock
-        for the OS the interpreter is running on.
         """
 
         return Computer.globalClock.getTime()
@@ -619,20 +674,22 @@ class Computer(object):
 
     @staticmethod
     def getPhysicalSystemMemoryInfo():
-        """Return a class containing information about current memory usage.
+        """
+        Return a class containing information about current memory usage.
 
         Args:
            None
                       
         Returns:
-           vmem(total=long, available=long, percent=float, used=long, free=long) 
-           
-               vmem.total: the total amount of memory in bytes.
-               vmem.available: the available amount of memory in bytes.
-               vmem.percent: the percent of memory in use by the system.
-               vmem.used: the used amount of memory in bytes.
-               vmem.free: the amount of memory that is free in bytes.On Windows, this is the same as vmem.available.
-           
+           vmem: (total=long, available=long, percent=float, used=long, free=long) 
+        
+        Where:
+            
+        * vmem.total: the total amount of memory in bytes.
+        * vmem.available: the available amount of memory in bytes.
+        * vmem.percent: the percent of memory in use by the system.
+        * vmem.used: the used amount of memory in bytes.
+        * vmem.free: the amount of memory that is free in bytes.On Windows, this is the same as vmem.available.           
         """
         if _psutil_available is False:
             print2err("Computer.getPhysicalSystemMemoryInfo is not supported on OS X")
@@ -643,13 +700,14 @@ class Computer(object):
 
     @staticmethod
     def getCPUTimeInfo(percpu=False):
-        """Return information about the computers CPU usage.
+        """
+        Return information about the computers CPU usage.
         
-        Kwargs:
+        Args:
            percpu (bool): If True, a list of cputimes objects is returned, one for each processing unit for the computer. If False, only a single cputimes object is returned.
                       
         Returns:
-           cputimes(user=float, system=float, idle=float)
+           object: (user=float, system=float, idle=float)        
         """
         if _psutil_available is False:
             print2err("Computer.getCPUTimeInfo is not supported on OS X")
@@ -657,25 +715,39 @@ class Computer(object):
 
         return psutil.cpu_times(percpu)
 
-    #
-    # Local / Current Process Related
-    #
 
     @staticmethod
     def getCurrentProcess():
         """
-        Get the current / Local process On Windows and Linux, this is
-        a psutil.Process class instance. On OS X, it is a multiprocessing.Process instance.
+        Get the current / Local process. 
+        
+        On Windows and Linux, this is a psutil.Process class instance. 
+        On OS X, it is a multiprocessing.Process instance.
 
         Args:
            None
                       
         Returns:
-           Process object for the current system process.
-           
+           object: Process object for the current system process.           
         """
         return Computer.currentProcess
 
+
+    @staticmethod
+    def getIoHubProcess():
+        """
+        Get the ioHub Process. 
+        
+        On Windows and Linux, this is a psutil.Process class instance. 
+        On OS X, it is a multiprocessing.Process instance.
+
+        Args:
+           None
+                      
+        Returns:
+           object: Process object for the ioHub Process.           
+        """
+        return Computer.ioHubServerProcess
 
 ########### Base Abstract Device that all other Devices inherit from ##########
 class Device(ioObject):

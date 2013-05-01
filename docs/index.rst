@@ -50,7 +50,7 @@ ioHub Features
 * Smooth integration with PsychoPy:
     When used with full `PsychoPy <http://www.psychopy.org>`_ functionality, ioHub can save debugging messages to PsychoPy log files, and PsychoPy *LogEvents* can be saved in the ioDataStore (as well as the PsychoPy logging system). Furthermore, ioHub and PsychoPy share a common time base, so times read from the PsychoPy Experiment process are directly comparable to times read from ioHub Device Events (if the PsychoPy time is based on psychopy.core.getTime or default psychopy.logging.defaultClock mechanisms).
 * High-precision synchronization:
-    The ioHub Server provides a common time base to automatically synchronize device events from multiple physical and virtual devices. In fact, the ioHub Server interacts with the PsychoPy Experiment process `as if' it were another virtual device: descriptive MessageEvents can be sent from within the PsychoPy Experiment to the ioHub Server, allowing important information in the course of the experiment (such as stimulus onsets, etc.) to be time stamped with microsecond-level precision and saved in the ioDataStore alongside similarly time-stamped device events.
+    The ioHub Server provides a common time base to automatically synchronize device events from multiple physical and virtual devices. In fact, the ioHub Server interacts with the PsychoPy Experiment process 'as if' it were another virtual device: descriptive MessageEvents can be sent from within the PsychoPy Experiment to the ioHub Server, allowing important information in the course of the experiment (such as stimulus onsets, etc.) to be time stamped with microsecond-level precision and saved in the ioDataStore alongside similarly time-stamped device events.
 
 
 Github Hosted
