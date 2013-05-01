@@ -211,6 +211,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # disable high priority in both processes
         Computer.disableHighPriority()
 
+        self.hub.quit()
 
     def plotResults(self):
         #### calculate stats on collected data and draw some plots ####
