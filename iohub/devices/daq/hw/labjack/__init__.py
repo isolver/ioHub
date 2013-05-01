@@ -3,7 +3,7 @@ import numpy as N
 
 from ... import AnalogInputDevice, MultiChannelAnalogInputEvent
 from .... import Computer,ioDeviceError
-from ..... import addDirectoryToPythonPath,printExceptionDetailsToStdErr,print2err
+from psychopy.iohub.util import addDirectoryToPythonPath,printExceptionDetailsToStdErr,print2err
 addDirectoryToPythonPath('devices/daq/hw/labjack')
 import pylabjack
 

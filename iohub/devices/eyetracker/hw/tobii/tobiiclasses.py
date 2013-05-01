@@ -544,8 +544,8 @@ class TobiiTracker(object):
  
 if __name__ == '__main__':
     #init global clock manually for test    
-    import iohub    
-    Computer.globalClock=iohub.MonotonicClock()
+    from  psychopy.clock import MonotonicClock    
+    Computer.globalClock=MonotonicClock()
     
     TobiiTrackerBrowser.start()
     

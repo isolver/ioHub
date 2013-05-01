@@ -12,42 +12,28 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 from __future__ import division
 
 
-import inspect
+
 import sys
-import os
-from collections import namedtuple,Iterable
 
-from timebase import psychopy_available, MonotonicClock, monotonicClock
-from util import fix_encoding,OrderedDict,convertCamelToSnake,win32MessagePump,print2err,printExceptionDetailsToStdErr,ioHubError,createErrorResult
-
+from psychopy.clock import  MonotonicClock, monotonicClock
+from util import fix_encoding,OrderedDict,convertCamelToSnake,win32MessagePump,print2err,printExceptionDetailsToStdErr,ioHubError,createErrorResult,module_directory,isIterable
+from util import getCurrentDateTimeString
+from util import ExperimentVariableProvider
+from util import FullScreenWindow, SinusoidalMotion
+from util import TimeTrigger,DeviceEventTrigger
+from util import ScreenState,ClearScreen,InstructionScreen,ImageScreen
+from util import ProgressBarDialog, MessageDialog, FileDialog, ioHubDialog
 
 fix_encoding.fix_encoding()
 
-def addDirectoryToPythonPath(path_from_iohub_root,leaf_folder=''):
-    dir_path=os.path.join(IO_HUB_DIRECTORY,path_from_iohub_root,sys.platform,"python{0}{1}".format(*sys.version_info[0:2]),leaf_folder)
-    if os.path.isdir(dir_path) and dir_path not in sys.path:
-        sys.path.append(dir_path)  
-    else:
-        print2err("Could not add path: ",dir_path)
-        dir_path=None
-    return dir_path
+def _localFunc():
+    return None
     
-def module_path(local_function):
-    """ returns the module path without the use of __file__.  Requires a function defined
-   locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
-    return os.path.abspath(inspect.getsourcefile(local_function))
-
-def module_directory(local_function):
-    mp=module_path(local_function)
-    moduleDirectory,mname=os.path.split(mp)
-    return moduleDirectory
-
 global IO_HUB_DIRECTORY
-IO_HUB_DIRECTORY=module_directory(module_path)
+IO_HUB_DIRECTORY=module_directory(_localFunc)
 
-  
 #version info for ioHub
-__version__='0.7.0'
+__version__='0.8.0'
 __license__='GNU GPLv3 (or more recent equivalent)'
 __author__='iSolver Software Solutions'
 __author_email__='sol@isolver-software.com'
@@ -65,13 +51,15 @@ if sys.platform not in SUPPORTED_SYS_NAMES:
     print ''
     sys.exit(1)
 
-
-
-def isIterable(o):
-    return isinstance(o, Iterable)
-        
-
-RectangleBorder=namedtuple('RectangleBorderClass', 'left top right bottom')
-
-
 import constants
+from constants import EventConstants, DeviceConstants, KeyboardConstants, MouseConstants
+
+import client
+from client import ioHubConnection, quickStartHubServer, ioHubExperimentRuntime
+
+import devices
+from devices import Computer, import_device, DeviceEvent, Device
+
+import datastore
+
+import server

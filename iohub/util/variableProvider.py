@@ -3,7 +3,7 @@ __author__ = 'Sol'
 import numpy as np
 import sys
 import json
-from ..timebase import monotonicClock
+from psychopy.clock import monotonicClock
 from . import OrderedDict,  printExceptionDetailsToStdErr, print2err
 getTime=monotonicClock.getTime 
 #### Experiment Variable (IV and DV) Condition Management

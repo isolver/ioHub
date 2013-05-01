@@ -19,7 +19,8 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-from iohub import module_directory,print2err
+from psychopy.iohub.util import module_directory
+
 
 class ValidationError(Exception):
     """Base class for exceptions in this module."""
@@ -422,7 +423,7 @@ def validateConfigDictToFuncMapping(param_validation_func_mapping,current_device
     return validation_results
             
 def validateDeviceConfiguration(relative_module_path,device_class_name,current_device_config):
-    validation_file_path=os.path.join(_current_dir,relative_module_path[len('iohub.devices.'):].replace('.',os.path.sep),'supported_config_settings.yaml')
+    validation_file_path=os.path.join(_current_dir,relative_module_path[len('psychopy.iohub.devices.'):].replace('.',os.path.sep),'supported_config_settings.yaml')
 
     device_settings_validation_dict=loadYamlFile(validation_file_path,print_file=True)
     device_settings_validation_dict=device_settings_validation_dict[device_settings_validation_dict.keys()[0]]

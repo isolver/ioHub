@@ -16,13 +16,12 @@ import os,sys
 from operator import itemgetter
 from collections import deque
 
-import iohub
-import iohub.client
-from iohub.util import OrderedDict,print2err, printExceptionDetailsToStdErr, ioHubError, createErrorResult,convertCamelToSnake,MonotonicClock
-from iohub.constants import DeviceConstants,EventConstants
-from iohub.devices import Computer, DeviceEvent, import_device        
-from iohub.devices.deviceConfigValidation import validateDeviceConfiguration
-
+from psychopy.iohub.util import OrderedDict,print2err, printExceptionDetailsToStdErr, ioHubError, createErrorResult,convertCamelToSnake
+from psychopy.iohub.constants import DeviceConstants,EventConstants
+from psychopy.iohub.devices import Computer, DeviceEvent, import_device        
+from psychopy.iohub.devices.deviceConfigValidation import validateDeviceConfiguration
+from psychopy.iohub.net import MAX_PACKET_SIZE
+from psychopy.iohub import IO_HUB_DIRECTORY
 from yaml import load
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -275,7 +274,7 @@ class udpServer(DatagramServer):
     def sendResponse(self,data,address):
         packet_data=None
         try:
-            max_size=iohub.net.MAX_PACKET_SIZE/2-20
+            max_size=MAX_PACKET_SIZE/2-20
             packet_data=self.pack(data)+'\r\n'
             packet_data_length=len(packet_data)
             if packet_data_length>= max_size:
@@ -439,7 +438,7 @@ class ioServer(object):
         # start UDP service
         self.udpService=udpServer(self,':%d'%config.get('udpPort',9000))
 
-        import iohub
+        from .. import iohub
         # read temp paths file
         iohub.data_paths=None
         try:
@@ -458,7 +457,7 @@ class ioServer(object):
             if 'data_store' in config:
                 experiment_datastore_config=config.get('data_store')
 
-                default_datastore_config_path=os.path.join(iohub.IO_HUB_DIRECTORY,'dataStore','default_datastore.yaml')
+                default_datastore_config_path=os.path.join(IO_HUB_DIRECTORY,'dataStore','default_datastore.yaml')
                 _dslabel,default_datastore_config=load(file(default_datastore_config_path,'r'), Loader=Loader).popitem()
 
                 for default_key,default_value in default_datastore_config.iteritems():
@@ -705,7 +704,9 @@ class ioServer(object):
 
         DeviceClass=None
         class_name_start=device_class_name.rfind('.')
-        device_module_path='iohub.devices.'
+        iohub_sub_mod='psychopy.iohub.'
+        iohub_submod_path_length=len(iohub_sub_mod)
+        device_module_path=iohub_sub_mod+'devices.'
         if class_name_start>0:
             device_module_path="{0}{1}".format(device_module_path,device_class_name[:class_name_start].lower())   
             device_class_name=device_class_name[class_name_start+1:]
@@ -714,9 +715,10 @@ class ioServer(object):
 
         #print2err("Processing device, device_class_name: {0}, device_module_path: {1}".format(device_class_name, device_module_path))
          
-        dconfigPath=os.path.join(iohub.IO_HUB_DIRECTORY,device_module_path[6:].replace('.',os.path.sep),"default_%s.yaml"%(device_class_name.lower()))
+        dconfigPath=os.path.join(IO_HUB_DIRECTORY,device_module_path[iohub_submod_path_length:].replace('.',os.path.sep),"default_%s.yaml"%(device_class_name.lower()))
 
-        #print2err("Loading Device Defaults file:\n\tdevice_class: {0}\n\tdeviceConfigFile:{1}\n".format(device_class_name,dconfigPath))
+#        print2err("dconfigPath: {0}, device_module_path: {1}\n".format(dconfigPath,device_module_path))
+#        print2err("Loading Device Defaults file:\n\tdevice_class: {0}\n\tdeviceConfigFile:{1}\n".format(device_class_name,dconfigPath))
         self.log("Loading Device Defaults file: %s"%(device_class_name,))
 
         _dclass,default_device_config=load(file(dconfigPath,'r'), Loader=Loader).popitem()
@@ -880,84 +882,4 @@ class ioServer(object):
             
     def __del__(self):
         self.shutdown()
-   
-################### End of Class Def. #########################
 
-# ------------------ Main / Quickstart testing -------------------------
-
-def run(rootScriptPathDir,configFilePath):
-    import tempfile
-    tdir=tempfile.gettempdir()
-    cdir,cfile=os.path.split(configFilePath)
-
-    if tdir==cdir:
-        tf=open(configFilePath)
-        ioHubConfig=json.loads(tf.read())
-        tf.close()
-        os.remove(configFilePath)
-    else:
-        ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
-
-
-    try:
-        s = ioServer(rootScriptPathDir, ioHubConfig)
-    except Exception,e:
-        printExceptionDetailsToStdErr()
-        sys.stdout.flush()
-        
-        try:
-            s.shutdown()
-        except:
-            pass
-        
-        return -1
-    
-    try:
-        s.log('Receiving datagrams on :9000')
-        s.udpService.start()
-
-        for m in s.deviceMonitors:
-            m.start()
-
-        gevent.spawn(s.processDeviceEvents,0.001)
-
-        sys.stdout.write("IOHUB_READY\n\r\n\r")
-        sys.stdout.flush()
-        
-        gevent.run()
-
-        s.log("Server END Time Offset: {0}".format(Computer.globalClock.getLastResetTime()),'DEBUG')
-
-    except Exception as e:
-        print2err("Error occurred during ioServer.start(): ",str(e))
-        printExceptionDetailsToStdErr()
-        print2err("------------------------------")
-
-        sys.stdout.write("IOHUB_FAILED\n\r\n\r")
-        sys.stdout.flush()
-        
-        try:
-            s.shutdown()
-        except:
-            pass
-    
-    return -1
-    
-if __name__ == '__main__':
-    prog=sys.argv[0]
-    if len(sys.argv)>=2:
-        initial_offset=float(sys.argv[1])
-    if len(sys.argv)>=3:
-        rootScriptPathDir=sys.argv[2]
-    if len(sys.argv)>=4:        
-        configFileName=sys.argv[3]        
-        #ioHub.print2err("ioServer initial_offset: ",initial_offset)
-    if len(sys.argv)<2:
-        configFileName=None
-        rootScriptPathDir=None
-        initial_offset=iohub.getTime()
-
-    Computer.isIoHubProcess=True
-    Computer.globalClock=MonotonicClock(initial_offset)        
-
-    run(rootScriptPathDir=rootScriptPathDir, configFilePath=configFileName)

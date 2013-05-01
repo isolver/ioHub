@@ -11,9 +11,9 @@ import time
 import weakref
 
 import scipy
-from psychopy import visual
+from ... import visual
 
-from iohub.devices import Computer
+from ..devices import Computer
 
 from .exception_tools import ioHubError
 from . import win32MessagePump

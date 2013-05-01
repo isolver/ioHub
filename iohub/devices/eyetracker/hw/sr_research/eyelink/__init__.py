@@ -11,7 +11,7 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 
-from ...... import addDirectoryToPythonPath
+from psychopy.iohub.util import addDirectoryToPythonPath
 
 addDirectoryToPythonPath('devices/eyetracker/hw/sr_research/eyelink')
 

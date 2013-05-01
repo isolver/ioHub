@@ -3,12 +3,39 @@ from __future__ import division
 import datetime
 import warnings
 import scipy, numpy
-import sys
+import sys,os,inspect
+import psychopy
+from collections import Iterable
 
 from exception_tools import ioHubConnectionException, ioHubServerError, printExceptionDetailsToStdErr, print2err, createErrorResult, ioHubError
-from ..timebase import MonotonicClock, monotonicClock
+from psychopy.clock import MonotonicClock, monotonicClock
 getTime = monotonicClock.getTime
 
+# Path Update / Location functions
+
+def addDirectoryToPythonPath(path_from_iohub_root,leaf_folder=''):
+    dir_path=os.path.join(psychopy.iohub.IO_HUB_DIRECTORY,path_from_iohub_root,sys.platform,"python{0}{1}".format(*sys.version_info[0:2]),leaf_folder)
+    if os.path.isdir(dir_path) and dir_path not in sys.path:
+        sys.path.append(dir_path)  
+    else:
+        print2err("Could not add path: ",dir_path)
+        dir_path=None
+    return dir_path
+    
+def module_path(local_function):
+    """ returns the module path without the use of __file__.  Requires a function defined
+   locally in the module. from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module"""
+    return os.path.abspath(inspect.getsourcefile(local_function))
+
+def module_directory(local_function):
+    mp=module_path(local_function)
+    moduleDirectory,mname=os.path.split(mp)
+    return moduleDirectory
+    
+
+def isIterable(o):
+    return isinstance(o, Iterable)
+    
 from dialogs import ProgressBarDialog, MessageDialog, FileDialog, ioHubDialog
 
  
@@ -55,10 +82,14 @@ from variableProvider import ExperimentVariableProvider
 from visualUtil import FullScreenWindow, SinusoidalMotion
 from visualUtil import TimeTrigger,DeviceEventTrigger
 from visualUtil import ScreenState,ClearScreen,InstructionScreen,ImageScreen
+
+###############################################################################
 #
-## Windows Message Pumping
+## A couple date / time related utility functions
 #
 
+getCurrentDateTime = datetime.datetime.now
+getCurrentDateTimeString = lambda : getCurrentDateTime().strftime("%Y-%m-%d %H:%M")
 
 ###############################################################################
 #
@@ -264,13 +295,6 @@ from dialogs import ProgressBarDialog, MessageDialog, FileDialog, ioHubDialog
 
 
 
-###############################################################################
-#
-## A couple date / time related utility functions
-#
-
-getCurrentDateTime = datetime.datetime.now
-getCurrentDateTimeString = lambda : getCurrentDateTime().strftime("%Y-%m-%d %H:%M")
 
 
 ###############################################################################

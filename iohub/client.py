@@ -850,7 +850,7 @@ class ioHubConnection(object):
                 ioHubConfigAbsPath=os.path.abspath(tfile.name)               
                 tfile.close()
 
-        run_script=os.path.join(IO_HUB_DIRECTORY,'server.py')
+        run_script=os.path.join(IO_HUB_DIRECTORY,'launchHubProcess.py')
         subprocessArgList=[sys.executable,run_script,"%.6f"%Computer.globalClock.getLastResetTime(),rootScriptPath,ioHubConfigAbsPath]
 
         # check for existing ioHub Process based on process if saved to file
@@ -1041,7 +1041,7 @@ class ioHubConnection(object):
         try:
             device_class_name=str(device_class_name)
             class_name_start=device_class_name.rfind('.')
-            device_module_path='iohub.devices.'
+            device_module_path='psychopy.iohub.devices.'
             if class_name_start>0:
                 device_module_path="{0}{1}".format(device_module_path,device_class_name[:class_name_start].lower())     
                 device_class_name=device_class_name[class_name_start+1:]

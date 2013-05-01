@@ -10,9 +10,13 @@ Distributed under the terms of the GNU General Public License (GPL version 3 or 
 .. fileauthor:: Sol Simpson <sol@isolver-software.com>
 """
 from .. import Computer, Device
-from ... import RectangleBorder,printExceptionDetailsToStdErr,print2err
+from ... import printExceptionDetailsToStdErr,print2err
 from ...constants import EventConstants, DeviceConstants, MouseConstants
 import numpy as N
+from collections import namedtuple
+
+RectangleBorder=namedtuple('RectangleBorderClass', 'left top right bottom')
+
 
 currentSec=Computer.currentSec
 

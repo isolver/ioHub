@@ -7,6 +7,7 @@ Created on Thu Nov 08 15:13:55 2012
 """
 
 try:
+    from .util import print2err
     
     class Constants(object):
         UNDEFINED=0
@@ -85,7 +86,6 @@ try:
    
             for event_id in device_event_ids:
                 event_constant_string=cls.getName(event_id)
-                import iohub
                 event_class=None
                 for event_class in event_classes.values():
                     if event_class.EVENT_TYPE_ID == event_id:
@@ -95,7 +95,7 @@ try:
                         break
                 
                 if event_id not in cls._classes.keys():
-                        iohub.print2err("\t*** ERROR ADDING EVENT CLASSS MAPPING: Could not find class: ",event_constant_string, " = ",event_id)
+                        print2err("\t*** ERROR ADDING EVENT CLASSS MAPPING: Could not find class: ",event_constant_string, " = ",event_id)
     
     EventConstants.initialize()
     

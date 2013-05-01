@@ -114,7 +114,7 @@ class EyeTracker(EyeTrackerDevice):
             self._eyelink.sendCommand("button_function 5 'accept_target_fixation'")
 
             # Sets up the file names / paths to be used for the native EyeLink EDF file.
-            import iohub
+            import psychopy.iohub as iohub
             if iohub.data_paths is None:
                 EyeTracker._local_edf_dir=os.path.abspath('.')
             else:

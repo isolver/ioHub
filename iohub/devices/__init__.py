@@ -26,7 +26,7 @@ if sys.platform != 'darwin':
     _psutil_available=True
 
 from ..util import convertCamelToSnake, print2err,printExceptionDetailsToStdErr
-from ..timebase import monotonicClock
+from psychopy.clock import monotonicClock
 
 class ioDeviceError(Exception):
     def __init__(self, device, msg):
@@ -1377,7 +1377,7 @@ def import_device(module_path, device_class_name):
 
 try:
     if getattr(sys.modules[__name__],'Display',None) is None:
-        display_class,device_class_name,event_classes=import_device('iohub.devices.display','Display')
+        display_class,device_class_name,event_classes=import_device('psychopy.iohub.devices.display','Display')
         setattr(sys.modules[__name__],'Display', display_class)
         
 except:

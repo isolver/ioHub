@@ -15,7 +15,7 @@ import os
 from collections import namedtuple
 import json
 
-import iohub
+from psychopy import iohub
 
 global _hubFiles
 
