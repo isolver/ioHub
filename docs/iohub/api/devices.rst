@@ -1,78 +1,81 @@
-==================================
+###################################
 ioHub Device and Device Event API
-==================================
+###################################
 
 The device and device event portion of the ioHub API contains the classes that represent
 the devices in use by the PsychoPy script and the associated events that each device type
-can generate. 
+can generate.
 
 The device and device event API has been designed to try and provide a consistent
 device and event interface across different device and event types, except where
 differences are required to properly represent the device or event of course.
-
 Two abstract classes (i.e. you never get a instance of one of the classes directly)
 form the base for all Device classes and DeviceEvent classes that are used within
-the iohub. 
+the iohub.
 
-In general, attributes of a class are named using _ format (i.e. eventclass.device_time), 
-while method names of a class use camel case fomat (i.e. deviceclass.getEvents() ).
+In general, attributes of a class are named using _ format (i.e. eventclass.device_time),
+while method names of a class use camel case format (i.e. deviceclass.getEvents() ).
 I find this makes it very easy to distinguish attributes from methods or functions when scanning
 a code completion list for a class in your IDE of choice for example.
 
-If device events are being saved to the ioDataStore, the hdf5 table for a given event class
+If device events are being saved to the ioHub DataStore, the hdf5 table for a given event class
 contains columns with the same names as the attributes of the event object that is
 stored in the table. This makes it somewhat easier to remember both event object
 attributes and event data storage tables formats.
 
-.. Important::
-    You never create Device or DeviceEvent class instances, regardless of device or event type. 
-    The ioHub package creates all Device based class instances and DeviceEvent instances as needed,
-    and these classses are accessable via methods within the ioHub package.
- 
+.. note:: A user script never creates an instance of a Device or DeviceEvent class.
+    The ioHub Event Framework creates all Device and DeviceEvent representations for
+    PsychoPy Process as needed.
+
+.. note:: Technically, the Device and DeviceEvent classes documented here are used by
+    the ioHub Process only. The PsychoPy Process accesses the Device class instances
+    via a dynamically created PsychoPy Process side class called
+    an ioHubDeviceView. However, the ioHubDeviceView instance created on the
+    PsychoPy Process associated with an actual ioHub Process Device instance
+    has an identical public interface that is used by the PsychoPy script.
+    Therefore, providing documentation for the ioHub Process Devices and DeviceEvents
+    is also providing the API specification that can be used by the PsychoPy Process
+    ( and it is much easier to document Classes that exist for a period longer than
+    just when the psychoPy process runs.) :)
+
 The Root Device and DeviceEvent Classes
-=========================================
+#########################################
 
 All device and event types supported by the ioHub are extensions of two abstract
-clsss definitions.
+class definitions.
 
 iohub.devices.Device
-+++++++++++++++++++++
+=========================
 
-The parent class of all supported device types in the ioHub is the Device class. 
-   
+The parent class of all supported ioHub Device types.
+
 .. autoclass:: iohub.devices.Device
     :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
 
 iohub.devices.DeviceEvent
-++++++++++++++++++++++++++
+==========================
 
-The parent class of all events, regardless of the device type that it has been received from,
-is the DeviceEvent class. 
+The parent class of all ioHub DeviceEvents, regardless of the device type has
+generated the event.
 
 .. autoclass:: iohub.devices.DeviceEvent
     :exclude-members: filter_id, device_id, NUMPY_DTYPE, DEVICE_ID_INDEX, BASE_EVENT_MAX_ATTRIBUTE_INDEX, CLASS_ATTRIBUTE_NAMES, EVENT_CONFIDENCE_INTERVAL_INDEX, EVENT_DELAY_INDEX, EVENT_DEVICE_TIME_INDEX, EVENT_EXPERIMENT_ID_INDEX, EVENT_FILTER_ID_INDEX, EVENT_HUB_TIME_INDEX, EVENT_ID_INDEX, EVENT_LOGGED_TIME_INDEX, EVENT_SESSION_ID_INDEX, EVENT_TYPE_ID, EVENT_TYPE_ID_INDEX, EVENT_TYPE_STRING, IOHUB_DATA_TABLE, PARENT_DEVICE, createEventAsClass, createEventAsDict, createEventAsNamedTuple, e, namedTupleClass
 
-Device and DeviceEvent Types
-=============================
+Available ioHub Device and DeviceEvent Types
+##############################################
 
 Details on each supported ioHub Device, and associated DeviceEvent types, can be
 found in the following sections.
 
-
 .. toctree::
-    :maxdepth: 2
-    
+    :maxdepth: 3
+
     Computer <device_details/computer>
-    Keyboard <device_details/keyboard>
-    Mouse <device_details/mouse>
     Display <device_details/display>
     Experiment <device_details/experiment>
-    EyeTracker <device_details/eyetracker>
+    Keyboard <device_details/keyboard>
+    Mouse <device_details/mouse>
     XInput Gamepad <device_details/xinput_gamepad>
+    Eye Tracker <device_details/eyetracker>
     Analog to Digitial Input Device <device_details/daq>
-       
-       
-Device Class Heirarchy
-=======================
-
-**inheritance dash diagram not working**
+    
