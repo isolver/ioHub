@@ -1,6 +1,6 @@
-#######################
-iohub.devices.Computer
-#######################
+############################
+The ioHub Computer Device
+############################
 
 **Platforms:** Windows, OS X, Linux
 

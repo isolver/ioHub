@@ -1,49 +1,22 @@
-# This section includes all valid labjack.AnalogInput Device
+# This section includes all valid Experiment Device
 # settings that can be specified in an iohub_config.yaml
 # or in a Python dictionary form and passed to the quickStartHubServer
 # method. Any device parameters not specified when the device class is
 # created by the ioHub Process will be assigned the default value
 # indicated here.
 #
-daq.hw.labjack.AnalogInput:
-    
+Experiment:
     # name: The unique name to assign to the evice instance created.
     #   The device is accessed from within the PsychoPy script 
     #   using the name's value; therefore it must be a valid Python
     #   variable name as well.
     #
-    name: ain
-
-    # model_name:The labjack.AnalogInput device model name is used to alter
-    #   internal Device logic based on which version of the labjack
-    #   device is going to be used. 
-    #   Currently, only the U6 model is officially supported.
-    #
-    model_name: U6
+    name: experiment
 
     # monitor_event_types: Specify which of the device's supported event
     #   types you would like the ioHub to monitor for.
     #
-    monitor_event_types: [MultiChannelAnalogInputEvent,]
-
-    # channel_sampling_rate: The sampling rate, in Hz, of each of the eight
-    #   analog input channels that are monitored. The channel_sampling_rate * 8
-    #   equals the number of samples per second that the ioHub will 
-    #   receive overall. Values between 125 and 1000 hz are suggested.
-    #
-    channel_sampling_rate: 1000
-
-    # resolution_index: The resolution index to set the device to when aquiring
-    #   the analog input signals. Please refer to your device's documentation 
-    #   for a detailed explaination of what resolution_index does.
-    #
-    resolution_index: 1
-
-    # settling_factor: The settling_factor to set the device to when aquiring
-    #    the analog input signals. Please refer to your device's documentation
-    #    for a detailed explaination of what settling_factor does.
-    #
-    settling_factor: 1
+    monitor_event_types: [MessageEvent, LogEvent]
 
     # enable: Specifies if the device should be enabled by ioHub and monitored
     #   for events.
@@ -76,24 +49,24 @@ daq.hw.labjack.AnalogInput:
     #   False = Do not start reporting events for this device until enableEventReporting(True)
     #   is set for the device during experiment runtime.
     #
-    auto_report_events: False
+    auto_report_events: True
 
     # event_buffer_length: Specify the maximum number of events (for each
     #   event type the device produces) that can be stored by the ioHub Server
     #   before each new event results in the oldest event of the same type being
     #   discarded from the ioHub device event buffer.
     #
-    event_buffer_length: 1024
+    event_buffer_length: 128
 
-    # input_channel_count: The number of analog to digital channels to monitor
-    #   in parrallel. Currently this value is fixed at 8 channels.
+    # The device manufacturer's name.
+    #   It is not used by the ioHub, so is FYI only.
     #
-    input_channel_count: 8
-
-    # The AnalogInput device manufacturer's name.
-    #   LabJack Corporation.
+    manufacturer_name: N/A
+    
+    # The device number to assign to the device. 
+    #   Device_number is not used by this device type.
     #
-    manufacturer_name: LabJack Corporation
+    device_number: 0
 
     # The serial number for the specific isnstance of device used
     #   can be specified here. It is not used by the ioHub, so is FYI only.
@@ -106,15 +79,10 @@ daq.hw.labjack.AnalogInput:
     #   
     manufacture_date: DD-MM-YYYY
 
-    # The device's hardware version can be specified here.
+    # The device model name can be specified here.
     #   It is not used by the ioHub, so is FYI only.
     #
-    hardware_version: N/A
-    
-    # If the device has firmware, its revision number
-    #   can be indicated here. It is not used by the ioHub, so is FYI only.
-    #
-    firmware_version: N/A
+    model_name: N/A
 
     # The device model number can be specified here.
     #   It is not used by the ioHub, so is FYI only.
@@ -125,7 +93,13 @@ daq.hw.labjack.AnalogInput:
     #   This field is not used by ioHub, so is FYI only. 
     software_version: N/A
 
-    # The device number to assign to the Analog Input device. 
-    #   device_number is not used by this device type.
+    # The device's hardware version can be specified here.
+    #   It is not used by the ioHub, so is FYI only.
     #
-    device_number: 0
+    hardware_version: N/A
+    
+    # If the device has firmware, its revision number
+    #   can be indicated here. It is not used by the ioHub, so is FYI only.
+    #
+    firmware_version: N/A
+

@@ -7,7 +7,7 @@
 #
 daq.hw.labjack.AnalogInput:
     
-    # name: The unique name to assign to the evice instance created.
+    # name: The unique name to assign to the device instance created.
     #   The device is accessed from within the PsychoPy script 
     #   using the name's value; therefore it must be a valid Python
     #   variable name as well.

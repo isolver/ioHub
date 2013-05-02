@@ -122,7 +122,7 @@ html_short_title = 'ioHub'
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = 'iofav.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -340,8 +340,8 @@ html_theme_options = {
     'bootswatch_theme': "united",
 }
 
-autoclass_content = "class"
+autoclass_content = 'class'
 
-autodoc_default_flags = ['members', 'undoc-members', 'inherited-members','show-inheritance']
+autodoc_default_flags = ['members', 'inherited-members','show-inheritance']
 
-autodoc_member_order='bysource'
+autodoc_member_order = 'bysource'

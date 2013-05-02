@@ -1,6 +1,6 @@
-================================
+##################################
 ioHub Event Monitoring Framework
-================================
+##################################
 
 ioHub is a Python package providing a cross-platform computer device event monitoring 
 and storage framework. ioHub is free to use and is GPL version 3 licensed.
@@ -18,7 +18,7 @@ ioHub is designed to be used with the most excellent `PsychoPy <http://www.psych
     page updated with the latest news and status on this exciting development. 
 
 OS and Device Support
-=====================
+#####################
 
 * Support for the following operating Systems:
 	#. Windows XP SP3, 7, 8
@@ -41,7 +41,7 @@ OS and Device Support
         #. `Tobii <http://www.tobii.com>`_ Technologies Tobii models.
 
 ioHub Features
-==============
+###############
 
 * Independent device event monitoring:
     The ioHub Server, responsible for the monitoring, bundling, and storage of device events, runs in a separate OS process from the main PsychoPy Experiment. Device events are monitored continuously system-wide rather than intermittently or relative to the PsychoPy window. In fact, no graphical window is needed to monitor supported devices (An example of using this *headless* event tracking mode is provided in the examples folder). Device event monitoring and callback processing occurs very quickly in parallel, regardless of what state the PsychoPy Experiment process is in (i.e. even when it is performing a blocking operation and would not be able to monitor new events itself).
@@ -54,12 +54,12 @@ ioHub Features
 
 
 Github Hosted
-==============
+##############
 
 The ioHub project source is available on GitHub `here <https://www.github.com/isolver/ioHub>`_.
 
 Support
-========
+########
 
 A `user forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users>`_ 
 and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-dev>`_
@@ -67,12 +67,13 @@ are available on Google Groups for support questions and development discussion 
 
 
 Manual Contents
-================
+################
 
 .. toctree::
    :maxdepth: 4
    
    Installation <iohub/installation>
+   Supported Device Types for Your OS <iohub/supported_devices>
    Quick Start Guide <iohub/quickstart>
    User Manual / API Overview <iohub/api/api_home>
    Performance <iohub/performance>
