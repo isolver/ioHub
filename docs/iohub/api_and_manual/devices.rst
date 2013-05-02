@@ -77,5 +77,5 @@ found in the following sections.
     Mouse <device_details/mouse>
     XInput Gamepad <device_details/xinput_gamepad>
     Eye Tracker <device_details/eyetracker>
-    Analog to Digitial Input Device <device_details/daq>
+    Analog to Digitial Input <device_details/daq>
     
