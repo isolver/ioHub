@@ -490,8 +490,9 @@ class ioHubConnection(object):
         
     def clearEvents(self,device_label=None):
         """
-        Clears all events from the ioHub Process so they are not sent the next time
-        getEvents() is called.
+        Clears events from the ioHub Process's Global Event Buffer (by default) so 
+        that uneeded events are not sent to the PsychoPy Process the next time
+        iohub.getEvents() is called.
         
         If device_label is None ( the default ), then all events in the ioHub
         *Global Event Buffer* are cleared, which leaves the *Device Event Buffers*

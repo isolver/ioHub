@@ -16,9 +16,9 @@ Implementation.
 **The ioHub Event Framework can be broken down into four areas based on the functionality provided.**
    
 .. toctree::
-    :maxdepth: 2
-    
-    * Getting Connected <getting_connected/getting_connected>
+    :maxdepth: 3
+
+    * Overview of the ioHub Process <iohub_process/iohub_process>
     * Devices and DeviceEvents <devices>
     * ioHub DataStore <datastore/iodatastore_api>
     * PsychoPy Coder *Extra's* API <utilities>

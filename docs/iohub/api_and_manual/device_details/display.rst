@@ -19,3 +19,8 @@ Display Device Events
 
 The Display Device does not generate any ioHub Events.
 
+Notes and Considerations
+###########################
+
+None at this time.
+

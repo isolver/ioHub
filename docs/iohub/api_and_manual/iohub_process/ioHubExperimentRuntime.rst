@@ -1,5 +1,5 @@
 #####################################################
-ioHubExperimentRuntime Class and Configuration Files
+The ioHubExperimentRuntime Class
 #####################################################
 
 .. autoclass:: iohub.client.ioHubExperimentRuntime

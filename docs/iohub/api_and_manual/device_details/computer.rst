@@ -17,3 +17,8 @@ Computer Device Events
 #######################
 
 The Computer Device does not generate any ioHub Events.
+
+Notes and Considerations
+###########################
+
+None at this time.
