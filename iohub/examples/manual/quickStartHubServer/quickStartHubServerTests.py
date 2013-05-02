@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Testing the iohub.client.quickStartHubServer function.
+Testing the iohub.client.launchHubServer function.
 """
 
-from iohub.client import quickStartHubServer
+from iohub.client import launchHubServer
 from iohub.util import FullScreenWindow
      
 def testWithNoKwargs():
-    io=quickStartHubServer()
+    io=launchHubServer()
     
     keyboard=io.devices.keyboard
     
@@ -21,7 +21,7 @@ def testWithNoKwargs():
     io.quit()
 
 def testUsingPsychoPyMonitorConfig():
-    io=quickStartHubServer(psychopy_monitor_name='testMonitor')
+    io=launchHubServer(psychopy_monitor_name='testMonitor')
     
     display=io.devices.display
     
@@ -35,7 +35,7 @@ def testUsingPsychoPyMonitorConfig():
 def testEnabledDataStore():
         psychopy_mon_name='testMonitor'
         exp_code='gap_endo_que'
-        io=quickStartHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code)
+        io=launchHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code)
         
         display=io.devices.display
         
@@ -61,7 +61,7 @@ def testEnabledDataStoreAutoSessionCode():
         sess_code='S_{0}'.format(long(time.mktime(time.localtime())))
         print 'Current Session Code will be: ', sess_code    
         
-        io=quickStartHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code, session_code=sess_code)
+        io=launchHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code, session_code=sess_code)
         
         display=io.devices.display
         

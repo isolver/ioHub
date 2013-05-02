@@ -7,7 +7,7 @@ import sys
 
 from psychopy import visual, core
 
-from iohub.client import Computer, quickStartHubServer, EventConstants
+from iohub.client import Computer, launchHubServer, EventConstants
 from iohub.util import FullScreenWindow
 
 # Create and start the ioHub Server Process, enabling the 
@@ -28,20 +28,20 @@ from iohub.util import FullScreenWindow
 # If psychopy_monitor_name is not specified or is None, a default psychopy monitor
 # config is used.
 #
-# All args to quickStartHubServer **must be** kwargs
+# All args to launchHubServer **must be** kwargs
 #
 # The function returns an instance of the ioHubClientConnection class (see docs
 # for full details), which is the experiment scripts interface to the ioHub
 # device and event framework.
 #
 import random
-io=quickStartHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,100000)))
+io=launchHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,100000)))
 				   
 # By default, keyboard, mouse, experiment, and display devices are created 
-# by the quickStartHubServer function. 
+# by the launchHubServer function. 
 #
 # If you would like other devices added, specify each my adding a kwarg to the 
-# quickStartHubServer function, where the kwarg is the ioHub Device class name,
+# launchHubServer function, where the kwarg is the ioHub Device class name,
 # and the kwarg value is the device configuration dictionary for the device.
 #
 # Any device configuration properties not specified in the device configuration 

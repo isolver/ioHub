@@ -673,7 +673,7 @@ class ioHubConnection(object):
         
         In general enableHighPriority() would be called at start of a trial 
         where time critial processing is important, disableHighPriority() would be
-        called at the end of the trial or time critical period.
+        called at the end of thlaunchHubProcesse trial or time critical period.
 
         This method is not supported on OS X at this time.
 
@@ -730,7 +730,7 @@ class ioHubConnection(object):
         """
         Adds a device to the ioHub Server Process for event monitoring after the
         ioHub Server has been started. Normally all devices should be specified
-        to the function or class that is having the ioHubConnection class instance
+        to the function or claslaunchHubProcesss that is having the ioHubConnection class instance
         created, and therefore the ioHUb Server Process started. This is due to the
         fact that 'adding' a device to be monitored can take several, to tens, 
         or even a couple hundred msec to perform on the ioHub server (depending on the
@@ -1296,14 +1296,14 @@ class ioHubConnection(object):
 
 #quickConnect
 
-def quickStartHubServer(**kwargs):
+def launchHubServer(**kwargs):
     """   
-    The quickStartHubServer function can be used to start the ioHub Process
+    The launchHubServer function can be used to start the ioHub Process
     without the need to create an experiment or iohub configuration file. 
     
-    All values passed to the quickStartHubServer method must be kwarg inputs.
+    All values passed to the launchHubServer method must be kwarg inputs.
     
-    Valid keyword args that the quickStartHubServer function will process are:
+    Valid keyword args that the launchHubServer function will process are:
         
     * experiment_code: The label being used for the experiment being run.
     * session_code: A unique session code for the current run of the experiment.
@@ -1339,10 +1339,10 @@ def quickStartHubServer(**kwargs):
         
         # -*- coding: utf-8 -*-       
         #
-        ## Testing the iohub.client.quickStartHubServer function.
+        ## Testing the iohub.client.launchHubServer function.
         #
         
-        from iohub.client import quickStartHubServer
+        from iohub.client import launchHubServer
         from iohub.util import FullScreenWindow
         
         # End of common script header code for these examples.
@@ -1351,7 +1351,7 @@ def quickStartHubServer(**kwargs):
     with the ioHub DataStore disabled, using only default device configuration
     settings::        
 
-        io=quickStartHubServer()
+        io=launchHubServer()
         
         keyboard=io.devices.keyboard
         
@@ -1369,7 +1369,7 @@ def quickStartHubServer(**kwargs):
     set by psychopy_monitor_name (assuming it is a valid psychopy monitor configuration).
     The ioHub DataStore is still disabled.::       
 
-        io=quickStartHubServer(psychopy_monitor_name='testMonitor')
+        io=launchHubServer(psychopy_monitor_name='testMonitor')
         
         display=io.devices.display
         
@@ -1389,7 +1389,7 @@ def quickStartHubServer(**kwargs):
         sess_code='S_{0}'.format(long(time.mktime(time.localtime())))
         print 'Current Session Code will be: ', sess_code
         
-        io=quickStartHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code, session_code=sess_code)
+        io=launchHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code, session_code=sess_code)
         
         display=io.devices.display
         
@@ -1411,7 +1411,7 @@ def quickStartHubServer(**kwargs):
 
         psychopy_mon_name='testMonitor'
         exp_code='gap_endo_que'
-        io=quickStartHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code)
+        io=launchHubServer(psychopy_monitor_name=psychopy_mon_name, experiment_code=exp_code)
         
         display=io.devices.display
         
@@ -1429,7 +1429,7 @@ def quickStartHubServer(**kwargs):
         io.quit()  
         
         
-    The source code for all the above little examples is in the examples/manual/quickStartHubServer folder.
+    The source code for all the above little examples is in the examples/manual/launchHubServer folder.
     """
     experiment_code=kwargs.get('experiment_code',-1)
     if experiment_code != -1:

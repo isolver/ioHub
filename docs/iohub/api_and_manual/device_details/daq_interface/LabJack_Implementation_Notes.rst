@@ -17,7 +17,7 @@ Contents TBC
 Default LabJack AnalogInput Device Settings
 ###############################################
 
-.. literalinclude:: default_yaml_configs/default_labbjack_ai.yaml
+.. literalinclude:: ../default_yaml_configs/default_labjack_ai.yaml
     :language: yaml
 
 General Considerations

@@ -2,8 +2,10 @@
 Configuration Files and Dictionaries
 ######################################
 
-The ioHub Event Framework has been designed to be highly configurable, ensuring that is can be tailoried to the needs of a specific use case or experiment paradigm.
-This section outlines how ioHub configuration works, what mechanisms are in place allowing a user to update configuration settings, and how configuration settings
+The ioHub Event Framework has been designed to be highly configurable, ensuring 
+that is can be tailoried to the needs of a specific use case or experiment paradigm.
+This section outlines how ioHub configuration works, what mechanisms are in 
+place allowing a user to update configuration settings, and how configuration settings
 are validated.
  
 Configuration Files vs. Dictionaries

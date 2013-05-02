@@ -26,7 +26,7 @@ To Run:
 
 """
 from psychopy import visual, core
-from iohub.client import Computer, quickStartHubServer,EventConstants
+from iohub.client import Computer, launchHubServer,EventConstants
 from iohub.util import FullScreenWindow, OrderedDict
 
 # PLEASE REMEMBER , THE SCREEN ORIGIN IS ALWAYS IN THE CENTER OF THE SCREEN,
@@ -42,7 +42,7 @@ from iohub.util import FullScreenWindow, OrderedDict
 # experiment. Session codes must be unique for a given experiment code within an
 # ioDataStore hdf5 event file.
 import random
-io=quickStartHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
+io=launchHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
         
 # By default, keyboard, mouse, experiment, and display devices are created if you 
 # do not pass any config info to the ioHubConnection class above.        

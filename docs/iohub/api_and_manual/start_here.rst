@@ -13,14 +13,12 @@ are only of importance to a developer working on the ioHub
 source code, or creating a new Device class or Common Eye Tracker
 Implementation.
 
-**The ioHub Event Framework can be broken down into six areas based on the functionality provided.**
+**The ioHub Event Framework can be broken down into four areas based on the functionality provided.**
    
 .. toctree::
     :maxdepth: 2
     
-    * ioHub Connection and Control <iohub_connection>
+    * Getting Connected <getting_connected/getting_connected>
     * Devices and DeviceEvents <devices>
-    * Configuration Files and Dictionaries <configuration>
-    * The ioHub Time Base <timebase>
-    * ioDataStore <datastore/iodatastore_api>
+    * ioHub DataStore <datastore/iodatastore_api>
     * PsychoPy Coder *Extra's* API <utilities>

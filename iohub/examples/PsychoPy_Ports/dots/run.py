@@ -14,14 +14,14 @@ This script is a copy of the PsychoPy 'dots' demo with
 ioHub integration.
 """
 from psychopy import visual, core
-from iohub.client import Computer, quickStartHubServer
+from iohub.client import Computer, launchHubServer
 from iohub.util import FullScreenWindow
 DOT_COUNT=1000
 
 # Example where ioHub does not use yaml config files specified by user.
 
 import random
-io=quickStartHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
+io=launchHubServer(experiment_code="exp_code",session_code="s%d"%(random.randint(1,1000000)))
 
 # By default, keyboard, mouse, and display devices are created if you
 # do not pass any config info to the ioHubConnection class above.

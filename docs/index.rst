@@ -66,8 +66,8 @@ and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&from
 are available on Google Groups for support questions and development discussion topics respectively.
 
 
-Manual Contents
-################
+Documentation Contents
+########################
 
 .. toctree::
    :maxdepth: 4
@@ -75,7 +75,7 @@ Manual Contents
    Installation <iohub/installation>
    Supported Device Types for Your OS <iohub/supported_devices>
    Quick Start Guide <iohub/quickstart>
-   User Manual / API Overview <iohub/api/api_home>
+   User Manual / API Review <iohub/api_and_manual/start_here>
    Performance <iohub/performance>
    Credits <iohub/credits>
    License <iohub/license>

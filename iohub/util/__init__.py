@@ -102,6 +102,7 @@ class NumPyRingBuffer(object):
     
     The class supports simple slice type access to the buffer contents
     with the following restrictions / considerations:
+        
         #. Negative indexing is not supported.
         #. The user of the class must factor in the actual number of data elements that have been added to the buffer, until the buffer becomes full.
 

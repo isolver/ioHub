@@ -35,7 +35,7 @@ To Run:
 
 """
 from psychopy import core, visual, logging
-from iohub.client import Computer, quickStartHubServer,EventConstants
+from iohub.client import Computer, launchHubServer,EventConstants
 from iohub.util import FullScreenWindow
 
 # When you would like to use the psychopy logging module, you create a logFile
@@ -68,20 +68,20 @@ logging.LogFile('./lastRun.log',filemode='w',level=logging.DEBUG)
 # If psychopy_monitor_name is not specified or is None, a default psychopy monitor
 # config is used.
 #
-# All args to quickStartHubServer **must be** kwargs
+# All args to launchHubServer **must be** kwargs
 #
 # The function returns an instance of the ioHubClientConnection class (see docs
 # for full details), but it is basically your experiment interface to the ioHub
 # device and event framework.
 import random
-io=quickStartHubServer(experiment_code="exp_code",
+io=launchHubServer(experiment_code="exp_code",
                        session_code="s%d"%(random.randint(1,100000)))
         
 # By default, keyboard, mouse, experiment, and display devices are created 
-# by the quickStartHubServer fucntion. 
+# by the launchHubServer fucntion. 
 #
 # If you would like other devices added, specify each my adding a kwarg to the 
-# quickStartHubServer function, where the kwarg is the ioHub Device class name,
+# launchHubServer function, where the kwarg is the ioHub Device class name,
 # and the kwarg value is the device configuration dictionary for the device.
 #
 # Any device configuration properties not specified in the device configuration 
@@ -113,7 +113,7 @@ mouse.setSystemCursorVisibility(False)
 # bassed to it explicitedly. (This will be fixed in a future release). The default
 # coordinate type is 'pix', you can change this to one of the following supported
 # corrdinate types by specifying the type you want to use in the Display config dict
-# passed to quickStartHubServer.
+# passed to launchHubServer.
 coord_type=display.getCoordinateType()
 
 grating = visual.PatchStim(psychoWindow, mask="circle",units=coord_type, 
