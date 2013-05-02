@@ -474,8 +474,6 @@ class Display(Device):
             runtime_info['pixel_resolution']=mode.w,mode.h
                                                 
             runtime_info_list.append(runtime_info)
-
-            #ioHub.print2err("Display {0} runtime info: {1}".format(i,runtime_info))
             del d
             
         tempd.Destroy()
@@ -537,8 +535,6 @@ class Display(Device):
         def display2psychopyPix(x,y):
             x=x-l
             y=y-t
-            #x=math.fabs(x/w)*w
-            #y=math.fabs(y/h)*h           
             return (x-w/2),-y+h/2
 
         def psychopy2displayPix(cx,cy):
@@ -559,7 +555,6 @@ class Display(Device):
             
         elif coord_type=='cm':
             def pix2cmcoord(self, x,y,display_index=None):
-                #print2err('Display {0} bounds: {1}'.format(display_index,self.getBounds()))
                 if display_index == self.getIndex():      
                     ppx,ppy=display2psychopyPix(x,y)
                     return misc.pix2cm(ppx,self._psychopy_monitor),misc.pix2cm(ppy,self._psychopy_monitor)
@@ -576,7 +571,6 @@ class Display(Device):
             def pix2degcoord(self, x,y,display_index=None):
                 if display_index == self.getIndex():      
                     ppx,ppy=display2psychopyPix(x,y)
-#                    print2err('pix2degcoord: ',(x,y),( ppx,ppy),( misc.pix2deg(ppx,self._psychopy_monitor),misc.pix2deg(ppy,self._psychopy_monitor)))
                     return misc.pix2deg(ppx,self._psychopy_monitor),misc.pix2deg(ppy,self._psychopy_monitor)
                 return x,y
             self._pix2coord=pix2degcoord
@@ -589,7 +583,6 @@ class Display(Device):
             
         elif coord_type=='norm':
             def pix2ncoord(self, x,y,display_index=None):
-                #print2err('Display {0} bounds: {1}'.format(display_index,self.getBounds()))
                 if display_index == self.getIndex():      
                     ppx,ppy=display2psychopyPix(x,y)
                     return ppx/((r-l)/2.0),ppy/((b-t)/2.0)
@@ -601,150 +594,6 @@ class Display(Device):
                     return psychopy2displayPix(nx*((r-l)/2.0),ny*((b-t)/2.0)) 
                 return nx,ny
             self._coord2pix=ncoord2pix
-            
-#        if coord_type=='pix':
-            
-#        origin=self.getOrigin()
-#        if origin not in Display._supported_origin_types:   
-#            print2err(" *** Display device error: Unknown origin type: {0}".format(origin))
-#            return
-#        
-#        x1,y1,x2,y2=self.getBounds()     
-#        print2err('getBounds: ',self.getBounds(),  )
-#
-#        bounds_matrix=np.matrix([[x1,y1,1,0],[-y1,x1,0,1],[x2,y2,1,0],[-y2,x2,0,1]])                
-#        
-#        cx1=None
-#        cy1=None            
-#        cx2=None
-#        cy2=None
-#                                    
-##        if coord_type == 'org':
-##            cx1=x1
-##            cy1=y1            
-##            cx2=x2
-##            cy2=y2
-#        if coord_type == 'pix':
-#            if origin == 'center':
-#                cx1=-pixel_width/2.0
-#                cy1=pixel_height/2.0
-#                cx2=pixel_width/2.0
-#                cy2=-pixel_height/2.0
-##            elif origin == 'top_left':
-##                cx1=0
-##                cy1=0
-##                cx2=pixel_width
-##                cy2=pixel_height
-##            elif origin == 'bottom_left':
-##                cx1=0
-##                cy1=pixel_height
-##                cx2=pixel_width
-##                cy2=0
-#        elif coord_type in ['mm','cm','inch']:
-#            phys_to_coord_ratio=1.0                
-##            if coord_type == 'mm':
-##                if phys_unit_type == 'cm':
-##                    phys_to_coord_ratio=10.0
-##                elif phys_unit_type == 'inch':
-##                    phys_to_coord_ratio=25.4
-#            if coord_type == 'cm':
-#                if phys_unit_type == 'mm':
-#                    phys_to_coord_ratio=0.1
-#                elif phys_unit_type == 'inch':
-#                    phys_to_coord_ratio=2.54
-##            elif coord_type == 'inch':
-##                if phys_unit_type == 'mm':
-##                    phys_to_coord_ratio=0.0393701
-##                elif phys_unit_type == 'cm':
-##                    phys_to_coord_ratio=0.393701
-#                    
-#            if origin == 'center':
-#                phys_to_coord_ratio=2.0*phys_to_coord_ratio                
-#                cx1=-phys_width/phys_to_coord_ratio
-#                cy1=phys_height/phys_to_coord_ratio
-#                cx2=phys_width/phys_to_coord_ratio
-#                cy2=-phys_height/phys_to_coord_ratio
-##            elif origin == 'top_left':
-##                cx1=0.0
-##                cy1=0.0
-##                cx2=phys_width*phys_to_coord_ratio
-##                cy2=phys_height*phys_to_coord_ratio
-##            elif origin == 'bottom_left':
-##                cx1=0.0
-##                cy1=phys_height*phys_to_coord_ratio
-##                cx2=phys_width*phys_to_coord_ratio
-##                cy2=0.0
-#        elif coord_type == 'norm':
-#            if origin == 'center':
-#                cx1=-1.0
-#                cy1=1.0
-#                cx2=1.0
-#                cy2=-1.0
-##            elif origin == 'top_left':
-##                cx1=0.0
-##                cy1=0.0
-##                cx2=1.0
-##                cy2=1.0
-##            elif origin == 'bottom_left':
-##                cx1=0.0
-##                cy1=1.0
-##                cx2=1.0
-##                cy2=0.0
-##        elif coord_type == 'percent':
-##            if origin == 'center':
-##                cx1=-50.0
-##                cy1=50.0
-##                cx2=50.0
-##                cy2=-50.0
-##            elif origin == 'top_left':
-##                cx1=0.0
-##                cy1=0.0
-##                cx2=100.0
-##                cy2=100.0
-##            elif origin == 'bottom_left':
-##                cx1=0.0
-##                cy1=100.0
-##                cx2=100.0
-##                cy2=0.0
-#        elif coord_type == 'deg':
-#            if origin == 'center':
-#                cx1=-degree_width/2.0
-#                cy1=degree_height/2.0
-#                cx2=degree_width/2.0
-#                cy2=-degree_height/2.0
-##            elif origin == 'top_left':
-##                cx1=0.0
-##                cy1=0.0
-##                cx2=degree_width
-##                cy2=degree_height
-##            elif origin == 'bottom_left':
-##                cx1=0.0
-##                cy1=degree_height
-##                cx2=degree_width
-##                cy2=0.0
-#        
-#        if cx1 is not None and cy1 is not None  and cx2 is not None and cy2 is not None :                
-#            coord_matrix=np.matrix( [[cx1],[cy1],[cx2],[cy2]] )               
-#            abcd = np.linalg.solve(bounds_matrix, coord_matrix)
-#            a,b,c,d=np.array(abcd)[:,0]
-#            #print2err('abcd: {0}\n a={1}, b={2} , c={3}, d={4}'.format(abcd,a,b,c,d))
-#        
-#        
-#            def pix2coord(self, x,y,display_index=None):
-#                #print2err('Display {0} bounds: {1}'.format(display_index,self.getBounds()))
-#                if display_index == self.getIndex(): 
-#                    return a*x+b*y+c, b*x-a*y+d
-#                return x,y
-#                
-#            self._pix2coord=pix2coord
-#        
-#            def coord2pix(self,cx,cy,display_index=None):
-#                if display_index == self.getIndex():
-#                    aabb=(a**2+b**2)
-#                    return (a*cx+b*cy-b*d-a*c)/aabb, (b*cx-a*cy-b*c+a*d)/aabb                    
-#                return cx,cy
-#        
-#            self._coord2pix=coord2pix
                     
     def _createPsychopyCalibrationFile(self):
         display_config=self.getConfiguration()
@@ -760,14 +609,7 @@ class Display(Device):
 
         psychoMonitor=None
         
-        if override_using_psycho_settings is True and psychopy_monitor_name in existing_monitors: 
-            print2err('**** Updating ioHub Display settings based on PsychoPy Monitor config...')
-
-            
-#            print2err('psychopy_monitor_name: ',psychopy_monitor_name)
-#            print2err('existing_monitors: ',existing_monitors)
-#            print2err(psychopy_monitor_name,' monitor exists: ',psychopy_monitor_name in existing_monitors)
-            
+        if override_using_psycho_settings is True and psychopy_monitor_name in existing_monitors:             
             psychoMonitor = monitors.Monitor(psychopy_monitor_name)
 
             px,py=self.getPixelResolution()
@@ -780,16 +622,7 @@ class Display(Device):
 
             display_config['default_eye_distance']['surface_center']=psychoMonitor.getDistance()*10.0
             display_config['default_eye_distance']['unit_type']='mm'
-            
-#            print2err('self.getDefaultEyeDistance(): ',self.getDefaultEyeDistance())
-#            print2err('psychoMonitor.getDistance()*10.0: ',psychoMonitor.getDistance()*10.0)
-#            print2err('mwidth: ' ,mwidth)
-#            print2err('aspect_ratio: ', aspect_ratio)
-#            print2err('px,py: ', (px,py))
-#            print2err('mheight: ', mheight)
-#            print2err('getPhysicalDimensions: ', self.getPhysicalDimensions())
         else:
-            print2err('**** Setting / Creating PsychoPy Monitor Config based on ioHub Display settings...')
 
             stim_area=display_config.get('physical_dimensions')
             dwidth=stim_area['width']
@@ -812,111 +645,9 @@ class Display(Device):
             psychoMonitor.saveMon()
 
         self._psychopy_monitor=psychoMonitor
-#        print2err("psychopy dist: ",psychoMonitor.getDistance())
-#        print2err("psychopy getSizePix: ",psychoMonitor.getSizePix())
-#        print2err("psychopy getWidth: ",psychoMonitor.getWidth())
-#        print2err("misc.deg2pix(1,psychoMonitor): ", misc.deg2pix(1,psychoMonitor))
-#        print2err("misc.pix2deg(1920,psychoMonitor): ",misc.pix2deg(1920,psychoMonitor))
-#        print2err("misc.pix2deg(1080,psychoMonitor): ",misc.pix2deg(1080,psychoMonitor))
 
         return True        
 
     def _close(self):
         Device._close(self) 
             
-    ################################################
-    #
-    # distToPixel
-    #
-    # Convert between distance coordinates and pixel coordinates.
-    #
-    # Distance coordinates are 2D Cartesian coordinates, measured from an origin at the
-    # center pixel,  and are real distance units (inches, centimeters, etc.) along horizontal and
-    # vertical screen axes.
-    #
-#    @staticmethod
-#    def distToPixel(hpix_per_dist_unit, vpix_perdist_unit, pixHres, pixVres, distH, distV):
-#        r = ucs.distToPixel(hpix_per_dist_unit,vpix_perdist_unit,pixHres, pixVres,distH,distV)
-#        return r
-
-#    @staticmethod
-#    def pixelToDist(hpix_per_dist_unit,vpix_perdist_unit,pixHres, pixVres, pixH, pixV):
-#        r = ucs.pixelToDist(hpix_per_dist_unit,vpix_perdist_unit,pixHres, pixVres, pixH, pixV)
-#        return r
-
-    #
-    # All of following assume a nominal eye point 'eye2display' distance units from display
-    # with line-of-gaze normal to the display at the display center.  Angle variable are
-    # assumed to have units of degrees.
-    #
-    # Since the Python math lib trig functions work with radians,
-    # a radian to angle conversion factor (deg/rad = 57.2958) is included to give angle
-    # variables 'degree' units.
-    #
-
-    #
-    # Convert between distance coordinates (distH, distV) and 'normalized Cartesian
-    # coordinates' (ndH, ndV).
-    #
-    # 'Normalized Cartesian coordinates' are Cartesian distance coordinates, normalized by
-    # by the distance from the nominal eye point to the display.  For very small distances
-    # from the origin, these values coorespond to visual angle from the origin along the
-    # horizontal and vertical display axes. A factor of 57.2958 is used so that the values
-    # correspond to degrees rather than radians.
-    #
-    
-#    @staticmethod
-#    def convertDistToNd(eye2display,distH,distV):
-#        return ucs.convertDistToNd(eye2display,distH,distV)
-        
-#    @staticmethod
-#    def convertNdToDist(eye2display, ndH, ndV):
-#        return ucs.convertNdToDist(eye2display, ndH, ndV)
-
-    #
-    # Convert between distance coordinates (distH, distV) and
-    # 'Cartesian Angles' (caH, caV).
-    # 'Cartesian Angles' are visual angles (from nominal eye point) along
-    # horizontal and vertical display axes.  In other words, the horizontal coordinate is the
-    # visual angle between the origin and the intersection of the Cartesian
-    # coordinate line with the horizontal axes.
-    #
-#    @staticmethod
-#    def distToCa(eye2display, distH, distV):
-#        return ucs.distToCa(eye2display, distH, distV)
-    
-#    @staticmethod
-#    def caToDist(eye2display, caH, caV):
-#        return ucs.caToDist(eye2display, caH, caV)
-
-        
-    #
-    # Convert between distance coordinates (distH, distV) and Fick Coordinates (as,el)
-    #
-#    @staticmethod
-#    def distToFick(eye2display,distH,distV):
-#        return ucs.distToFick(eye2display,distH,distV)
-
-#    @staticmethod
-#    def fickToDist(eye2display, az, el):
-#        return ucs.fickToDist(eye2display, az, el)
-
-    #
-    # Convert between distance coordinates (distH, distV) and 'symmetric angle'
-    # coordinates (saH, saV).
-    # 'Symmetric angles' are visual angles between a point on the display and the central
-    # axes lines, measured along lines parallel to the display axes.  The vertical coordinate is
-    # same as the Fick elevation angle.  The horizontal coordinate is measured in a
-    # symmetrical fashion and is not the same as the Fick azimuth angle.
-    #
-#    @staticmethod
-#    def distToSa(eye2display, distH, distV):
-#        return ucs.distToSa(eye2display,distH,distV)
-    
-#    @staticmethod
-#    def saToDist(self,eye2display, saH, saV):
-#        return ucs.saToDist(eye2display, saH, saV)
-
-
-            
-######### Display Events ###########
