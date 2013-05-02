@@ -625,9 +625,7 @@ class Display(Device):
 
         psychoMonitor=None
         
-        if override_using_psycho_settings is True and psychopy_monitor_name in existing_monitors: 
-            print2err('**** Updating ioHub Display settings based on PsychoPy Monitor config...')
-            
+        if override_using_psycho_settings is True and psychopy_monitor_name in existing_monitors:             
             psychoMonitor = monitors.Monitor(psychopy_monitor_name)
 
             px,py=self.getPixelResolution()
@@ -642,8 +640,6 @@ class Display(Device):
             display_config['default_eye_distance']['unit_type']='mm'
             
         else:
-            print2err('**** Setting / Creating PsychoPy Monitor Config based on ioHub Display settings...')
-
             stim_area=display_config.get('physical_dimensions')
             dwidth=stim_area['width']
             
@@ -662,7 +658,7 @@ class Display(Device):
             psychoMonitor=monitors.Monitor(psychopy_monitor_name,
                                        width=dwidth, distance=ddist, gamma=1.0)
             
-            psychoMonitor.setSizePix(self.getPixelResolution())                                   
+            psychoMonitor.setSizePix(list(self.getPixelResolution()))                                   
             psychoMonitor.saveMon()
 
         self._psychopy_monitor=psychoMonitor
