@@ -16,6 +16,7 @@ import time
 import subprocess
 from collections import deque
 import json
+import signal
 
 try:
     from yaml import load
@@ -35,7 +36,7 @@ from . import IO_HUB_DIRECTORY,isIterable
 from .devices import Computer, DeviceEvent,import_device
 from .devices.experiment import MessageEvent,LogEvent
 from .constants import DeviceConstants,EventConstants
-from .util import MessageDialog, print2err,printExceptionDetailsToStdErr,ioHubError,win32MessagePump, ioHubConnectionException, ioHubServerError
+from .util import updateDict,MessageDialog, print2err,printExceptionDetailsToStdErr,ioHubError,win32MessagePump, ioHubConnectionException, ioHubServerError
 from .net import UDPClientConnection
 
 currentSec= Computer.currentSec
@@ -808,6 +809,9 @@ class ioHubConnection(object):
         
         rootScriptPath = os.path.dirname(sys.argv[0])
 
+        hub_defaults_config=load(file(os.path.join(IO_HUB_DIRECTORY,'default_config.yaml'),'r'), Loader=Loader)
+
+
         if ioHubConfigAbsPath is None and ioHubConfig is None:
             ioHubConfig=dict(monitor_devices=[dict(Keyboard={}),dict(Display={}),dict(Mouse={})])
         elif ioHubConfig is not None and ioHubConfigAbsPath is None:
@@ -826,15 +830,14 @@ class ioHubConnection(object):
                     
         elif ioHubConfigAbsPath  is not None and ioHubConfig is None:
             ioHubConfig=load(file(ioHubConfigAbsPath,u'r'), Loader=Loader)
-            self.udp_client=UDPClientConnection(coder='msgpack')
         else:        
             print2err("ERROR: Both a ioHubConfig dict object AND a path to an ioHubConfig file can not be provided.")
             sys.exit(1)
-        
+
+        if ioHubConfig:
+            updateDict(ioHubConfig,hub_defaults_config)
+
         if ioHubConfig and ioHubConfigAbsPath is None:
-                if self.udp_client is None:                
-                    self.udp_client=UDPClientConnection(coder='msgpack')
-                
                 if isinstance(ioHubConfig.get('monitor_devices'),dict):
                     #short hand device spec is being used. Convert dict of 
                     #devices in a list of device dicts.
@@ -847,6 +850,9 @@ class ioHubConnection(object):
                 tfile.write(json.dumps(ioHubConfig))
                 ioHubConfigAbsPath=os.path.abspath(tfile.name)               
                 tfile.close()
+
+            
+        self.udp_client=UDPClientConnection(remote_port=ioHubConfig.get('udp_port',9000))
 
         run_script=os.path.join(IO_HUB_DIRECTORY,'server.py')
         subprocessArgList=[sys.executable,run_script,"%.6f"%Computer.globalClock.getLastResetTime(),rootScriptPath,ioHubConfigAbsPath]
@@ -870,11 +876,14 @@ class ioHubConnection(object):
                         pass
                 else:
                     try:
-                        os.kill(iohub_pid) #code
-                    except Exception:
-                        pass
+                        os.kill(iohub_pid, signal.SIGKILL) #code
+                    except OSError:  # no such process
+                        pass  # not sure if this is *always* the right thing to do
             except:
                 printExceptionDetailsToStdErr()
+
+        if sys.platform == 'darwin':
+            self._osxKillAndFreePort()
 
         # start subprocess, get pid, and get psutil process object for affinity and process priority setting
         self._server_process = subprocess.Popen(subprocessArgList,stdout=subprocess.PIPE)
@@ -1261,8 +1270,20 @@ class ioHubConnection(object):
                 self.udp_client.sendTo(('STOP_IOHUB_SERVER',))
                 self.udp_client.close()
                 if Computer.ioHubServerProcess:
-                    r=Computer.ioHubServerProcess.wait(timeout=5)
-                    print 'ioHub Server Process Completed With Code: ',r
+                    if sys.platform != 'darwin': 
+                        r=Computer.ioHubServerProcess.wait(timeout=5)
+                        print 'ioHub Server Process Completed With Code: ',r
+                    else:
+                        t=Computer.getTime()
+                        while Computer.getTime()-t<5.0:
+                            Computer.ioHubServerProcess.poll()
+                            status=Computer.ioHubServerProcess.returncode
+                            if status != None:
+                                print 'ioHub Server Process Completed With Code: ',status
+                                return True
+                            time.sleep(0.1)
+                        print "Warning: TimeoutExpired, Killing ioHub Server process."
+                        self._osxKillAndFreePort()
             except TimeoutError:
                 print "Warning: TimeoutExpired, Killing ioHub Server process."
                 Computer.ioHubServerProcess.kill()
@@ -1291,6 +1312,15 @@ class ioHubConnection(object):
         else:
             raise ioHubConnectionException('Response from ioHub should always be iterable and have a length > 0')
 
+    def _osxKillAndFreePort(self):
+        p = subprocess.Popen(['lsof', '-i:9000', '-P'], stdout=subprocess.PIPE)
+        lines = p.communicate()[0]
+        for line in lines.splitlines():
+            if line.startswith('Python'):
+                PID, userID = line.split()[1:3]
+                # could verify same userID as current user, probably not needed
+                os.kill(int(PID), signal.SIGKILL)        
+                print 'Called  os.kill(int(PID), signal.SIGKILL): ', PID, userID 
     def __del__(self):
         try:
             self._shutDownServer()

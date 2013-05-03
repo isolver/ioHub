@@ -34,7 +34,6 @@ currentSec= Computer.currentSec
 import json
 import msgpack
     
-#noinspection PyBroadException,PyBroadException
 class udpServer(DatagramServer):
     def __init__(self,ioHubServer,address,coder='msgpack'):
         self.iohub=ioHubServer
@@ -432,14 +431,15 @@ class ioServer(object):
         self.filterLookupByOutput={}
         self.filterLookupByName={}  
         self._hookDevice=None
+
+        import iohub        
         ioServer.eventBuffer=deque(maxlen=config.get('global_event_buffer',2048))
 
         self._running=True
         
         # start UDP service
-        self.udpService=udpServer(self,':%d'%config.get('udpPort',9000))
+        self.udpService=udpServer(self,':%d'%config.get('udp_port',9000))
 
-        import iohub
         # read temp paths file
         iohub.data_paths=None
         try:
@@ -885,8 +885,11 @@ class ioServer(object):
 
 # ------------------ Main / Quickstart testing -------------------------
 
+
 def run(rootScriptPathDir,configFilePath):
     import tempfile
+    from iohub import IO_HUB_DIRECTORY
+    from iohub.util import updateDict
     tdir=tempfile.gettempdir()
     cdir,cfile=os.path.split(configFilePath)
 
@@ -897,6 +900,12 @@ def run(rootScriptPathDir,configFilePath):
         os.remove(configFilePath)
     else:
         ioHubConfig=load(file(configFilePath,'r'), Loader=Loader)
+
+ 
+
+    hub_defaults_config=load(file(os.path.join(IO_HUB_DIRECTORY,'default_config.yaml'),'r'), Loader=Loader)
+    updateDict(ioHubConfig,hub_defaults_config)
+    print2err('SERVER CONFIG ==================\n',ioHubConfig,'\n============================ ', ioHubConfig.get('udp_port'))
 
 
     try:
