@@ -870,9 +870,20 @@ class Device(ioObject):
     def getConfiguration(self):
         """
         Retrieve the configuration settings information used to create the device instance. 
+        This will be a combination of the default settings for the device 
+        (found in iohub.devices.<device_name>.default_,defice_name>.yaml, plus any
+        device settings specified by the experiment author within an 
+        iohub_config.yaml file if the ioHubExperimentRuntime is being used
+        to define the experiment logic, or if using the iohub.launchHubProcess()
+        function in the experriment script, as device settings in dictionary form.
         
-        :returns: The configuration settings used when the device was originally created by the ioHub Process. 
-        :rtype: dict
+        Changing any values in the returned dictionary has no effect on the device state.
+        
+        Args:
+            None
+            
+        Returns:
+            (dict): The dictionary of the device configuration settings used to create the device.
         """
         return self._configuration
 
@@ -881,17 +892,18 @@ class Device(ioObject):
         Retrieve any DeviceEvents that have occurred since the last call to the
         device's getEvents() or clearEvents() methods.
 
-        Note that calling the global ioHub Process level getEvents() or clearEvents() methods
-        via the ioHubClientConnection class does *not* affect device level event buffers.
+        Note that calling getEvents() at a device level does not change the Global Event Buffer's
+        contents. 
 
-        :param eventTypeID: Specifies a specific event type to return from the device. Events that have occurred but do not match the event ID specified are ignored. Event type ID's can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.
-        :type eventTypeID: int 
-        :param clearEvents: If True, clear the device event buffer before returning any events. If False, events are not removed from the device event buffer. Default is True.
-        :type clearEvents: bool 
-        :param asType: The object type to return events as. Valid values are 'namedtuple' (default), 'dict', 'list', or 'object'.
-        :type asType: str 
-        :returns:  New events that the ioHub has received since the last getEvents() or clearEvents() call to the device. Events are ordered by the ioHub time for each event. The event object type is determined by the asType parameter to the method; by default a namedtuple object is returned for each event. 
-        :rtype: list of event objects
+        Args:
+            eventTypeID (int): If specified, provides the ioHub DeviceEvent ID for which events should be returned for.  Events that have occurred but do not match the event ID specified are ignored. Event type ID's can be accessed via the EventConstants class; all available event types are class atttributes of EventConstants.
+            
+            clearEvents (int): Can be used to indicate if the events being returned should also be removed from the device event buffer. True (the defualt) indicates to remove events being returned. False results in events being left in the device event buffer. 
+        
+            asType (str): Optional kwarg giving the object type to return events as. Valid values are 'namedtuple' (the default), 'dict', 'list', or 'object'.
+
+        Returns:   
+            (list): New events that the ioHub has received since the last getEvents() or clearEvents() call to the device. Events are ordered by the ioHub time of each event, older event at index 0. The event object type is determined by the asType parameter passed to the method. By default a namedtuple object is returned for each event. 
         """
         if len(args)==1:
             eventTypeID=args[0]
@@ -920,33 +932,44 @@ class Device(ioObject):
 
     def clearEvents(self):
         """
-        Clears any DeviceEvents that have occurred since the last call to the device's getEvents()
-        with clearEvents = True, or the device's clearEvents() methods.
+        Clears any DeviceEvents that have occurred since the last call to the device's getEvents(),
+        or clearEvents() methods.
             
-        Note that calling the global ioHub Process level getEvents() or clearEvents() methods
-        via the ioHubClientConnection class does *not* effect device level event buffers.
+        Note that calling clearEvents() atthe device level only clears the 
+        given device's event buffer. The ioHub Process's Global Event Buffer is unchanged.
+        
+        Args: 
+            None
+        
+        Returns:
+            None
         """
         self._iohub_event_buffer.clear()
 
     def enableEventReporting(self,enabled=True):
         """
-        Sets whether a Device should report events and provide them to the PsychoPy Process
-        and / or save them to the ioHub DataStore.
+        Specifies if the device should be reporting events to the ioHub Process
+        (enabled=True) or whether the device should stop reporting events to the
+        ioHub Process (enabled=False).
+        
             
-        :param enabled:  True (default) == monitor and report device events as they occur. False == Do not report any events for the device until reporting is enabled. 
-        :type enabled: bool 
-        :returns: Current reporting state. 
-        :rtype: bool
+        Args:
+            enabled (bool):  True (default) == Start to report device events to the ioHub Process. False == Stop Reporting Events to the ioHub Process. Most Device types automatically start sending events to the ioHUb Process, however some devices like the EyeTracker and AnlogInput device's do not. The setting to control this behavour is 'auto_report_events'
+        
+        Returns:
+            bool: The current reporting state. 
         """
         self._is_reporting_events=enabled
         return self._is_reporting_events
 
     def isReportingEvents(self):
         """
-        Returns whether a Device is currently reporting events or whether the device is ignoring any events that occur.
-
-        :returns: Current reporting state. 
-        :rtype: bool
+        Returns whether a Device is currently reporting events to the ioHub Process.
+        
+        Args: None
+        
+        Returns:
+            (bool): Current reporting state.
         """
         return self._is_reporting_events
 
@@ -1151,8 +1174,8 @@ class DeviceEvent(ioObject):
     The DeviceEvent class is the base class for all ioHub DeviceEvent types.
 
     Any ioHub DeviceEvent class (i.e MouseMoveEvent, MouseScrollEvent, MouseButtonPressEvent,
-    KeyboardPressEvent, KeyboardReleaseEvent, etc.) also includes the methods and attributes of
-    the DeviceEvent class.
+    KeyboardPressEvent, KeyboardReleaseEvent, etc.) also has access to the 
+    methods and attributes of the DeviceEvent class.
     """
     EVENT_EXPERIMENT_ID_INDEX=0
     EVENT_SESSION_ID_INDEX=1
@@ -1297,17 +1320,17 @@ class DeviceEvent(ioObject):
         #: regardless of device type. Time is calculated differently depending
         #: on the device and perhaps event type.
         #: Time is what should be used when comparing times of events across
-        #: different devices. Time is in sec.msec-usec.
+        #: different devices or with times given py psychopy.core.getTime(). Time is in sec.msec-usec.
         self.time=None
 
         #: This property attempts to give a sense of the amount to which
         #: the event time may be off relative to the true time the event
-        #: occurred. confidence_interval is calculated differently depending
+        #: may have become available to te ioHub Process. 
+        #: confidence_interval is calculated differently depending
         #: on the device and perhaps event types. In general though, the
-        #: smaller the confidence_interval, the more likely it is that the
-        #: calculated time of the event is correct. For devices where
-        #: a realistic confidence_interval can not be calculated,
-        #: for example if the event device delay is unknown, then a value
+        #: smaller the confidence_interval, the more accurate the
+        #: calculated time of the event will be. For devices where
+        #: a meaningful confidence_interval can not be calculated, a value
         #: of 0.0 is used. Valid confidence_interval values are
         #: in sec.msec-usec and will range from 0.000001 sec.msec-usec
         #: and higher.
@@ -1317,8 +1340,11 @@ class DeviceEvent(ioObject):
         #: real world event occurred to when the ioHub received the event for
         #: processing. This is often called the real-time end-to-end delay
         #: of an event. If the delay for an event can not be reasonably estimated
-        #: or is not known, a delay of 0.0 is set. Delays are in sec.msec-usec
+        #: or is not known at all, a delay of 0.0 is set. Delays are in sec.msec-usec
         #: and valid values will range from 0.000001 sec.msec-usec and higher.
+        #: the delay of an event is suptracted from the initially determined ioHub
+        #: time for the eventso that the event.time attribute reports the actual
+        #: event time as accurately as possible.
         self.delay=None
 
         self.filter_id=None

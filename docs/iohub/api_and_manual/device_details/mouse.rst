@@ -12,7 +12,7 @@ Mouse Device Configuration Settings
 ########################################
 
 
-.. literalinclude:: default_yaml_configs/default_keyboard.yaml
+.. literalinclude:: default_yaml_configs/default_mouse.yaml
     :language: yaml
 
 
