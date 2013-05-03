@@ -19,7 +19,7 @@ from psychopy import misc
 
 from .. import Device,Computer
 from ...constants import DeviceConstants
-from ...util import ioHubDialog, print2err,printExceptionDetailsToStdErr, createErrorResult, win32MessagePump
+from ...util import ioHubDialog, print2err,printExceptionDetailsToStdErr, createErrorResult
 
 currentSec=Computer.currentSec
             
