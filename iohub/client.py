@@ -732,17 +732,10 @@ class ioHubConnection(object):
 
     def addDeviceToMonitor(self,device_class, device_config={}):
         """
-<<<<<<< HEAD
-        Adds a device to the ioHub Server Process for event monitoring after the
-        ioHub Server has been started. Normally all devices should be specified
-        to the function or claslaunchHubProcesss that is having the ioHubConnection class instance
-        created, and therefore the ioHUb Server Process started. This is due to the
-=======
         Adds a device to the ioHub Process for event monitoring after the
         ioHub Process has been started. Normally all devices should be specified
         to the function or class that is having the ioHubConnection class instance
         created, and therefore the ioHub Process started. This is due to the
->>>>>>> new_docs
         fact that 'adding' a device to be monitored can take several, to tens, 
         or even a couple hundred msec to perform on the ioHub server (depending on the
         device type). When this is occurring, events from existing devices can not
@@ -1309,13 +1302,8 @@ class ioHubConnection(object):
 
 def launchHubServer(**kwargs):
     """   
-<<<<<<< HEAD
     The launchHubServer function can be used to start the ioHub Process
-    without the need to create an experiment or iohub configuration file. 
-=======
-    The quickStartHubServer function can be used to start the ioHub Process
     without the need to create experiment or iohub (.yaml) configuration files. 
->>>>>>> new_docs
     
     All values passed to the launchHubServer method must be kwarg inputs.
     
