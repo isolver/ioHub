@@ -2,13 +2,13 @@
 ioHub API Manual and Specification
 ####################################
 
-This section of the documentation provides the information on
-how to use the ioHub Event Framework and the ioHub
-API details for parts of the ioHub Framework that an
-end user of the ioHub may want to know about.
+We believe ioHub users will benefit from big picture understanding of the ioHub Event Monitoring Framework
+along with descriptions of implemented functions and classes. The documentation within the API Manual describes how to 
+maximze full functionality of the ioHub Event Monitoring Framework, from an overview of
+ioHub at the process level, to the ioHub Event Model, to data storage and utility
+classes, and finally to full integration of ioHub with PsychoPy. 
 
-
-We do not cover *back-end* related API's that
+This User Manual does not cover *back-end* related API's that
 are only of importance to a developer working on the ioHub 
 source code, or creating a new Device class or Common Eye Tracker
 Implementation.
