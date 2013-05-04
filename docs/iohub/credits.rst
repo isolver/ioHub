@@ -27,7 +27,7 @@ Without the hard work of these project teams, this project would not exist eithe
 Common Eye Tracker Interface Contributions
 ===========================================
 
-The ioHub project is being developed for use by the `COGAIN Technical Committee on Eye Data Quality <http://www.cogain.org/info/eye-data-quality/>`_ on a volenteer basis by iSolver Solutions.
+The ioHub project is being developed for use by the `COGAIN Technical Committee on Eye Data Quality <http://www.cogain.org/info/eye-data-quality/>`_ on a volunteer basis by iSolver Solutions.
 I would like to acknowledge all the hard work that the volunteers of the committee membership have been contributing toward the COGAIN Technical committees' overall goals.
 
 The hope is that the package will also serve as a useful open source and free resource for the psychology and eye tracking research community in general.

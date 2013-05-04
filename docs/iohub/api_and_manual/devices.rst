@@ -2,23 +2,23 @@
 ioHub Device and Device Event API
 ###################################
 
-The device and device event portion of the ioHub API contains the classes that represent
-the devices in use by the PsychoPy script and the associated events that each device type
-can generate.
+Devices and DeviceEvents refer to the classes associated with monitoring both physical and
+virtual devices, and bundling these data for use by the ioHub Process for storage in the 
+ioDataStore and/or by the PsychoPy process for event handling in the experiment script.
 
 The device and device event API has been designed to try and provide a consistent
-device and event interface across different device and event types, except where
-differences are required to properly represent the device or event of course.
+interface across different device and event types, only breaking from this common
+framework when required.
 Two abstract classes (i.e. you never get a instance of one of the classes directly)
-form the base for all Device classes and DeviceEvent classes that are used within
-the iohub.
+construct the basis for all Device and DeviceEvent classes used within
+the ioHub.
 
-In general, attributes of a class are named using _ format (i.e. eventclass.device_time),
+In general, attributes of a class are named using '_' format (e.g., eventclass.device_time),
 while method names of a class use camel case format (i.e. deviceclass.getEvents() ).
-I find this makes it very easy to distinguish attributes from methods or functions when scanning
+I find these notations make it very easy to distinguish attributes from methods or functions when scanning
 a code completion list for a class in your IDE of choice for example.
 
-If device events are being saved to the ioHub DataStore, the hdf5 table for a given event class
+If device events are being saved to the ioDataStore, the hdf5 table for a given event class
 contains columns with the same names as the attributes of the event object that is
 stored in the table. This makes it somewhat easier to remember both event object
 attributes and event data storage tables formats.
@@ -35,8 +35,8 @@ attributes and event data storage tables formats.
     has an identical public interface that is used by the PsychoPy script.
     Therefore, providing documentation for the ioHub Process Devices and DeviceEvents
     is also providing the API specification that can be used by the PsychoPy Process
-    ( and it is much easier to document Classes that exist for a period longer than
-    just when the psychoPy process runs.) :)
+    ( and it is much easier to document classes that exist for a period longer than
+    just when the PsychoPy process runs.) :)
 
 The Root Device and DeviceEvent Classes
 #########################################
