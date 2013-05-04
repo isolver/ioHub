@@ -3,15 +3,12 @@ ioHub Configuration
 ####################
 
 The ioHub Event Framework has been designed to be highly configurable, ensuring 
-<<<<<<< HEAD
 that is can be tailored to the needs of a specific use case or experiment paradigm.
+
 This section outlines how ioHub configuration works, what mechanisms are in 
 place allowing a user to update configuration settings, and how configuration settings
 are validated. There are two ways configuration settings can be specified, 
 using configuration files for using configuration dictionaries within the experiment script.
-=======
-that is can be tailoried to the needs of a specific use case or experiment paradigm.
->>>>>>> almost have config dec page done
 
 ioHub tries to seperate experiment logic ( the python code that defines how your experimental
 paradigm is implemented, how stimuli are read and presented, etc. ) from experiment configuration
