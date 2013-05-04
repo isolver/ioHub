@@ -3,7 +3,7 @@ ioHub Configuration
 ####################
 
 The ioHub Event Framework has been designed to be highly configurable, ensuring 
-that is can be tailoried to the needs of a specific use case or experiment paradigm.
+that is can be tailored to the needs of a specific use case or experiment paradigm.
 This section outlines how ioHub configuration works, what mechanisms are in 
 place allowing a user to update configuration settings, and how configuration settings
 are validated. There are two ways configuration settings can be specified, 
@@ -17,9 +17,9 @@ the PyYAML Package, from here on simply refered to as YAML.  This syntax was
 choosen for the following reasons:
 
 * YAML is very readable.
-* YAML syntax is similar to Python Syntax, in that the indentation of the lines defines the scope inwhich the statement belongs too.
+* YAML syntax is similar to Python syntax, in that raw indentation determines relevant scope.
 * Convertion from a YAML file to a Python Object struct is a simple mapping to Python dictionaries and lists and values are automatically converted to the appropriate built-in Python type.
-* Nested, or heirchial, representations can be specified.
+* Nested, or hierarchical, representations can be specified.
 * A YAML definition can be converted to JSON format for wire level transmission, and the converted back to YAML format. JSON is a subset of the YAML specification (not because JSON came after YAML, but because YAML was designed this way).
 * XML could have also been used, however the author's experience is that for configuration files, XML is overly verbose, less readable by humans, and just overkill in general.
 
