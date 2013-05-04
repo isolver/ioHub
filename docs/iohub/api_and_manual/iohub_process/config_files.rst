@@ -222,9 +222,9 @@ An example of a experiment_config.yaml file::
     # Here are a few pointers to keep in mind about the confiuration file format
     # that will help ensure they are created with proper YAML syntax:
     # 
-    # - Think of the whole file as representing a python dictionary. Infact when the
+    # * Think of the whole file as representing a python dictionary. Infact when the
     #   the file is read by PyYAML, it results in the data from the file being returned as a Python dictionary.
-    # - If you have ever created a Python dictionary using the form
+    # * If you have ever created a Python dictionary using the form
     #
     #   mydict={ 
     #           'key1': 'value1',
@@ -236,16 +236,15 @@ An example of a experiment_config.yaml file::
     #   + The file does not begin with a '{' or end with a '}'.
     #   + key: value pairs are seperation by lines, not by ','s.
     #    
-    # - The indendation level of the line in the file indicates the scope of the key:value pair, 
+    # * The indendation level of the line in the file indicates the scope of the key:value pair, 
     #     ( scope meaning the dictionary or list level that the key: value pair is associated with) 
     #    Again, should be a familar idea. ;)
-    #
-    # - A key can have a dictionary as it;s value, by specifying the key name and
+    # * A key can have a dictionary as it;s value, by specifying the key name and
     #   then providing the key's dictionary value starting on the nexxt line, indented by a soft tab.
-    # - Keys should only contain a-z,A-Z,and underscores. (This is an ioHub spec. more than a YAML one)
-    # - Keys never need to have quotes around them, and never should.
-    # - String values also do not need quotes around them.
-    # - Other system data types used in values can usually just be types as if you were entering the value
+    # * Keys should only contain a-z,A-Z,and underscores. (This is an ioHub spec. more than a YAML one)
+    # * Keys never need to have quotes around them, and never should.
+    # * String values also do not need quotes around them.
+    # * Other system data types used in values can usually just be types as if you were entering the value
     #   in a python script. For example:
     #
     #       dict_of_mixed_type_values:     # So a dict value is created by having each key: value pair for the key indented one soft tab.
@@ -370,15 +369,6 @@ An example of a experiment_config.yaml file::
         #
         process_affinity: []            # Default
 
-<<<<<<< HEAD
-* YAML is very readable.
-* YAML syntax is similar to Python syntax, in that raw indentation determines relevant scope.
-* Convertion from a YAML file to a Python Object struct is a simple mapping to Python dictionaries and lists and values are automatically converted to the appropriate built-in Python type.
-* Nested, or hierarchical, representations can be specified.
-* A YAML definition can be converted to JSON format for wire level transmission, and the converted back to YAML format. JSON is a subset of the YAML specification (not because JSON came after YAML, but because YAML was designed this way).
-* XML could have also been used, however the author's experience is that for configuration files, XML is overly verbose, less readable by humans, and just overkill in general.
-=======
->>>>>>> almost have config dec page done
 
         # config: The name of the ioHub config file, specifying device 
         #       settings, etc
@@ -387,10 +377,11 @@ An example of a experiment_config.yaml file::
 
     ####### End of experiment_config.yaml example ########
 
+
 An example of an iohub_configuration.yaml file::
 
-
     # To Be Completed
+
 
 In Python Dictionary Format
 ---------------------------
@@ -400,6 +391,7 @@ be used to have the ioHub server create the default device types, as well as Dir
 Gamepad device for use during the experiment::
 
     # To Be Completed
+
 
 .. note:: As previously mentioned, the example set provide for the ioHub is an excellent resource
     for further examples of confuration in ioHub.
