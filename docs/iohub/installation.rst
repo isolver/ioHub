@@ -45,7 +45,7 @@ Given WinPythonPlus is provided in the form of a portable software distribution,
 there is no actual *installation* required. Simply downloaded the WinPythonPlus archive from the link above, 
 run the self extracting archive, and select where you want the WinPythonPlus distribution to go. **That is it.**
 Once extracted, open the WinPythonPlus folder and you will see a set of .bat files in the top level directory
-(a poor mans version of an executable ;) ). The .bat file are what need to be used to start any of the 
+(a poor man's version of an executable ;) ). The .bat file are what need to be used to start any of the 
 provided applications, and even when you wish to just start a python interpreter in the Windows console.
 
 
@@ -281,7 +281,7 @@ Packages To Download
 ioHub Package Installation
 +++++++++++++++++++++++++++
 
-There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
+There is currently no Python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
 The site-packages directory of your Python installation is a guarenteed place that will work. 
 
 To do so:
