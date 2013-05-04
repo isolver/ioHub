@@ -75,3 +75,4 @@ RectangleBorder=namedtuple('RectangleBorderClass', 'left top right bottom')
 
 
 import constants
+from constants import DeviceConstants, EventConstants, KeyboardConstants, MouseConstants, EyeTrackerConstants
