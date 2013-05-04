@@ -905,7 +905,6 @@ def run(rootScriptPathDir,configFilePath):
 
     hub_defaults_config=load(file(os.path.join(IO_HUB_DIRECTORY,'default_config.yaml'),'r'), Loader=Loader)
     updateDict(ioHubConfig,hub_defaults_config)
-    print2err('SERVER CONFIG ==================\n',ioHubConfig,'\n============================ ', ioHubConfig.get('udp_port'))
 
 
     try:
