@@ -4,11 +4,13 @@ QuickStart Guide for PsychoPy Coders
 
 .. note::
 
-    This QuickStart Guide gives a fast introduction to using the
-    ioHub and PsychoPy packages together by 'porting'
+    This QuickStart Guide gives an easy introduction to using the
+    ioHub Event Monitoring Framework with PsychoPy by 'porting'
     two existing PsychoPy demos to use ioHub for device event reporting. 
     
-    Not all the functionality of the ioHub is covered, nor are all device types.
+    The full functionality of using the ioHub with PsychoPy in a research setting,
+    including a description of all supported devices, is outside the scope of this
+    brief introduction.
     For a more complete review of the ioHub package features and how to use them,
     see the ioHub User Manual section.
     
@@ -21,17 +23,15 @@ Overview
 ==========
 
 In this section we will introduce ioHub by converting the PsychoPy demo 'mouse.py'
-to use the ioHub Event Monitoring Framework using a 'script only' approach to
+to use the ioHub Event Monitoring Framework using a *script only* approach to
 working with ioHub. We will then convert a second PsychoPy demo, 'joystick_universal.py',
-but this time use the scipt + ioHub configuration file approach. 
+using the *script + config* approach to manage more complicated device monitoring. 
+Both approaches have strengths and weaknesses. In general the *script + config* approach
+should be used when more complicated devices, like an eye tracker or an analog to digital
+converter, are required in the experiment. The configuration files are used to customize
+device and data monitoring settings, as well as store experiment and session metadata.
 
-..	note:: Both examples shown here can be found in the ioHub examples\quickStart sub directory.
-
-Each approach has strengths and weaknesses. In general if the experiment
-is using complex device types, like an eye tracker or an analog to digital
-converter, then the latter approach of using configuration files to define 
-experiment metadata and device implementation alongside a python source file containing experiment logic
-is preferred.
+..	note:: Both examples shown here can be found in the ioHub examples\quickStart subdirectory.
 
 Converting PsychoPy's mouse.py Demo to use ioHub
 ================================================
@@ -88,10 +88,10 @@ PsychoPy software installation)::
         message.draw()
         myWin.flip()#redraw the buffer
         
-To convert the mouse.py script as literally as possible and use the ioHub for
-the keyboard and mouse device inputs, the script would look as follows. The ioHub
-version is much longer here because loads of comments have been added to the 
-script explaining the ioHub API calls being made in some detail. Please review the
+Now we take the mnouse.py demo above and convert it as literally as possible in order to monitor
+the keyboard and mouse device inputs with the ioHub Event Model. The ioHub
+version is much longer here only for demonstration purposes and extensive comments to explain
+how the ioHub API calls are being made in some detail. Please review the
 comments added below the source code, as they explain differences to note when using
 ioHub instead of the built in PsychoPy event functionality::
 
@@ -344,8 +344,8 @@ file script just as you would the original PsychoPy mouse.py demo.
 Converting the PsychoPy Demo 'joystick_universal.py' Using ioHub Configuration Files 
 =====================================================================================
 
-The second approach to creating an ioHub experiment is to use a combination of
-the python experiment script files(s) needed for the experiment with two
+The second approach to creating an ioHub experiment (*script + config*) is to use a combination of
+the Python experiment script files(s) needed for the experiment with two
 configuration files that are used by ioHub to learn about high level experiment
 data, any experiment session level variables that should be tracked, and the details of
 the devices to be used during the experiment runtime.
@@ -354,10 +354,8 @@ This approach is most useful when your experiment uses more complex devices like
 an eye tracker or analog to digital input device. However it can be used for any experiment,
 and has the advantage of cleanly separating device configuration from the experiment
 runtime logic. This separation allows, for example, the same experiment script to
-be used while still being able to easily change the eye tracker device that is used
-during the experiment runtime. Nothing in the python experiment logic needs to change,
-the eye tracker device configuration is instead updated to reflect the change in
-eye tracking hardware being used.
+be used with different eye tracker hardwares without changing anything in the experiment script.
+Instead, the new device parameters are updated in the configuration files (described below).
 
 The PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
 
@@ -438,9 +436,9 @@ The PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
         myWin.flip()#redraw the buffer
 
 .. note:: Currently ioHub has support for XInput compatible Gamepads only. This includes the 
-    Xbox 360 Gamepad for PCs (Wired or wireless) and some models of Logitech
+    Xbox 360 Gamepad for PCs (wired or wireless) and some models of Logitech
     Gamepads, such as the Logitech F310 and F710. To run this example, you will need
-    one of these Gamepad models, or another gamepad that supports the XInput interface.
+    one of these gamepad models, or another gamepad that supports the XInput interface.
     
     Full XInput Gamepad 1.3 functionality is supported by ioHub, including reading all 
     Gamepad inputs, setting the vibration state for the two vibration mechanisms
@@ -452,7 +450,7 @@ The PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
     you will get an error at the start of the experiment printed to your python console.
     
     You can check if you already have XInput 1.3 installed on your Windows system
-    by searching for xinput1_3.dll in the c:\Windows directory of your PC. If the file 
+    by searching for xinput1_3.dll in the C:\Windows directory of your PC. If the file 
     is found, you do not need to do anything further. (Windows 7 seems to come with the file
     already, Windows XP SP2 or 3 may not have the file.)
     
@@ -463,30 +461,29 @@ The PsychoPy demo script we will 'convert' is the joystick_universal.py demo::
     C:\Windows\SysWOW64. Please check that this DLL is present after you run 
     the DirectX 10 upgrade utility.
     
-Once the information in the above Note has been followed, and you have the XInput
-capable device plugged into your PC, then creating the ioHub version of the demo 
-can be started. Note that all source files for this 
-example are in the ioGamepad directory of the ioHub Examples folder.
+After ensuring XInput has been successfully installed (see above note) and connecting the XInput
+capable device to your PC, we can begin converting the joystick_universal.py script to use ioHub.
+Note that all source files for this example are in the ioHub examples\quickStart subdirectory, but
+it is encouraged that new users replicate the following demo from scratch as is described below.
 
 **The following steps should be followed if a new version of the demo is being created:**
 
-#. Create a directory (location of your choice) called ioXInputGamePad. The directory can be any name you wish, but here it is assumed it is called ioXInputPsychoPy.
-#. Within the ioXInputGamePad directory, create the python source file that will hold the example python source code. This example assumes it has been named run.py
-#. Within the ioXInputGamePad directory, create a file that will hold the experiment configuration for the demo. This file **must** be called experiment_config.yaml
-#. Within the ioXInputGamePad directory, create a file that will hold the ioHub configuration for the demo. This file can be of any name, but the standard is to call it iohub_config.yaml.
+#. Create a new directory for the experiment (location and name of your choice; the rest of this demo refers to this directory as being named 'ioXInputGamePad').
+#. Within the ioXInputGamePad directory, create the Python source file for the experiment script. This example assumes it has been named 'run.py'.
+#. Within the ioXInputGamePad directory, create a file that will hold the experiment configuration for the demo. ioHub assumes this file is named 'experiment_config.yaml'.
+#. Within the ioXInputGamePad directory, create a file that will hold the ioHub configuration for the demo. ioHub assumes this file is named 'iohub_config.yaml'.
 
-With the above directory and file structure created, contents can now be added to the
-python source file and the two .yaml configuration files as described below. 
+With the above directory created, fill the 
+Python source file and the two .yaml configuration files as described below. 
 
-.. note:: When using this approach to creating the experiment,
-    the above experiment folder structure will always be used. To save time in creating
-    this initial experiment folder setup, there is a folder called startingTemplate
+.. note:: When using the *script + config* approach to creating the experiment,
+    the above experiment folder structure (one source.py and two config.yaml files) will always be used. 
+    To save time in creating this initial experiment folder setup, there is a folder called startingTemplate
     in the ioHub examples folder that contains the necessary python source file with
-    the ExperimentIOHubRuntime class extension already defined, so only your experiment
-    code needs to be added to the class run method. The folder also contains a base 
-    experiment_config.yaml and iohub_config.yaml which can just be modified as necessary 
-    for your experiment. In this QuickStart example, it will be assumed that all files are
-    being created from scratch.
+    the ioHubExperimentRuntime class extension already defined, so only your experiment
+    code needs to be added to the class run method. The startingTemplate directory also contains a base 
+    experiment_config.yaml and iohub_config.yaml to be modified as necessary 
+    for the experiment.
     
 run.py Python Source File Contents
 ++++++++++++++++++++++++++++++++++++
@@ -655,9 +652,9 @@ Three types of settings are defined within the experiment_config.yaml file:
 
 #.  Custom session variables you want displayed in a dialog for input at the start 
     of each session of the experiment. These are defined in the 
-    session_defaults: user_variables section. 
-#.  Configuration settings related to the local Experiment process. 
-#.  Custom experiment preferences can also be added, as long as the preference name is 
+    session_defaults:user_variables section of the configuration file. 
+#.  Configuration settings related to the experiment script and PsychoPy Process. 
+#.  Custom experiment preferences, as long as the preference name is 
     not a standard ioHub experiment configuration preference name.
 
 ioHub Configuration files are specified using YAML syntax. For this quickstart section,
@@ -683,12 +680,12 @@ Enter the following into your experiment_config.yaml for this example::
 Defining Device Information in the iohub_config.yaml File.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-ioHub specific configuration settings, mainly in regard to the devices that will be used
-within your experiment, are represented in the iohub_config.yaml file.
-There are two types of ioHub settings in the iohub_config.yaml file:
+Configuration settings for the ioHub Process, especially the devices to be monitored
+during the experiment, are held in the iohub_config.yaml file.
+There are two types of settings in the iohub_config.yaml file:
 
-#.  General ioHub Server configuration settings.
 #.  Details about the setup of each ioHub Device to be used.
+#.  General ioHub Process configuration settings, including ioDataStore event storage.
 
 Enter the following into your iohub_config.yaml for this example::
 
@@ -745,13 +742,11 @@ With all three files saved, and a supported XInput compatible gamepad connected
 to the computer (powered on if a wireless gamepad), you can run the gamepad example
 by starting the run.py script. 
 
-While at first this approach may seem like more work than a script only approach to 
-creating your experiment, I think once you have used it a couple times it will become
-clear that the configuration file vs. experiment logic approach to dividing how
-information is represented for an experiment often results in less work and the
-promotion of experiment python script reuse. This is because there is less of a need
-to be repeatedly 'configuring' more complex device types within the script environment itself, 
-but instead within a better suited, more constrained, device configuration specification.
+While at first this approach may seem like more work than a *script only* approach to 
+creating your experiment, the advantages to using the *script + config* file will
+emerge over time, especially as experiment scripts are reused. The *script + config* approach
+takes care of the repeated lines of device setup and management used for more complicated devices in traditional
+*script only* approaches.
 
 Please let us know your opinions on this after working with this experiment structure.
 
