@@ -19,12 +19,10 @@ ioHub is currently available for use on the following Operating Systems:
 Current Device Support
 #######################
     
-The list of available ioHub device types is OS dependent. This is mainly
-because of lack of time to port all devices to the different operating systems, 
-not because the devices can 'not' be supported. One exception to this is the 
-common eye tracking device interface, where OS support for a particular eye tracking
-device will always be limited to only the OS's that the underlying eye tracker
-hardware interface / API supports itself. 
+The list of available ioHub device types is OS dependent. Unavilable devices
+can (and will) be ported to all OS's when time permits. One exception to this
+is the eye tracker (through the Common Eye Tracking Device Interface), where
+OS support is determined by the underlying eye tracker hardware interface.
 
 The current state (April, 2013) of device support for each OS is as follows:
 
@@ -42,8 +40,8 @@ Devices *in the works*
 #######################
 
 The following devices are on the roadmap for addition to the ioHub by the
-end of 2013. Many of the listed devices already have partial 
-implementations started. The order of the device listing 
+end of 2013. Implementation for many devices listed below is already
+underway. The order of the device listing 
 does not imply the priority of the device support implementation.
 
 ===================== ============= =========== =============== 
