@@ -231,11 +231,10 @@ An example of a experiment_config.yaml file::
     #           'key2': 2
     #           }
     #
-    # Then it should be quite easy to see that the YAML format for a file is very
-    # similar, other than these differences:
-    #   + The file does not begin with a '{' or end with a '}'.
-    #   + key: value pairs are seperation by lines, not by ','s.
-    #    
+    #   Then it should be quite easy to see that the YAML format for a file is very
+    #   similar, other than these differences:
+    #     + The file does not begin with a '{' or end with a '}'.
+    #     + key: value pairs are seperation by lines, not by ','s.  
     # * The indendation level of the line in the file indicates the scope of the key:value pair, 
     #     ( scope meaning the dictionary or list level that the key: value pair is associated with) 
     #    Again, should be a familar idea. ;)
@@ -262,39 +261,42 @@ An example of a experiment_config.yaml file::
     #              - Four                   # will also equal [1,2,3,'Four','Five','Six'] in python
     #              - Five
     #              - Six
+    #
+    ######
 
-
+    ######
+    #
     # This is an example experiment_config.yaml. Values that are also the default
     # value for the setting are indicated as such. 
     
     # tile: A short but non criptic name of the experiment. 
     #       Similar to what you might title a paper about the experiment.   
     #
-    title: sequentialFixationTask
+    title: Effect of Exogenous and Endogenous Cues on Saccadic Reaction Time
 
     # code: A vert short, usually criptic, code for the experiment.
     #       An experiment code is 'required' when using the ioHub DataStore.
     #       While not technically inforced, it is a good practive to use a unique
     #       code for each experiment you create.
     #
-    code: seqFixA
+    code: sac_ee_cue
 
     # version: The version of the experiment being run, in string format.
     #       Each version on an experiment should have it's own experiment folder
     #       that has the experiment source and configuaration.    
-    version: '0.1'
+    version: '1.1'
 
     # description: Can be used to give longer, more informative text about what the experiment is for.
     #       Can also be used to indicate anything important to remember about running the experiment.
     #
-    description: Implementation of the fixation sequence testing paradigm as a way to try out the ioHub.
+    description: This study looks at how central cues in the form of arrow graphics, and peripheral cues if the form of a flash of light, around the location of an upcoming target's interact to influence saccadic onset time.
 
     # display_experiment_dialog: If True, a read-only dialog will be displayed 
     #       each time the experiment starts stating the above four parameter values.
     #       This can be useful so the person running the experiment can check that
     #        they started the right one!
     #
-    display_experiment_dialog: False    # Default
+    display_experiment_dialog: True    # Default if False
     
     # session_defaults: This parameter is defined as a sub dictionary containing
     # the experiment session metadata and user defined custom parameters.
@@ -310,20 +312,34 @@ An example of a experiment_config.yaml file::
         #       a unique session code. It the code enteried already exists in the experiments DataStore
         #       An error is returned and a different code can be entered.
         #
-        code: E1S01
+        code: Sxxxxxx
 
         # comments: Can be used to give any information the experiment operator
         #       Thinks may be important to note about the session about to be run.
         #
-        comments: None
+        comments: Ensure the particpant's right eye is tracked and that the data collection room's light are turned off before the experiment begins.
 
+        # user_variables: Allow for custom session data entry fields to be displayed in the Session Input Dialog.
+        #   If no extra session variables are needed, this section can be removed. The default is no
+        #   extra user defined variable.
+        #   To create user defines variables, add one line for each variable wanted to the user_variables
+        #   parameter section. The key of each line will be shown ad the label for the input.
+        #   The value of each line specifies the default value for string field, 
+        #   and the possible values to be shown for a list field, which is displayed as a dropdown list in the dialog.
+        #   For list fileds, the first element of the list is the default. 
+        #   Fields that have a boolean default are displayed as a checkbox.
         user_variables:
             participant_age: Unknown
             participant_gender: [ Select, Male, Female ]
             glasses: False
             contacts: False
             eye_color: Unknown
-    session_variable_order: [ name, code, comments, participant_age, participant_gender, glasses, contacts, eye_color ]
+        
+        # session_variable_order: This setting accepts a list value, each element of which
+        #   is a session variable key (either built-in or custom). The order the keys
+        #   are provided in the list will be the order that each appears in the Session Input Dialog.
+        # 
+        session_variable_order: [ name, code, comments, participant_age, participant_gender, glasses, contacts, eye_color ]
     
     # display_session_dialog: If True, an input dialog is shown
     #       each time the experiment starts allowing the operator to enter data for
