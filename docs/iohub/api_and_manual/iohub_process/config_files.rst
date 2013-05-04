@@ -3,15 +3,12 @@ ioHub Configuration
 ####################
 
 The ioHub Event Framework has been designed to be highly configurable, ensuring 
-<<<<<<< HEAD
 that is can be tailoried to the needs of a specific use case or experiment paradigm.
-=======
-that is can be tailored to the needs of a specific use case or experiment paradigm.
+
 This section outlines how ioHub configuration works, what mechanisms are in 
 place allowing a user to update configuration settings, and how configuration settings
 are validated. There are two ways configuration settings can be specified, 
 using configuration files for using configuration dictionaries within the experiment script.
->>>>>>> 811f53fb4b5fa1d27ba661cbf76b7689cc1f90e2
 
 ioHub tries to seperate experiment logic ( the python code that defines how your experimental
 paradigm is implemented, how stimuli are read and presented, etc. ) from experiment configuration
@@ -372,16 +369,6 @@ An example of a experiment_config.yaml file::
         #       Not supported on OSX.
         #
         process_affinity: []            # Default
-
-<<<<<<< HEAD
-=======
-* YAML is very readable.
-* YAML syntax is similar to Python syntax, in that raw indentation determines relevant scope.
-* Convertion from a YAML file to a Python Object struct is a simple mapping to Python dictionaries and lists and values are automatically converted to the appropriate built-in Python type.
-* Nested, or hierarchical, representations can be specified.
-* A YAML definition can be converted to JSON format for wire level transmission, and the converted back to YAML format. JSON is a subset of the YAML specification (not because JSON came after YAML, but because YAML was designed this way).
-* XML could have also been used, however the author's experience is that for configuration files, XML is overly verbose, less readable by humans, and just overkill in general.
->>>>>>> 811f53fb4b5fa1d27ba661cbf76b7689cc1f90e2
 
         # config: The name of the ioHub config file, specifying device 
         #       settings, etc
