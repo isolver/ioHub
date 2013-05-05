@@ -3,9 +3,12 @@ PsychoPy Coder *Extra's* API
 ==================================================
 
 The iohub.util submodule of the ioHub Framework contains various classes and functions
-that add some optional functionality to the PsychoPy API. This section of the API is
-considered *experimental* and will be adjusted and improved based on time as well as user
-feedback and suggestions.
+that I have found useful when writing experiments using PsychoPy and the ioHub.
+This section of the API is considered *experimental* and will be adjusted and
+improved based on time as well as user feedback and suggestions.
+
+..note:: This section, and subsections, of the manual and API is not fully 
+    documented at this time. This will be fixed as time permits. 
 
 .. toctree::
    :maxdepth: 4

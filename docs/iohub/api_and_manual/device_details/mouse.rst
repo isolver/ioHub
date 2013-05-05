@@ -15,6 +15,11 @@ Mouse Device Configuration Settings
 .. literalinclude:: default_yaml_configs/default_mouse.yaml
     :language: yaml
 
+Mouse Device Constants
+#######################
+
+.. autoclass:: iohub.constants.MouseConstants
+    :member-order: bysource
 
 Mouse Event Types
 #####################

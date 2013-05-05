@@ -1,0 +1,40 @@
+
+* See the docs status page for remaining doc pages
+
+* Create an up to date example set that can be shared with psychopy.
+    - Updates Simple example, not using config files and reporting key press durations
+    - ioMouse Example
+    - XInput Gamepad Example, not using config files 
+    - Reaction Time / line length judgeing example
+    - Starting Template for cases when using ioHubExperimentRuntime
+    - Combined eye tracking example, use SMIExample as template (has multiple trials, etc)
+        > Allow user to select eye tracker at very start of test, which selects the iohub_config to use.
+        > Use a different image for each trial.
+    - AnalogInput Example:
+        > Allow selection of device to use to select ioHub_config.yaml
+        > Clean up.
+    - ioHubEventDelayTest, as is, just clean up.
+    - PsychoPy logging integration example.
+    - example showing multiple ways of using the launchHubProcess() method
+
+* Test eye tracker implementations and update implementation page for each with any outstanding issues.
+    - SMI
+    - Tobii
+    - SRR
+    - EyeGaze
+
+* test Analog input example using LabJack and MC box
+
+* Update WinPythonPlus distribution:
+     - with latest ioHub source.
+     - ensure all.bat files are up to date
+     - ensure settings dir is clean
+     - put latest ioHub examples in my-code folder
+     - create new self extracting exe  and upload to Google.
+
+* Update docs with new WinPythonPlus dowload link.
+
+* Update github RADME if necessary.
+
+* Add list of known issues / considerations to doc.
+

@@ -1,4 +1,4 @@
-# This section includes all valid Keyboard Device
+# This file includes all valid Keyboard Device
 # settings that can be specified in an iohub_config.yaml
 # or in Python dictionary form and passed to the launchHubServer
 # method. Any device parameters not specified when the device class is

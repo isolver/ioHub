@@ -24,10 +24,10 @@ xinput.Gamepad:
     # device_number: Up to 4 XInput 'users' can be connected to the computer at one time. The
     #   gamepad's user ID is based on how many other gamepads are already connected to the
     #   computer when the new gamepad turns on. If a gamepad with a lower user id
-    #   the disconnects from the computer, other gamepad user ids remain the same.
+    #   then disconnects from the computer, other active gamepad user ids remain the same.
     #   Therefore XInput user id is not equal to the index of the gamepad in a set 
     #   of gamepads. If the experiment should connect to the first active gamepad found, enter -1.
-    #   Otherwise enter the user_id (1-4) of he gamepad you wish to connect to.
+    #   Otherwise enter the user_id (1-4) of the gamepad user ID you wish to connect to.
     device_number: -1
 
     # monitor_event_types: *If* the ioHubDataStore is enabled for the experiment, then
@@ -35,7 +35,7 @@ xinput.Gamepad:
     #   monitor_event_types: Specified which xinput.Gamepad Event types should be monitored
     #   for and therefore saved to the DataStore or sent to the Experiment Process.
     #
-    monitor_event_types:  [GamepadStateChangeEvent, GamepadDisconnectEvent]
+    monitor_event_types:  [GamepadStateChangeEvent,]
 
     # save_events: Save xinput.Gamepad events to the data_collection/xinput.Gamepad event 
     #   group in the hdf5 event file.
@@ -90,6 +90,11 @@ xinput.Gamepad:
     # so is FYI only.
     #   
     manufacture_date: DD-MM-YYYY
+
+    # The device manufacturer's name.
+    #   It is not used by the ioHub, so is FYI only.
+    #
+    manufacturer_name: N/A
 
     # model_name: The device model name can be specified here.
     #   It is not used by the ioHub, so is FYI only.

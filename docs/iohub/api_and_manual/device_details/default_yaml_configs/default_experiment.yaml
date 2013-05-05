@@ -1,4 +1,4 @@
-# This section includes all valid Experiment Device
+# This file includes all valid Experiment Device
 # settings that can be specified in an iohub_config.yaml
 # or in a Python dictionary form and passed to the quickStartHubServer
 # method. Any device parameters not specified when the device class is
@@ -32,14 +32,14 @@ Experiment:
     #   True = Save events for this device to the ioDataStore.
     #   False = Do not save events for this device in the ioDataStore.
     #    
-    saveEvents: True
+    save_events: True
 
     # streamEvents: Indicate if events from this device should be made available
     #   during experiment runtime to the PsychoPy Process.
     #   True = Send events for this device to  the PsychoPy Process in real-time.
     #   False = Do *not* send events for this device to the PsychoPy Process in real-time.
     #    
-    streamEvents: True
+    stream_events: True
 
     # auto_report_events: Indicate if events from this device should start being
     #   processed by the ioHub as soon as the device is loaded at the start of an experiment,

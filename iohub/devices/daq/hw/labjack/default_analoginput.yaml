@@ -1,4 +1,4 @@
-# This section includes all valid labjack.AnalogInput Device
+# This file includes all valid labjack.AnalogInput Device
 # settings that can be specified in an iohub_config.yaml
 # or in a Python dictionary form and passed to the quickStartHubServer
 # method. Any device parameters not specified when the device class is
@@ -7,7 +7,7 @@
 #
 daq.hw.labjack.AnalogInput:
     
-    # name: The unique name to assign to the evice instance created.
+    # name: The unique name to assign to the device instance created.
     #   The device is accessed from within the PsychoPy script 
     #   using the name's value; therefore it must be a valid Python
     #   variable name as well.
