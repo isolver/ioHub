@@ -12,7 +12,7 @@ SR Research EyeLink EyeTracker Class
 
 * EyeLink
 * EyeLink II
-* EyeLink 1000 (tested on this model, in monocular mode only, to date)
+* EyeLink 1000 (tested in monocular mode only, to date)
 
 .. autoclass:: iohub.devices.eyetracker.hw.sr_research.eyelink.EyeTracker
     :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES, EYELINK, EYELINK_1000, EYELINK_II    
@@ -21,14 +21,13 @@ SR Research EyeLink EyeTracker Class
 Installing other Necessary SR Research Software
 ##################################################
 
-The EyeLink implementation of the ioHub common eye tracker interface uses the 
-pyLink module written by SR Research. For Windows, this package is bundled with
+The EyeLink implementation of the ioHub Common Eye Tracker Interface uses the 
+pyLink module written by SR Research. This package is bundled with
 ioHub, so no extra display side software installation should be needed to use
 the ioHub Common Eye Tracker Interface with the EyeLink.
 
 For Linux or OS X tests, pyLink will need to be installed and functioning for ioHub
 to have any chance of running.
-
 
 Default SR Research EyeLink Device Settings
 ############################################
@@ -201,8 +200,8 @@ General Considerations
 Known Issues:              
 ==============
 
-    #. Several event fields, in several event types, should be being populated but are not (and are therefore not listed above).
-    #. Eye image transfer to during camera setup is not supported.
+    #. Several event fields, in several event types, should be populated but are not (and are therefore not listed above).
+    #. Eye image transfer during camera setup is not supported.
 
 Limitations:
 ==============

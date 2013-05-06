@@ -18,10 +18,8 @@ Tobii EyeTracker Class
 * Tobii IS-1
     
 .. note::    
-    Currently Python 2.6 must be used to use the Tobii eye tracker, Python 2.7 
-    is not supported. When a Python 2.7 compatible version of the Tobii Python 
-    package becomes available, the Tobii system will also be able to use used 
-    within PsychoPy and ioHub when running Python 2.7.
+    Python 2.6 must be used to use the Tobii eye tracker until a Python 2.7 compatible 
+    version of the Tobii Python package is supported.
 
 .. autoclass:: iohub.devices.eyetracker.hw.tobii.EyeTracker
     :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
@@ -44,10 +42,10 @@ Required files / folder from the Tobii Analytics SDK 3.0 RC 1 package:
     *  _tobiisdkpy26.pyd
     *  boost_python-vc90-mt-1_41.dll
 
-Again, the one directory and 3 files listed above must be in a directory that is in your
+Again, the one directory and 3 files listed above must be in a directory in your
 Python 2.6 Python Path, as well as in your system PATH environment variable setting.
-By placing these four items in your Python 2.6 site packages directory, this can be
-achieved without needing to change your system environment variables.
+You do not need to change your system environment variables if you place these
+four items in your Python 2.6 site-packages directory.
 
 
 Default Tobii EyeTracker Device Settings
@@ -104,7 +102,7 @@ None at this time.
 Limitations:
 ==============
 
-    #. There is no way to present the 'tracking status' graphics desplay, showing each eye location in the head box and the status indications for distance valitity and eye tracking stability.
+    #. There is no way to present the 'tracking status' graphics display that shows each eye location in the head box and status indications for distance validity and eye tracking stability.
     #. The current calibration procedure is not visually similar to the standard Tobii calibration graphics set. This should be added when time permits.
 
 To Do / Wish List:
