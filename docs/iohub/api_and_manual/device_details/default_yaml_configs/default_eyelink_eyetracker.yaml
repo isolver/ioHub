@@ -259,3 +259,4 @@ eyetracker.hw.sr_research.eyelink.EyeTracker:
     #   device_number is not used by this device type.
     #
     device_number: 0
+

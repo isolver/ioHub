@@ -21,10 +21,9 @@ Keyboard:
     #
     enable: True
  
-    # saveEvents: *If* the ioHubDataStore is enabled for the experiment, then
-    #   indicate if events for this device should be saved to the
-    #   monitor_event_types: Specified which KeyboardEvent types should be monitored
-    #   for and therefore saved to the DataStore or sent to the Experiment Process.
+
+    # monitor_event_types: Specified which device event types that should be monitored
+    #   and therefore saved to the DataStore or sent to the Experiment Process.
     #
     monitor_event_types: [KeyboardPressEvent, KeyboardReleaseEvent, KeyboardCharEvent]
 
@@ -34,6 +33,8 @@ Keyboard:
     #
     report_auto_repeat_press_events: False
 
+    # saveEvents: *If* the ioHubDataStore is enabled for the experiment, then
+    #   indicate if events for this device should be saved to the
     #   data_collection/keyboard event group in the hdf5 event file.
     #   True = Save events for this device to the ioDataStore.
     #   False = Do not save events for this device in the ioDataStore.

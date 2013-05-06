@@ -237,7 +237,7 @@ class EyeTracker(EyeTrackerDevice):
                     starting_state=starting_state,
                     error=e)            
 
-    def isRecordingEnabled(self,*args,**kwargs):
+    def isRecordingEnabled(self):
         """
         The isRecordingEnabled method indicates if the eye tracker device is currently
         recording data or not. 
@@ -310,8 +310,6 @@ class EyeTracker(EyeTrackerDevice):
             None
 
         Returns:
-            int: If this method is not supported by the eye tracker interface, EyeTrackerConstants.FUNCTIONALITY_NOT_SUPPORTED is returned.
-
             None: If the eye tracker is not currently recording data.
 
             EyeSample: If the eye tracker is recording in a monocular tracking mode, the latest sample event of this event type is returned.
@@ -343,8 +341,6 @@ class EyeTracker(EyeTrackerDevice):
             None
 
         Returns:
-            int: If this method is not supported by the eye tracker interface, EyeTrackerConstants.EYETRACKER_INTERFACE_METHOD_NOT_SUPPORTED is returned.
-
             None: If the eye tracker is not currently recording data or no eye samples have been received.
 
             tuple: Latest (gaze_x,gaze_y) position of the eye(s)
