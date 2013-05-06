@@ -2,8 +2,9 @@
 The ioHub Common Eye Tracker Interface
 ########################################
 
-**Platforms:** Windows, other OS's are eye tracker manufacturer dependent. 
-See each Eye Tracker Implementation page for the status of non-Windows support.
+**Platforms:** OS support is determined by individual eye tracker manufacturers. 
+See the individual Eye Tracker Implementation page for your eye tracker to check 
+non-Windows OS support.
     
 .. autoclass:: iohub.devices.eyetracker.EyeTrackerDevice
     :exclude-members: ALL_EVENT_CLASSES, CLASS_ATTRIBUTE_NAMES, DEVICE_BUFFER_LENGTH_INDEX, DEVICE_CLASS_NAME_INDEX, DEVICE_MAX_ATTRIBUTE_INDEX, DEVICE_TIMEBASE_TO_SEC, DEVICE_TYPE_ID, DEVICE_TYPE_ID_INDEX, DEVICE_TYPE_STRING, DEVICE_USER_LABEL_INDEX, NUMPY_DTYPE, e, DEVICE_FIRMWARE_VERSION_INDEX, DEVICE_HARDWARE_VERSION_INDEX,DEVICE_MANUFACTURER_NAME_INDEX,DEVICE_MODEL_NAME_INDEX, DEVICE_MODEL_NUMBER_INDEX, DEVICE_NUMBER_INDEX, DEVICE_SERIAL_NUMBER_INDEX, DEVICE_SOFTWARE_VERSION_INDEX, EVENT_CLASS_NAMES
@@ -12,17 +13,19 @@ See each Eye Tracker Implementation page for the status of non-Windows support.
 EyeTracker Device Configuration Settings
 ###########################################
 
-Each eye tracker implementation supports different configuration settings 
-based on the capabilities and design of the Eye Tracker model. Please see
-the Implementation Page for each Eye Tracker supported for the configuration settings
-used for that system.
+While all supported eye trackers have the same user-level methods through the
+Common Eye Tracker Interface, differences between eye trackers are reflected 
+in the different configuration settings based on the capabilities and design
+of individual eye tracker models. Please see the implementation page for your
+Eye Tracker hardware for configuration specifics. These configurations settings
+are specified in the iohub_config.yaml.
 
 
 EyeTracker Device Constants
 #############################
 
-The following outlines the various EyeTrackerConstant values which can be used
-in an implementation::
+The following EyeTrackerConstant values can be used to configure the settings
+of the eye tracker device::
 
         #
         ## Sample Filtering related constants
@@ -152,10 +155,8 @@ in an implementation::
 EyeTracker Event Types
 #######################
 
-The Common Eye Tracker Interface supports the following set of eye tracker events.
-
-Not all event types are supported by all eye tracking systems. Refer to the implementation
-page for the eye tracker being used to determine which eye tracker event types are supported.
+The following eye tracker DeviceEvents can be accessed in the experiment
+script and saved to the ioDataStore (if specified).
 
 Sample Events
 ===============
@@ -206,7 +207,8 @@ Eye Tracking Hardware Implementations
 
 The following links provide details on the Common Eye Tracker Interface implementation
 for each currently supported eye tracking system. It is very important to review
-the documentation for the system you are using the Common Eye Tracker Interface with.
+the documentation for your eye tracker, both for correct configuration and event
+access during the experiment.
 
 Eye Tracker implementations are listed in alphabetical order.
 
