@@ -38,3 +38,6 @@
 
 * Add list of known issues / considerations to doc.
 
+* Post announcement on user list.
+
+* Send email to Eye tracker company rep's, Kenneth, Fiona, Jeff, Dong, Marcus, NY Lady, Typing project people.

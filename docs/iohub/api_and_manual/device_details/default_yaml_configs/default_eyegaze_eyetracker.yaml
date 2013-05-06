@@ -1,4 +1,4 @@
-# This file includes all valid lc_technologies.eyegaze.EyeTracker Device
+# This section includes all valid lc_technologies.eyegaze.EyeTracker Device
 # settings that can be specified in an iohub_config.yaml
 # or in a Python dictionary form and passed to the quickStartHubServer
 # method. Any device parameters not specified when the device class is
@@ -80,13 +80,6 @@ eyetracker.hw.lc_technologies.eyegaze.EyeTracker:
     host_connection:
         type: LOCAL       
     
-    # monitor_event_types: The EyeGaze implementation of the common eye tracker
-    # interface supports the following event types:
-    # * MonocularEyeSampleEvent - supported on single camera systems.
-    # * BinocularEyeSampleEvent - Supported on dual camera systems only.
-    #
-    monitor_event_types: [ MonocularEyeSampleEvent, BinocularEyeSampleEvent, ]
-    
     # manufacturer_name:    manufacturer_name is used to store the name of the
     #   maker of the eye tracking device. This is for informational purposes only.
     #
@@ -131,4 +124,3 @@ eyetracker.hw.lc_technologies.eyegaze.EyeTracker:
     #   device_number is not used by this device type.
     #
     device_number: 0
-

@@ -32,10 +32,6 @@ class EyeTracker(EyeTrackerDevice):
     class in the iohub_config.yaml device settings file:
         
         eyetracker.hw.smi.iviewx.EyeTracker
-        
-    See the configuration options section of the iViewX Common Eye Tracker 
-    Interface documentation for a full description and listing of all 
-    valid configuration settings for this device.
     """
     # >>> Overwritten class attributes
     DEVICE_TIMEBASE_TO_SEC=0.000001
@@ -52,9 +48,6 @@ class EyeTracker(EyeTrackerDevice):
     # <<<
 
     def __init__(self, *args,**kwargs):
-        """
-        """
-
         EyeTrackerDevice.__init__(self,*args,**kwargs)
         try:             
             self._ioKeyboard=None

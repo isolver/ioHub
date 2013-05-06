@@ -1,4 +1,4 @@
-# This file includes all valid labjack.AnalogInput Device
+# This section includes all valid mc.AnalogInput Device
 # settings that can be specified in an iohub_config.yaml
 # or in a Python dictionary form and passed to the quickStartHubServer
 # method. Any device parameters not specified when the device class is
