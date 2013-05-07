@@ -4,9 +4,6 @@
 * Create an up to date example set that can be shared with psychopy.
     - XInput Gamepad Example, not using config files 
     - Starting Template for cases when using ioHubExperimentRuntime
-    - Combined eye tracking example, use SMIExample as template (has multiple trials, etc)
-        > Allow user to select eye tracker at very start of test, which selects the iohub_config to use.
-        > Use a different image for each trial.
     - AnalogInput Example:
         > Allow selection of device to use to select ioHub_config.yaml
         > Clean up.
@@ -27,6 +24,10 @@
      - ensure settings dir is clean
      - put latest ioHub examples in my-code folder
      - create new self extracting exe  and upload to Google.
+
+* Test psychopy iohub intestation.
+
+* update psychopy examples with new demos (modify impoers as needed)
 
 * Update docs with new WinPythonPlus dowload link.
 

@@ -147,7 +147,7 @@ while QUIT_EXP is False:
             keypress_duration_stim.setText("%.6f"%(event.duration))
         event_type_stim.setText(EventConstants.getName(event.type))
     
-        if event.key=='Q' and ('CONTROL_LEFT' in event.modifiers or 'CONTROL_LEFT' in event.modifiers):
+        if event.key.lower()=='q' and ('CONTROL_LEFT' in event.modifiers or 'CONTROL_LEFT' in event.modifiers):
             QUIT_EXP=True
             break
 
