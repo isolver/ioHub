@@ -7,12 +7,12 @@ LC EyeGaze EyeTracker Implementation
 **Supported Models:**
 
 * All LC EyeGaze Eye Tracking Systems should work.
-* testing has been doing using a monocular , head fixed, model running in single computer mode only.
+* testing has been doing using a monocular, head fixed, model running in single computer mode only.
 
 .. note:: Please see the outstanding issues section at the bottom of this page regarding 
     an important unresolved issue related to Eyegaze Sample time stamp conversion to ioHub time.
-    Until this issue is resolved, although the accuracy of the gaze data appears to be very good
-    spatially, the sample event time stamps are usable due to large errors in the current time base conversion calculations.
+    Although gaze data appears to be spatially accurate, the sample event time stamps are unusable
+    due to large errors in the current native device to ioHub time base conversions.
 
 
 .. autoclass:: iohub.devices.eyetracker.hw.lc_technologies.eyegaze.EyeTracker
