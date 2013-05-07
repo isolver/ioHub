@@ -10,6 +10,7 @@ from iohub.constants import EventConstants, EyeTrackerConstants
 from iohub.util import ( DeviceEventTrigger, getCurrentDateTimeString,
                                    ClearScreen, InstructionScreen, 
                                    FullScreenWindow)
+from random import shuffle
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
@@ -44,8 +45,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         # Create an ordered dictionary of psychopy stimuli. An ordered dictionary is one that returns keys in the order
         # they are added, you you can use it to reference stim by a name or by 'zorder'
-        image_name='./images/party.png'
-        imageStim = visual.ImageStim(self.window, image=image_name, name='image_stim',units=display_coord_type)
+        image_cache=dict()
+        image_names=['./images/party.png','./images/desert.png','./images/jellyfish.png',
+                     './images/lighthouse.png','./images/swimming.png']
+        for iname in image_names:
+            image_cache[iname]=visual.ImageStim(self.window, image=iname, name=iname[iname.rfind('/')+1:],units=display_coord_type)
         gaze_dot =visual.GratingStim(self.window,tex=None, mask="gauss", pos=(0,0 ),size=(66,66),color='green', units=display_coord_type)
 
         # create screen statesertv
@@ -73,7 +77,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.instructionScreen.setText(instuction_text)        
         self.instructionScreen.switchTo("START_EXPERIMENT_WAIT")
         
-        for t in range(5): 
+        shuffle(image_names)
+        
+        for t,iname in enumerate(image_names): 
+            imageStim=image_cache[iname]
+
             self.hub.clearEvents('all')
             instuction_text="Press Space Key To Start Trial %d"%t
             self.instructionScreen.setText(instuction_text)        
@@ -96,7 +104,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     imageStim.draw()
                     
                 flip_time=self.window.flip()          
-                self.hub.sendMessageEvent("SYNCTIME %s"%(image_name,),sec_time=flip_time)
+                self.hub.sendMessageEvent("SYNCTIME %s"%(iname,),sec_time=flip_time)
                 
                 keys=kb.getEvents()
                 for key in keys:
@@ -119,6 +127,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         ### End of experiment logic
 
+
 # The below code should never need to be changed, unless you want to get command
 # line arguements or something.
 ##################################################################
@@ -129,7 +138,40 @@ if __name__ == "__main__":
         Creates an instance of the ExperimentRuntime class, checks for an experiment config file name parameter passed in via
         command line, and launches the experiment logic.
         """
-        import sys
+        import sys,os
+        from psychopy import gui
+        
+        eye_tracker_config_files={
+                                  'LC Technologies EyeGaze':'eyetracker_configs/eyegaze_config.yaml',
+                                  'SMI iViewX':'eyetracker_configs/iviewx_config.yaml',
+                                  'SR Research EyeLink':'eyetracker_configs/eyelink_config.yaml',
+                                  'Tobii Technologies Eye Trackers':'eyetracker_configs/tobii_config.yaml'
+                                  }
+        
+        info = {'Eye Tracker Type': ['Select', 'LC Technologies EyeGaze', 
+                                     'SMI iViewX', 'SR Research EyeLink', 'Tobii Technologies Eye Trackers']}
+        
+        dlg_info=dict(info)
+        infoDlg = gui.DlgFromDict(dictionary=dlg_info, title='Select Eye Tracker')
+        if not infoDlg.OK:
+            return -1 
+
+        while dlg_info.values()[0] == u'Select' and infoDlg.OK:
+                dlg_info=dict(info)
+                infoDlg = gui.DlgFromDict(dictionary=dlg_info, title='SELECT Eye Tracker To Continue...')
+   
+        if not infoDlg.OK:
+            return -1 
+
+        base_config_file=os.path.normcase(os.path.join(configurationDirectory,'iohub_config.yaml.part'))
+        eyetrack_config_file=os.path.normcase(os.path.join(configurationDirectory,eye_tracker_config_files[dlg_info.values()[0]]))
+        
+        combined_config_file_name=base_config_file=os.path.normcase(os.path.join(configurationDirectory,'iohub_config.yaml))
+        
+        ExperimentRuntime.mergeConfigurationFiles(base_config_file,eyetrack_config_file,combined_config_file_name)
+
+        
+        
         if len(sys.argv)>1:
             configFile=sys.argv[1]
             runtime=ExperimentRuntime(configurationDirectory, configFile)

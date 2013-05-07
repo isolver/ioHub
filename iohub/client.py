@@ -19,7 +19,7 @@ import json
 import signal
 
 try:
-    from yaml import load
+    from yaml import load, dump
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
 #    print "*** Using Python based YAML Parsing"
@@ -1528,7 +1528,7 @@ def launchHubServer(**kwargs):
     
     if experiment_code and session_code:    
         # Enable saving of all keyboard and mouse events to the 'ioDataStore'
-        ioConfig['data_store']=dict(experiment_info=dict(code=experiment_code),
+        ioConfig['data_store']=dict(enable=True,experiment_info=dict(code=experiment_code),
                                             session_info=dict(code=session_code))
     
     # Start the ioHub Server
@@ -1821,6 +1821,39 @@ class ioHubExperimentRuntime(object):
         print repr(traceback.format_tb(exc_traceback))
         print "*** tb_lineno:", exc_traceback.tb_lineno
 
+    @staticmethod
+    def mergeConfigurationFiles(base_config_file_path,update_from_config_file_path,merged_save_to_path):
+        """
+        Merges two iohub configuration files into one and saves it to a file 
+        using the path/file name in merged_save_to_path.
+        """        
+        base_config=load(file(base_config_file_path,'r'), Loader=Loader)
+        update_from_config=load(file(update_from_config_file_path,'r'), Loader=Loader)
+
+
+        def merge(update, base):
+            if isinstance(update,dict) and isinstance(base,dict):
+                for k,v in base.iteritems():
+                    if k not in update:
+                        update[k] = v
+                    else:
+                        if isinstance(update[k],list):
+                            if isinstance(v,list):
+                                v.extend(update[k])
+                                update[k]=v
+                            else:
+                                update[k].insert(0,v)
+                        else:
+                            update[k] = merge(update[k],v)
+            return update
+            
+        import copy        
+        merged=merge(copy.deepcopy(update_from_config),base_config)        
+        dump(merged,file(merged_save_to_path,'w'), Dumper=Dumper)
+
+        return merged
+
+        
     def _initalizeConfiguration(self):
         global _currentSessionInfo
         """
