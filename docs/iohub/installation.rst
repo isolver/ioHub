@@ -2,58 +2,23 @@
 Installation
 #############
 
-.. note:: Exciting news: ioHub is in the process of merging with the PsychoPy Package, so these Installation instructions will be changing drastically over the short term as the PsychoPy Package and PsychoPy Python Distributions are updated to include ioHub as a submodule.
+.. note:: As of the May 8th, 2013 release of PsychoPy, the ioHub Package has merged with
+    the PsychoPy package and is now being distributed as part of PsychoPy. 
+    
+    The documentation provided here is still up to date however the installation instructions
+    below are only needed if you can not use the PsychoPy Python Distribution Installer
+    provided for Windows or OS X. Please visit the `PsychoPy <http://www.psychopy.org>`_ 
+    website and follow the installation and download links to learn how to install one of these
+    PsychoPy Python Distributions.
+
+    If you do need to perform a manual installation of PsychoPy and wish to also
+    use the ioHub submodule within it, then the following *manual* installation
+    instructions can still be of use.
  
 There are different installation options depending on the target OS.
 
 Windows
 ########
-
-Using the WinPythonPlus Distribution
-=====================================
-
-The easiest way to get up and running with the ioHub and PychoPy on Windows (as of end of April, 2013)
-is to download the WinPythonPlus Portable Software distribution, which includes everything you need plus
-several other very useful and cool tools.
-
-Download the WinPythonPlus self-extracting archive from ** `here <https://docs.google.com/file/d/0B-qFhchxISOSUHpfS3dvN2hXU00/edit?usp=sharing>`_ **
-
-What's Included
-++++++++++++++++
-
-* Python 2.7.3 32 bit.
-* `PsychoPy <http://www.psychopy.org>`_ and all necessary dependencies.
-* ioHub and all necessary dependencies.
-* `NumPy <http://www.numpy.org>`_.
-* `SciPy <http://www.scipy.org>`_.
-* `Matplotlib <http://matplotlib.org/>`_.
-* `iPython 0.13 <http://ipython.org/install.html>`_ , including the iPython qtConsole and iPython Notebook.
-* `PyQt <http://wiki.python.org/moin/PyQt>`_.
-* `PyGraphQt <http://www.pyqtgraph.org/>`_.
-* `GuiQwt <https://code.google.com/p/guiqwt/>`_.
-* `GuiData <http://pythonhosted.org/guidata/>`_.
-* `OpenCV (including the cv2 Python interface) <http://opencv.org/>`_.
-* `cython <http://www.cython.org/>`_, using the provided minggw / gnuwin32 / gcc tool chain.
-* `Spyder <https://code.google.com/p/spyderlib/>`_.
-* `HDFView <http://www.hdfgroup.org/hdf-java-html/hdfview/>`_, a HDF5 file viewer written by The HDF Group.
-* Several other useful python packages for scientific applications.
-
-Installation of WinPythonPlus
-++++++++++++++++++++++++++++++
-
-Given WinPythonPlus is provided in the form of a portable software distribution, 
-there is no actual *installation* required. Simply downloaded the WinPythonPlus archive from the link above, 
-run the self extracting archive, and select where you want the WinPythonPlus distribution to go. **That is it.**
-Once extracted, open the WinPythonPlus folder and you will see a set of .bat files in the top level directory
-(a poor man's version of an executable ;) ). The .bat file are what need to be used to start any of the 
-provided applications, and even when you wish to just start a python interpreter in the Windows console.
-
-
-.. note:: WinPythonPlus is based on the `great WinPython project <http://www.winpython.org>`_, with extra packages added and the structure of the distribution changed somewhat. WinPython makes no permanent changes to your Windows registry or environment settings. Only temporary changes are made to the shell environment that is launched to run whichever application you run.
-
-.. warning:: It is important to always launch a tool packaged in the WinPythonPlus distribution using the provided launcher .bat file or exe in the WinPythonPlus root folder. These launchers temporarily configure the environment variables for that process so that the application and associated APIs will run correctly. Starting one of the provided tools by directly running the tools exe or similar file will not work correctly and will cause unexpected issues and perhaps application crashes.
-	
-.. note:: **Nothing can happen to your computer that would affect your computer overall or result in long standing issues though, don't worry.**
 
 Manually Installing ioHub
 ===========================
@@ -106,23 +71,11 @@ any device specific driver required is known about and is installed.
 ioHub Package Installation
 ++++++++++++++++++++++++++++++
 
-There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
-The site-packages directory of your Python installation is a guaranteed place that will work. 
-
-To do so:
-
-#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
-#. Open the zip file.
-#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the zip file downloaded to your python site-packages directory. (likely something like C:\Python27\Lib\site-packages, or C:\Python26\Lib\site-packages).
-
+ioHub is now included with the PsychoPy package. Please ensure the most recent version
+of PsychoPy is installed and ioHub is also then installed.
 
 Linux
 #######
-
-For Linux the WinPythonPlus distribution can not be used. Instead the necessary
-packages must be installed using the OS's package manager and the Python pip 
-and / or easy_install utilities. Fortunately, on Linux, this is a very easy 
-process that almost anyone can do.
 
 Manually Installing ioHub
 ===========================
@@ -194,25 +147,14 @@ Packages to install using pip
 ioHub Package Installation
 ++++++++++++++++++++++++++++++
 
-There is currently no python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
-The site-packages directory of your Python installation is a guaranteed place that will work. 
-
-To do so:
-
-#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
-#. Open the zip file.
-#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the compressed file downloaded to a directory in your Python path. sudo access may be needed.
-
+ioHub is now included with the PsychoPy package. Please ensure the most recent version
+of PsychoPy is installed and ioHub is also then installed.
 
 OSX 10.6 - 10.8
 ################
 
-For OS X 10.6 + the WinPythonPlus distribution can not be used. Instead the necessary
-packages must be installed. Unfortunately, on OS X, this can be a frustrating task. If you are
-based at a university, then I would suggest that you get a free copy of the Enthought Canopy Python distribution. 
-The link to apply for one is: https://www.enthought.com/products/canopy/academic/
-The Enthought Canopy Python distribution includes many of the packages needed by PsychoPy and ioHub.
-You will find that some packages are still missing and must be installed manually.
+This is not suggested for the faint of heart. Instead you should strongly consider 
+installing the PsychoPy Python Distribution for OS X discussed at the start of this page.
 
 Manual Installation
 ====================
@@ -281,23 +223,5 @@ Packages To Download
 ioHub Package Installation
 +++++++++++++++++++++++++++
 
-There is currently no Python package installer for ioHub, so to install the ioHub package itself, the iohub source directory can simply be copied to a location in your Python Path. 
-The site-packages directory of your Python installation is a guarenteed place that will work. 
-
-To do so:
-
-#. Get a `zip download <https://github.com/isolver/ioHub/zipball/master/>`_ of the `ioHub project source <https://www.github.com/isolver/ioHub/>`_
-#. Open the zip file.
-#. Copy the **inner** iohub (all lower case) folder that is located in the top level directory of the compressed file downloaded to a directory in your Python path. sudo access may be needed.
-
-
-Running Example Scripts
-#########################
-
-Running example scripts using ioHub should now work. All examples are in the *examples* folder of the iohub distribution. To run a demo, open a console and cd to the **Example dir** (relative to the iohub root folder): examples\ioHubAccessDelayTest         
-
-**Run with**: python run.py
-
-or cd to **Demo dir** (relative to the ioHub root folder):  examples\PsychoPy_Ports\ioMouse
-
-**Run with**: python ioMouse.py
+ioHub is now included with the PsychoPy package. Please ensure the most recent version
+of PsychoPy is installed and ioHub is also then installed.

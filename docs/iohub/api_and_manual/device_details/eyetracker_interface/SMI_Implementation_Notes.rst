@@ -112,8 +112,7 @@ General Considerations
 Known Issues:              
 ==============
 
-    #. In RED-m, the sample time reported by the eye tracker appears to repeat itself every 2 samples approximately. This is using a very new version of the RED-m software, so it needs to be investigated whether this is a C API issue or ioHub Interface Implementation Issue.
-    #. Correctly set the pupil measure type and eyes_tracked setting. Currently set to constants.  
+    #. Correctly set the pupil measure type and eyes_tracked setting. Currently set to constants (PUPIL_DIAM and BINOCULAR).  
 
 Limitations:
 ==============

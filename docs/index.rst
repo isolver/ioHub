@@ -11,11 +11,20 @@ input device events on a system wide basis. When ioHub is used for experiment
 device monitoring during a psychology or neuroscience type study, 
 ioHub is designed to be used with the most excellent `PsychoPy <http://www.psychopy.org>`_. 
 
-.. note:: In the near future ioHub will be merging with PsychoPy, so it can be 
-    used out of the box with a PsychoPy installation.
-    This will mean many **positive changes** over the short term
-    as the psychopy.iohub project is put in place. We will keep this
-    page updated with the latest news and status on this exciting development. 
+.. note:: As of the May 8th, 2013 release of PsychoPy, the ioHub Package has merged with
+    the PsychoPy package and is now being distributed as part of PsychoPy. 
+    
+    The documentation provided here is still up to date other than module paths not
+    starting with psychopy. Therefore, when viewing API documentation and using
+    ioHub merged with PsychoPy, the proper class, method, or fucntion path should be:
+
+        psychopy.iohub.xxxxx
+
+    instead of the indicated 
+
+        iohub.xxxxx 
+
+    path in this documentation. 
 
 OS and Device Support
 #####################
@@ -33,7 +42,12 @@ OS and Device Support
 	#. Eye Tracker, via a Common Eye Tracking Interface
 	
 .. note::
-    The Common Eye Tracking Interface provides the same user level API for all supported hardwares, meaning the same experiment script can be run with any supported eye tracker and the same data analyses can be performed on any eye tracking data saved via ioHub in the ioDataStore. The Common Eye Tracking Interface currently supports the following eye tracking systems:
+    The Common Eye Tracking Interface provides the same user level API for all supported hardware,
+    meaning the same experiment script can be run with any supported eye tracker and the same 
+    data analyses can be performed on any eye tracking data saved via ioHub in the ioDataStore
+    as long as the event type being used for analysis is supported by the different implementations used.
+     
+    The Common Eye Tracking Interface currently supports the following eye tracking systems:
 	
         #. `LC Technologies <http://www.eyegaze.com>`_ EyeGaze and EyeFollower models.
         #. `SensoMotoric Instruments <http://www.smivision.com>`_ iViewX models.
@@ -46,7 +60,7 @@ ioHub Features
 * Independent device event monitoring:
     The ioHub Process, responsible for the monitoring, bundling, and storage of device events, runs in a separate OS process from the main PsychoPy Process. ioHub DeviceEvents are monitored continuously system-wide rather than intermittently or relative to the PsychoPy window. In fact, no graphical window is needed to monitor supported devices (An example of using this *headless* event tracking mode is provided in the examples folder). ioHub Device event monitoring and callback processing occurs very quickly in parallel, regardless of what state the PsychoPy Process is in (i.e. even when it is performing a blocking operation and would not be able to monitor new events itself).
 * Easy data storage and retrieval:
-    ioHub Device event data are saved in the *ioDataStore*, a structured event definition using the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ standard. With a multicore CPU, all device events during an experiment can be automatically saved for post hoc analyses without impairing performance of the PsychoPy Process. The same device events saved to the ioDataStore can be accessed during an experiment as numpy ndarray's, affording direct use in powerful scientific Python models such as Scipy and MatPlotLib. These events can be retrieved during the PsychoPy experiment and from the ioDataStore very flexibly: for example, by event time (chronologically and device independent), by device (e.g., mouse events), and by event type (e.g., fixation events).
+    ioHub Device event data are saved in the *ioHub DataStore*, a structured event definition using the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ standard. With a multicore CPU, all device events during an experiment can be automatically saved for post hoc analyses without impairing performance of the PsychoPy Process. The same device events saved to the ioDataStore can be accessed during an experiment as numpy ndarray's, affording direct use in powerful scientific Python models such as Scipy and MatPlotLib. These events can be retrieved during the PsychoPy experiment and from the ioDataStore very flexibly: for example, by event time (chronologically and device independent), by device (e.g., mouse events), and by event type (e.g., fixation events).
 * Smooth integration with PsychoPy:
     When used with full `PsychoPy <http://www.psychopy.org>`_ functionality, ioHub can save debugging messages to PsychoPy log files, and PsychoPy *LogEvents* can be saved in the ioDataStore (as well as the PsychoPy logging system). Furthermore, ioHub and PsychoPy share a common time base, so times read from the PsychoPy Experiment process are directly comparable to times read from ioHub Device Events (if the PsychoPy time is based on psychopy.core.getTime or default psychopy.logging.defaultClock mechanisms).
 * High-precision synchronization:
@@ -57,14 +71,17 @@ Github Hosted
 ##############
 
 The ioHub project source is available on GitHub `here <https://www.github.com/isolver/ioHub>`_.
+Given the merging of the ioHub Package with PsychoPy, the ioHub Github repository will be kept for
+historical reasons, but users wanting to install and use ioHub should do so by 
+going to the `PsychoPy <http://www.psychopy.org>`_ website and following download and installation instructions
+there.
 
 Support
 ########
 
-A `user forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-users>`_ 
-and `developer forum / mailing list <https://groups.google.com/forum/?hl=en&fromgroups#!forum/iohub-dev>`_
-are available on Google Groups for support questions and development discussion topics respectively.
-
+Given the merging of ioHub with PsychoPy, please visit the 
+`PsychoPy <http://www.psychopy.org>`_ website and follow the links to the
+PsychoPy User groups.
 
 Documentation Contents
 ########################
